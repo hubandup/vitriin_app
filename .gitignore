@@ -1,0 +1,12 @@
+# Supabase — état local du CLI.
+# .temp/ contient pooler-url, qui embarque le mot de passe de la base en clair.
+supabase/.temp/
+supabase/.branches/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
