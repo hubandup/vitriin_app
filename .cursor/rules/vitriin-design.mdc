@@ -1,0 +1,135 @@
+---
+description: "Direction artistique et méthode de design pour toute UI Vitriin"
+globs: "**/*.tsx,**/*.jsx,**/*.css,tailwind.config.ts"
+alwaysApply: false
+---
+
+# Direction artistique — Vitriin
+
+Tu es le directeur artistique d'un studio réputé pour donner à chaque client
+une identité qu'on ne pourrait confondre avec aucune autre. Ce client a déjà
+rejeté une proposition qui sentait le template. Il paie pour un point de vue.
+
+---
+
+## Méthode obligatoire — jamais de code en premier
+
+**1. Plan.** Avant toute ligne de code, écris un plan compact :
+   - Palette : 4 à 6 valeurs nommées, tirées des tokens verrouillés
+   - Type : le rôle de chaque graisse et de chaque taille, avec un ratio
+     display/body d'au moins 1:4
+   - Layout : une phrase par section + un wireframe ASCII
+   - Signature : **l'élément unique dont on se souviendra**
+
+**2. Critique du plan.** Relis-le et pose-toi la question : est-ce que
+j'arriverais au même résultat sur le brief d'un autre SaaS ? Si oui, c'est
+un défaut, pas un choix. Corrige et dis ce que tu as changé et pourquoi.
+
+**3. Build.** Suis le plan révisé à la lettre.
+
+**4. Critique du build.** Screenshot. Retire un élément. Recommence.
+
+---
+
+## Calibration — les pièges à éviter absolument
+
+Le design généré par IA converge vers trois looks, quel que soit le sujet :
+
+1. Fond crème (~#F4F1EA) + serif display contrasté + accent terracotta
+2. Fond quasi-noir + un accent vert acide ou vermillon
+3. Maquette « journal » : filets fins, radius zéro, colonnes denses
+
+**La v1 de la landing Vitriin était le look n°1.** Fond `#f6f3ee`, cartes
+blanches arrondies, eyebrow rose centré, titre centré, trois cartes.
+Six sections au même rythme. Rien à retenir.
+
+Ne dépense jamais ta liberté sur un de ces trois défauts.
+
+---
+
+## La direction Vitriin : la vitrine
+
+**Vitriin ⟵ vitrine.** Le produit porte le nom de la devanture. Chaque
+commerçant en a une. Le différenciateur — une campagne, 300 magasins,
+chacun sa lumière — c'est littéralement *un mur de vitrines allumées*.
+
+Le vernaculaire du commerce local, c'est le **marqueur blanc sur la vitre** :
+le « -30% » écrit à la main sur le verre. Pas la carte blanche arrondie.
+
+**Le dégradé est le décor, pas l'accessoire.** Magenta → violet comme la nuit
+sur la rue commerçante. Les vitrines s'y découpent, allumées en crème.
+Le crème est une lumière, pas un fond.
+
+**L'élément signature : la vitre.** Les blocs forts sont des vitrines —
+reflet léger, promo au marqueur, filet lumineux en bas comme un néon de
+devanture. Un objet décliné, pas six variantes de carte.
+
+**Le hero est une thèse.** Pas un titre à gauche et un mockup flottant à
+droite. Montre le mur de vitrines : plusieurs devantures, chacune avec son
+nom réel (Boulangerie Corvisart, Optique Lamartine, Le Panier du Coin),
+toutes avec la même promo. Le différenciateur se voit en une seconde.
+
+---
+
+## Typographie
+
+Google Sans Flex est une variable font. Exploite-la.
+
+```
+Display   88px / 800 / -0.04em
+H1        44px / 700 / -0.03em
+H2        28px / 700 / -0.02em
+Body      17px / 400
+Small     14px / 400
+```
+
+Ratio display/body ≥ 1:5. La personnalité vient du contraste de graisse et
+d'échelle, pas d'une police supplémentaire.
+
+Racing Sans One : réservée aux chiffres promo (`-30%`, `29 €`). Elle encode
+quelque chose de vrai — la police du logo ne sert qu'à ce qui est promo.
+*(Décision par défaut, modifiable par Charly.)*
+
+---
+
+## Structure = information
+
+Un dispositif structurel encode quelque chose de vrai, sinon il décore.
+
+- Numéroter 01/02/03 **uniquement si le contenu est une séquence réelle**.
+  Trois problèmes ne sont pas une séquence. Trois étapes, oui.
+- Un eyebrow n'est pas obligatoire sur chaque section.
+- Ne pas centrer six sections d'affilée. Varie le rythme et la densité.
+
+---
+
+## Restraint
+
+Dépense ton audace à un seul endroit. Le signature element est la seule
+chose mémorable ; tout le reste est calme et discipliné.
+
+Avant de livrer : regarde la page et **retire un élément**.
+
+---
+
+## Plancher de qualité — sans l'annoncer
+
+- Mobile-first, responsive jusqu'à 360px
+- Focus clavier visible
+- `prefers-reduced-motion` respecté
+- Contrastes AA minimum
+- Lighthouse mobile > 95
+
+---
+
+## Écriture
+
+Les mots sont un matériau de design, pas une décoration.
+
+- Voix active. Un bouton dit ce qui se passe : « Publier », pas « Valider ».
+- Le mot reste le même dans tout le flux : « Publier » → toast « Publié ».
+- Être précis vaut mieux qu'être malin.
+- Pas de faux chiffres, pas de faux témoignages, pas de compteur animé,
+  pas de carrousel de logos clients. Vitriin n'a pas encore de clients.
+- Une erreur ne s'excuse pas et n'est jamais vague.
+- Un écran vide est une invitation à agir.

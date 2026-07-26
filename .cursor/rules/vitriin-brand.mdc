@@ -1,0 +1,36 @@
+---
+description: "Identité de marque Vitriin — tokens verrouillés, non négociables"
+alwaysApply: true
+---
+
+# Vitriin — marque
+
+Vitriin est une marque de Hub & Up. Plateforme de promo locale pour
+commerçants indépendants et réseaux de franchise.
+
+**Différenciateur** : chaque point de vente publie sur ses propres comptes
+sociaux, sous sa propre identité locale. Une centrale pousse une campagne
+sur 300 magasins en un clic. Buffer et Hootsuite ne savent pas faire ça.
+
+## Tokens verrouillés
+
+```
+primary    #e5087e   rose magenta
+violet     #951b81
+gradient   linear-gradient(to right, #e5087e, #951b81)   ← signature
+cream      #f5ecd3
+teal       #0c9875   ·  teal-light #5ebca3
+ink        #2D2D2D   ·  muted #888888   ·  line #EEECE8
+```
+
+## Polices
+
+- **Google Sans Flex** — UI et corps. Variable, exploite 400→800.
+- **Racing Sans One** — logo, et chiffres promo uniquement (`-30%`, `29 €`).
+  Jamais en corps de texte, jamais en UI.
+
+## Règles
+
+- Le dégradé est la signature de la marque. Il structure, il ne décore pas.
+- Ne jamais inventer une couleur hors palette.
+- Français, tutoiement jamais, vouvoiement en B2B.
