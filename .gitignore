@@ -8,6 +8,13 @@ supabase/.branches/
 .env.*
 !.env.example
 
+# `.env.*` n'attrape QUE les noms commençant par « .env. ». Un fichier comme
+# scripts/smoke-meta.env passait donc au travers. Ce motif-ci couvre tout nom
+# se terminant par .env, sans toucher aux *.env.example qui doivent rester
+# suivis.
+*.env
+!*.env.example
+
 # OS
 .DS_Store
 

@@ -314,6 +314,33 @@ deno_version = 1
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# =============================================================================
+# Edge Functions — plomberie Meta
+# =============================================================================
+
+[functions.meta-oauth-start]
+# Appelée par l'app avec le JWT du commerçant : on vérifie qu'il est bien
+# membre du magasin avant d'ouvrir un flux d'autorisation en son nom.
+verify_jwt = true
+
+[functions.meta-oauth-callback]
+# PUBLIQUE, et c'est obligatoire : c'est Meta qui redirige ici le navigateur du
+# commerçant, et un navigateur ne sait pas poser d'en-tête Authorization.
+#
+# La sécurité ne repose donc pas sur un JWT mais sur le paramètre `state` :
+# signé en HMAC-SHA256 contre la forge, adossé à un nonce consommé en base
+# (private.oauth_states) contre le rejeu. Sans state valide, la fonction
+# s'arrête avant le moindre appel à Meta.
+verify_jwt = false
+
+[functions.meta-publish]
+verify_jwt = true
+
+[functions.meta-health-check]
+# Accepte la clé service_role (mode balayage planifié) ou le JWT d'un membre
+# du magasin. La distinction est faite dans la fonction.
+verify_jwt = true
+
 [analytics]
 enabled = true
 port = 54327
