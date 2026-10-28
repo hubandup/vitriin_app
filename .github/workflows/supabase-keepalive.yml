@@ -1,0 +1,28 @@
+# Garde le projet Supabase éveillé.
+# En formule gratuite, Supabase met le projet en pause après 7 jours sans
+# activité. Pendant l'examen Meta (et tant qu'on reste en gratuit), une
+# requête tous les 3 jours suffit à l'éviter.
+# La clé utilisée est la clé publique « anon », déjà visible dans
+# app.vitriin.co : aucun secret ici. La lecture est filtrée par RLS.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: "17 6 */3 * *"   # 06:17 UTC, tous les 3 jours
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Requête légère sur la base
+        env:
+          SUPABASE_URL: https://zjugauidrijghesgsmap.supabase.co
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/stores?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+          echo "HTTP $code"
+          test "$code" = "200"
