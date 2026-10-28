@@ -341,6 +341,16 @@ verify_jwt = true
 # du magasin. La distinction est faite dans la fonction.
 verify_jwt = true
 
+[functions.meta-insights]
+# JWT d'un membre du magasin : relit les statistiques de SES publications.
+verify_jwt = true
+
+[functions.meta-data-deletion]
+# PUBLIQUE, comme le callback OAuth : c'est Meta qui appelle, serveur à
+# serveur, sans JWT Supabase. Sécurisée par la signature HMAC du
+# signed_request, calculée avec l'App Secret.
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

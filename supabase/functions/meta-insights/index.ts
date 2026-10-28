@@ -1,0 +1,367 @@
+// meta-insights — relit chez Meta les statistiques des publications d'un magasin.
+//
+// Entrée : { store_id, limit? }, avec le JWT d'un membre du magasin.
+// Sortie : une ligne par publication réussie, avec ses chiffres normalisés.
+//
+// Les chiffres sont aussi écrits dans publications.metrics : l'app affiche les
+// derniers chiffres connus sans rappeler Meta, et ne rafraîchit qu'à la demande.
+//
+// Autorisations Meta utilisées :
+//   Facebook  · pages_read_engagement  → réactions, commentaires, partages
+//             · read_insights          → portée et vues du post
+//   Instagram · instagram_manage_insights → portée, vues, interactions
+//
+// Métriques choisies d'après l'état de l'API en octobre 2026 : les anciennes
+// « impressions » ont été retirées (Instagram en avril 2025, Facebook en juin
+// 2026) au profit des « vues ». Chaque métrique est demandée de façon tolérante :
+// si Meta en refuse une, les autres sont quand même rendues.
+
+import { preflight, fail, json, log } from "../_shared/http.ts";
+import { classify, graph, GraphError, redact } from "../_shared/meta.ts";
+import {
+  authenticate,
+  isStoreMember,
+  loadAccessToken,
+  serviceClient,
+} from "../_shared/supabase.ts";
+import type { SupabaseClient } from "jsr:@supabase/supabase-js@2";
+
+const FN = "meta-insights";
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 50;
+
+/** Statistiques normalisées, identiques pour les deux canaux. */
+interface Metrics {
+  reach: number | null;
+  views: number | null;
+  reactions: number | null;
+  comments: number | null;
+  shares: number | null;
+  saved: number | null;
+  interactions: number | null;
+}
+
+interface Account {
+  id: string;
+  store_id: string;
+  channel: "facebook" | "instagram";
+  external_account_id: string;
+  parent_external_id: string | null;
+  display_name: string;
+}
+
+Deno.serve(async (req) => {
+  const cors = preflight(req);
+  if (cors) return cors;
+  if (req.method !== "POST") return fail(req, 405, "Méthode non autorisée.");
+
+  const caller = await authenticate(req);
+  if (!caller) return fail(req, 401, "Authentification requise.");
+
+  let body: { store_id?: unknown; limit?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return fail(req, 400, "Corps JSON invalide.");
+  }
+
+  const storeId = body.store_id;
+  if (typeof storeId !== "string" || !UUID_RE.test(storeId)) {
+    return fail(req, 400, "store_id manquant ou mal formé.");
+  }
+
+  const limit = Math.min(
+    MAX_LIMIT,
+    Math.max(1, Number.isInteger(body.limit) ? Number(body.limit) : DEFAULT_LIMIT),
+  );
+
+  // Lecture des statistiques : réservée aux membres du magasin, comme la
+  // publication. Vérifié sous RLS avec le JWT de l'appelant.
+  if (!await isStoreMember(caller, storeId)) {
+    return fail(req, 403, "Vous n'êtes pas membre de ce magasin.");
+  }
+
+  const service = serviceClient();
+
+  // --- Les publications réussies du magasin --------------------------------
+  const { data: rows, error: pubError } = await service
+    .from("publications")
+    .select(
+      "id, channel, external_post_id, published_at, store_promotions!inner(store_id, promotions(title))",
+    )
+    .eq("store_promotions.store_id", storeId)
+    .eq("status", "published")
+    .in("channel", ["facebook", "instagram"])
+    .not("external_post_id", "is", null)
+    .order("published_at", { ascending: false })
+    .limit(limit);
+
+  if (pubError) {
+    log("error", FN, "Lecture des publications impossible", {
+      storeId,
+      detail: pubError.message,
+    });
+    return fail(req, 500, "Erreur interne.");
+  }
+
+  // --- Les comptes actifs du magasin ---------------------------------------
+  const { data: accounts, error: accError } = await service
+    .from("social_accounts")
+    .select("id, store_id, channel, external_account_id, parent_external_id, display_name")
+    .eq("store_id", storeId)
+    .eq("status", "active");
+
+  if (accError) {
+    log("error", FN, "Lecture des comptes impossible", {
+      storeId,
+      detail: accError.message,
+    });
+    return fail(req, 500, "Erreur interne.");
+  }
+
+  // Un token déchiffré par compte et par appel, pas un par publication.
+  const tokens = new Map<string, Promise<string>>();
+  const tokenFor = (account: Account) => {
+    if (!tokens.has(account.id)) {
+      tokens.set(account.id, loadAccessToken(service, account));
+    }
+    return tokens.get(account.id)!;
+  };
+
+  const revoked = new Set<string>();
+  const now = new Date().toISOString();
+
+  const results = await Promise.all(
+    (rows ?? []).map(async (row) => {
+      const channel = row.channel as "facebook" | "instagram";
+      const postId = String(row.external_post_id);
+      const sp = row.store_promotions as unknown as {
+        promotions: { title: string } | null;
+      };
+      const base = {
+        publication_id: row.id,
+        channel,
+        title: sp?.promotions?.title ?? null,
+        published_at: row.published_at,
+      };
+
+      const account = pickAccount((accounts ?? []) as Account[], channel, postId);
+      if (!account || revoked.has(account.id)) {
+        return { ...base, status: "unavailable", error: "Compte non connecté." };
+      }
+
+      try {
+        const token = await tokenFor(account);
+        const metrics = channel === "facebook"
+          ? await facebookMetrics(postId, token)
+          : await instagramMetrics(postId, token);
+
+        await service
+          .from("publications")
+          .update({ metrics, metrics_fetched_at: now })
+          .eq("id", row.id);
+
+        return { ...base, status: "ok", account: account.display_name, metrics };
+      } catch (cause) {
+        const detail = cause instanceof GraphError
+          ? cause.describe()
+          : redact(cause instanceof Error ? cause.message : cause);
+
+        if (classify(cause) === "revoked") {
+          revoked.add(account.id);
+          await markRevoked(service, account.id, detail);
+        }
+
+        log("warn", FN, "Statistiques indisponibles pour un post", {
+          storeId,
+          channel,
+          detail,
+        });
+        return { ...base, status: "error", error: "Statistiques indisponibles pour ce post." };
+      }
+    }),
+  );
+
+  return json(req, {
+    store_id: storeId,
+    fetched_at: now,
+    count: results.length,
+    results,
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Choix du compte
+// -----------------------------------------------------------------------------
+// publications ne garde pas l'identifiant du compte, seulement celui du post.
+// Côté Facebook, l'identifiant d'un post commence par celui de sa Page
+// (« pageId_postId ») : on retrouve la bonne Page même si le magasin en a
+// plusieurs. Côté Instagram, un magasin n'a qu'un compte en pratique.
+
+function pickAccount(
+  accounts: Account[],
+  channel: "facebook" | "instagram",
+  postId: string,
+): Account | undefined {
+  const candidates = accounts.filter((a) => a.channel === channel);
+  if (channel === "facebook") {
+    const pageId = postId.split("_")[0];
+    return candidates.find((a) => a.external_account_id === pageId) ??
+      candidates[0];
+  }
+  return candidates[0];
+}
+
+async function markRevoked(
+  service: SupabaseClient,
+  accountId: string,
+  detail: string,
+): Promise<void> {
+  await service.rpc("social_account_set_status", {
+    p_account_id: accountId,
+    p_status: "revoked",
+    p_error: detail,
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Facebook
+// -----------------------------------------------------------------------------
+
+async function facebookMetrics(postId: string, token: string): Promise<Metrics> {
+  // Engagement : champs du post, lisibles avec pages_read_engagement.
+  // limit(0) : on veut le total, pas la liste des réactions ou commentaires.
+  const post = await graph.get(
+    postId,
+    {
+      fields: [
+        "reactions.summary(total_count).limit(0)",
+        "comments.summary(total_count).limit(0)",
+        "shares",
+      ].join(","),
+    },
+    token,
+  );
+
+  const reactions = summaryCount(post.reactions);
+  const comments = summaryCount(post.comments);
+  const shares = numberOr(
+    (post.shares as { count?: unknown } | undefined)?.count,
+    0,
+  );
+
+  // Portée et vues : Insights, avec read_insights. Meta n'en publie qu'après
+  // quelques heures, et pas du tout sur les Pages trop petites : on tolère
+  // l'absence plutôt que d'échouer.
+  const insights = await insightsTolerant(postId, token, [
+    "post_total_media_view_unique",
+    "post_media_view",
+  ]);
+
+  return {
+    reach: insights.post_total_media_view_unique ?? null,
+    views: insights.post_media_view ?? null,
+    reactions,
+    comments,
+    shares,
+    saved: null,
+    interactions: sumKnown(reactions, comments, shares),
+  };
+}
+
+// -----------------------------------------------------------------------------
+// Instagram
+// -----------------------------------------------------------------------------
+
+async function instagramMetrics(mediaId: string, token: string): Promise<Metrics> {
+  const m = await insightsTolerant(mediaId, token, [
+    "reach",
+    "views",
+    "likes",
+    "comments",
+    "shares",
+    "saved",
+    "total_interactions",
+  ]);
+
+  return {
+    reach: m.reach ?? null,
+    views: m.views ?? null,
+    reactions: m.likes ?? null,
+    comments: m.comments ?? null,
+    shares: m.shares ?? null,
+    saved: m.saved ?? null,
+    interactions: m.total_interactions ??
+      sumKnown(m.likes ?? null, m.comments ?? null, m.shares ?? null, m.saved ?? null),
+  };
+}
+
+// -----------------------------------------------------------------------------
+// Outils
+// -----------------------------------------------------------------------------
+
+/**
+ * Demande toutes les métriques en un appel ; si Meta en refuse une (métrique
+ * retirée, indisponible pour ce type de post), redemande une par une et garde
+ * celles qui passent. Une erreur de token, elle, remonte immédiatement.
+ */
+async function insightsTolerant(
+  objectId: string,
+  token: string,
+  metrics: string[],
+): Promise<Record<string, number>> {
+  try {
+    return parseInsights(
+      await graph.get(`${objectId}/insights`, { metric: metrics.join(",") }, token),
+    );
+  } catch (cause) {
+    if (classify(cause) === "revoked") throw cause;
+  }
+
+  const out: Record<string, number> = {};
+  for (const metric of metrics) {
+    try {
+      Object.assign(
+        out,
+        parseInsights(await graph.get(`${objectId}/insights`, { metric }, token)),
+      );
+    } catch (cause) {
+      if (classify(cause) === "revoked") throw cause;
+      // Métrique indisponible : on passe à la suivante.
+    }
+  }
+  return out;
+}
+
+function parseInsights(payload: Record<string, unknown>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const item of (payload.data ?? []) as Record<string, unknown>[]) {
+    const name = String(item.name ?? "");
+    const values = item.values as { value?: unknown }[] | undefined;
+    const raw = values?.[0]?.value ?? (item.total_value as { value?: unknown })?.value;
+    const value = typeof raw === "number" ? raw : Number(raw);
+    if (name && Number.isFinite(value)) out[name] = value;
+  }
+  return out;
+}
+
+function summaryCount(edge: unknown): number {
+  return numberOr(
+    (edge as { summary?: { total_count?: unknown } } | undefined)?.summary?.total_count,
+    0,
+  );
+}
+
+function numberOr(value: unknown, fallback: number): number {
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function sumKnown(...values: (number | null)[]): number | null {
+  const known = values.filter((v): v is number => v !== null);
+  return known.length ? known.reduce((a, b) => a + b, 0) : null;
+}

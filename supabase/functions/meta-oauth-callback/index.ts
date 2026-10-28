@@ -152,6 +152,7 @@ Deno.serve(async (req) => {
           page,
           storeId,
           userId,
+          metaUserId: debug.userId,
           scopes: debug.scopes,
         }));
       } catch (cause) {
@@ -221,9 +222,15 @@ Deno.serve(async (req) => {
  */
 async function storePage(
   service: ReturnType<typeof serviceClient>,
-  args: { page: MetaPage; storeId: string; userId: string; scopes: string[] },
+  args: {
+    page: MetaPage;
+    storeId: string;
+    userId: string;
+    metaUserId: string | null;
+    scopes: string[];
+  },
 ): Promise<string[]> {
-  const { page, storeId, userId, scopes } = args;
+  const { page, storeId, userId, metaUserId, scopes } = args;
   const written: string[] = [];
 
   const upsert = async (fields: {
@@ -274,6 +281,26 @@ async function storePage(
       parentExternalId: page.id,
     });
     written.push(`@${page.instagram.username} · Instagram`);
+  }
+
+  // Identifiant Facebook de la personne : seule clé que Meta nous renverra
+  // dans une demande de suppression ou de désautorisation (meta-data-deletion).
+  // Écrit à part pour ne pas toucher à la signature de social_account_upsert.
+  // Un échec ici ne doit pas faire échouer la connexion : on le journalise.
+  if (metaUserId) {
+    const ids = [page.id, ...(page.instagram ? [page.instagram.id] : [])];
+    const { error } = await service
+      .from("social_accounts")
+      .update({ meta_user_id: metaUserId })
+      .eq("store_id", storeId)
+      .in("external_account_id", ids);
+    if (error) {
+      log("error", FN, "Enregistrement de l'identifiant Facebook impossible", {
+        storeId,
+        pageId: page.id,
+        detail: error.message,
+      });
+    }
   }
 
   return written;

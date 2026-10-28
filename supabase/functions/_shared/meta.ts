@@ -245,6 +245,8 @@ export async function exchangeForLongLivedToken(
 
 export interface TokenDebug {
   appId: string;
+  /** Identifiant Facebook propre à l'app (ASID) de la personne qui a autorisé. */
+  userId: string | null;
   scopes: string[];
   expiresAt: number | null;
 }
@@ -274,6 +276,7 @@ export async function debugToken(token: string): Promise<TokenDebug> {
 
   return {
     appId,
+    userId: info.user_id ? String(info.user_id) : null,
     scopes: Array.isArray(info.scopes) ? (info.scopes as string[]) : [],
     // 0 signifie « n'expire pas » dans la réponse de Meta.
     expiresAt: expiresAt > 0 ? expiresAt : null,

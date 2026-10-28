@@ -249,3 +249,41 @@ Non bloquant pour le code, bloquant pour Meta :
 - révocation réelle côté Meta à la déconnexion (`DELETE /{user-id}/permissions`).
   Aujourd'hui, supprimer la ligne `social_accounts` ne supprime que notre copie.
   À ouvrir si l'App Review l'exige pour les autorisations demandées.
+
+---
+
+## Statistiques et suppression des données (28 octobre 2026)
+
+```
+meta-insights        relit portée, vues, réactions, commentaires   JWT requis
+meta-data-deletion   suppression et désautorisation demandées      PUBLIQUE
+                     par Meta (signed_request signé HMAC)
+```
+
+Migration associée : `20261028120000_insights_and_data_deletion.sql`
+(colonne `social_accounts.meta_user_id`, colonnes `publications.metrics`,
+registre `private.data_deletion_requests`).
+
+### À déclarer dans le tableau de bord Meta
+
+| Champ | Où | Valeur |
+|---|---|---|
+| Data Deletion Request URL | Paramètres de l'app → De base → Suppression des données utilisateur → « URL de rappel » | `https://zjugauidrijghesgsmap.supabase.co/functions/v1/meta-data-deletion` |
+| Deauthorize Callback URL | Facebook Login for Business → Paramètres | `https://zjugauidrijghesgsmap.supabase.co/functions/v1/meta-data-deletion?event=deauthorize` |
+
+### Métriques lues
+
+- Facebook : `reactions`, `comments`, `shares` (champs du post, `pages_read_engagement`) ;
+  `post_total_media_view_unique` (portée) et `post_media_view` (vues) via
+  Insights (`read_insights`).
+- Instagram : `reach`, `views`, `likes`, `comments`, `shares`, `saved`,
+  `total_interactions` (`instagram_manage_insights`).
+
+Chaque métrique est demandée de façon tolérante : si Meta en retire une, les
+autres restent lues.
+
+### Comptes connectés avant cette migration
+
+`meta_user_id` n'est renseigné qu'à la connexion. Les comptes connectés avant
+le 28 octobre 2026 doivent être reconnectés une fois pour être couverts par la
+suppression automatique.
