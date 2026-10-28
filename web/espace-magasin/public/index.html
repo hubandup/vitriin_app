@@ -115,9 +115,10 @@
     <input id="p-mech" value="-30%">
     <label for="p-desc">Texte</label>
     <textarea id="p-desc">Jusqu'à dimanche, profitez de -30% sur la révision complète de votre vélo. Passez nous voir en boutique !</textarea>
-    <label for="p-media">Visuel (JPEG, URL publique)</label>
-    <input id="p-media">
-    <div class="preview"><img id="p-img" alt="Aperçu du visuel"><span class="muted">Instagram exige un JPEG au format carré ou portrait.</span></div>
+    <label>Visuel</label>
+    <input id="p-media" type="hidden">
+    <input id="p-file" type="file" accept="image/*" hidden>
+    <div class="preview"><img id="p-img" alt="Aperçu du visuel"><span><button class="ghost" id="btn-upload" type="button" style="margin-top:0">Choisir une photo</button><br><span class="muted" id="upload-msg">JPEG, PNG ou photo du téléphone. Recadrée automatiquement pour Instagram.</span></span></div>
     <button class="primary" id="btn-publish">Publier sur Facebook et Instagram</button>
     <div class="msg" id="pub-msg"></div>
     <div id="pub-results"></div>
@@ -146,7 +147,43 @@ let STORE = null;
 
 $("p-media").value = location.origin + "/promo-test.jpg";
 const refreshImg = () => { $("p-img").src = $("p-media").value; };
-$("p-media").addEventListener("input", refreshImg); refreshImg();
+refreshImg();
+
+// Upload du visuel. Instagram n'accepte que le JPEG, avec un ratio entre
+// 4:5 (portrait) et 1,91:1 (paysage). On convertit et recadre au centre
+// dans le navigateur, puis on dépose dans le bucket public promo-media,
+// sous le dossier du magasin.
+async function toInstagramJpeg(file) {
+  const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+  let sw = bmp.width, sh = bmp.height, sx = 0, sy = 0;
+  const ratio = sw / sh;
+  if (ratio < 0.8) { const h = Math.round(sw / 0.8); sy = Math.round((sh - h) / 2); sh = h; }
+  else if (ratio > 1.91) { const w = Math.round(sh * 1.91); sx = Math.round((sw - w) / 2); sw = w; }
+  const scale = Math.min(1, 1440 / Math.max(sw, sh));
+  const c = document.createElement("canvas");
+  c.width = Math.round(sw * scale); c.height = Math.round(sh * scale);
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height); // PNG transparent → fond blanc
+  ctx.drawImage(bmp, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  return await new Promise((ok, ko) => c.toBlob(b => b ? ok(b) : ko(new Error("Conversion impossible.")), "image/jpeg", 0.9));
+}
+$("btn-upload").onclick = () => $("p-file").click();
+$("p-file").onchange = async () => {
+  const file = $("p-file").files[0]; if (!file) return;
+  if (!STORE) { msg("upload-msg", "Créez d'abord votre magasin.", true); return; }
+  const btn = $("btn-upload"), pub = $("btn-publish");
+  btn.disabled = true; pub.disabled = true; msg("upload-msg", "Envoi de la photo…");
+  try {
+    const jpeg = await toInstagramJpeg(file);
+    const path = `${STORE.id}/${crypto.randomUUID()}.jpg`;
+    const { error } = await sb.storage.from("promo-media").upload(path, jpeg, { contentType: "image/jpeg", upsert: false });
+    if (error) throw error;
+    $("p-media").value = sb.storage.from("promo-media").getPublicUrl(path).data.publicUrl;
+    refreshImg(); msg("upload-msg", "Photo prête.");
+  } catch (e) {
+    msg("upload-msg", "Envoi impossible : " + (e.message || e), true);
+  } finally { btn.disabled = false; pub.disabled = false; $("p-file").value = ""; }
+};
 
 async function fn(name, body) {
   const { data: { session } } = await sb.auth.getSession();
