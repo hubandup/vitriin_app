@@ -17,7 +17,7 @@
 // si Meta en refuse une, les autres sont quand même rendues.
 
 import { preflight, fail, json, log } from "../_shared/http.ts";
-import { classify, graph, GraphError, redact } from "../_shared/meta.ts";
+import { graph, GraphError, redact } from "../_shared/meta.ts";
 import {
   authenticate,
   isStoreMember,
@@ -171,7 +171,12 @@ Deno.serve(async (req) => {
           ? cause.describe()
           : redact(cause instanceof Error ? cause.message : cause);
 
-        if (classify(cause) === "revoked") {
+        // Seul le code 190 prouve qu'un token est mort. Les codes 10 et 200,
+        // que classify() range aussi en « révoqué » pour la publication,
+        // signifient ici « pas le droit de lire CE post » (post supprimé, ou
+        // publié par un autre compte) : ils ne doivent pas déconnecter le
+        // magasin.
+        if (cause instanceof GraphError && cause.code === 190) {
           revoked.add(account.id);
           await markRevoked(service, account.id, detail);
         }
@@ -209,9 +214,10 @@ function pickAccount(
 ): Account | undefined {
   const candidates = accounts.filter((a) => a.channel === channel);
   if (channel === "facebook") {
+    // Correspondance stricte : jamais l'accès d'une autre Page. Meta refuserait
+    // la lecture, et ce refus ne dit rien de l'état du compte.
     const pageId = postId.split("_")[0];
-    return candidates.find((a) => a.external_account_id === pageId) ??
-      candidates[0];
+    return candidates.find((a) => a.external_account_id === pageId);
   }
   return candidates[0];
 }
@@ -319,7 +325,7 @@ async function insightsTolerant(
       await graph.get(`${objectId}/insights`, { metric: metrics.join(",") }, token),
     );
   } catch (cause) {
-    if (classify(cause) === "revoked") throw cause;
+    if (isDeadToken(cause)) throw cause;
   }
 
   const out: Record<string, number> = {};
@@ -330,11 +336,15 @@ async function insightsTolerant(
         parseInsights(await graph.get(`${objectId}/insights`, { metric }, token)),
       );
     } catch (cause) {
-      if (classify(cause) === "revoked") throw cause;
+      if (isDeadToken(cause)) throw cause;
       // Métrique indisponible : on passe à la suivante.
     }
   }
   return out;
+}
+
+function isDeadToken(cause: unknown): boolean {
+  return cause instanceof GraphError && cause.code === 190;
 }
 
 function parseInsights(payload: Record<string, unknown>): Record<string, number> {

@@ -202,10 +202,17 @@ async function loadAccounts() {
   // Garde-fou : on ne publie jamais tant que plusieurs Pages sont rattachées au magasin.
   if (pages.length > 1) {
     show("choose"); show("accounts", false); show("btn-connect", false); show("s-publish", false); show("s-stats", false);
+    // La Page qui porte le nom du magasin passe en tête, cochée d'office :
+    // le choix se fait souvent parmi des dizaines de Pages, l'erreur est facile.
+    const norm = (t) => (t || "").toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
+    const best = pages.find(p => norm(p.display_name) === norm(STORE.name)) ||
+      pages.find(p => norm(p.display_name).includes(norm(STORE.name)) || norm(STORE.name).includes(norm(p.display_name)));
+    if (best) pages.sort((a, b) => (a === best ? -1 : b === best ? 1 : 0));
     $("choose-list").innerHTML = pages.map(p => {
       const ig = active.find(a => a.channel === "instagram" && a.parent_external_id === p.external_account_id);
-      return `<label class="opt"><input type="radio" name="page" value="${p.id}"><span><strong>${p.display_name}</strong>${ig ? " · Instagram @" + ig.display_name.replace(/^@/, "") : ""}</span></label>`;
+      return `<label class="opt"><input type="radio" name="page" value="${p.id}"${p === best ? " checked" : ""}><span><strong>${p.display_name}</strong>${p === best ? ' <span class="pill ok">Nom du magasin</span>' : ""}${ig ? " · Instagram @" + ig.display_name.replace(/^@/, "") : ""}</span></label>`;
     }).join("");
+    $("btn-choose").disabled = !best;
     document.querySelectorAll('input[name=page]').forEach(r => r.onchange = () => { $("btn-choose").disabled = false; });
     $("btn-choose").onclick = async () => {
       const keep = pages.find(p => p.id === document.querySelector('input[name=page]:checked').value);
