@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
   // --- Le contenu ----------------------------------------------------------
   const { data: promotion, error: promotionError } = await service
     .from("promotions")
-    .select("title, description, mechanic, media_url")
+    .select("title, description, mechanic, media_url, discount_code, created_by_store_id")
     .eq("id", activation.promotion_id)
     .maybeSingle();
 
@@ -479,11 +479,28 @@ async function waitForContainer(
 // -----------------------------------------------------------------------------
 
 function buildCaption(
-  promotion: { title?: unknown; mechanic?: unknown; description?: unknown },
+  promotion: {
+    title?: unknown;
+    mechanic?: unknown;
+    description?: unknown;
+    discount_code?: unknown;
+    created_by_store_id?: unknown;
+  },
 ): string {
   const parts = [promotion.title, promotion.mechanic, promotion.description]
     .filter((p): p is string => typeof p === "string" && p.trim() !== "")
     .map((p) => p.trim());
+
+  // Code de réduction en caisse. Fourni par la centrale pour une promo réseau.
+  // Un code créé par le magasin doit être déclaré dans son logiciel de caisse :
+  // la mention n'apparaît que dans l'app, jamais dans le post.
+  // L'Espace Centrale l'écrit déjà dans le texte : on ne le répète pas.
+  const code = typeof promotion.discount_code === "string"
+    ? promotion.discount_code.trim()
+    : "";
+  if (code && !parts.some((p) => p.includes(code))) {
+    parts.push(`Code en caisse : ${code}`);
+  }
 
   return parts.join("\n\n");
 }

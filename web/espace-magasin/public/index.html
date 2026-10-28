@@ -54,6 +54,14 @@
   .chan.facebook{background:#1877F2} .chan.instagram{background:linear-gradient(45deg,#f9a03f,#e1306c,#833ab4)}
   @media (max-width:420px){.grid{grid-template-columns:repeat(2,1fr)}}
   a{color:var(--v)}
+  .np{display:flex;gap:14px;padding:14px 0;border-top:1px solid var(--line)} .np:first-child{border-top:0}
+  .np img,.np .noimg{width:72px;height:90px;border-radius:12px;object-fit:cover;flex:none;background:var(--bg);border:1px solid var(--line)}
+  .np h3{font-size:16px;margin:0}
+  .np .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .np .acts{display:flex;gap:8px;flex-wrap:wrap}
+  .np .acts button{margin-top:10px;padding:10px 14px;font-size:14px}
+  .np .code{display:inline-block;margin-top:8px;border:1px dashed var(--p);color:var(--v);border-radius:10px;padding:6px 10px;font-weight:700;font-size:13px}
+  .alert{background:#fdf1f6;border:1px solid #f6cfe2;color:var(--v);border-radius:14px;padding:12px 14px;font-size:14px;font-weight:600;margin-bottom:16px}
   footer{text-align:center;font-size:13px;color:var(--muted);padding:20px}
 </style>
 </head>
@@ -86,15 +94,30 @@
       <input id="store-name" value="Le Salon du Vélo">
       <label for="store-city">Ville</label>
       <input id="store-city" value="Lyon">
+      <label for="store-pc">Code postal</label>
+      <input id="store-pc" value="69002" inputmode="numeric" maxlength="5">
       <button class="primary" id="btn-store">Créer mon magasin</button>
     </div>
     <p class="muted" id="store-info"></p>
     <div class="msg" id="store-msg"></div>
   </section>
 
-  <!-- 3. Comptes -->
+  <!-- 3. Réseau -->
+  <section class="card hidden" id="s-network">
+    <div class="step"><span class="num">3</span><h2>Mon réseau</h2></div>
+    <div id="net-join">
+      <p class="muted">Votre magasin fait partie d'une enseigne ou d'un groupement ? Saisissez le code fourni par votre centrale pour recevoir ses promos. Sinon, passez cette étape.</p>
+      <label for="net-code">Code réseau</label>
+      <input id="net-code" maxlength="12" style="text-transform:uppercase;letter-spacing:.08em" placeholder="Ex. A7F3C91B">
+      <button class="primary" id="btn-join">Rejoindre le réseau</button>
+    </div>
+    <p class="muted hidden" id="net-info"></p>
+    <div class="msg" id="net-msg"></div>
+  </section>
+
+  <!-- 4. Comptes -->
   <section class="card hidden" id="s-accounts">
-    <div class="step"><span class="num">3</span><h2>Facebook et Instagram</h2></div>
+    <div class="step"><span class="num">4</span><h2>Facebook et Instagram</h2></div>
     <p class="muted">Vitriin publie sur la Page Facebook de votre magasin et sur le compte Instagram professionnel qui lui est relié. Une seule connexion suffit pour les deux.</p>
     <div id="choose" class="hidden">
       <p><strong>Plusieurs Pages ont été connectées.</strong> Un magasin publie sur une seule Page et son compte Instagram. Choisissez celle de ce magasin : les autres seront retirées de Vitriin.</p>
@@ -106,9 +129,18 @@
     <div class="msg" id="acct-msg"></div>
   </section>
 
-  <!-- 4. Publier -->
+  <!-- 5. Promos du réseau -->
+  <section class="card hidden" id="s-netpromos">
+    <div class="step"><span class="num">5</span><h2>Promos du réseau</h2></div>
+    <div id="np-alert" class="alert hidden"></div>
+    <p class="muted" id="np-intro">Les promos envoyées par votre centrale. Activez celles que vous relayez, puis publiez-les sur votre Page Facebook et votre compte Instagram.</p>
+    <div id="np-list"></div>
+    <div class="msg" id="np-msg"></div>
+  </section>
+
+  <!-- 6. Publier -->
   <section class="card hidden" id="s-publish">
-    <div class="step"><span class="num">4</span><h2>Publier une promotion</h2></div>
+    <div class="step"><span class="num">6</span><h2>Publier une promotion</h2></div>
     <label for="p-title">Titre</label>
     <input id="p-title" value="INSCRIPTION LYON-LAVAL 2027">
     <label for="p-mech">Offre</label>
@@ -125,7 +157,7 @@
   </section>
 
   <section class="card hidden" id="s-stats">
-    <div class="step"><span class="num">5</span><h2>Résultats</h2></div>
+    <div class="step"><span class="num">7</span><h2>Résultats</h2></div>
     <p class="muted">Statistiques lues chez Facebook et Instagram. Meta les met à jour avec quelques heures de décalage, et ne fournit pas la portée Facebook des Pages de moins de 100 abonnés.</p>
     <div id="stats"></div>
     <button class="ghost" id="btn-stats">Actualiser les statistiques</button>
@@ -144,6 +176,10 @@ const $ = (id) => document.getElementById(id);
 const show = (id, on = true) => $(id).classList.toggle("hidden", !on);
 const msg = (id, text, err = false) => { $(id).textContent = text || ""; $(id).classList.toggle("err", err); };
 let STORE = null;
+const esc = (t) => String(t ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} } };
+(() => { const q = new URLSearchParams(location.search), code = q.get("rejoindre");
+  if (code) { store.set("vitriin_join", code.toUpperCase().replace(/[^A-Z0-9]/g, "")); q.delete("rejoindre"); history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "")); } })();
 
 $("p-media").value = location.origin + "/lyon-laval-2027.jpg";
 const refreshImg = () => { $("p-img").src = $("p-media").value; };
@@ -217,24 +253,107 @@ async function boot() {
 
 // 2. Magasin
 async function loadStore() {
-  const { data, error } = await sb.from("store_members").select("store_id, stores(id, name, city, slug)").limit(1);
+  const { data, error } = await sb.from("store_members").select("store_id, stores(id, name, city, slug, postal_code, network_id)").limit(1);
   if (error) return msg("store-msg", error.message, true);
   if (!data.length) { show("store-create"); return; }
   STORE = data[0].stores;
   show("store-create", false);
   $("store-info").textContent = `${STORE.name}${STORE.city ? " · " + STORE.city : ""}`;
   $("s-store").classList.add("done");
+  show("s-network"); await loadNetwork();
   show("s-accounts"); await loadAccounts();
 }
 $("btn-store").onclick = async () => {
   const name = $("store-name").value.trim();
   const slug = name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-  const { error } = await sb.rpc("create_store", { p_slug: slug, p_name: name, p_city: $("store-city").value.trim() || null });
+  const { error } = await sb.rpc("create_store", { p_slug: slug, p_name: name, p_city: $("store-city").value.trim() || null, p_postal_code: $("store-pc").value.trim() || null });
   if (error) return msg("store-msg", error.message, true);
   loadStore();
 };
 
-// 3. Comptes
+// 3. Réseau
+let NETWORK = null;
+async function loadNetwork() {
+  NETWORK = null;
+  if (STORE.network_id) {
+    const { data } = await sb.rpc("get_store_network", { p_store_id: STORE.id });
+    NETWORK = (data && data[0]) || { network_name: "votre réseau" };
+  }
+  show("net-join", !NETWORK); show("net-info", !!NETWORK);
+  if (NETWORK) {
+    $("net-info").innerHTML = `Membre du réseau <strong>${esc(NETWORK.network_name)}</strong>. Ses promos arrivent ci-dessous, prêtes à publier.`;
+    $("s-network").classList.add("done"); store.set("vitriin_join", null);
+    show("s-netpromos"); await loadNetPromos();
+  } else {
+    $("s-network").classList.remove("done"); show("s-netpromos", false);
+    const pending = store.get("vitriin_join"); if (pending && !$("net-code").value) $("net-code").value = pending;
+    if (pending) msg("net-msg", "Code reçu par lien d'invitation : vérifiez-le puis rejoignez le réseau.");
+  }
+}
+$("btn-join").onclick = async () => {
+  const code = $("net-code").value.trim().toUpperCase();
+  if (code.length < 4) return msg("net-msg", "Saisissez le code fourni par votre centrale.", true);
+  $("btn-join").disabled = true; msg("net-msg", "Rattachement…");
+  const { data, error } = await sb.rpc("join_network", { p_code: code, p_store_id: STORE.id });
+  $("btn-join").disabled = false;
+  if (error) return msg("net-msg", error.message, true);
+  STORE.network_id = data[0].network_id; msg("net-msg", "");
+  await loadNetwork();
+};
+
+// 5. Promos du réseau
+const NP_STATUS = { pending: ["Reçue", "wait"], active: ["Activée", "ok"], declined: ["Refusée", "ko"] };
+const dfr = (d) => new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+async function loadNetPromos() {
+  const { data, error } = await sb.from("store_promotions")
+    .select("id, status, created_at, promotions!inner(id, title, mechanic, description, media_url, discount_code, starts_at, ends_at, is_mandatory, created_by_network_id), publications(channel, status, error_message)")
+    .eq("store_id", STORE.id).not("promotions.created_by_network_id", "is", null)
+    .order("created_at", { ascending: false }).limit(50);
+  if (error) return msg("np-msg", error.message, true);
+  const now = Date.now();
+  const rows = data.filter(r => new Date(r.promotions.ends_at) > now - 7 * 864e5);
+  const toDo = rows.filter(r => r.status === "pending" || (r.status === "active" && !(r.publications || []).some(p => p.status === "published")));
+  $("np-alert").textContent = toDo.length ? `${toDo.length} promo${toDo.length > 1 ? "s" : ""} du réseau ${toDo.length > 1 ? "attendent" : "attend"} votre action.` : "";
+  show("np-alert", toDo.length > 0);
+  const connected = !!document.querySelector("#accounts .pill.ok");
+  if (!rows.length) { $("np-list").innerHTML = '<p class="muted">Aucune promo du réseau pour l\'instant.</p>'; return; }
+  $("np-list").innerHTML = rows.map(r => {
+    const p = r.promotions, pubs = r.publications || [], ended = new Date(p.ends_at) < now;
+    const done = pubs.filter(x => x.status === "published").map(x => x.channel === "facebook" ? "Facebook" : "Instagram");
+    const [lbl, cls] = done.length ? ["Publiée", "ok"] : NP_STATUS[r.status];
+    const failed = pubs.filter(x => x.status === "failed");
+    let acts = "";
+    if (r.status === "pending") acts = `<button class="primary" style="width:auto" data-np-act="${r.id}">Activer</button>${p.is_mandatory ? "" : `<button class="ghost" data-np-decline="${r.id}">Refuser</button>`}`;
+    else if (r.status === "declined" && !ended) acts = `<button class="ghost" data-np-act="${r.id}">Finalement, l'activer</button>`;
+    else if (r.status === "active" && !ended && done.length < 2) acts = `<button class="primary" style="width:auto" data-np-pub="${r.id}" ${connected ? "" : "disabled"}>${done.length ? "Publier sur l'autre réseau" : "Publier sur Facebook et Instagram"}</button>`;
+    return `<div class="np">${p.media_url ? `<img src="${esc(p.media_url)}" alt="">` : '<div class="noimg"></div>'}<div style="flex:1;min-width:0">
+      <div class="stat-head"><h3>${esc(p.title)}</h3><span class="pill ${cls}">${lbl}</span></div>
+      <div class="tags">${p.mechanic ? `<span class="pill wait">${esc(p.mechanic)}</span>` : ""}<span class="pill" style="background:#f3eefb;color:var(--v)">${NETWORK ? esc(NETWORK.network_name) : "Réseau"}</span>${p.is_mandatory ? '<span class="pill ko">Obligatoire</span>' : ""}</div>
+      <p class="muted">Du ${dfr(p.starts_at)} au ${dfr(p.ends_at)}${p.is_mandatory && r.status === "active" && !done.length && !ended ? ` · à publier avant le ${dfr(p.ends_at)}` : ""}${done.length ? ` · publiée sur ${done.join(" et ")}` : ""}</p>
+      ${p.discount_code ? `<span class="code">Code à saisir en caisse : ${esc(p.discount_code)}</span>` : ""}
+      ${failed.length && done.length < 2 ? `<p class="msg err">${esc(failed[0].error_message || "La dernière publication a échoué.")}</p>` : ""}
+      ${r.status === "active" && !connected && !ended ? '<p class="muted">Connectez d\'abord Facebook et Instagram (étape 4) pour publier.</p>' : ""}
+      <div class="acts">${acts}</div></div></div>`;
+  }).join("");
+  const setStatus = async (id, status) => {
+    const { error: e } = await sb.from("store_promotions").update({ status }).eq("id", id);
+    if (e) return msg("np-msg", e.message, true);
+    msg("np-msg", ""); loadNetPromos();
+  };
+  document.querySelectorAll("[data-np-act]").forEach(b => b.onclick = () => setStatus(b.dataset.npAct, "active"));
+  document.querySelectorAll("[data-np-decline]").forEach(b => b.onclick = () => setStatus(b.dataset.npDecline, "declined"));
+  document.querySelectorAll("[data-np-pub]").forEach(b => b.onclick = async () => {
+    b.disabled = true; msg("np-msg", "Publication en cours (Instagram peut prendre jusqu'à une minute)…");
+    try {
+      const res = await fn("meta-publish", { store_promotion_id: b.dataset.npPub });
+      const ok = (res.results || []).filter(x => x.status === "published").length;
+      msg("np-msg", ok ? "Publiée." : (res.message || "Aucune publication réussie."), !ok);
+      loadNetPromos(); loadStats();
+    } catch (e) { msg("np-msg", e.message, true); b.disabled = false; }
+  });
+}
+
+// 4. Comptes
 async function loadAccounts() {
   const { data, error } = await sb.from("social_accounts").select("id, channel, display_name, status, external_account_id, parent_external_id").eq("store_id", STORE.id);
   if (error) return msg("acct-msg", error.message, true);
@@ -277,6 +396,7 @@ async function loadAccounts() {
   $("btn-connect").textContent = connected ? "Changer de Page" : "Connecter Facebook et Instagram";
   $("btn-connect").className = connected ? "ghost" : "primary";
   if (connected) { $("s-accounts").classList.add("done"); show("s-publish"); show("s-stats"); loadStats(); } else { show("s-publish", false); show("s-stats", false); }
+  if (NETWORK) loadNetPromos();
 }
 // Retour de Facebook : message d'erreur éventuel transmis par le callback.
 (() => { const q = new URLSearchParams(location.search);
@@ -290,7 +410,7 @@ $("btn-connect").onclick = async () => {
   } catch (e) { msg("acct-msg", e.message, true); }
 };
 
-// 4. Publier
+// 6. Publier
 $("btn-publish").onclick = async () => {
   const btn = $("btn-publish"); btn.disabled = true; $("pub-results").innerHTML = "";
   try {
@@ -323,7 +443,7 @@ $("btn-publish").onclick = async () => {
   } finally { btn.disabled = false; }
 };
 
-// 5. Résultats
+// 7. Résultats
 const fmt = (n) => (n === null || n === undefined) ? "–" : new Intl.NumberFormat("fr-FR").format(n);
 function renderStats(items) {
   if (!items.length) { $("stats").innerHTML = '<p class="muted">Aucune publication pour l\'instant.</p>'; return; }

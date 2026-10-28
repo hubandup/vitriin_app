@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vitriin Pro · Centrale</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#e5087e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+/* Charte Vitriin (magenta, déc. du 4 oct. 2026) appliquée à la maquette « Vitriin Centrale ». */
+:root{
+  --p:#e5087e; --v:#951b81; --grad:linear-gradient(90deg,#e5087e,#951b81);
+  --ink:#2D2D2D; --muted:#8a847c; --faint:#aaa39a; --line:#ECE8E2; --bg:#f6f3ee;
+  --rose:#fdeef6; --teal:#0c9875; --teal2:#5ebca3; --forest:#3a4a3a; --err:#D0342C;
+  --t-green:#e7f5f0; --t-pink:#fdeef6; --t-indigo:#eef0fb; --c-indigo:#5b63c4;
+  --t-amber:#fbf0e6; --c-amber:#c08a3e; --t-purple:#f3eefb; --c-purple:#8a5bc4; --t-red:#fbe9e7;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
+button{font-family:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;color:var(--ink)}
+.hidden{display:none!important}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:#d8d2c8;border-radius:6px}::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- App shell ---------- */
+.app{display:flex;height:100vh;overflow:hidden}
+.side{flex:none;width:244px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;padding:22px 16px}
+.brand{display:flex;align-items:center;gap:11px;padding:0 6px 4px}
+.brand img{width:38px;height:38px;border-radius:50%;flex:none}
+.brand b{display:block;font-weight:700;font-size:15.5px;letter-spacing:-.02em;line-height:1.1}
+.brand span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+.net{margin-top:22px;padding:13px 12px;background:var(--bg);border-radius:14px;display:flex;align-items:center;gap:11px}
+.net .av{width:34px;height:34px;border-radius:9px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none;overflow:hidden}
+.net .av img{width:100%;height:100%;object-fit:cover}
+.net b{display:block;font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.net span{font-size:11px;color:var(--muted)}
+.sect{margin-top:18px;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#b3ada4;padding:0 8px}
+.nav{margin-top:8px;display:flex;flex-direction:column;gap:3px}
+.nav button{display:flex;align-items:center;gap:12px;padding:11px 12px;border:none;border-radius:11px;text-align:left;font-weight:600;font-size:14px;background:transparent;color:#6b6660}
+.nav button.on{background:var(--rose);color:var(--v)}
+.nav svg{flex:none}
+.bulk{padding:14px;border-radius:14px;background:linear-gradient(160deg,#fdeef6,#eef6f2);border:1px solid var(--line)}
+.bulk b{font-weight:700;font-size:13px}
+.bulk p{font-size:11.5px;color:var(--muted);margin:3px 0 0;line-height:1.4}
+.bulk button{margin-top:11px;width:100%;background:var(--grad);color:#fff;border:none;font-weight:700;font-size:12.5px;padding:9px;border-radius:9px}
+.me{margin-top:14px;display:flex;align-items:center;gap:10px;padding:0 6px}
+.me .av{width:32px;height:32px;border-radius:50%;background:#f5ecd3;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;color:#7a6a52;flex:none}
+.me div{min-width:0;line-height:1.15;flex:1}
+.me b{display:block;font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me button{border:none;background:none;padding:0;font-size:10.5px;color:var(--muted);text-decoration:underline}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{flex:none;height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 26px}
+.top h1{font-weight:700;font-size:18px;letter-spacing:-.02em;margin:0}
+.top p{font-size:12px;color:var(--muted);margin:0}
+.search{display:flex;align-items:center;gap:9px;background:var(--bg);border-radius:11px;padding:9px 13px;width:240px}
+.search input{border:none;background:none;outline:none;font-size:13px;width:100%}
+.bell{position:relative;width:42px;height:42px;border-radius:11px;background:var(--bg);border:none;display:flex;align-items:center;justify-content:center;flex:none}
+.bell i{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--p);border:1.5px solid #fff}
+.btn-p{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--grad);color:#fff;border:none;font-weight:700;font-size:13.5px;padding:11px 17px;border-radius:11px;box-shadow:0 6px 16px rgba(229,8,126,.30);white-space:nowrap}
+.btn-p:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn-s{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--bg);border:1px solid var(--line);color:var(--ink);font-weight:700;font-size:13px;padding:10px 18px;border-radius:10px;white-space:nowrap}
+.btn-s:disabled{opacity:.5;cursor:not-allowed}
+.content{flex:1;min-height:0;overflow-y:auto;padding:26px}
+
+/* ---------- Building blocks ---------- */
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px}
+.card h3{font-weight:700;font-size:15.5px;margin:0}
+.card .sub{font-size:12px;color:var(--muted)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.gx{display:grid;grid-template-columns:1.55fr 1fr;gap:16px}
+.mt{margin-top:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+.kpi .ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.kpi .tr{font-size:11.5px;font-weight:700;color:var(--teal)}
+.kpi .val{font-weight:700;font-size:25px;letter-spacing:-.03em;margin-top:12px}
+.kpi .lbl{font-size:12px;color:var(--muted);margin-top:1px}
+.mini{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.mini .lbl{font-size:12.5px;font-weight:600;color:#6b6660}
+.mini .val{font-weight:700;font-size:25px;letter-spacing:-.03em;margin-top:6px}
+.wide{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;align-items:center;gap:14px}
+.wide .ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.wide .val{font-weight:700;font-size:22px;letter-spacing:-.02em;line-height:1.1}
+.wide .lbl{font-size:12px;color:var(--muted);line-height:1.35;margin-top:2px}
+
+.bars{display:flex;align-items:flex-end;gap:14px;height:172px;margin-top:22px}
+.bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+.bars i{display:block;width:100%;max-width:34px;border-radius:7px 7px 3px 3px;background:#f6d4c9;min-height:3px}
+.bars i.last{background:var(--p)}
+.bars span{font-size:11px;color:var(--muted);font-weight:600}
+.dark{background:var(--forest);border-radius:18px;padding:20px;color:#fff;flex:1}
+.dark .t{font-size:12.5px;opacity:.75;font-weight:600}
+.dark .v{font-weight:700;font-size:34px;letter-spacing:-.03em;margin-top:6px}
+.track{height:8px;border-radius:5px;background:var(--bg);overflow:hidden}
+.track i{display:block;height:100%;border-radius:5px;background:var(--teal)}
+.dark .track{background:rgba(255,255,255,.18);margin-top:12px}
+.dark .track i{background:var(--teal2)}
+.dark p{font-size:12px;opacity:.75;margin:10px 0 0;line-height:1.4}
+.alert-ic{width:38px;height:38px;border-radius:11px;background:var(--t-pink);color:var(--v);display:flex;align-items:center;justify-content:center;flex:none}
+.line{display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid var(--line)}
+.line:last-child{border-bottom:none}
+.rank{width:30px;height:30px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;color:var(--muted);flex:none}
+.link{font-size:12px;color:var(--p);font-weight:700;background:none;border:none;padding:0}
+.empty{font-size:13px;color:var(--muted);padding:14px 0;line-height:1.5}
+
+/* Tables */
+.tcard{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.tscroll{overflow-x:auto}
+.thead,.trow{display:grid;gap:14px;padding:13px 22px;align-items:center;min-width:860px}
+.thead{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--faint);border-bottom:1px solid var(--line);text-transform:uppercase}
+.trow{padding:14px 22px;border-bottom:1px solid var(--line)}
+.trow:last-child{border-bottom:none}
+.trow.click{cursor:pointer}.trow.click:hover{background:#fcfbf9}
+.r{text-align:right}
+.cell-name{display:flex;align-items:center;gap:11px;min-width:0}
+.cell-name .av{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none}
+.cell-name b{display:block;font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell-name small{display:block;font-size:11.5px;color:var(--muted)}
+.mut{font-size:12.5px;color:var(--muted)}
+.num{font-weight:600;font-size:13px}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px;white-space:nowrap}
+.p-green{background:var(--t-green);color:var(--teal)} .p-amber{background:var(--t-amber);color:var(--c-amber)}
+.p-grey{background:#f0eeec;color:var(--muted)} .p-red{background:var(--t-red);color:var(--err)}
+.p-pink{background:var(--t-pink);color:var(--p)} .p-indigo{background:var(--t-indigo);color:var(--c-indigo)} .p-purple{background:var(--t-purple);color:var(--c-purple)}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:7px;white-space:nowrap}
+.soc{display:flex;gap:5px}
+.soc span{width:23px;height:23px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;background:#ece8e2;color:#b3ada4}
+.soc .fb{background:#1877F2;color:#fff}.soc .ig{background:#E1306C;color:#fff}
+.relay{min-width:0}
+.relay .row{font-size:12px;font-weight:700}
+.relay .row span{font-weight:500;color:var(--muted)}
+.relay .track{margin-top:5px;height:6px}
+.chips{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;color:#6b6660;font-weight:600;font-size:13px;padding:8px 15px;border-radius:20px}
+.chip.on{background:var(--p);border-color:var(--p);color:#fff}
+.chip em{font-style:normal;font-size:11px;font-weight:700;margin-left:6px;padding:1px 7px;border-radius:10px;background:var(--bg);color:var(--muted)}
+.chip.on em{background:rgba(255,255,255,.25);color:#fff}
+.tbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+
+/* Sources (Promotions) */
+.src{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.src.dash{border:2px dashed #d9cfc2}
+.src .ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.src b{font-weight:700;font-size:15px;margin-top:13px}
+.src p{font-size:12.5px;color:var(--muted);margin:5px 0 0;line-height:1.45}
+.src .btn-p,.src .btn-s{margin-top:14px;font-size:13px;padding:10px 18px;border-radius:10px}
+.soon{position:absolute;top:14px;right:14px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--bg);color:var(--muted)}
+
+/* Banner (Magasins) */
+.banner{background:#fff;border:1px solid #f6d3de;border-radius:18px;overflow:hidden}
+.banner .hd{background:#fdf1f3;display:flex;align-items:center;gap:14px;padding:16px 20px}
+.banner .hd b{display:block;font-weight:700;font-size:15px}
+.banner .hd span{font-size:12.5px;color:#6b6660}
+.banner .hd .cnt{margin-left:auto;font-weight:700;font-size:13px;color:var(--err);white-space:nowrap}
+.banner .bd{padding:16px 20px;display:flex;gap:12px;flex-wrap:wrap}
+.tag{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.tag .av{width:30px;height:30px;border-radius:8px;background:#f0eeec;color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11.5px;flex:none}
+.tag b{display:block;font-size:13px;font-weight:600}
+.tag small{font-size:11.5px;color:var(--muted)}
+.tag button{margin-left:8px;background:var(--grad);color:#fff;border:none;font-weight:700;font-size:12.5px;padding:8px 13px;border-radius:9px}
+
+/* Modal */
+.ov{position:fixed;inset:0;background:rgba(45,45,45,.38);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:20}
+.modal{background:#fff;border-radius:20px;width:100%;max-width:980px;box-shadow:0 24px 60px rgba(0,0,0,.18)}
+.modal.sm{max-width:560px}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--line)}
+.mh h2{font-size:18px;font-weight:700;letter-spacing:-.02em;margin:0}
+.mh p{font-size:12px;color:var(--muted);margin:2px 0 0}
+.x{width:36px;height:36px;border-radius:10px;border:none;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.mb{padding:22px 24px}
+.mf{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:16px 24px;border-top:1px solid var(--line);flex-wrap:wrap}
+.mf .note{margin-right:auto;font-size:12px;color:var(--muted);max-width:460px;line-height:1.4}
+.form{display:grid;grid-template-columns:1.25fr 1fr;gap:24px}
+.fl{display:block;font-size:12.5px;font-weight:700;margin:16px 0 7px}
+.fl:first-child{margin-top:0}
+.fl small{font-weight:500;color:var(--muted)}
+.in{width:100%;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;outline:none}
+.in:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(229,8,126,.12)}
+textarea.in{min-height:84px;resize:vertical;line-height:1.45}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.types button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px 8px;font-size:12.5px;font-weight:600;color:#6b6660;text-align:center;line-height:1.25}
+.types button b{display:block;font-size:16px;color:var(--ink);margin-bottom:2px}
+.types button.on{border-color:var(--p);background:var(--rose);color:var(--v)}
+.types button.on b{color:var(--p)}
+.drop{border:2px dashed #d9cfc2;border-radius:16px;padding:18px;display:flex;align-items:center;gap:16px;cursor:pointer;background:#fff}
+.drop img{width:86px;height:86px;border-radius:12px;object-fit:cover;flex:none;background:var(--bg)}
+.drop .ph{width:86px;height:86px;border-radius:12px;background:var(--t-pink);color:var(--p);display:flex;align-items:center;justify-content:center;flex:none}
+.drop b{display:block;font-size:14px}
+.drop span{font-size:12px;color:var(--muted);line-height:1.4}
+.sw{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.sw input{display:none}
+.sw .k{flex:none;width:38px;height:22px;border-radius:12px;background:#e2ddd5;position:relative;transition:.15s;margin-top:1px}
+.sw .k::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+.sw input:checked + .k{background:var(--p)}
+.sw input:checked + .k::after{left:19px}
+.sw b{display:block;font-size:13.5px}
+.sw span{font-size:12px;color:var(--muted);line-height:1.4}
+.seg{display:flex;background:var(--bg);border-radius:11px;padding:4px;gap:4px}
+.seg button{flex:1;border:none;background:none;padding:9px;border-radius:8px;font-weight:700;font-size:13px;color:#6b6660}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.picker{border:1px solid var(--line);border-radius:12px;margin-top:10px;max-height:240px;overflow-y:auto}
+.picker label{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer}
+.picker label:last-child{border-bottom:none}
+.picker input{accent-color:var(--p);width:16px;height:16px}
+.picker small{margin-left:auto;color:var(--muted);font-size:11.5px}
+/* Aperçu du post */
+.post{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;position:sticky;top:0}
+.post .ph{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.post .ph i{width:30px;height:30px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;font-size:11px;color:var(--muted)}
+.post .ph b{font-size:13px}.post .ph small{display:block;font-size:11px;color:var(--muted)}
+.post .img{aspect-ratio:4/5;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:12.5px;position:relative}
+.post .img img{width:100%;height:100%;object-fit:cover;display:block}
+.post .img .stk{position:absolute;left:12px;top:12px;background:var(--grad);color:#fff;font-weight:700;font-size:18px;padding:6px 12px;border-radius:10px}
+.post .cap{padding:12px 14px;font-size:13px;line-height:1.45;white-space:pre-wrap}
+.post .cap b{display:block}
+.post .code{margin:0 14px 14px;border:1px dashed var(--p);color:var(--v);border-radius:10px;padding:8px 12px;font-weight:700;font-size:13px;text-align:center}
+.hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.45}
+.err{color:var(--err);font-size:13px;margin-top:10px}
+
+/* Invitation */
+.code-box{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg);border-radius:14px;padding:16px 18px}
+.code-box b{font-size:26px;letter-spacing:.12em;font-weight:700}
+.copy{display:flex;gap:8px;margin-top:12px}
+.copy input{flex:1;min-width:0}
+
+/* Détail promo */
+.back{display:inline-flex;align-items:center;gap:6px;border:none;background:none;font-weight:700;font-size:13px;color:#6b6660;padding:0;margin-bottom:14px}
+.head{display:flex;gap:20px;align-items:flex-start}
+.head img,.head .noimg{width:120px;height:150px;border-radius:14px;object-fit:cover;flex:none;background:var(--bg)}
+.head h2{margin:0;font-size:20px;letter-spacing:-.02em}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.head p{font-size:13px;color:#6b6660;line-height:1.5;margin:10px 0 0;white-space:pre-wrap}
+.ch{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600}
+.ch.ok{color:var(--teal)}.ch.ko{color:var(--err)}.ch.no{color:var(--faint)}
+
+/* Écrans plein page */
+.full{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.auth{width:100%;max-width:420px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px 28px}
+.auth .brand{padding:0;margin-bottom:22px}
+.auth h2{font-size:20px;letter-spacing:-.02em;margin:0 0 4px}
+.auth > p{font-size:13px;color:var(--muted);margin:0 0 18px;line-height:1.45}
+.auth .btn-p{width:100%;margin-top:18px;padding:13px}
+.auth .alt{margin-top:14px;text-align:center;font-size:13px;color:var(--muted)}
+.auth .alt button{border:none;background:none;color:var(--p);font-weight:700;padding:0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13.5px;font-weight:600;padding:12px 18px;border-radius:12px;z-index:40;box-shadow:0 10px 30px rgba(0,0,0,.2);max-width:calc(100% - 32px)}
+.spin{display:flex;align-items:center;justify-content:center;height:100vh;color:var(--muted);font-size:14px}
+
+/* Responsive */
+@media (max-width:1200px){.g5{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:980px){
+  .side{display:none}.gx,.g2,.g3,.g4{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}
+  .search{display:none}.post{position:static}
+}
+@media (max-width:640px){
+  .app{height:auto;min-height:100vh}.content{padding:16px}.top{padding:0 16px;height:auto;min-height:64px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+  .gx,.g2,.g3,.g4,.two{grid-template-columns:1fr}.g5{grid-template-columns:1fr 1fr}.types{grid-template-columns:repeat(2,1fr)}
+  .mnav{display:flex!important}.head{flex-direction:column}
+}
+.mnav{display:none;gap:6px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
+.mnav button{flex:none;border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 13px;font-weight:600;font-size:13px;color:#6b6660}
+.mnav button.on{background:var(--rose);border-color:var(--rose);color:var(--v)}
+@media (max-width:980px){.mnav{display:flex}}
+</style>
+</head>
+<body>
+
+<div id="loading" class="spin">Chargement…</div>
+
+<!-- ============ CONNEXION ============ -->
+<div id="v-auth" class="full hidden">
+  <div class="auth">
+    <div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Pro</b><span>Centrale</span></div></div>
+    <h2 id="auth-title">Connexion</h2>
+    <p id="auth-sub">Pilotez les promotions de votre réseau.</p>
+    <label class="fl" for="a-email">Email</label>
+    <input class="in" id="a-email" type="email" autocomplete="username">
+    <label class="fl" for="a-pass">Mot de passe</label>
+    <input class="in" id="a-pass" type="password" autocomplete="current-password">
+    <button class="btn-p" id="a-go">Se connecter</button>
+    <div class="err hidden" id="a-err"></div>
+    <div class="alt" id="a-alt">Pas encore de compte ? <button id="a-mode">Créer un compte centrale</button></div>
+  </div>
+</div>
+
+<!-- ============ CRÉATION DU RÉSEAU ============ -->
+<div id="v-new" class="full hidden">
+  <div class="auth">
+    <div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Pro</b><span>Centrale</span></div></div>
+    <h2>Créez votre réseau</h2>
+    <p>Le nom que verront vos magasins quand ils vous rejoindront. Vous pourrez ensuite les inviter.</p>
+    <label class="fl" for="n-name">Nom du réseau</label>
+    <input class="in" id="n-name" placeholder="Ex. Réseau Foulées">
+    <button class="btn-p" id="n-go">Créer le réseau</button>
+    <div class="err hidden" id="n-err"></div>
+    <div class="alt"><button id="n-out">Se déconnecter</button></div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="v-app" class="app hidden">
+  <aside class="side">
+    <div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Pro</b><span>Centrale</span></div></div>
+    <div class="net"><span class="av" id="net-av"></span><div style="min-width:0;line-height:1.15"><b id="net-name"></b><span id="net-count"></span></div></div>
+    <div class="sect">PILOTAGE</div>
+    <nav class="nav" id="nav">
+      <button data-v="overview"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tableau de bord</button>
+      <button data-v="promos"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H5a2 2 0 0 0-2 2v4.6a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.8Z"/><circle cx="7.5" cy="7.5" r="1.4" fill="currentColor"/></svg>Promotions</button>
+      <button data-v="stores"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4.6 4.5h14.8L21 9"/><path d="M3.4 9h17.2v1.6a2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0V9Z"/><path d="M5 11.4V20h14v-8.6"/></svg>Magasins</button>
+      <button data-v="audience"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6"/><path d="M17.5 13.5a5.5 5.5 0 0 1 3 5.5"/></svg>Audience</button>
+    </nav>
+    <div style="flex:1"></div>
+    <div class="bulk"><b>Importer en masse</b><p>Excel, visuels ou via ton PIM.</p><button id="bulk-go">Importer</button></div>
+    <div class="me"><span class="av" id="me-av"></span><div><b id="me-mail"></b><button id="logout">Se déconnecter</button></div></div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div style="min-width:0"><h1 id="pg-title"></h1><p id="pg-sub"></p></div>
+      <div style="flex:1"></div>
+      <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a39d94" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg><input id="q" type="text" placeholder="Rechercher un magasin…"></label>
+      <button class="bell" id="bell" title="Magasins à activer"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><i id="bell-dot" class="hidden"></i></button>
+      <button class="btn-p" id="new-promo"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouvelle promo</button>
+    </header>
+    <div class="mnav" id="mnav"></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<!-- ============ MODALE : NOUVELLE PROMO ============ -->
+<div class="ov hidden" id="m-promo">
+  <div class="modal">
+    <div class="mh"><div><h2>Nouvelle promo</h2><p>Créée une fois, envoyée à vos magasins. Chacun la publie sur ses propres comptes.</p></div><button class="x" data-close aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="mb">
+      <div class="form">
+        <div>
+          <label class="fl">Visuel <small>· une image, recadrée pour Facebook et Instagram</small></label>
+          <div class="drop" id="f-drop"><span class="ph" id="f-ph"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="m21 15-5-5L5 21"/></svg></span><img id="f-img" class="hidden" alt="Visuel"><div><b id="f-drop-t">Choisir une image</b><span id="f-drop-s">JPEG ou PNG. Convertie et recadrée automatiquement (format 4:5 maximum).</span></div></div>
+          <input type="file" id="f-file" accept="image/*" hidden>
+
+          <label class="fl" for="f-title">Titre</label>
+          <input class="in" id="f-title" maxlength="90" placeholder="Ex. Black Friday running">
+
+          <label class="fl">Type de promotion</label>
+          <div class="types" id="f-types"></div>
+
+          <label class="fl" for="f-mech">Offre <small id="f-mech-h"></small></label>
+          <input class="in" id="f-mech" maxlength="60">
+
+          <label class="fl" for="f-desc">Texte du post <small>· facultatif</small></label>
+          <textarea class="in" id="f-desc" maxlength="1500" placeholder="Ce que le client doit savoir : produits concernés, conditions…"></textarea>
+
+          <div class="two">
+            <div><label class="fl" for="f-start">Du</label><input class="in" id="f-start" type="date"></div>
+            <div><label class="fl" for="f-end">Au</label><input class="in" id="f-end" type="date"></div>
+          </div>
+
+          <label class="fl" for="f-code">Code de réduction en caisse <small>· facultatif, fourni par la centrale</small></label>
+          <input class="in" id="f-code" maxlength="24" placeholder="Ex. BLACK25" style="text-transform:uppercase;letter-spacing:.06em">
+
+          <label class="fl">Règle</label>
+          <label class="sw"><input type="checkbox" id="f-mand"><span class="k"></span><span><b>Promo obligatoire</b><span>Vos magasins ne peuvent pas la refuser. Ils la publient eux-mêmes, depuis leur espace.</span></span></label>
+
+          <label class="fl">Magasins</label>
+          <div class="seg" id="f-target"><button data-t="all" class="on">Tout le réseau</button><button data-t="pick">Sélection</button></div>
+          <div id="f-pick" class="hidden">
+            <div class="chips" id="f-zones" style="margin-top:12px"></div>
+            <div class="picker" id="f-list"></div>
+          </div>
+          <div class="hint" id="f-count"></div>
+        </div>
+        <div>
+          <label class="fl">Aperçu du post magasin</label>
+          <div class="post">
+            <div class="ph"><i>MG</i><div><b>Votre magasin</b><small>Publié par le magasin · Facebook et Instagram</small></div></div>
+            <div class="img" id="pv-img">Votre visuel</div>
+            <div class="cap" id="pv-cap"></div>
+            <div class="code hidden" id="pv-code"></div>
+          </div>
+          <div class="hint">Le magasin voit la promo dans son espace, l'active, puis la publie sur sa Page Facebook et son compte Instagram. Vitriin ne publie jamais à sa place.</div>
+        </div>
+      </div>
+      <div class="err hidden" id="f-err"></div>
+    </div>
+    <div class="mf"><span class="note" id="f-note"></span><button class="btn-s" data-close>Annuler</button><button class="btn-p" id="f-send">Envoyer aux magasins</button></div>
+  </div>
+</div>
+
+<!-- ============ MODALE : INVITER DES MAGASINS ============ -->
+<div class="ov hidden" id="m-invite">
+  <div class="modal sm">
+    <div class="mh"><div><h2>Ajouter des magasins</h2><p>Chaque magasin crée son compte et rejoint votre réseau avec ce code.</p></div><button class="x" data-close aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="mb">
+      <label class="fl">Code du réseau</label>
+      <div class="code-box"><b id="i-code"></b><button class="btn-s" id="i-regen" title="Les magasins déjà rattachés restent dans le réseau">Nouveau code</button></div>
+      <label class="fl">Lien d'invitation</label>
+      <div class="copy"><input class="in" id="i-link" readonly><button class="btn-p" id="i-copy">Copier</button></div>
+      <label class="fl">Message à envoyer</label>
+      <textarea class="in" id="i-msg" style="min-height:150px" readonly></textarea>
+      <div class="copy" style="justify-content:flex-end"><button class="btn-s" id="i-copy-msg">Copier le message</button></div>
+      <div class="hint">Le lien ouvre l'espace magasin avec le code déjà rempli. Si le code a trop circulé, générez-en un nouveau : l'ancien ne fonctionnera plus.</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://zjugauidrijghesgsmap.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU";
+const sb = supabase.createClient(SUPABASE_URL, ANON_KEY);
+const $ = (id) => document.getElementById(id);
+const show = (el, on = true) => (typeof el === "string" ? $(el) : el).classList.toggle("hidden", !on);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nf = new Intl.NumberFormat("fr-FR");
+const compact = (n) => n >= 1e6 ? (n / 1e6).toFixed(1).replace(".", ",").replace(",0", "") + " M" : n >= 1e4 ? Math.round(n / 1e3) + " k" : n >= 1e3 ? (n / 1e3).toFixed(1).replace(".", ",").replace(",0", "") + " k" : nf.format(n);
+const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+const DAY = 864e5;
+const dshort = (d) => new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }).replace(".", "");
+const initials = (name) => (name || "?").split(/[\s'’-]+/).filter(w => /[A-Za-zÀ-ÿ0-9]/.test(w[0] || "")).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "?";
+let toastT; function toast(t) { $("toast").textContent = t; show("toast"); clearTimeout(toastT); toastT = setTimeout(() => show("toast", false), 3200); }
+const errText = (e) => (e && (e.message || e.error_description)) || String(e);
+async function copy(text) { try { await navigator.clipboard.writeText(text); toast("Copié dans le presse-papiers."); } catch { toast("Copie impossible : sélectionnez le texte à la main."); } }
+
+/* ---------- Référentiels ---------- */
+const TYPES = [
+  { k: "percent", ico: "%", label: "Pourcentage", ph: "-30 %", help: "· ex. -30 %" },
+  { k: "amount", ico: "€", label: "Montant", ph: "-20 €", help: "· ex. -20 €" },
+  { k: "new_price", ico: "49€", label: "Nouveau prix", ph: "49,90 € au lieu de 69,90 €", help: "· ex. 49,90 € au lieu de 69,90 €" },
+  { k: "x_plus_y", ico: "2+1", label: "X + Y offert", ph: "2 achetés, le 3e offert", help: "· ex. 2 achetés, le 3e offert" },
+  { k: "cashback", ico: "↺", label: "Cashback fidélité", ph: "10 % crédités sur votre carte", help: "· % crédité sur le compte fidélité" },
+  { k: "free_with_condition", ico: "🎁", label: "Gratuit sous condition", ph: "Chaussettes offertes dès 80 € d'achat", help: "· ex. offert dès 80 € d'achat" },
+];
+const TYPE_PILL = { percent: "p-pink", amount: "p-amber", new_price: "p-indigo", x_plus_y: "p-green", cashback: "p-purple", free_with_condition: "p-grey" };
+const AV_PAL = [["var(--t-pink)", "var(--p)"], ["var(--t-green)", "var(--teal)"], ["var(--t-indigo)", "var(--c-indigo)"], ["var(--t-amber)", "var(--c-amber)"], ["var(--t-purple)", "var(--c-purple)"]];
+const REGIONS = {
+  "Île-de-France": "75 77 78 91 92 93 94 95", "Hauts-de-France": "02 59 60 62 80", "Grand Est": "08 10 51 52 54 55 57 67 68 88",
+  "Normandie": "14 27 50 61 76", "Bretagne": "22 29 35 56", "Pays de la Loire": "44 49 53 72 85", "Centre-Val de Loire": "18 28 36 37 41 45",
+  "Bourgogne-Franche-Comté": "21 25 39 58 70 71 89 90", "Nouvelle-Aquitaine": "16 17 19 23 24 33 40 47 64 79 86 87",
+  "Occitanie": "09 11 12 30 31 32 34 46 48 65 66 81 82", "Auvergne-Rhône-Alpes": "01 03 07 15 26 38 42 43 63 69 73 74",
+  "Provence-Alpes-Côte d'Azur": "04 05 06 13 83 84", "Corse": "20", "Outre-mer": "97",
+};
+const DEPT = {}; Object.entries(REGIONS).forEach(([r, l]) => l.split(" ").forEach(d => DEPT[d] = r));
+const ZONE_OF = { "Île-de-France": "idf", "Hauts-de-France": "nord", "Normandie": "nord", "Grand Est": "est", "Bourgogne-Franche-Comté": "est", "Auvergne-Rhône-Alpes": "est", "Bretagne": "ouest", "Pays de la Loire": "ouest", "Centre-Val de Loire": "ouest", "Nouvelle-Aquitaine": "ouest", "Occitanie": "sud", "Provence-Alpes-Côte d'Azur": "sud", "Corse": "sud" };
+const ZONES = [["all", "Toutes"], ["idf", "Île-de-France"], ["nord", "Nord"], ["est", "Est"], ["ouest", "Ouest"], ["sud", "Sud"]];
+const regionOf = (pc) => { const c = String(pc || "").trim(); return c.length >= 2 ? (DEPT[c.slice(0, 2)] || null) : null; };
+const SHORT_REGION = { "Provence-Alpes-Côte d'Azur": "PACA", "Auvergne-Rhône-Alpes": "A.-Rhône-Alpes", "Nouvelle-Aquitaine": "N.-Aquitaine", "Bourgogne-Franche-Comté": "Bourgogne-F.-C.", "Centre-Val de Loire": "Centre-Val de L." };
+
+/* ---------- État ---------- */
+const S = { user: null, net: null, stores: [], accounts: [], promos: [], acts: [], view: "overview", zone: "all", filter: "all", q: "", detail: null };
+const ICON = {
+  store: '<path d="M3 9 4.6 4.5h14.8L21 9"/><path d="M3.4 9h17.2v1.6a2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0V9Z"/><path d="M5 11.4V20h14v-8.6"/>',
+  tag: '<path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H5a2 2 0 0 0-2 2v4.6a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.8Z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="2.6"/>',
+  send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  share: '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.2 10.8 7.6-3.6M8.2 13.2l7.6 3.6"/>',
+  warn: '<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>',
+  xls: '<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 21V5a2 2 0 0 1 2-2h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2Z"/><path d="m9 13 6 4M15 13l-6 4"/>',
+  img: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="m21 15-5-5L5 21"/>',
+  db: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+  people: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6"/><path d="M17.5 13.5a5.5 5.5 0 0 1 3 5.5"/>',
+};
+const svg = (p, s = 18, w = 2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+
+/* ---------- Données dérivées ---------- */
+function derive() {
+  const now = Date.now();
+  const acc = {}; S.accounts.forEach(a => { (acc[a.store_id] ||= []).push(a); });
+  const actsByPromo = {}, actsByStore = {};
+  S.acts.forEach(a => { (actsByPromo[a.promotion_id] ||= []).push(a); (actsByStore[a.store_id] ||= []).push(a); });
+  const pubs = S.acts.flatMap(a => (a.publications || []).filter(p => p.status === "published").map(p => ({ ...p, store_id: a.store_id, promotion_id: a.promotion_id })));
+  const views = (p) => (p.metrics && !p.metrics.hidden && Number(p.metrics.views)) || 0;
+
+  const stores = S.stores.map((s, i) => {
+    const a = (acc[s.id] || []);
+    const fb = a.find(x => x.channel === "facebook"), ig = a.find(x => x.channel === "instagram");
+    const fbOk = fb && fb.status === "active", igOk = ig && ig.status === "active";
+    const broken = a.some(x => x.status !== "active");
+    const conn = fbOk && igOk ? "full" : (fbOk || igOk) ? "partial" : broken ? "broken" : "none";
+    const sp = pubs.filter(p => p.store_id === s.id);
+    const myActs = actsByStore[s.id] || [];
+    const region = regionOf(s.postal_code);
+    return {
+      ...s, i, region, zone: ZONE_OF[region] || null, fbOk, igOk, conn,
+      pending: myActs.filter(x => x.status === "pending").length,
+      relayed: new Set(sp.map(p => p.promotion_id)).size,
+      pubCount: sp.length,
+      views30: sp.filter(p => p.published_at && now - new Date(p.published_at) < 30 * DAY).reduce((t, p) => t + views(p), 0),
+      viewsAll: sp.reduce((t, p) => t + views(p), 0),
+    };
+  });
+  const byId = Object.fromEntries(stores.map(s => [s.id, s]));
+
+  const promos = S.promos.map((p, i) => {
+    const acts = actsByPromo[p.id] || [];
+    const st = p.status === "draft" ? "draft" : p.status === "archived" || now > new Date(p.ends_at) ? "done" : now < new Date(p.starts_at) ? "planned" : "active";
+    const relayedActs = acts.filter(a => (a.publications || []).some(x => x.status === "published"));
+    const regs = [...new Set(acts.map(a => byId[a.store_id]?.region).filter(Boolean))];
+    return {
+      ...p, i, st, acts, target: acts.length, relayed: relayedActs.length,
+      activated: acts.filter(a => a.status === "active").length,
+      declined: acts.filter(a => a.status === "declined").length,
+      pending: acts.filter(a => a.status === "pending").length,
+      views: acts.flatMap(a => a.publications || []).filter(x => x.status === "published").reduce((t, x) => t + views(x), 0),
+      regions: !acts.length ? "—" : acts.length === stores.length && stores.length > 1 ? "Toutes régions" : regs.length ? regs.slice(0, 2).map(r => SHORT_REGION[r] || r).join(", ") + (regs.length > 2 ? ` +${regs.length - 2}` : "") : "—",
+    };
+  });
+  return { stores, byId, promos, pubs, views };
+}
+
+/* ---------- Navigation ---------- */
+const TITLES = {
+  overview: ["Tableau de bord", "Vue d'ensemble du réseau · 30 derniers jours"],
+  promos: ["Promotions", "Importer, diffuser et piloter tes campagnes"],
+  stores: ["Magasins", ""],
+  audience: ["Audience", "Qui sont les clients de ton réseau"],
+};
+function go(v) { S.view = v; S.detail = null; render(); $("content").scrollTop = 0; }
+document.querySelectorAll("#nav button").forEach(b => b.onclick = () => go(b.dataset.v));
+$("mnav").innerHTML = [...document.querySelectorAll("#nav button")].map(b => `<button data-v="${b.dataset.v}">${b.textContent}</button>`).join("");
+$("mnav").querySelectorAll("button").forEach(b => b.onclick = () => go(b.dataset.v));
+$("bulk-go").onclick = () => go("promos");
+$("bell").onclick = () => go("stores");
+$("q").oninput = (e) => { S.q = e.target.value.trim().toLowerCase(); if (S.view !== "stores") { S.view = "stores"; S.detail = null; } render(); const q = $("q"); q.focus(); };
+
+function render() {
+  const D = derive();
+  const [t, sub] = TITLES[S.view];
+  $("pg-title").textContent = S.detail ? "Suivi de la promo" : t;
+  $("pg-sub").textContent = S.detail ? "Magasin par magasin : reçue, activée, publiée" : S.view === "stores" ? `${nf.format(D.stores.length)} point${D.stores.length > 1 ? "s" : ""} de vente · segmentation par zone` : sub;
+  document.querySelectorAll("#nav button, #mnav button").forEach(b => b.classList.toggle("on", b.dataset.v === S.view));
+  $("net-name").textContent = S.net.name;
+  $("net-count").textContent = `${nf.format(D.stores.length)} magasin${D.stores.length > 1 ? "s" : ""}`;
+  $("net-av").innerHTML = S.net.logo_url ? `<img src="${esc(S.net.logo_url)}" alt="">` : esc(initials(S.net.name));
+  show("bell-dot", D.stores.some(s => s.conn === "none" || s.conn === "broken"));
+  const html = S.detail ? viewDetail(D) : { overview: viewOverview, promos: viewPromos, stores: viewStores, audience: viewAudience }[S.view](D);
+  $("content").innerHTML = html;
+  bindView(D);
+}
+
+/* ---------- Tableau de bord ---------- */
+function kpi(ic, tint, color, val, lbl, trend) {
+  return `<div class="kpi"><div class="row"><span class="ic" style="background:${tint};color:${color}">${svg(ic)}</span><span class="tr">${trend || ""}</span></div><div class="val">${val}</div><div class="lbl">${lbl}</div></div>`;
+}
+function viewOverview(D) {
+  const now = Date.now();
+  const n = D.stores.length;
+  const connected = D.stores.filter(s => s.fbOk || s.igOk).length;
+  const rate = pct(connected, n);
+  const toActivate = D.stores.filter(s => s.conn === "none" || s.conn === "broken");
+  const live = D.promos.filter(p => p.st === "active").length;
+  const views = D.pubs.reduce((t, p) => t + D.views(p), 0);
+  const recent = (d) => d && now - new Date(d) < 30 * DAY;
+  const newStores = D.stores.filter(s => recent(s.created_at)).length;
+  const newPromos = D.promos.filter(p => recent(p.created_at)).length;
+  const pub30 = D.pubs.filter(p => recent(p.published_at)).length;
+
+  // 8 dernières semaines de publications magasin.
+  const weeks = Array.from({ length: 8 }, (_, i) => {
+    const end = now - (7 - i) * 7 * DAY, start = end - 7 * DAY;
+    return D.pubs.filter(p => { const t = new Date(p.published_at).getTime(); return t > start && t <= end; }).length;
+  });
+  const mx = Math.max(1, ...weeks);
+  const last4 = weeks.slice(4).reduce((a, b) => a + b, 0), prev4 = weeks.slice(0, 4).reduce((a, b) => a + b, 0);
+  const evol = prev4 ? Math.round((last4 - prev4) / prev4 * 100) : null;
+
+  const regions = Object.entries(D.stores.reduce((m, s) => { const r = s.region || "Non renseignée"; (m[r] ||= []).push(s); return m; }, {}))
+    .map(([name, l]) => ({ name, count: l.length, perf: pct(l.filter(s => s.fbOk || s.igOk).length, l.length) }))
+    .sort((a, b) => b.count - a.count).slice(0, 7);
+  const top = [...D.stores].sort((a, b) => b.viewsAll - a.viewsAll || b.pubCount - a.pubCount).slice(0, 5);
+
+  return `
+  <div class="g5">
+    ${kpi(ICON.store, "var(--t-green)", "var(--teal)", nf.format(n), "Magasins du réseau", newStores ? "+" + newStores : "")}
+    ${kpi(ICON.tag, "var(--t-pink)", "var(--p)", nf.format(live), "Promos en cours", newPromos ? "+" + newPromos : "")}
+    ${kpi(ICON.eye, "var(--t-indigo)", "var(--c-indigo)", compact(views), "Vues totales", "")}
+    ${kpi(ICON.send, "var(--t-amber)", "var(--c-amber)", nf.format(D.pubs.length), "Publications magasins", pub30 ? "+" + pub30 : "")}
+    ${kpi(ICON.share, "var(--t-purple)", "var(--c-purple)", rate + "%", "Connexion réseaux", "")}
+  </div>
+  <div class="gx mt">
+    <div class="card">
+      <div class="row" style="align-items:flex-start"><div><h3>Publications des magasins</h3><div class="sub">8 dernières semaines · posts Facebook et Instagram</div></div>${evol !== null ? `<div style="font-weight:700;font-size:13px;color:var(--p);white-space:nowrap">${evol >= 0 ? "+" : ""}${evol}% vs période préc.</div>` : ""}</div>
+      <div class="bars">${weeks.map((w, i) => `<div><i class="${i === 7 ? "last" : ""}" style="height:${Math.round(w / mx * 100)}%" title="${w} publication${w > 1 ? "s" : ""}"></i><span>S${i + 1}</span></div>`).join("")}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card" style="padding:20px">
+        <div style="display:flex;align-items:center;gap:10px"><span class="alert-ic">${svg(ICON.warn, 20)}</span><div style="line-height:1.15"><div style="font-weight:700;font-size:24px;letter-spacing:-.02em">${nf.format(toActivate.length)} magasin${toActivate.length > 1 ? "s" : ""}</div><div style="font-size:12.5px;color:var(--muted)">sans réseaux sociaux connectés</div></div></div>
+        <button class="btn-s" style="margin-top:15px;width:100%;padding:11px" data-go="stores">${toActivate.length ? "Relancer ces magasins" : "Voir les magasins"}</button>
+      </div>
+      <div class="dark">
+        <div class="t">Taux de connexion réseau</div>
+        <div class="v">${rate}<span style="font-size:20px">%</span></div>
+        <div class="track"><i style="width:${rate}%"></i></div>
+        <p>${nf.format(connected)} magasin${connected > 1 ? "s" : ""} connecté${connected > 1 ? "s" : ""} sur ${nf.format(n)} · objectif 90 %</p>
+      </div>
+    </div>
+  </div>
+  <div class="g2 mt">
+    <div class="card">
+      <div class="row" style="margin-bottom:6px"><h3>Connexion par région</h3><button class="link" data-go="stores">Segmenter</button></div>
+      ${regions.length ? regions.map(r => `<div class="line"><div style="width:150px;flex:none"><div style="font-weight:600;font-size:13px">${esc(SHORT_REGION[r.name] || r.name)}</div><div style="font-size:11px;color:var(--muted)">${r.count} magasin${r.count > 1 ? "s" : ""}</div></div><div class="track" style="flex:1;height:9px"><i style="width:${r.perf}%;background:${r.perf >= 80 ? "var(--teal)" : r.perf >= 60 ? "var(--p)" : "#e0b25c"}"></i></div><div style="width:42px;text-align:right;font-weight:700;font-size:13px;flex:none">${r.perf}%</div></div>`).join("") : `<div class="empty">Aucun magasin pour l'instant. Invitez-les depuis la page Magasins.</div>`}
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px">Magasins les plus performants</h3>
+      ${top.length && top.some(s => s.pubCount) ? top.map((s, i) => `<div class="line" style="padding:10px 0"><span class="rank">${i + 1}</span><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name)}</div><div style="font-size:11.5px;color:var(--muted)">${esc([s.city, s.region && (SHORT_REGION[s.region] || s.region)].filter(Boolean).join(" · ") || "—")}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:13.5px">${compact(s.viewsAll)}</div><div style="font-size:11px;color:var(--teal);font-weight:700">${s.pubCount} pub.</div></div></div>`).join("") : `<div class="empty">Le classement apparaît dès que vos magasins publient vos promos.</div>`}
+    </div>
+  </div>`;
+}
+
+/* ---------- Promotions ---------- */
+const ST_PILL = { active: ["Active", "p-green"], planned: ["Programmée", "p-amber"], done: ["Terminée", "p-grey"], draft: ["Brouillon", "p-grey"] };
+function viewPromos(D) {
+  const counts = { all: D.promos.length, active: 0, planned: 0, done: 0 };
+  D.promos.forEach(p => { if (counts[p.st] !== undefined) counts[p.st]++; });
+  const list = D.promos.filter(p => S.filter === "all" || p.st === S.filter);
+  const active = D.promos.filter(p => p.st === "active");
+  const relays = D.promos.reduce((t, p) => t + p.relayed, 0);
+  const targets = D.promos.reduce((t, p) => t + p.target, 0);
+  const views = D.promos.reduce((t, p) => t + p.views, 0);
+  const cols = "grid-template-columns:2.2fr 1.2fr 1.4fr 1.5fr .8fr .9fr";
+  const chip = (k, l) => `<button class="chip ${S.filter === k ? "on" : ""}" data-filter="${k}">${l}<em>${counts[k]}</em></button>`;
+  return `
+  <div class="g3">
+    <div class="src dash"><span class="soon">Bientôt</span><span class="ic" style="background:var(--t-green);color:var(--teal)">${svg(ICON.xls, 26, 1.9)}</span><b>Importer un fichier Excel</b><p>Glisse ton .xlsx ou .csv, on mappe automatiquement tes colonnes promo.</p><button class="btn-p" data-soon="L'import Excel arrive bientôt. En attendant, créez la promo avec un visuel.">Choisir un fichier</button></div>
+    <div class="src"><span class="ic" style="background:var(--t-pink);color:var(--p)">${svg(ICON.img, 26, 1.9)}</span><b>Pousser des visuels</b><p>Diffuse une affiche à tout ou partie de ton réseau.</p><button class="btn-s" data-new>Téléverser</button></div>
+    <div class="src"><span class="soon">Bientôt</span><span class="ic" style="background:var(--t-indigo);color:var(--c-indigo)">${svg(ICON.db, 26, 1.9)}</span><b>Connecter mon PIM</b><p>Synchronise ton catalogue produits en temps réel via l'API.</p><button class="btn-s" data-soon="La connexion PIM arrive bientôt.">Configurer</button></div>
+  </div>
+  <div class="g4 mt">
+    <div class="mini"><div class="lbl">Campagnes actives</div><div class="val" style="color:var(--v)">${active.length}</div></div>
+    <div class="mini"><div class="lbl">Vues générées</div><div class="val" style="color:var(--c-indigo)">${compact(views)}</div></div>
+    <div class="mini"><div class="lbl">Magasins relais</div><div class="val" style="color:var(--teal)">${nf.format(relays)}</div></div>
+    <div class="mini"><div class="lbl">Taux de relais moyen</div><div class="val" style="color:var(--c-amber)">${pct(relays, targets)}%</div></div>
+  </div>
+  <div class="tcard mt">
+    <div class="tbar"><div class="chips">${chip("all", "Toutes")}${chip("active", "Actives")}${chip("planned", "Programmées")}${chip("done", "Terminées")}</div><button class="btn-p" style="font-size:13.5px;padding:10px 16px" data-new>${svg('<path d="M12 5v14M5 12h14"/>', 17, 2.4)}Nouvelle campagne</button></div>
+    <div class="tscroll">
+      <div class="thead" style="${cols}"><div>Campagne</div><div>Type</div><div>Régions</div><div>Relais magasins</div><div class="r">Vues</div><div class="r">Statut</div></div>
+      ${list.length ? list.map(p => {
+        const pal = AV_PAL[p.i % AV_PAL.length], t = TYPES.find(x => x.k === p.promo_type), r = pct(p.relayed, p.target), [sl, sc] = ST_PILL[p.st];
+        return `<div class="trow click" style="${cols}" data-promo="${p.id}">
+          <div class="cell-name"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(p.title)[0])}</span><div style="min-width:0"><b>${esc(p.title)}</b><small>${dshort(p.starts_at)} → ${dshort(p.ends_at)}${p.is_mandatory ? " · Obligatoire" : ""}</small></div></div>
+          <div>${t ? `<span class="badge ${TYPE_PILL[t.k]}">${t.label}</span>` : `<span class="mut">—</span>`}</div>
+          <div class="mut">${esc(p.regions)}</div>
+          <div class="relay"><div class="row"><b>${p.target ? `${nf.format(p.relayed)} / ${nf.format(p.target)}` : "— / 0"}</b><span>${r}%</span></div><div class="track"><i style="width:${r}%"></i></div></div>
+          <div class="r num" style="font-weight:700">${p.views ? compact(p.views) : "—"}</div>
+          <div class="r"><span class="pill ${sc}">${sl}</span></div></div>`;
+      }).join("") : `<div class="empty" style="padding:22px">${D.promos.length ? "Aucune campagne dans ce filtre." : "Aucune campagne pour l'instant. Créez la première avec « Nouvelle campagne »."}</div>`}
+    </div>
+  </div>`;
+}
+
+/* ---------- Suivi d'une promo ---------- */
+function chState(pubs, ch, acc) {
+  const p = (pubs || []).find(x => x.channel === ch);
+  if (p && p.status === "published") return `<span class="ch ok">✓ Publiée</span>`;
+  if (p && p.status === "failed") return `<span class="ch ko" title="${esc(p.error_message || "")}">Échec</span>`;
+  if (p && p.status === "pending") return `<span class="ch no">En cours</span>`;
+  return acc ? `<span class="ch no">—</span>` : `<span class="ch no">Non connecté</span>`;
+}
+function viewDetail(D) {
+  const p = D.promos.find(x => x.id === S.detail);
+  if (!p) { S.detail = null; return viewPromos(D); }
+  const t = TYPES.find(x => x.k === p.promo_type), [sl, sc] = ST_PILL[p.st];
+  const cols = "grid-template-columns:2fr 1.2fr 1fr 1fr 1fr .8fr";
+  const rows = p.acts.map(a => ({ a, s: D.byId[a.store_id] })).filter(x => x.s).sort((x, y) => x.s.name.localeCompare(y.s.name, "fr"));
+  const stLabel = (a) => (a.publications || []).some(x => x.status === "published") ? ["Publiée", "p-green"] : a.status === "active" ? ["Activée", "p-indigo"] : a.status === "declined" ? ["Refusée", "p-red"] : ["Reçue", "p-amber"];
+  const others = D.stores.filter(s => !p.acts.some(a => a.store_id === s.id)).length;
+  return `
+  <button class="back" data-back>${svg('<path d="m15 18-6-6 6-6"/>', 16, 2.4)}Toutes les campagnes</button>
+  <div class="card"><div class="head">
+    ${p.media_url ? `<img src="${esc(p.media_url)}" alt="">` : `<div class="noimg"></div>`}
+    <div style="flex:1;min-width:0">
+      <div class="row" style="align-items:flex-start;flex-wrap:wrap"><h2>${esc(p.title)}</h2><span class="pill ${sc}">${sl}</span></div>
+      <div class="meta">${t ? `<span class="badge ${TYPE_PILL[t.k]}">${t.label}</span>` : ""}${p.mechanic ? `<span class="badge p-pink">${esc(p.mechanic)}</span>` : ""}${p.discount_code ? `<span class="badge p-grey">Code en caisse : ${esc(p.discount_code)}</span>` : ""}${p.is_mandatory ? `<span class="badge p-purple">Obligatoire</span>` : ""}<span class="badge p-grey">${dshort(p.starts_at)} → ${dshort(p.ends_at)}</span></div>
+      ${p.description && p.description.replace(/\n*Code en caisse : [A-Z0-9-]+$/, "").trim() ? `<p>${esc(p.description.replace(/\n*Code en caisse : [A-Z0-9-]+$/, "").trim())}</p>` : ""}
+    </div></div></div>
+  <div class="g4 mt">
+    <div class="mini"><div class="lbl">Magasins ciblés</div><div class="val">${nf.format(p.target)}</div></div>
+    <div class="mini"><div class="lbl">${p.is_mandatory ? "À publier" : "En attente de réponse"}</div><div class="val" style="color:var(--c-amber)">${nf.format(p.is_mandatory ? p.activated - p.relayed : p.pending)}</div></div>
+    <div class="mini"><div class="lbl">Refusées</div><div class="val" style="color:var(--err)">${nf.format(p.declined)}</div></div>
+    <div class="mini"><div class="lbl">Publiées · taux de relais</div><div class="val" style="color:var(--teal)">${nf.format(p.relayed)} <span style="font-size:15px;color:var(--muted)">· ${pct(p.relayed, p.target)}%</span></div></div>
+  </div>
+  <div class="tcard mt">
+    <div class="tbar"><h3 style="font-size:15.5px;margin:0">Magasins</h3>${others && p.st !== "done" ? `<button class="btn-s" data-resend>Envoyer à ${others} autre${others > 1 ? "s" : ""} magasin${others > 1 ? "s" : ""}</button>` : ""}</div>
+    <div class="tscroll">
+      <div class="thead" style="${cols}"><div>Magasin</div><div>Statut</div><div>Facebook</div><div>Instagram</div><div class="r">Vues</div><div class="r">Depuis</div></div>
+      ${rows.length ? rows.map(({ a, s }) => {
+        const [l, c] = stLabel(a), pal = AV_PAL[s.i % AV_PAL.length];
+        const v = (a.publications || []).reduce((t, x) => t + (x.status === "published" ? D.views(x) : 0), 0);
+        return `<div class="trow" style="${cols}"><div class="cell-name"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span><div style="min-width:0"><b>${esc(s.name)}</b><small>${esc(s.city || "—")}</small></div></div>
+          <div><span class="pill ${c}">${l}</span></div><div>${chState(a.publications, "facebook", s.fbOk)}</div><div>${chState(a.publications, "instagram", s.igOk)}</div>
+          <div class="r num">${v ? compact(v) : "—"}</div><div class="r mut">${dshort(a.created_at)}</div></div>`;
+      }).join("") : `<div class="empty" style="padding:22px">Cette promo n'a encore été envoyée à aucun magasin.</div>`}
+    </div>
+  </div>`;
+}
+
+/* ---------- Magasins ---------- */
+const CONN = { full: ["Complet", "p-green"], partial: ["Partiel", "p-amber"], none: ["À activer", "p-red"], broken: ["À reconnecter", "p-red"] };
+function viewStores(D) {
+  const n = D.stores.length;
+  const regs = new Set(D.stores.map(s => s.region).filter(Boolean)).size;
+  const connected = D.stores.filter(s => s.fbOk || s.igOk);
+  const off = D.stores.filter(s => s.conn === "none" || s.conn === "broken");
+  const relays = D.stores.reduce((t, s) => t + s.relayed, 0);
+  const list = D.stores.filter(s => (S.zone === "all" || s.zone === S.zone) && (!S.q || (s.name + " " + (s.city || "")).toLowerCase().includes(S.q)));
+  const cols = "grid-template-columns:1.9fr 1.1fr 1.4fr 1.3fr 1fr .9fr .9fr";
+  return `
+  <div class="g4">
+    <div class="wide"><span class="ic" style="background:var(--t-green);color:var(--teal)">${svg(ICON.store, 20)}</span><div><div class="val" style="color:var(--teal)">${nf.format(n)}</div><div class="lbl">Points de vente · ${regs} région${regs > 1 ? "s" : ""}</div></div></div>
+    <div class="wide"><span class="ic" style="background:var(--t-indigo);color:var(--c-indigo)">${svg(ICON.share, 20)}</span><div><div class="val" style="color:var(--c-indigo)">${pct(connected.length, n)}%</div><div class="lbl">Connectés ≥1 réseau · ${nf.format(connected.length)} magasin${connected.length > 1 ? "s" : ""}</div></div></div>
+    <div class="wide"><span class="ic" style="background:var(--t-red);color:var(--err)">${svg(ICON.warn, 20)}</span><div><div class="val" style="color:var(--err)">${nf.format(off.length)}</div><div class="lbl">Sans aucun réseau · à activer</div></div></div>
+    <div class="wide"><span class="ic" style="background:var(--t-amber);color:var(--c-amber)">${svg(ICON.send, 20)}</span><div><div class="val" style="color:var(--c-amber)">${nf.format(relays)}</div><div class="lbl">Promos relayées · toutes campagnes</div></div></div>
+  </div>
+  ${off.length ? `<div class="banner mt">
+    <div class="hd"><span class="alert-ic" style="background:#fbe1e6;color:var(--err)">${svg(ICON.warn, 20)}</span><div><b>Magasins sans réseau social</b><span>Relance-les pour qu'ils connectent Facebook ou Instagram et relaient tes campagnes.</span></div><span class="cnt">${off.length} à activer</span></div>
+    <div class="bd">${off.slice(0, 6).map(s => `<div class="tag"><span class="av">${esc(initials(s.name))}</span><div><b>${esc(s.name)}</b><small>${esc(s.city || (s.conn === "broken" ? "Compte à reconnecter" : "—"))}</small></div><button data-relance="${s.id}">Relancer</button></div>`).join("")}${off.length > 6 ? `<div class="tag" style="border-style:dashed"><div><b>+ ${off.length - 6} autres</b><small>dans le tableau ci-dessous</small></div></div>` : ""}</div>
+  </div>` : ""}
+  <div class="row mt" style="flex-wrap:wrap">
+    <div class="chips"><span style="font-size:12.5px;font-weight:700;color:var(--muted);margin-right:4px">Zone :</span>${ZONES.map(([k, l]) => `<button class="chip ${S.zone === k ? "on" : ""}" data-zone="${k}">${l}</button>`).join("")}</div>
+    <button class="btn-p" style="font-size:13.5px;padding:10px 16px" data-invite>${svg('<path d="M12 5v14M5 12h14"/>', 17, 2.4)}Ajouter un magasin</button>
+  </div>
+  <div class="tcard mt">
+    <div class="tscroll">
+      <div class="thead" style="${cols}"><div>Magasin</div><div>Ville</div><div>Région</div><div>Réseaux</div><div>Connexion</div><div class="r">Vues 30j</div><div class="r">Publiées</div></div>
+      ${list.length ? list.map(s => {
+        const pal = AV_PAL[s.i % AV_PAL.length], [cl, cc] = CONN[s.conn];
+        return `<div class="trow" style="${cols}">
+          <div class="cell-name"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span><div style="min-width:0"><b>${esc(s.name)}</b><small style="color:${s.pending ? "var(--c-amber)" : "var(--teal)"};font-weight:700">${s.pending ? `${s.pending} promo${s.pending > 1 ? "s" : ""} à valider` : "À jour"}</small></div></div>
+          <div class="mut">${esc(s.city || "—")}</div><div class="mut">${esc(s.region ? (SHORT_REGION[s.region] || s.region) : "—")}</div>
+          <div class="soc"><span class="${s.fbOk ? "fb" : ""}">f</span><span class="${s.igOk ? "ig" : ""}">IG</span><span title="Bientôt">TT</span><span title="Bientôt">WA</span></div>
+          <div><span class="pill ${cc}">${cl}</span></div>
+          <div class="r num" style="font-weight:700">${s.views30 ? compact(s.views30) : "—"}</div>
+          <div class="r num" style="font-weight:700">${nf.format(s.pubCount)}</div></div>`;
+      }).join("") : `<div class="empty" style="padding:22px">${n ? "Aucun magasin ne correspond." : "Aucun magasin dans le réseau. Cliquez sur « Ajouter un magasin » pour obtenir votre lien d'invitation."}</div>`}
+    </div>
+  </div>`;
+}
+
+/* ---------- Audience ---------- */
+function viewAudience() {
+  return `<div class="card" style="text-align:center;padding:48px 24px">
+    <span class="ic" style="width:52px;height:52px;border-radius:14px;background:var(--t-purple);color:var(--c-purple);display:inline-flex;align-items:center;justify-content:center">${svg(ICON.people, 26, 1.9)}</span>
+    <h3 style="margin-top:14px;font-size:17px">L'audience arrive bientôt</h3>
+    <p style="font-size:13px;color:var(--muted);max-width:440px;margin:8px auto 0;line-height:1.5">Âge, zones les plus actives, profils de clients : ces données s'afficheront ici dès que vos magasins auront assez de publications pour que Facebook et Instagram les fournissent.</p>
+  </div>`;
+}
+
+/* ---------- Liaisons ---------- */
+function bindView(D) {
+  const c = $("content");
+  c.querySelectorAll("[data-go]").forEach(b => b.onclick = () => go(b.dataset.go));
+  c.querySelectorAll("[data-new]").forEach(b => b.onclick = () => openPromo());
+  c.querySelectorAll("[data-soon]").forEach(b => b.onclick = () => toast(b.dataset.soon));
+  c.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { S.filter = b.dataset.filter; render(); });
+  c.querySelectorAll("[data-zone]").forEach(b => b.onclick = () => { S.zone = b.dataset.zone; render(); });
+  c.querySelectorAll("[data-promo]").forEach(r => r.onclick = () => { S.detail = r.dataset.promo; render(); c.scrollTop = 0; });
+  c.querySelectorAll("[data-back]").forEach(b => b.onclick = () => { S.detail = null; render(); });
+  c.querySelectorAll("[data-invite]").forEach(b => b.onclick = openInvite);
+  c.querySelectorAll("[data-relance]").forEach(b => b.onclick = () => {
+    const s = D.byId[b.dataset.relance];
+    copy(`Bonjour ${s.name},\n\nPour relayer les promos du réseau ${S.net.name}, il reste une étape : connecter la Page Facebook et le compte Instagram du magasin. Ça prend deux minutes depuis votre espace : ${location.origin}/\n\nMerci !`);
+  });
+  c.querySelectorAll("[data-resend]").forEach(b => b.onclick = () => openPromo(S.detail));
+}
+$("new-promo").onclick = () => openPromo();
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => { show("m-promo", false); show("m-invite", false); });
+
+/* ---------- Invitation ---------- */
+function inviteLink() { return `${location.origin}/?rejoindre=${encodeURIComponent(S.net.join_code)}`; }
+function fillInvite() {
+  $("i-code").textContent = S.net.join_code;
+  $("i-link").value = inviteLink();
+  $("i-msg").value = `Bonjour,\n\n${S.net.name} passe sur Vitriin pour diffuser ses promotions sur les pages Facebook et Instagram de chaque magasin.\n\n1. Ouvrez ce lien : ${inviteLink()}\n2. Créez votre compte et votre magasin.\n3. Connectez votre Page Facebook et votre compte Instagram.\n\nCode réseau, si on vous le demande : ${S.net.join_code}\n\nVous recevrez ensuite nos promos dans votre espace, prêtes à publier.`;
+}
+function openInvite() { fillInvite(); show("m-invite"); }
+$("i-copy").onclick = () => copy($("i-link").value);
+$("i-copy-msg").onclick = () => copy($("i-msg").value);
+$("i-regen").onclick = async () => {
+  $("i-regen").disabled = true;
+  const { data, error } = await sb.rpc("regenerate_join_code", { p_network_id: S.net.id });
+  $("i-regen").disabled = false;
+  if (error) return toast(errText(error));
+  S.net.join_code = data; fillInvite(); toast("Nouveau code créé. L'ancien ne fonctionne plus.");
+};
+
+/* ---------- Nouvelle promo ---------- */
+const F = { type: "percent", media: null, target: "all", zone: "all", picked: new Set(), resend: null };
+const iso = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+$("f-types").innerHTML = TYPES.map(t => `<button type="button" data-type="${t.k}"><b>${t.ico}</b>${t.label}</button>`).join("");
+$("f-types").querySelectorAll("button").forEach(b => b.onclick = () => { F.type = b.dataset.type; syncType(); preview(); });
+function syncType() {
+  const t = TYPES.find(x => x.k === F.type);
+  $("f-types").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.type === F.type));
+  $("f-mech").placeholder = t.ph; $("f-mech-h").textContent = t.help;
+}
+$("f-target").querySelectorAll("button").forEach(b => b.onclick = () => { F.target = b.dataset.t; syncTarget(); });
+function storesForPicker() { return derive().stores.filter(s => !F.resend || !S.acts.some(a => a.promotion_id === F.resend && a.store_id === s.id)); }
+function syncTarget() {
+  $("f-target").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.t === F.target));
+  show("f-pick", F.target === "pick");
+  const all = storesForPicker();
+  $("f-zones").innerHTML = ZONES.map(([k, l]) => `<button type="button" class="chip ${F.zone === k ? "on" : ""}" data-fz="${k}">${l}</button>`).join("");
+  $("f-zones").querySelectorAll("button").forEach(b => b.onclick = () => { F.zone = b.dataset.fz; syncTarget(); });
+  const vis = all.filter(s => F.zone === "all" || s.zone === F.zone);
+  $("f-list").innerHTML = vis.length ? vis.map(s => `<label><input type="checkbox" value="${s.id}" ${F.picked.has(s.id) ? "checked" : ""}>${esc(s.name)}<small>${esc([s.city, s.conn === "full" || s.conn === "partial" ? "" : "non connecté"].filter(Boolean).join(" · "))}</small></label>`).join("") : `<div class="empty" style="padding:12px">Aucun magasin dans cette zone.</div>`;
+  $("f-list").querySelectorAll("input").forEach(i => i.onchange = () => { i.checked ? F.picked.add(i.value) : F.picked.delete(i.value); count(); });
+  count();
+}
+function targetIds() { const all = storesForPicker(); return F.target === "all" ? all.map(s => s.id) : all.filter(s => F.picked.has(s.id)).map(s => s.id); }
+function count() {
+  const ids = targetIds(), all = derive().stores, by = Object.fromEntries(all.map(s => [s.id, s]));
+  const conn = ids.filter(id => by[id] && (by[id].fbOk || by[id].igOk)).length;
+  $("f-count").textContent = ids.length ? `${ids.length} magasin${ids.length > 1 ? "s" : ""} ciblé${ids.length > 1 ? "s" : ""}, dont ${conn} connecté${conn > 1 ? "s" : ""} à Facebook ou Instagram.${ids.length > conn ? " Les autres recevront la promo et pourront la publier après connexion." : ""}` : (all.length ? "Aucun magasin sélectionné." : "Votre réseau n'a pas encore de magasin : invitez-les depuis la page Magasins.");
+  $("f-send").textContent = ids.length ? `Envoyer à ${ids.length} magasin${ids.length > 1 ? "s" : ""}` : "Envoyer aux magasins";
+}
+function preview() {
+  const title = $("f-title").value.trim() || "Titre de la promo", mech = $("f-mech").value.trim(), desc = $("f-desc").value.trim(), code = $("f-code").value.trim().toUpperCase();
+  $("pv-img").innerHTML = F.media ? `<img src="${esc(F.media)}" alt="">${mech ? `<span class="stk">${esc(mech)}</span>` : ""}` : `Votre visuel${mech ? `<span class="stk">${esc(mech)}</span>` : ""}`;
+  $("pv-cap").innerHTML = `<b>${esc(title)}</b>${mech ? esc(mech) + "\n" : ""}${esc(desc)}`;
+  $("pv-code").textContent = code ? "Code en caisse : " + code : ""; show("pv-code", !!code);
+}
+["f-title", "f-mech", "f-desc", "f-code"].forEach(id => $(id).oninput = preview);
+
+function openPromo(resendId = null) {
+  F.resend = resendId; F.picked = new Set(); F.zone = "all";
+  const isResend = !!resendId;
+  document.querySelectorAll("#m-promo .form > div:first-child > *").forEach(el => el.classList.toggle("hidden", isResend && !["f-target", "f-pick", "f-count"].includes(el.id) && !(el.textContent === "Magasins" && el.classList.contains("fl"))));
+  document.querySelector("#m-promo .form > div:last-child").classList.toggle("hidden", isResend);
+  document.querySelector("#m-promo .form").style.gridTemplateColumns = isResend ? "1fr" : "";
+  document.querySelector("#m-promo .mh h2").textContent = isResend ? "Envoyer à d'autres magasins" : "Nouvelle promo";
+  if (!isResend) {
+    F.type = "percent"; F.media = null; F.target = "all";
+    ["f-title", "f-mech", "f-desc", "f-code"].forEach(id => $(id).value = "");
+    $("f-mand").checked = false;
+    const t = new Date(); $("f-start").value = iso(t); $("f-end").value = iso(new Date(t.getTime() + 14 * DAY));
+    show("f-img", false); show("f-ph"); $("f-drop-t").textContent = "Choisir une image";
+    $("f-drop-s").textContent = "JPEG ou PNG. Convertie et recadrée automatiquement (format 4:5 maximum).";
+  } else F.target = "pick";
+  $("f-note").textContent = isResend ? "" : "Vitriin ne publie jamais à la place d'un magasin : chacun valide et publie depuis son espace.";
+  show("f-err", false); syncType(); syncTarget(); preview(); show("m-promo");
+}
+
+// Le visuel : JPEG, ratio Instagram (4:5 à 1,91:1), 1440 px max, sous n/<réseau>/.
+async function toInstagramJpeg(file) {
+  const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+  let sw = bmp.width, sh = bmp.height, sx = 0, sy = 0; const ratio = sw / sh;
+  if (ratio < 0.8) { const h = Math.round(sw / 0.8); sy = Math.round((sh - h) / 2); sh = h; }
+  else if (ratio > 1.91) { const w = Math.round(sh * 1.91); sx = Math.round((sw - w) / 2); sw = w; }
+  const scale = Math.min(1, 1440 / Math.max(sw, sh));
+  const cv = document.createElement("canvas"); cv.width = Math.round(sw * scale); cv.height = Math.round(sh * scale);
+  const ctx = cv.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(bmp, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+  return await new Promise((ok, ko) => cv.toBlob(b => b ? ok(b) : ko(new Error("Conversion impossible.")), "image/jpeg", 0.9));
+}
+$("f-drop").onclick = () => $("f-file").click();
+$("f-file").onchange = async () => {
+  const file = $("f-file").files[0]; if (!file) return;
+  $("f-drop-t").textContent = "Envoi de l'image…"; $("f-send").disabled = true;
+  try {
+    const jpeg = await toInstagramJpeg(file);
+    const path = `n/${S.net.id}/${crypto.randomUUID()}.jpg`;
+    const { error } = await sb.storage.from("promo-media").upload(path, jpeg, { contentType: "image/jpeg", upsert: false });
+    if (error) throw error;
+    F.media = sb.storage.from("promo-media").getPublicUrl(path).data.publicUrl;
+    $("f-img").src = F.media; show("f-img"); show("f-ph", false);
+    $("f-drop-t").textContent = "Image prête"; $("f-drop-s").textContent = "Cliquez pour la remplacer.";
+    preview();
+  } catch (e) { $("f-drop-t").textContent = "Envoi impossible"; $("f-drop-s").textContent = errText(e); }
+  finally { $("f-send").disabled = false; $("f-file").value = ""; }
+};
+
+$("f-send").onclick = async () => {
+  const err = (t) => { $("f-err").textContent = t; show("f-err"); };
+  show("f-err", false);
+  const ids = targetIds();
+  if (!ids.length) return err("Choisissez au moins un magasin.");
+  const btn = $("f-send"); btn.disabled = true;
+  try {
+    let promoId = F.resend;
+    if (!promoId) {
+      const title = $("f-title").value.trim(), mech = $("f-mech").value.trim(), code = $("f-code").value.trim().toUpperCase();
+      if (!F.media) throw new Error("Ajoutez un visuel : Instagram ne publie pas sans image.");
+      if (!title) throw new Error("Donnez un titre à la promo.");
+      if (!mech) throw new Error("Précisez l'offre (ex. -30 %).");
+      if (code && !/^[A-Z0-9-]{3,24}$/.test(code)) throw new Error("Le code de caisse : 3 à 24 caractères, lettres, chiffres ou tirets.");
+      const start = new Date($("f-start").value + "T00:00:00"), end = new Date($("f-end").value + "T23:59:59");
+      if (isNaN(start) || isNaN(end) || end <= start) throw new Error("Vérifiez les dates : la fin doit suivre le début.");
+      const { data, error } = await sb.from("promotions").insert({
+        created_by_network_id: S.net.id, title, mechanic: mech,
+        // Le code part dans le texte du post : c'est le client final qui doit le lire.
+        description: [$("f-desc").value.trim(), code ? `Code en caisse : ${code}` : ""].filter(Boolean).join("\n\n") || null,
+        promo_type: F.type, discount_code: code || null, media_url: F.media,
+        starts_at: start.toISOString(), ends_at: end.toISOString(), is_mandatory: $("f-mand").checked, status: "draft",
+      }).select("id").single();
+      if (error) throw error;
+      promoId = data.id;
+    }
+    const allIds = storesForPicker().map(s => s.id);
+    const { data: n, error: e2 } = await sb.rpc("send_promotion", { p_promotion_id: promoId, p_store_ids: F.target === "all" && !F.resend && ids.length === allIds.length ? null : ids });
+    if (e2) throw e2;
+    show("m-promo", false);
+    toast(`Promo envoyée à ${n} magasin${n > 1 ? "s" : ""}. Ils la retrouvent dans leur espace.`);
+    await load(); S.view = "promos"; S.detail = promoId; render();
+  } catch (e) { err(errText(e)); }
+  finally { btn.disabled = false; }
+};
+
+/* ---------- Chargement ---------- */
+async function load() {
+  const id = S.net.id;
+  const [st, ac, pr, sp] = await Promise.all([
+    sb.from("stores").select("id, name, city, postal_code, created_at").eq("network_id", id).order("name").range(0, 4999),
+    sb.from("social_accounts").select("store_id, channel, status, stores!inner(network_id)").eq("stores.network_id", id).range(0, 9999),
+    sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, media_url, starts_at, ends_at, is_mandatory, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
+    sb.from("store_promotions").select("id, promotion_id, store_id, status, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),
+  ]);
+  const e = st.error || ac.error || pr.error || sp.error; if (e) throw e;
+  S.stores = st.data; S.accounts = ac.data; S.promos = pr.data; S.acts = sp.data;
+}
+
+/* ---------- Authentification ---------- */
+let signup = false;
+$("a-mode").onclick = () => {
+  signup = !signup;
+  $("auth-title").textContent = signup ? "Créer un compte centrale" : "Connexion";
+  $("auth-sub").textContent = signup ? "Pour l'équipe marketing de l'enseigne. Les magasins ont leur propre espace." : "Pilotez les promotions de votre réseau.";
+  $("a-go").textContent = signup ? "Créer mon compte" : "Se connecter";
+  $("a-pass").autocomplete = signup ? "new-password" : "current-password";
+  $("a-alt").firstChild.textContent = signup ? "Déjà un compte ? " : "Pas encore de compte ? ";
+  $("a-mode").textContent = signup ? "Se connecter" : "Créer un compte centrale";
+  show("a-err", false);
+};
+$("a-go").onclick = async () => {
+  const email = $("a-email").value.trim(), password = $("a-pass").value;
+  const fail = (t) => { $("a-err").textContent = t; show("a-err"); };
+  show("a-err", false); $("a-go").disabled = true;
+  try {
+    if (signup) {
+      if (password.length < 8) return fail("Mot de passe : 8 caractères minimum.");
+      const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + "/centrale/" } });
+      if (error) return fail(errText(error));
+      if (!data.session) return fail("Compte créé. Confirmez votre adresse via l'email reçu, puis connectez-vous.");
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) return fail("Email ou mot de passe incorrect.");
+    }
+    boot();
+  } finally { $("a-go").disabled = false; }
+};
+$("a-pass").onkeydown = (e) => { if (e.key === "Enter") $("a-go").click(); };
+const logout = async () => { await sb.auth.signOut(); location.reload(); };
+$("logout").onclick = logout; $("n-out").onclick = logout;
+
+$("n-go").onclick = async () => {
+  const name = $("n-name").value.trim();
+  if (name.length < 2) { $("n-err").textContent = "Indiquez le nom du réseau."; return show("n-err"); }
+  const slug = name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  $("n-go").disabled = true;
+  const { error } = await sb.rpc("create_network", { p_name: name, p_slug: slug });
+  $("n-go").disabled = false;
+  if (error) { $("n-err").textContent = errText(error); return show("n-err"); }
+  await boot(); go("stores"); openInvite();
+};
+
+async function boot() {
+  const { data: { session } } = await sb.auth.getSession();
+  show("loading", false);
+  if (!session) { show("v-auth"); show("v-new", false); show("v-app", false); return; }
+  S.user = session.user;
+  const { data, error } = await sb.from("network_members").select("role, networks(id, name, slug, join_code, logo_url)").limit(1);
+  if (error) { show("v-auth"); $("a-err").textContent = errText(error); show("a-err"); return; }
+  show("v-auth", false);
+  if (!data.length) { show("v-new"); show("v-app", false); return; }
+  S.net = data[0].networks;
+  $("me-mail").textContent = S.user.email; $("me-av").textContent = initials(S.user.email.split("@")[0].replace(/[._]/g, " "));
+  try { await load(); } catch (e) { toast(errText(e)); }
+  show("v-new", false); show("v-app"); render();
+}
+boot();
+</script>
+</body>
+</html>

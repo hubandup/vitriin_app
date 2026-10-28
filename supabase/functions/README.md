@@ -287,3 +287,12 @@ autres restent lues.
 `meta_user_id` n'est renseigné qu'à la connexion. Les comptes connectés avant
 le 28 octobre 2026 doivent être reconnectés une fois pour être couverts par la
 suppression automatique.
+
+---
+
+## meta-publish : code de caisse dans la légende (28 octobre 2026)
+
+`buildCaption` ajoute « Code en caisse : XXX » quand `promotions.discount_code`
+est posé et que le texte ne le contient pas déjà. Modification commitée,
+**pas encore déployée** : l'Espace Centrale écrit déjà le code dans le texte,
+rien ne presse. Elle partira au prochain `supabase functions deploy meta-publish`.
