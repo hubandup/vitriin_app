@@ -97,6 +97,27 @@ export function confirmationPage(options: {
 }): Response {
   const { ok, title, message, accounts = [], status = ok ? 200 : 400 } = options;
 
+  // Supabase sert les réponses HTML des Edge Functions en text/plain sur le
+  // domaine *.supabase.co (mesure anti-hameçonnage) : la page ci-dessous
+  // s'afficherait en code source brut. Quand APP_RETURN_URL est posé, on
+  // renvoie donc le commerçant vers l'app web avec le résultat en paramètre,
+  // et c'est l'app qui affiche le résultat. Aucun token ni identifiant de
+  // compte dans l'URL : seulement l'issue et un message lisible.
+  if (env.appReturnUrl) {
+    const target = new URL(env.appReturnUrl);
+    target.searchParams.set("oauth", ok ? "ok" : "error");
+    if (!ok) target.searchParams.set("message", message.slice(0, 300));
+    if (ok) target.searchParams.set("count", String(accounts.length));
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: target.toString(),
+        "Cache-Control": "no-store",
+        "Referrer-Policy": "no-referrer",
+      },
+    });
+  }
+
   const accent = ok ? "#0c9875" : "#e5087e";
 
   const accountList = accounts.length > 0
