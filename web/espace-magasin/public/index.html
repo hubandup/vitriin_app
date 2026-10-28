@@ -145,7 +145,7 @@ const show = (id, on = true) => $(id).classList.toggle("hidden", !on);
 const msg = (id, text, err = false) => { $(id).textContent = text || ""; $(id).classList.toggle("err", err); };
 let STORE = null;
 
-$("p-media").value = location.origin + "/promo-test.jpg";
+$("p-media").value = location.origin + "/lyon-laval-2027.jpg";
 const refreshImg = () => { $("p-img").src = $("p-media").value; };
 refreshImg();
 
