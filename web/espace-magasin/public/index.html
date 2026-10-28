@@ -306,13 +306,15 @@ async function loadStats() {
     .eq("store_promotions.store_id", STORE.id).eq("status", "published")
     .order("published_at", { ascending: false }).limit(20);
   if (error) return msg("stats-msg", error.message, true);
-  renderStats(data.map(d => ({ channel: d.channel, published_at: d.published_at, metrics: d.metrics, title: d.store_promotions?.promotions?.title })));
+  // Masque les posts devenus illisibles : supprimés, ou publiés sur un compte
+  // qui n'est plus celui du magasin.
+  renderStats(data.filter(d => !d.metrics?.hidden).map(d => ({ channel: d.channel, published_at: d.published_at, metrics: d.metrics, title: d.store_promotions?.promotions?.title })));
 }
 $("btn-stats").onclick = async () => {
   const btn = $("btn-stats"); btn.disabled = true; msg("stats-msg", "Lecture des statistiques chez Meta…");
   try {
     const res = await fn("meta-insights", { store_id: STORE.id });
-    renderStats(res.results || []);
+    renderStats((res.results || []).filter(r => r.status !== "hidden"));
     msg("stats-msg", `Mis à jour le ${new Date(res.fetched_at).toLocaleString("fr-FR")}`);
   } catch (e) { msg("stats-msg", e.message, true); }
   finally { btn.disabled = false; }

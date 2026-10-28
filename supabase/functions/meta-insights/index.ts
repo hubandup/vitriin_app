@@ -150,6 +150,14 @@ Deno.serve(async (req) => {
       };
 
       const account = pickAccount((accounts ?? []) as Account[], channel, postId);
+
+      // Post publié sur une Page qui n'est plus celle du magasin (typiquement :
+      // plusieurs Pages connectées un temps, puis une seule gardée). Il n'est
+      // plus lisible avec les accès du magasin : on le masque durablement.
+      if (!account && channel === "facebook") {
+        await hide(service, row.id, "other_account", now);
+        return { ...base, status: "hidden", reason: "other_account" };
+      }
       if (!account || revoked.has(account.id)) {
         return { ...base, status: "unavailable", error: "Compte non connecté." };
       }
@@ -158,7 +166,7 @@ Deno.serve(async (req) => {
         const token = await tokenFor(account);
         const metrics = channel === "facebook"
           ? await facebookMetrics(postId, token)
-          : await instagramMetrics(postId, token);
+          : await instagramMetrics(postId, token, account);
 
         await service
           .from("publications")
@@ -167,6 +175,11 @@ Deno.serve(async (req) => {
 
         return { ...base, status: "ok", account: account.display_name, metrics };
       } catch (cause) {
+        if (cause instanceof Unreachable) {
+          await hide(service, row.id, cause.reason, now);
+          return { ...base, status: "hidden", reason: cause.reason };
+        }
+
         const detail = cause instanceof GraphError
           ? cause.describe()
           : redact(cause instanceof Error ? cause.message : cause);
@@ -222,6 +235,37 @@ function pickAccount(
   return candidates[0];
 }
 
+/**
+ * Post qu'on ne pourra plus lire : supprimé depuis Facebook ou Instagram, ou
+ * publié sur un autre compte que celui du magasin. Marqué dans metrics pour que
+ * l'app le masque sans rappeler Meta à chaque fois.
+ */
+class Unreachable extends Error {
+  constructor(readonly reason: "deleted" | "other_account") {
+    super(reason);
+  }
+}
+
+async function hide(
+  service: SupabaseClient,
+  publicationId: string,
+  reason: string,
+  now: string,
+): Promise<void> {
+  await service
+    .from("publications")
+    .update({ metrics: { hidden: true, reason }, metrics_fetched_at: now })
+    .eq("id", publicationId);
+}
+
+/** Codes Meta signifiant « cet objet n'existe pas, ou pas pour ce token ». */
+function isMissingObject(cause: unknown): boolean {
+  return cause instanceof GraphError &&
+    (cause.code === 100 || cause.code === 10 || cause.code === 803) &&
+    /does not exist|cannot be loaded|Unsupported get request|n'existe pas/i
+      .test(cause.message);
+}
+
 async function markRevoked(
   service: SupabaseClient,
   accountId: string,
@@ -239,25 +283,35 @@ async function markRevoked(
 // -----------------------------------------------------------------------------
 
 async function facebookMetrics(postId: string, token: string): Promise<Metrics> {
-  // Engagement : champs du post, lisibles avec pages_read_engagement.
-  // limit(0) : on veut le total, pas la liste des réactions ou commentaires.
-  const post = await graph.get(
-    postId,
-    {
-      fields: [
-        "reactions.summary(total_count).limit(0)",
-        "comments.summary(total_count).limit(0)",
-        "shares",
-      ].join(","),
-    },
-    token,
-  );
+  // 1. Le post existe-t-il encore, et appartient-il à cette Page ?
+  try {
+    await graph.get(postId, { fields: "id" }, token);
+  } catch (cause) {
+    if (isMissingObject(cause)) throw new Unreachable("deleted");
+    throw cause;
+  }
 
-  const reactions = summaryCount(post.reactions);
-  const comments = summaryCount(post.comments);
-  const shares = numberOr(
-    (post.shares as { count?: unknown } | undefined)?.count,
-    0,
+  // 2. Engagement, un champ à la fois : Meta exige pour certains champs une
+  //    autorisation que Vitriin ne demande pas (le compteur de commentaires
+  //    réclame pages_read_user_content). Groupés, un seul refus ferait tout
+  //    échouer ; séparés, on garde ce qui est lisible.
+  const reactions = await fieldTolerant(
+    postId,
+    "reactions.summary(total_count).limit(0)",
+    token,
+    (post) => summaryCount(post.reactions),
+  );
+  const comments = await fieldTolerant(
+    postId,
+    "comments.summary(total_count).limit(0)",
+    token,
+    (post) => summaryCount(post.comments),
+  );
+  const shares = await fieldTolerant(
+    postId,
+    "shares",
+    token,
+    (post) => numberOr((post.shares as { count?: unknown } | undefined)?.count, 0),
   );
 
   // Portée et vues : Insights, avec read_insights. Meta n'en publie qu'après
@@ -283,7 +337,26 @@ async function facebookMetrics(postId: string, token: string): Promise<Metrics> 
 // Instagram
 // -----------------------------------------------------------------------------
 
-async function instagramMetrics(mediaId: string, token: string): Promise<Metrics> {
+async function instagramMetrics(
+  mediaId: string,
+  token: string,
+  account: Account,
+): Promise<Metrics> {
+  // Le média existe-t-il encore, et appartient-il au compte du magasin ?
+  // publications ne garde pas le compte d'origine : on compare le nom du
+  // compte propriétaire à celui connecté.
+  let owner = "";
+  try {
+    const media = await graph.get(mediaId, { fields: "id,username" }, token);
+    owner = String(media.username ?? "");
+  } catch (cause) {
+    if (isMissingObject(cause)) throw new Unreachable("deleted");
+    throw cause;
+  }
+  if (owner && owner.toLowerCase() !== account.display_name.replace(/^@/, "").toLowerCase()) {
+    throw new Unreachable("other_account");
+  }
+
   const m = await insightsTolerant(mediaId, token, [
     "reach",
     "views",
@@ -341,6 +414,21 @@ async function insightsTolerant(
     }
   }
   return out;
+}
+
+/** Lit un champ du post ; rend null si Meta le refuse (sauf token mort). */
+async function fieldTolerant(
+  postId: string,
+  field: string,
+  token: string,
+  read: (post: Record<string, unknown>) => number,
+): Promise<number | null> {
+  try {
+    return read(await graph.get(postId, { fields: field }, token));
+  } catch (cause) {
+    if (isDeadToken(cause)) throw cause;
+    return null;
+  }
 }
 
 function isDeadToken(cause: unknown): boolean {
