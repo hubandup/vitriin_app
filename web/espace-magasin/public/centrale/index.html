@@ -51,6 +51,9 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .net{margin-top:22px;padding:13px 12px;background:var(--bg);border-radius:14px;display:flex;align-items:center;gap:11px}
 .net .av{width:34px;height:34px;border-radius:9px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none;overflow:hidden}
 .net .av img{width:100%;height:100%;object-fit:cover}
+.av.slogo{background:#fff;border:1px solid var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center;flex:none;padding:0}
+.av.slogo img{width:100%;height:100%;object-fit:contain;display:block}
+.head .av.slogo img{width:100%;height:100%;border-radius:0;object-fit:contain}
 .net b{display:block;font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .net span{font-size:11px;color:var(--muted)}
 .sect{margin-top:18px;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#b3ada4;padding:0 8px}
@@ -1053,7 +1056,7 @@ const CH_NAME = { facebook: "Facebook", instagram: "Instagram", google: "Google 
 const ACC_ST = { active: ["Connecté", "p-green"], error: ["À reconnecter", "p-red"], expired: ["Expiré", "p-red"], revoked: ["Révoqué", "p-red"] };
 function viewStoreDw(D, s) {
   if (!E || E.id !== s.id) E = { id: s.id, editable: isAdmin(), dirty: false, name: s.name || "", address: s.address || "", postal_code: s.postal_code || "", city: s.city || "" };
-  const pal = AV_PAL[s.i % AV_PAL.length], [cl, cc] = CONN[s.conn];
+  const [cl, cc] = CONN[s.conn];
   const received = s.acts.length, activated = s.acts.filter(a => a.status === "active").length, declined = s.acts.filter(a => a.status === "declined").length;
   const reach = s.pubs.reduce((t, p) => t + metric(p, "reach"), 0);
   const inter = s.pubs.reduce((t, p) => t + metric(p, "reactions") + metric(p, "comments") + metric(p, "shares") + metric(p, "likes"), 0);
@@ -1061,7 +1064,7 @@ function viewStoreDw(D, s) {
   const recent = [...s.acts].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6);
   const ro = E.editable ? "" : "readonly";
   return `
-  <div class="head" style="align-items:center"><span class="av" style="width:56px;height:56px;font-size:18px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex:none;background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span>
+  <div class="head" style="align-items:center">${storeAv(s, 56)}
     <div style="flex:1;min-width:0"><h2>${esc(s.name)}</h2><div class="meta"><span class="pill ${cc}">${cl}</span>${s.region ? `<span class="badge p-grey">${esc(SHORT_REGION[s.region] || s.region)}</span>` : ""}<span class="badge p-grey">${s.auto_accept === false ? "Validation manuelle" : "Acceptation auto"}</span></div></div></div>
   <div class="dk">
     <div class="mini"><div class="lbl">Promos reçues</div><div class="val">${nf.format(received)}</div></div>
@@ -1079,7 +1082,8 @@ function viewStoreDw(D, s) {
   ${s.conn !== "full" ? `<button class="btn-s" style="margin-top:10px" data-relance="${s.id}">Copier le message de relance</button>` : ""}
 
   <h3 style="font-size:15px;margin:22px 0 0">Informations</h3>
-  ${E.editable ? "" : `<div class="hint">Seuls les administrateurs de la centrale peuvent modifier la fiche.</div>`}
+  ${E.editable ? `<div class="row" style="justify-content:flex-start;gap:10px;margin-top:12px;flex-wrap:wrap"><button class="btn-s" id="s-logo">${s.logo_url ? "Changer le logo" : "Ajouter un logo"}</button>${s.logo_url ? `<button class="link" id="s-logo-rm">Reprendre le logo de la centrale</button>` : ""}<input type="file" id="s-logo-f" accept="image/png,image/jpeg,image/webp" hidden></div>
+  <div class="hint">Sans logo propre, le magasin affiche celui de la centrale.</div>` : `<div class="hint">Seuls les administrateurs de la centrale peuvent modifier la fiche.</div>`}
   <label class="fl" for="s-name">Nom du magasin</label><input class="in" id="s-name" data-s="name" maxlength="120" value="${esc(E.name)}" ${ro}>
   <label class="fl" for="s-address">Adresse</label><input class="in" id="s-address" data-s="address" maxlength="200" value="${esc(E.address)}" ${ro}>
   <div class="two"><div><label class="fl" for="s-pc">Code postal</label><input class="in" id="s-pc" data-s="postal_code" maxlength="10" value="${esc(E.postal_code)}" ${ro}></div>
@@ -1092,8 +1096,19 @@ function viewStoreDw(D, s) {
     return `<div class="srow click" style="cursor:pointer" data-promo="${p.id}">${p.media_url ? `<img class="thumb" src="${esc(p.media_url)}" alt="">` : ""}<div style="flex:1;min-width:0"><b style="display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</b><small style="color:var(--muted)">${dshort(p.starts_at)} → ${dshort(p.ends_at)}</small></div><span class="pill ${c}">${l}</span></div>`; }).join("")
     : `<div class="empty">Aucune promo reçue pour l'instant.</div>`}`;
 }
+async function setStoreLogo(id, url) {
+  const { data, error } = await sb.from("stores").update({ logo_url: url }).eq("id", id).select("id");
+  if (error || !data?.length) return toast(error ? errText(error) : "Modification refusée : droits administrateur requis.");
+  const st = S.stores.find(x => x.id === id); if (st) st.logo_url = url;
+  render(); toast(url ? "Logo du magasin mis à jour." : "Le magasin reprend le logo de la centrale.");
+}
 function bindStoreDw() {
   const b = $("dw-b");
+  if ($("s-logo")) {
+    $("s-logo").onclick = () => $("s-logo-f").click();
+    $("s-logo-f").onchange = async (e) => { const f = e.target.files[0]; if (!f) return; try { await setStoreLogo(E.id, await uploadSmall(f, "stores")); } catch (x) { toast(errText(x)); } };
+    if ($("s-logo-rm")) $("s-logo-rm").onclick = () => setStoreLogo(E.id, null);
+  }
   b.querySelectorAll("[data-s]").forEach(i => i.oninput = () => { E[i.dataset.s] = i.value; markDirty(); });
   b.querySelectorAll("[data-promo]").forEach(r => r.onclick = () => openDw("promo", r.dataset.promo));
   b.querySelectorAll("[data-relance]").forEach(x => x.onclick = () => relance(x.dataset.relance));
@@ -1119,6 +1134,13 @@ function relance(id) {
 }
 
 /* ---------- Magasins ---------- */
+// Logo du magasin, sinon celui de la centrale, sinon ses initiales.
+function storeAv(s, size = 0) {
+  const pal = AV_PAL[s.i % AV_PAL.length], logo = s.logo_url || S.net.logo_url;
+  const sz = size ? `width:${size}px;height:${size}px;font-size:${Math.round(size / 3)}px;border-radius:${Math.round(size / 3.5)}px;` : "";
+  return logo ? `<span class="av slogo" style="${sz}"><img src="${esc(logo)}" alt="" loading="lazy"></span>`
+    : `<span class="av" style="${sz}display:flex;align-items:center;justify-content:center;flex:none;background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span>`;
+}
 function viewStores(D) {
   const n = D.stores.length;
   const regs = new Set(D.stores.map(s => s.region).filter(Boolean)).size;
@@ -1137,7 +1159,7 @@ function viewStores(D) {
   </div>
   ${off.length ? `<div class="banner mt">
     <div class="hd"><span class="alert-ic" style="background:#fbe1e6;color:var(--err)">${svg(ICON.warn, 20)}</span><div><b>Magasins sans réseau social</b><span>Relance-les pour qu'ils connectent Facebook ou Instagram et relaient tes campagnes.</span></div><span class="cnt">${off.length} à activer</span></div>
-    <div class="bd">${off.slice(0, 6).map(s => `<div class="tag"><span class="av">${esc(initials(s.name))}</span><div><b>${esc(s.name)}</b><small>${esc(s.city || (s.conn === "broken" ? "Compte à reconnecter" : "—"))}</small></div><button data-relance="${s.id}">Relancer</button></div>`).join("")}${off.length > 6 ? `<div class="tag" style="border-style:dashed"><div><b>+ ${off.length - 6} autres</b><small>dans le tableau ci-dessous</small></div></div>` : ""}</div>
+    <div class="bd">${off.slice(0, 6).map(s => `<div class="tag">${storeAv(s)}<div><b>${esc(s.name)}</b><small>${esc(s.city || (s.conn === "broken" ? "Compte à reconnecter" : "—"))}</small></div><button data-relance="${s.id}">Relancer</button></div>`).join("")}${off.length > 6 ? `<div class="tag" style="border-style:dashed"><div><b>+ ${off.length - 6} autres</b><small>dans le tableau ci-dessous</small></div></div>` : ""}</div>
   </div>` : ""}
   <div class="row mt" style="flex-wrap:wrap">
     <div class="chips"><span style="font-size:12.5px;font-weight:700;color:var(--muted);margin-right:4px">Zone :</span>${ZONES.map(([k, l]) => `<button class="chip ${S.zone === k ? "on" : ""}" data-zone="${k}">${l}</button>`).join("")}</div>
@@ -1147,9 +1169,9 @@ function viewStores(D) {
     <div class="tscroll">
       <div class="thead" style="${cols}"><div>Magasin</div><div>Ville</div><div>Région</div><div>Réseaux</div><div>Connexion</div><div class="r">Vues 30j</div><div class="r">Publiées</div></div>
       ${list.length ? list.map(s => {
-        const pal = AV_PAL[s.i % AV_PAL.length], [cl, cc] = CONN[s.conn], sel = S.dw && S.dw.k === "store" && S.dw.id === s.id;
+        const [cl, cc] = CONN[s.conn], sel = S.dw && S.dw.k === "store" && S.dw.id === s.id;
         return `<div class="trow click${sel ? " sel" : ""}" style="${cols}" data-store="${s.id}">
-          <div class="cell-name"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span><div style="min-width:0"><b>${esc(s.name)}</b><small style="color:${s.pending ? "var(--c-amber)" : "var(--teal)"};font-weight:700">${s.pending ? `${s.pending} promo${s.pending > 1 ? "s" : ""} à valider` : "À jour"}</small></div></div>
+          <div class="cell-name">${storeAv(s)}<div style="min-width:0"><b>${esc(s.name)}</b><small style="color:${s.pending ? "var(--c-amber)" : "var(--teal)"};font-weight:700">${s.pending ? `${s.pending} promo${s.pending > 1 ? "s" : ""} à valider` : "À jour"}</small></div></div>
           <div class="mut">${esc(s.city || "—")}</div><div class="mut">${esc(s.region ? (SHORT_REGION[s.region] || s.region) : "—")}</div>
           <div class="soc"><span class="${s.fbOk ? "fb" : ""}">f</span><span class="${s.igOk ? "ig" : ""}">IG</span><span title="Bientôt">TT</span><span title="Bientôt">WA</span></div>
           <div><span class="pill ${cc}">${cl}</span></div>
@@ -1170,7 +1192,7 @@ function viewAudience() {
 }
 
 /* ---------- Paramètres ---------- */
-const STABS = [["prefs", "Préférences"], ["users", "Utilisateurs"], ["account", "Compte"], ["comms", "Communication"]];
+const STABS = [["prefs", "Préférences"], ["users", "Utilisateurs"], ["account", "Enseigne"], ["comms", "Communication"]];
 const ROLE_L = { owner: "Propriétaire", admin: "Administrateur", member: "Éditeur" };
 const swHtml = (id, on, title, sub, dis) => `<label class="sw ${dis ? "ro" : ""}"><input type="checkbox" id="${id}" ${on ? "checked" : ""} ${dis ? "disabled" : ""}><span class="k"></span><span><b>${title}</b><span>${sub}</span></span></label>`;
 function viewSettings() {
@@ -1580,7 +1602,7 @@ $("f-send").onclick = async () => {
 async function load() {
   const id = S.net.id;
   const [st, ac, pr, sp] = await Promise.all([
-    sb.from("stores").select("id, name, address, city, postal_code, auto_accept, created_at").eq("network_id", id).order("name").range(0, 4999),
+    sb.from("stores").select("id, name, address, city, postal_code, auto_accept, logo_url, created_at").eq("network_id", id).order("name").range(0, 4999),
     sb.from("social_accounts").select("store_id, channel, status, display_name, stores!inner(network_id)").eq("stores.network_id", id).range(0, 9999),
     sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
     sb.from("store_promotions").select("id, promotion_id, store_id, status, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),

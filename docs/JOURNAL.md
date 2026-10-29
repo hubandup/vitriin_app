@@ -20,6 +20,16 @@ Repères :
 
 ## 2026-10-29
 
+### MOD-006 · Logos des magasins, onglet « Enseigne »
+- **Quoi** : page Magasins, logo à gauche de chaque magasin (tableau, bandeau
+  « à activer », fiche). Sans logo propre, celui de la centrale ; sans aucun
+  logo, les initiales. Logo ajouté ou retiré depuis la fiche magasin
+  (administrateurs). Paramètres : l'onglet « Compte » devient « Enseigne ».
+- **Base** : migration `20261029214806_stores_logo_url` (`stores.logo_url`,
+  https uniquement, modifiable selon les règles existantes de `stores`).
+- **Fichier** : `web/espace-magasin/public/centrale/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-006 ; la colonne peut rester.
+
 ### BUG-002 · Photo de profil géante dans le menu de la Centrale — corrigé
 - **Quoi** : l'avatar du bas du menu n'était pas contraint à sa pastille
   (image affichée en taille réelle, par-dessus « Importer en masse »).
