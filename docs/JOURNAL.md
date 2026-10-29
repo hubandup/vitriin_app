@@ -20,6 +20,23 @@ Repères :
 
 ## 2026-10-29
 
+### MOD-007 · App magasin alignée sur la Centrale
+- **Quoi** :
+  - Logo : la pastille du magasin (accueil, réglages, aperçu côté clients)
+    affiche son logo, sinon celui de l'enseigne, sinon l'initiale.
+  - Réglages : contact de l'enseigne (email support, téléphone, CGV) quand la
+    centrale l'a renseigné.
+  - Promos de la centrale : nombre de photos et formats prévus
+    (ex. « 3 photos · Instagram Carrousel · Facebook Carrousel ») ; un post
+    sans offre n'affiche plus de ligne de prix vide.
+  - Déjà livrés en MOD-005 : acceptation automatique, code EAN.
+- **Base** : migration `20261029215143_get_store_network_contact`
+  (`get_store_network` renvoie aussi `support_email`, `phone`, `cgv_url`,
+  toujours réservé aux membres du magasin).
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-007 ; la fonction élargie
+  reste compatible avec l'ancien code.
+
 ### MOD-006 · Logos des magasins, onglet « Enseigne »
 - **Quoi** : page Magasins, logo à gauche de chaque magasin (tableau, bandeau
   « à activer », fiche). Sans logo propre, celui de la centrale ; sans aucun

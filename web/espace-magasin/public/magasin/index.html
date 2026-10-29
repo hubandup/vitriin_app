@@ -49,7 +49,8 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 
 /* ---- Header ---- */
 .head{display:flex;align-items:center;gap:13px;margin-bottom:14px}
-.av{width:46px;height:46px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;flex:none}
+.av{width:46px;height:46px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;flex:none;overflow:hidden}
+.av img,.rav img{width:100%;height:100%;object-fit:contain;background:#fff;display:block}
 .head .sp b{display:block;font-size:19px;font-weight:700;letter-spacing:-.01em}
 .head .sp span{display:block;font-size:13.5px;color:var(--muted);margin-top:2px}
 .client-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--rose);color:var(--p);font-weight:700;font-size:15px;padding:13px;border-radius:14px}
@@ -289,7 +290,7 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .reel .rh{position:absolute;top:calc(var(--sat) + 22px);left:14px;right:14px;display:flex;align-items:center;gap:10px;color:#fff}
 .glass{background:rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .reel .back{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;flex:none}
-.reel .rav{width:40px;height:40px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.reel .rav{width:40px;height:40px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;overflow:hidden}
 .reel .rh b{display:block;font-size:15.5px}
 .reel .rh span{font-size:12.5px;opacity:.75}
 .reel .open{margin-left:auto;font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:999px;display:flex;align-items:center;gap:5px}
@@ -439,7 +440,9 @@ function mapRow(row, accounts) {
   const sched = planned ? new Date(planned.published_at) : null;
   return {
     id: row.id, spId: row.id, promoId: pr.id, src: pr.created_by_network_id ? "net" : "own",
-    kind: pr.promo_type ? "promo" : "post", title: pr.title, img: pr.media_url, mech: pr.mechanic, text: pr.description || "",
+    kind: pr.promo_type ? "promo" : "post", title: pr.title, img: pr.media_url,
+    media: Array.isArray(det.media) && det.media.length ? det.media : (pr.media_url ? [pr.media_url] : []),
+    formats: Array.isArray(det.formats) ? det.formats : [], mech: pr.mechanic, text: pr.description || "",
     type: pr.promo_type, orig: det.orig ?? null, val: det.val ?? null, xy: det.xy || [2, 1], sub: det.sub || "", cond: det.sub || "",
     start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, deadline: start > Date.now() ? start : end,
     status, ch, stats, recAt: new Date(row.created_at).getTime(),
@@ -452,7 +455,7 @@ function mapRow(row, accounts) {
 }
 
 async function loadData() {
-  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, name, address, city, postal_code, auto_accept)").limit(1);
+  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, name, address, city, postal_code, auto_accept, logo_url)").limit(1);
   if (e0) throw e0;
   if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
   const st = mem[0].stores;
@@ -467,6 +470,8 @@ async function loadData() {
   const fb = acc.data.find(a => a.channel === "facebook"), ig = acc.data.find(a => a.channel === "instagram");
   Object.assign(STORE, {
     id: st.id, name: st.name, city: st.city || "", address: st.address || "", autoAccept: st.auto_accept !== false, hasNet: !!n,
+    // Logo du magasin, sinon celui de l'enseigne (même règle que la Centrale).
+    logo: st.logo_url || n?.logo_url || null, support: n?.support_email || "", phone: n?.phone || "", cgv: n?.cgv_url || "",
     net: n?.network_name || "votre réseau", netFull: n ? `${n.network_name} · ${st.city || ""}` : "Magasin indépendant",
     page: fb?.display_name || "Non connectée", insta: ig?.display_name || "Non connecté",
   });
@@ -525,8 +530,10 @@ async function setAutoAccept(on) {
   if (error || !data?.length) { STORE.autoAccept = !on; render(true); return toast("Réglage non enregistré. Réessayez."); }
   toast(on ? "Les promos du réseau seront activées dès réception." : "Vous validerez chaque promo du réseau.");
 }
-const STORE = { id: null, name: "", net: "", city: "", address: "", netFull: "", page: "", insta: "" };
+const STORE = { id: null, name: "", net: "", city: "", address: "", netFull: "", page: "", insta: "", logo: null, support: "", phone: "", cgv: "" };
 const initial = () => (STORE.city || STORE.name || "?").trim()[0].toUpperCase();
+// Pastille du magasin : logo s'il existe, sinon l'initiale.
+const avatar = () => STORE.logo ? `<img src="${esc(STORE.logo)}" alt="" onerror="this.replaceWith(document.createTextNode('${initial()}'))">` : initial();
 
 /* ===================== Calculs ===================== */
 function pricing(p) {
@@ -580,7 +587,7 @@ function viewHome() {
   const pend = pendingNet(), due = mandatoryDue();
   const carousel = S.promos.filter(p => p.status === "published" || p.status === "scheduled").sort((a, b) => (b.pubAt || 0) - (a.pubAt || 0));
   return `<div class="screen">
-    <div class="head"><span class="av">${initial()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>Réseau ${esc(STORE.net)} · ${esc(STORE.city)}</span></div></div>
+    <div class="head"><span class="av">${avatar()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>Réseau ${esc(STORE.net)} · ${esc(STORE.city)}</span></div></div>
     <button class="client-btn" data-act="clients">${I.eye}Voir côté clients</button>
     ${pend.length ? `<button class="hero" data-go="promos:net"><span class="ic">${I.net}</span><span class="sp"><b>${pend.length} nouvelle${pend.length > 1 ? "s" : ""} promo${pend.length > 1 ? "s" : ""} du réseau à valider</b><span>${pend.map(p => esc(p.title)).join(" · ")}</span></span><span class="chev">${I.chev}</span></button>` : ""}
     ${due.map(p => `<button class="due" data-go="promos:net"><span class="ic">${I.clock}</span><span class="sp"><b>${esc(p.title)} : à publier avant le ${fmtLong(p.deadline)}</b><span>Promo obligatoire du réseau · publiez-la ou programmez-la</span></span><span class="chev">${I.chev}</span></button>`).join("")}
@@ -627,6 +634,14 @@ function viewPromos() {
     ${list.map(cardPromo).join("") || '<div class="empty">Rien pour l\'instant.</div>'}
   </div>`;
 }
+// Formats choisis par la centrale (« instagram:carousel »…) et nombre de photos.
+const FMT_L = { feed: "Feed", photo: "Photo", carousel: "Carrousel", reels: "Reels", stories: "Stories", news: "Nouveautés", offer: "Offre", product: "Produit", video: "Vidéo", pin: "Épingle", rich: "Épingle enrichie" };
+const NET_L = { instagram: "Instagram", facebook: "Facebook", google: "Google", tiktok: "TikTok", pinterest: "Pinterest" };
+function fmtLine(p) {
+  const f = p.formats.map(k => { const [n, x] = String(k).split(":"); return NET_L[n] && FMT_L[x] ? `${NET_L[n]} ${FMT_L[x]}` : null; }).filter(Boolean);
+  const photos = p.media.length > 1 ? `${p.media.length} photos` : "";
+  return f.length || photos ? `<div class="small">${esc([photos, f.join(" · ")].filter(Boolean).join(" · "))}</div>` : "";
+}
 function cardPromo(p) {
   const pr = pricing(p);
   const pending = p.status === "received" || (p.mandatory && !["published", "scheduled"].includes(p.status));
@@ -649,8 +664,8 @@ function cardPromo(p) {
   } else if (p.status === "draft") {
     bottom = `<div class="foot"><div class="row"><span class="sp" style="font-size:14px;color:var(--muted)">Brouillon · pas encore publié</span><button class="b-ghost" style="padding:9px 16px;border-radius:12px;font-weight:700" data-edit="${p.id}">Modifier</button></div></div>`;
   }
-  return `<div class="card ${pending ? "pending" : ""}"><div class="top">${imgOr(p.img)}<div class="sp"><div class="tags">${tags}</div><h3>${esc(p.title)}</h3>${pr.price != null ? `<div class="price"><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}<span class="badge">${esc(pr.badge)}</span></div>` : `<div class="price"><span class="num">${esc(pr.badge)}</span></div>`}
-    ${p.sub ? `<div class="small" style="color:var(--ink)">${esc(p.sub)}</div>` : ""}<div class="small">Du ${fmtShort(p.start)} au ${fmtShort(p.end)}</div>${codeLine}</div></div>${bottom}</div>`;
+  return `<div class="card ${pending ? "pending" : ""}"><div class="top">${imgOr(p.img)}<div class="sp"><div class="tags">${tags}</div><h3>${esc(p.title)}</h3>${pr.price != null ? `<div class="price"><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}<span class="badge">${esc(pr.badge)}</span></div>` : pr.badge ? `<div class="price"><span class="num">${esc(pr.badge)}</span></div>` : ""}
+    ${p.sub ? `<div class="small" style="color:var(--ink)">${esc(p.sub)}</div>` : ""}<div class="small">Du ${fmtShort(p.start)} au ${fmtShort(p.end)}</div>${codeLine}${fmtLine(p)}</div></div>${bottom}</div>`;
 }
 
 function viewStats() {
@@ -678,9 +693,14 @@ function viewStats() {
 function viewSettings() {
   return `<div class="screen">
     <h1 class="title">Réglages</h1>
-    <div class="head" style="margin:16px 0 0"><span class="av" style="width:56px;height:56px;font-size:23px">${initial()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>${esc(STORE.address)}</span></div></div>
+    <div class="head" style="margin:16px 0 0"><span class="av" style="width:56px;height:56px;font-size:23px">${avatar()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>${esc(STORE.address)}</span></div></div>
     <div class="lbl">RÉSEAU</div>
     <div class="net"><span class="ic" style="color:#fff">${I.net}</span><div class="sp"><b style="display:block;font-size:16px">${esc(STORE.netFull)}</b><span style="font-size:13px;color:var(--muted)">Les promos de votre centrale arrivent ici automatiquement</span></div></div>
+    ${STORE.support || STORE.phone || STORE.cgv ? `<div class="box" style="margin-top:10px">
+      ${STORE.support ? `<a class="li" href="mailto:${esc(STORE.support)}" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Support de l'enseigne</span><b style="font-size:15.5px">${esc(STORE.support)}</b></span></a>` : ""}
+      ${STORE.phone ? `<a class="li" href="tel:${esc(STORE.phone.replace(/[^+0-9]/g, ""))}" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Téléphone</span><b style="font-size:15.5px">${esc(STORE.phone)}</b></span></a>` : ""}
+      ${/^https:\/\//.test(STORE.cgv) ? `<a class="li" href="${esc(STORE.cgv)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span class="sp" style="font-size:15.5px">Conditions générales de vente</span></a>` : ""}
+    </div>` : ""}
     <div class="lbl">COMPTES CONNECTÉS</div>
     <div class="box">
       <div class="li"><span class="ch fb" style="width:44px;height:44px">${I.fb}</span><div class="sp"><span style="font-size:13px;color:var(--muted)">Page Facebook</span><b style="display:block;font-size:15.5px">${esc(STORE.page)}</b></div><span class="pill ${S.fb === "ok" ? "p-ok" : "p-ko"}">${S.fb === "ok" ? "Connecté" : "À connecter"}</span></div>
@@ -974,7 +994,7 @@ function clients(startId) {
   layer.innerHTML = `<div class="reels" id="reels">${list.map((p, k) => { const pr = pricing(p); return `<section class="reel">
     <img onerror="this.style.visibility='hidden'" src="${esc(p.img)}" alt=""><div class="shade"></div>
     <div class="prog">${list.map((_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("")}</div>
-    <div class="rh"><button class="back glass" data-close>${I.back}</button><span class="rav">${initial()}</span><div><b>${esc(STORE.name)}</b><span>${esc(STORE.city)} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
+    <div class="rh"><button class="back glass" data-close>${I.back}</button><span class="rav">${avatar()}</span><div><b>${esc(STORE.name)}</b><span>${esc(STORE.city)} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
     <button class="pillback" data-close>${I.back.replace('width="20" height="20"', 'width="15" height="15"')}Côté clients · Revenir au magasin</button>
     <div class="side"><button data-fav="${p.id}"><i class="glass">${I.heart(p.liked)}</i><span id="fav-${p.id}">${(p.fav || 0) + (p.liked ? 1 : 0)}</span></button><button data-tip="Itinéraire vers ${esc(STORE.address)}"><i class="glass">${I.pin}</i>Itinéraire</button><button data-tip="Lien de la promo copié"><i class="glass">${I.share}</i>Partager</button><button data-savep="${p.id}"><i class="glass">${I.save(p.saved)}</i>${p.saved ? "Enregistré" : "Enregistrer"}</button></div>
     <div class="info"><small>${esc(STORE.name)} · Jusqu'au ${fmtShort(p.end)}</small><h3>${esc(p.title)}</h3><p>${esc(p.sub || `Valable du ${fmtShort(p.start)} au ${fmtShort(p.end)}`)}</p>
