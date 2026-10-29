@@ -140,13 +140,14 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .card .band,.card .foot{padding:8px 11px 10px}
 .card .btns{margin-top:7px}
 .card .btns button{padding:10px 8px;font-size:14px;border-radius:11px}
-.swipe{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden;background:var(--red)}
+.swipe{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden}
 .swipe .card{margin-bottom:0;transition:transform .2s ease;touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .swipe img{-webkit-user-drag:none;pointer-events:none}
 .swipe.drag .card{transition:none}
-.swipe.sw-blue{background:var(--blue)}
 .st.s-susp{background:#e6eefb;color:var(--blue)}
-.sw-del{position:absolute;right:0;top:0;bottom:0;width:96px;color:#fff;font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.sw-btn{position:absolute;top:0;bottom:0;width:96px;color:#fff;font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.sw-r{right:0;border-radius:0 16px 16px 0}.sw-l{left:0;border-radius:16px 0 0 16px}
+.b-red{background:var(--red)}.b-blue{background:var(--blue)}.b-teal{background:var(--teal)}
 .tags{display:flex;gap:5px;flex-wrap:wrap}
 .card h3{font-size:15.5px;margin:4px 0 0;letter-spacing:-.01em;line-height:1.25}
 .card .price .num{font-size:18px}
@@ -378,6 +379,7 @@ const IMG = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=90
 
 /* ===================== Icônes ===================== */
 const I = {
+  play: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/></svg>',
   pause: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>',
   trash: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>',
   eye: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
@@ -655,7 +657,7 @@ function viewPromos() {
   return `<div class="screen">
     <h1 class="title">Promos</h1>
     <div class="seg"><button class="${UI.promoTab === "net" ? "on" : ""}" data-ptab="net">De la centrale ${pend ? `<span class="c">${pend}</span>` : ""}</button><button class="${UI.promoTab === "own" ? "on" : ""}" data-ptab="own">Créées par vous · ${own.length}</button></div>
-    <p class="intro">${UI.promoTab === "net" ? `Touchez une promo pour l'ouvrir.${STORE.canDelete ? " Glissez vers la gauche pour la suspendre." : ""}` : "Touchez une promo pour la modifier, glissez vers la gauche pour la supprimer."}</p>
+    <p class="intro">${UI.promoTab === "net" ? "Touchez une promo pour l'ouvrir. Glissez-la vers la gauche pour la suspendre ou la supprimer." : "Touchez une promo pour la modifier. Glissez-la vers la gauche pour la suspendre ou la supprimer."}</p>
     ${list.map(cardPromo).join("") || '<div class="empty">Rien pour l\'instant.</div>'}
   </div>`;
 }
@@ -667,16 +669,18 @@ function fmtLine(p) {
   const photos = p.media.length > 1 ? `${p.media.length} photos` : "";
   return f.length || photos ? `<div class="small">${esc([photos, f.join(" · ")].filter(Boolean).join(" · "))}</div>` : "";
 }
-// Glisser vers la gauche :
-// - promo du magasin → Supprimer ;
-// - promo de la centrale terminée → Supprimer (la retire de l'app) ;
-// - promo de la centrale en cours ou à venir → Suspendre, si la centrale
-//   l'autorise et qu'elle n'est pas obligatoire (déjà suspendue : rien).
+// Règle unique, promo de la centrale ou du magasin :
+// - en cours ou à venir → glisser à gauche = « Suspendre » (bleu) ;
+// - suspendue → glisser à gauche = « Supprimer » (rouge), à droite = « Reprendre » ;
+// - terminée (ou brouillon) → glisser à gauche = « Supprimer ».
+// Pour une promo de la centrale, suspendre suppose son accord et jamais une
+// obligatoire (vérifié aussi en base).
 const isOver = (p) => Date.now() > new Date(p.end).getTime();
 function swipeAction(p) {
-  if (p.src === "own" || isOver(p)) return "del";
-  if (STORE.canDelete && !p.mandatory && !p.suspended) return "susp";
-  return null;
+  if (p.status === "draft" || isOver(p)) return { left: "del" };
+  if (p.suspended) return { left: "del", right: "resume" };
+  if (p.src === "own" || (STORE.canDelete && !p.mandatory)) return { left: "susp" };
+  return {};
 }
 function cardPromo(p) {
   const pr = pricing(p);
@@ -710,8 +714,11 @@ function cardPromo(p) {
     <div class="small">${p.sub ? `<span style="color:var(--ink)">${esc(p.sub)}</span> · ` : ""}Du ${fmtShort(p.start)} au ${fmtShort(p.end)}</div>${codeLine}${fmtLine(p)}</div></div>${bottom}</div>`;
   // Glisser vers la gauche pour supprimer, si c'est permis.
   const act = swipeAction(p);
-  return act === "del" ? `<div class="swipe" data-sw="${p.id}"><button class="sw-del" data-del="${p.id}">${I.trash}Supprimer</button>${card}</div>`
-    : act === "susp" ? `<div class="swipe sw-blue" data-sw="${p.id}"><button class="sw-del" data-susp="${p.id}">${I.pause}Suspendre</button>${card}</div>` : card;
+  if (!act.left && !act.right) return card;
+  const L = act.left === "del" ? `<button class="sw-btn sw-r b-red" data-del="${p.id}">${I.trash}Supprimer</button>`
+    : act.left === "susp" ? `<button class="sw-btn sw-r b-blue" data-susp="${p.id}">${I.pause}Suspendre</button>` : "";
+  const R = act.right === "resume" ? `<button class="sw-btn sw-l b-teal" data-resume="${p.id}">${I.play}Reprendre</button>` : "";
+  return `<div class="swipe" data-sw="${p.id}" data-dir="${act.left ? "l" : ""}${act.right ? "r" : ""}">${R}${L}${card}</div>`;
 }
 
 function viewStats() {
@@ -800,7 +807,7 @@ document.addEventListener("click", (e) => {
   else if (ds.act === "clients") clients(ds.id);
   else if (ds.del) askDelete(find(ds.del));
   else if (ds.susp) askSuspend(find(ds.susp));
-  else if (ds.resume) setSuspended(find(ds.resume), false);
+  else if (ds.resume) askResume(find(ds.resume));
   else if (ds.card) { if (closeSwipes()) return; openPromo(find(ds.card)); }
   else if (ds.act === "reconnect") reconnect();
   else if (ds.act === "disconnect") toast("Gardez Instagram connecté pour que vos promos y paraissent.");
@@ -810,16 +817,18 @@ const find = (id) => S.promos.find(p => p.id === id);
 
 /* ===================== Glisser pour supprimer ===================== */
 let swiped = false, drag = null;
+const SW = 96;
+function swSet(w, x) { w.querySelector(".card").style.transform = x ? `translateX(${x}px)` : ""; w.dataset.pos = x; }
 function closeSwipes(except) {
   let had = false;
-  $$(".swipe.open").forEach(w => { if (w !== except) { w.classList.remove("open"); w.querySelector(".card").style.transform = ""; had = true; } });
+  $$(".swipe.open").forEach(w => { if (w !== except) { w.classList.remove("open"); swSet(w, 0); had = true; } });
   return had;
 }
 // Événements tactiles (iPhone, Android) et souris (ordinateur), gérés à part :
 // plus fiable sur Safari iOS que les « pointer events ».
 function swStart(target, x, y) {
-  const w = target.closest(".swipe"); if (!w || target.closest(".sw-del")) return;
-  drag = { w, x, y, dx: 0, base: w.classList.contains("open") ? -96 : 0, on: false, dead: false };
+  const w = target.closest(".swipe"); if (!w || target.closest(".sw-btn")) return;
+  drag = { w, x, y, dx: 0, base: +(w.dataset.pos || 0), on: false, dead: false, dir: w.dataset.dir || "" };
 }
 function swMove(x, y, ev) {
   if (!drag || drag.dead) return;
@@ -830,17 +839,18 @@ function swMove(x, y, ev) {
     drag.on = true; drag.w.classList.add("drag"); closeSwipes(drag.w);
   }
   if (ev && ev.cancelable) ev.preventDefault();
-  drag.dx = dx; const v = Math.max(-110, Math.min(0, drag.base + dx));
-  drag.w.querySelector(".card").style.transform = `translateX(${v}px)`;
+  drag.dx = dx;
+  const min = drag.dir.includes("l") ? -SW - 14 : 0, max = drag.dir.includes("r") ? SW + 14 : 0;
+  swSet(drag.w, Math.max(min, Math.min(max, drag.base + dx)));
 }
 function swEnd() {
   if (!drag) return;
-  const { w, on, base, dx } = drag; drag = null;
+  const { w, on, base, dx, dir } = drag; drag = null;
   if (!on) return;
   swiped = true; setTimeout(() => swiped = false, 350);
   w.classList.remove("drag");
-  const open = base + dx < -48;
-  w.classList.toggle("open", open); w.querySelector(".card").style.transform = open ? "translateX(-96px)" : "";
+  const v = base + dx, to = v < -48 && dir.includes("l") ? -SW : v > 48 && dir.includes("r") ? SW : 0;
+  w.classList.toggle("open", !!to); swSet(w, to);
 }
 document.addEventListener("touchstart", (e) => { const t = e.touches[0]; swStart(e.target, t.clientX, t.clientY); }, { passive: true });
 document.addEventListener("touchmove", (e) => { const t = e.touches[0]; swMove(t.clientX, t.clientY, e); }, { passive: false });
@@ -852,7 +862,7 @@ document.addEventListener("mouseup", swEnd);
 function askDelete(p) {
   if (!p) return;
   sheet(`<div class="grab"></div><h2>Supprimer « ${esc(p.title)} » ?</h2>
-    <p class="small" style="font-size:14px;margin-top:6px">${p.src === "own" ? "La promo disparaît de votre app et de votre vitrine. Les publications déjà faites sur Facebook et Instagram restent en ligne." : "Cette promo est terminée : elle disparaît de votre liste. Votre centrale le voit dans son suivi."}</p>
+    <p class="small" style="font-size:14px;margin-top:6px">${p.src === "own" ? "La promo disparaît de votre app et de votre vitrine. Les publications déjà faites sur Facebook et Instagram restent en ligne." : `${isOver(p) ? "Cette promo est terminée" : "Cette promo est suspendue"} : elle disparaît de votre liste. Votre centrale le voit dans son suivi.`}</p>
     <button class="big-btn" id="d-go" style="background:var(--red)">${I.trash}Supprimer</button><button class="txt-btn" data-close>Annuler</button>`);
   $("#d-go").onclick = async () => {
     $("#d-go").disabled = true;
@@ -867,9 +877,16 @@ function askDelete(p) {
 function askSuspend(p) {
   if (!p) return;
   sheet(`<div class="grab"></div><h2>Suspendre « ${esc(p.title)} » ?</h2>
-    <p class="small" style="font-size:14px;margin-top:6px">La promo est retirée de votre vitrine et vous ne la publiez plus. Vous pourrez la reprendre à tout moment tant qu'elle court. Votre centrale le voit dans son suivi.</p>
+    <p class="small" style="font-size:14px;margin-top:6px">La promo est retirée de votre vitrine et vous ne la publiez plus. Vous pourrez la reprendre à tout moment tant qu'elle court${p.src === "net" ? ". Votre centrale le voit dans son suivi." : "."}</p>
     <button class="big-btn" id="s-go" style="background:var(--blue)">${I.pause}Suspendre</button><button class="txt-btn" data-close>Annuler</button>`);
   $("#s-go").onclick = () => { $("#s-go").disabled = true; setSuspended(p, true); };
+}
+function askResume(p) {
+  if (!p) return;
+  sheet(`<div class="grab"></div><h2>Reprendre « ${esc(p.title)} » ?</h2>
+    <p class="small" style="font-size:14px;margin-top:6px">La promo revient dans votre vitrine et vous pouvez de nouveau la publier.</p>
+    <button class="big-btn" id="r-go" style="background:var(--teal)">${I.play}Reprendre</button><button class="txt-btn" data-close>Annuler</button>`);
+  $("#r-go").onclick = () => { $("#r-go").disabled = true; setSuspended(p, false); };
 }
 async function setSuspended(p, on) {
   if (!p) return;
@@ -901,10 +918,11 @@ function sheetNet(p) {
       <div class="ro-line">${[pr.badge, `Du ${fmtShort(p.start)} au ${fmtShort(p.end)}`, p.code && `Code ${esc(p.code)}`, p.ean && `EAN ${esc(p.ean)}`, p.mandatory && "Obligatoire"].filter(Boolean).map(esc).join(" · ")}</div>
       </div>
       ${can ? `<button class="big-btn" id="n-save">Enregistrer</button>${Object.keys(p.ov || {}).length ? '<button class="txt-btn" id="n-reset">Revenir à la version de la centrale</button>' : ""}` : ""}
-      ${p.suspended ? `<button class="txt-btn" id="n-resume" style="color:var(--blue);font-weight:700">Reprendre la promo</button>` : swipeAction(p) === "susp" ? `<button class="txt-btn" id="n-susp" style="color:var(--blue);font-weight:700">${I.pause} Suspendre la promo</button>` : swipeAction(p) === "del" ? `<button class="txt-btn" id="n-del" style="color:var(--red);font-weight:700">Supprimer la promo</button>` : ""}
+      ${swipeAction(p).right === "resume" ? `<button class="txt-btn" id="n-resume" style="color:var(--teal);font-weight:700">Reprendre la promo</button>` : ""}
+      ${swipeAction(p).left === "susp" ? `<button class="txt-btn" id="n-susp" style="color:var(--blue);font-weight:700">Suspendre la promo</button>` : swipeAction(p).left === "del" ? `<button class="txt-btn" id="n-del" style="color:var(--red);font-weight:700">Supprimer la promo</button>` : ""}
       <button class="txt-btn" data-close>${can ? "Annuler" : "Fermer"}</button>`);
     // Mêmes actions que le glisser, pour qui ne le découvre pas.
-    $("#n-resume") && ($("#n-resume").onclick = () => setSuspended(p, false));
+    $("#n-resume") && ($("#n-resume").onclick = () => askResume(p));
     $("#n-susp") && ($("#n-susp").onclick = () => askSuspend(p));
     $("#n-del") && ($("#n-del").onclick = () => askDelete(p));
     if (!can) return;

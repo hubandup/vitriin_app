@@ -20,6 +20,20 @@ Repères :
 
 ## 2026-10-29
 
+### MOD-010 · Une seule règle de glisser, centrale comme magasin
+- **Règle** (remplace MOD-009) :
+  - en cours ou à venir → glisser à gauche : « Suspendre » (bleu) + confirmation ;
+  - suspendue → à gauche : « Supprimer » (rouge), à droite : « Reprendre »
+    (vert) ; chacun avec confirmation ;
+  - terminée (ou brouillon) → à gauche : « Supprimer » + confirmation.
+  - Garde-fous conservés pour une promo de la centrale : suspendre suppose
+    l'accord de la centrale et jamais une obligatoire.
+- **Base** : migration `20261029224915_store_delete_when_suspended` : une promo
+  de la centrale peut être supprimée si elle est suspendue ou terminée.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-010, puis réappliquer la
+  fonction de la migration `20261029222520_store_suspend`.
+
 ### BUG-004 · Glisser sans effet (Suspendre / Supprimer) — corrigé
 - **Cause** : le glisser reposait sur les « pointer events ». Sur iPhone
   (Safari) et à la souris (glisser natif de l'image, sélection de texte), le
