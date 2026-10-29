@@ -990,6 +990,18 @@ async function boot() {
   show("v-new", false); show("v-app"); render();
 }
 boot();
+
+// Suivi en direct : ce que font les magasins (activer, refuser, publier)
+// remonte sans recharger la page. Pas de rafraîchissement pendant une saisie.
+async function liveRefresh() {
+  if (!S.net || document.visibilityState !== "visible") return;
+  if (!$("m-promo").classList.contains("hidden") || !$("m-invite").classList.contains("hidden")) return;
+  if (document.activeElement && ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+  const y = $("content").scrollTop;
+  try { await load(); render(); $("content").scrollTop = y; } catch (e) { console.warn(e); }
+}
+setInterval(liveRefresh, 15000);
+document.addEventListener("visibilitychange", liveRefresh);
 </script>
 </body>
 </html>

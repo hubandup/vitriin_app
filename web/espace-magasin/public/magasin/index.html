@@ -338,6 +338,7 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 <div id="layer"></div>
 <input type="file" id="file" accept="image/*" hidden>
 <input type="file" id="cam" accept="image/*" capture="environment" hidden>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 /* ===================== Utilitaires ===================== */
@@ -403,35 +404,130 @@ const LIB = {
   grey: IMG("photo-1491553895911-0055eca6402d"),
 };
 const HOUR = 36e5;
-function seed() {
-  const now = Date.now();
+
+/* ===================== Données réelles (Supabase) ===================== */
+// L'app lit et écrit dans la même base que l'Espace Centrale : une promo
+// envoyée par la centrale apparaît ici, et ce que fait le magasin (activer,
+// refuser, publier) remonte dans le suivi de la centrale.
+// Publication : SIMULÉE (RPC demo_publish), réservée aux réseaux de démo.
+// Aucun appel à Meta depuis cette page.
+const SUPABASE_URL = "https://zjugauidrijghesgsmap.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU";
+const sb = supabase.createClient(SUPABASE_URL, ANON_KEY);
+const PREFS_KEY = "vitriin-app-prefs";
+const prefs = Object.assign({ notifNet: true, notifFail: true, liked: {}, saved: {} }, store.get(PREFS_KEY) || {});
+const errText = (e) => (e && (e.message || e.error_description)) || String(e);
+
+function mapRow(row, accounts) {
+  const pr = row.promotions, det = pr.details || {};
+  const pubs = row.publications || [];
+  const byCh = { fb: pubs.find(x => x.channel === "facebook"), ig: pubs.find(x => x.channel === "instagram") };
+  const ch = {};
+  ["fb", "ig"].forEach(c => { const x = byCh[c]; if (x?.status === "published") ch[c] = "ok"; else if (x?.status === "failed") ch[c] = "ko"; });
+  const done = pubs.filter(x => x.status === "published" || x.status === "failed");
+  const planned = pubs.find(x => x.status === "pending" && new Date(x.published_at) > Date.now());
+  let status;
+  if (pr.status === "draft") status = "draft";
+  else if (done.length) status = "published";
+  else if (planned) status = "scheduled";
+  else if (row.status === "declined") status = "declined";
+  else if (row.status === "active") status = "active";
+  else status = "received";
+  const start = new Date(pr.starts_at), end = new Date(pr.ends_at);
+  const m = (x) => x?.status === "published" && x.metrics ? [+x.metrics.reach || 0, +x.metrics.views || 0, (+x.metrics.reactions || 0) + (+x.metrics.shares || 0), +x.metrics.comments || 0] : null;
+  const stats = done.length ? { fb: m(byCh.fb), ig: m(byCh.ig) } : null;
+  const sched = planned ? new Date(planned.published_at) : null;
   return {
-    v: 3,
-    ig: "broken",
-    notifNet: true, notifFail: true,
-    promos: [
-      { id: "air", src: "net", title: "Air Runner 95", img: LIB.air, type: "percent", orig: 129, val: 30, start: d(-2), end: d(18), code: "9 901230 000956", mandatory: true, deadline: d(5), status: "received", ch: {}, recAt: now - HOUR },
-      { id: "trail", src: "net", title: "Trail Spark", img: LIB.trail, type: "percent", orig: 89, val: 20, start: d(-2), end: d(11), code: "9 901230 001205", status: "received", ch: {}, recAt: now - HOUR },
-      { id: "bf", src: "net", title: "Black Friday running", img: LIB.bf, type: "percent", orig: null, val: 25, sub: "Sur tout le rayon running", start: d(29), end: d(32), code: "9 901230 025119", status: "received", ch: {}, recAt: now - HOUR },
-      { id: "phantom", src: "net", title: "Phantom Glide", img: LIB.phantom, type: "percent", orig: 140, val: 15, start: d(-9), end: d(4), code: "9 901230 000772", status: "published", ch: { fb: "ok", ig: "ok" }, pubAt: now - 7 * DAY, fav: 31,
-        stats: { fb: [600, 900, 38, 5], ig: [485, 812, 34, 4] } },
-      { id: "sandales", src: "own", title: "Sandales Été", img: LIB.lacing, type: "new_price", orig: 59, val: 45, start: d(-5), end: d(5), code: "9 901230 000017", status: "published", ch: { fb: "ok", ig: "ko" }, pubAt: now - 26 * HOUR, fav: 20,
-        stats: { fb: [490, 710, 27, 3], ig: null } },
-      { id: "socks", src: "own", title: "Chaussettes running", img: LIB.socks, type: "x_plus_y", orig: 44.70, val: 29.80, xy: [2, 1], sub: "Les 3 pour 29,80 €", start: d(-7), end: d(7), code: "9 901230 000031", status: "published", ch: { fb: "ok", ig: "ok" }, pubAt: now - 3 * DAY, fav: 14,
-        stats: { fb: [808, 1142, 40, 5], ig: [343, 677, 36, 5] } },
-      { id: "mesh", src: "own", title: "Mesh Run Bleu", img: null, type: "amount", orig: 90, val: 20, start: d(-2), end: d(11), status: "draft", ch: {} },
-    ],
+    id: row.id, spId: row.id, promoId: pr.id, src: pr.created_by_network_id ? "net" : "own",
+    kind: pr.promo_type ? "promo" : "post", title: pr.title, img: pr.media_url, mech: pr.mechanic, text: pr.description || "",
+    type: pr.promo_type, orig: det.orig ?? null, val: det.val ?? null, xy: det.xy || [2, 1], sub: det.sub || "", cond: det.sub || "",
+    start, end, code: pr.discount_code, mandatory: pr.is_mandatory, deadline: start > Date.now() ? start : end,
+    status, ch, stats, recAt: new Date(row.created_at).getTime(),
+    pubAt: done.length ? Math.max(...done.map(x => new Date(x.published_at).getTime())) : null,
+    schedAt: sched ? new Date(sched.getFullYear(), sched.getMonth(), sched.getDate()).getTime() : null,
+    schedTime: sched ? sched.toTimeString().slice(0, 5) : null, schedSetAt: planned ? new Date(row.activated_at || row.created_at).getTime() : null,
+    fav: stats ? (stats.fb?.[2] || 0) + (stats.ig?.[2] || 0) : 0,
+    liked: !!prefs.liked[row.id], saved: !!prefs.saved[row.id],
   };
 }
-let S = store.get("vitriin-demo");
-if (!S || S.v !== 3) S = seed();
-const save = () => store.set("vitriin-demo", S);
+
+async function loadData() {
+  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, name, address, city, postal_code)").limit(1);
+  if (e0) throw e0;
+  if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
+  const st = mem[0].stores;
+  await sb.rpc("demo_tick", { p_store_id: st.id }); // fait avancer la démo ; sans effet ailleurs
+  const [net, acc, rows] = await Promise.all([
+    sb.rpc("get_store_network", { p_store_id: st.id }),
+    sb.from("social_accounts").select("channel, display_name, status").eq("store_id", st.id),
+    sb.from("store_promotions").select("id, status, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
+  ]);
+  const e = net.error || acc.error || rows.error; if (e) throw e;
+  const n = net.data?.[0];
+  const fb = acc.data.find(a => a.channel === "facebook"), ig = acc.data.find(a => a.channel === "instagram");
+  Object.assign(STORE, {
+    id: st.id, name: st.name, city: st.city || "", address: st.address || "",
+    net: n?.network_name || "votre réseau", netFull: n ? `${n.network_name} · ${st.city}` : "Magasin indépendant",
+    page: fb?.display_name || "Non connectée", insta: ig?.display_name || "Non connecté",
+  });
+  S.fb = fb ? (fb.status === "active" ? "ok" : "broken") : "none";
+  S.ig = ig ? (ig.status === "active" ? "ok" : "broken") : "none";
+  S.promos = rows.data.filter(r => r.promotions).map(r => mapRow(r, acc.data));
+}
+
+// Recharge puis réaffiche, sans casser une feuille ouverte.
+let loading = false;
+async function refresh(keepScroll = true) {
+  if (loading || !STORE.id) return; loading = true;
+  try { await loadData(); if (!$("#layer").innerHTML) render(keepScroll); }
+  catch (e) { console.warn(e); }
+  finally { loading = false; }
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(); });
+setInterval(() => { if (document.visibilityState === "visible") refresh(); }, 15000);
+
+function showLogin(msg) {
+  $("#nav").classList.add("hidden"); $("#fab").classList.add("hidden");
+  $("#view").innerHTML = `<div class="screen" style="padding-top:60px">
+    <div style="text-align:center;margin-bottom:28px"><img src="/icon-512.png" alt="" style="width:72px;height:72px;border-radius:18px"><h1 class="title" style="margin-top:14px">Vitriin</h1><div class="sub">Espace magasin</div></div>
+    <span class="label">Email</span><input class="in" id="l-email" type="email" autocomplete="username" value="magasin.demo@vitriin.co">
+    <span class="label">Mot de passe</span><input class="in" id="l-pass" type="password" autocomplete="current-password">
+    ${msg ? `<p class="small" style="color:var(--red);margin-top:10px">${esc(msg)}</p>` : ""}
+    <button class="big-btn" id="l-go" style="margin-top:18px">Se connecter</button></div>`;
+  const go = async () => {
+    $("#l-go").disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email: $("#l-email").value.trim(), password: $("#l-pass").value });
+    if (error) return showLogin("Email ou mot de passe incorrect.");
+    boot();
+  };
+  $("#l-go").onclick = go; $("#l-pass").onkeydown = (e) => { if (e.key === "Enter") go(); };
+}
+async function boot() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return showLogin();
+  $("#view").innerHTML = '<div class="screen"><div class="empty" style="margin-top:80px">Chargement…</div></div>';
+  try { await loadData(); }
+  catch (e) { return showLogin(errText(e)); }
+  $("#nav").classList.remove("hidden");
+  render();
+}
+
+let S = { ig: "none", fb: "none", notifNet: prefs.notifNet, notifFail: prefs.notifFail, promos: [] };
+const save = () => {
+  prefs.notifNet = S.notifNet; prefs.notifFail = S.notifFail;
+  S.promos.forEach(p => { if (p.liked) prefs.liked[p.id] = 1; else delete prefs.liked[p.id]; if (p.saved) prefs.saved[p.id] = 1; else delete prefs.saved[p.id]; });
+  store.set(PREFS_KEY, prefs);
+};
 const UI = { tab: "home", promoTab: "net" };
-const STORE = { name: "L'Atelier du Coureur", net: "Foulée Sport", city: "Lyon 3ᵉ", address: "14 rue Paul Bert, 69003 Lyon", netFull: "Foulée Sport · Rhône-Alpes", code: "RESEAU-LYON3-2026", storeCode: "LYON3-014", page: "L'Atelier du Coureur – Lyon 3", insta: "@atelierducoureur.lyon" };
+const STORE = { id: null, name: "", net: "", city: "", address: "", netFull: "", page: "", insta: "" };
+const initial = () => (STORE.city || STORE.name || "?").trim()[0].toUpperCase();
 
 /* ===================== Calculs ===================== */
 function pricing(p) {
   const o = p.orig;
+  // Promo saisie par la centrale sans chiffres détaillés : on affiche son texte d'offre tel quel.
+  if (p.mech && (p.val == null || (p.type === "x_plus_y" && p.orig == null && p.val == null))) return { price: null, old: null, badge: p.mech };
+  if (!p.type) return { price: null, old: null, badge: "" };
   switch (p.type) {
     case "percent": return { price: o != null ? Math.round(o * (100 - p.val)) / 100 : null, old: o, badge: `-${p.val} %` };
     case "amount": return { price: o != null ? Math.max(0, o - p.val) : null, old: o, badge: `-${eur(p.val).replace(",00", "")}` };
@@ -478,7 +574,7 @@ function viewHome() {
   const pend = pendingNet(), due = mandatoryDue();
   const carousel = S.promos.filter(p => p.status === "published" || p.status === "scheduled").sort((a, b) => (b.pubAt || 0) - (a.pubAt || 0));
   return `<div class="screen">
-    <div class="head"><span class="av">A</span><div class="sp"><b>${STORE.name}</b><span>Réseau ${STORE.net} · ${STORE.city}</span></div></div>
+    <div class="head"><span class="av">${initial()}</span><div class="sp"><b>${STORE.name}</b><span>Réseau ${STORE.net} · ${STORE.city}</span></div></div>
     <button class="client-btn" data-act="clients">${I.eye}Voir côté clients</button>
     ${pend.length ? `<button class="hero" data-go="promos:net"><span class="ic">${I.net}</span><span class="sp"><b>${pend.length} nouvelle${pend.length > 1 ? "s" : ""} promo${pend.length > 1 ? "s" : ""} du réseau à valider</b><span>${pend.map(p => esc(p.title)).join(" · ")}</span></span><span class="chev">${I.chev}</span></button>` : ""}
     ${due.map(p => `<button class="due" data-go="promos:net"><span class="ic">${I.clock}</span><span class="sp"><b>${esc(p.title)} : à publier avant le ${fmtLong(p.deadline)}</b><span>Promo obligatoire du réseau · publiez-la ou programmez-la</span></span><span class="chev">${I.chev}</span></button>`).join("")}
@@ -575,13 +671,13 @@ function viewStats() {
 function viewSettings() {
   return `<div class="screen">
     <h1 class="title">Réglages</h1>
-    <div class="head" style="margin:16px 0 0"><span class="av" style="width:56px;height:56px;font-size:23px">A</span><div class="sp"><b>${STORE.name}</b><span>${STORE.address}</span></div></div>
+    <div class="head" style="margin:16px 0 0"><span class="av" style="width:56px;height:56px;font-size:23px">${initial()}</span><div class="sp"><b>${STORE.name}</b><span>${STORE.address}</span></div></div>
     <div class="lbl">RÉSEAU</div>
-    <div class="net"><span class="ic" style="color:#fff">${I.net}</span><div class="sp"><b style="display:block;font-size:16px">${STORE.netFull}</b><span style="font-size:13px;color:var(--muted)">Code ${STORE.code} · magasin ${STORE.storeCode}</span></div></div>
+    <div class="net"><span class="ic" style="color:#fff">${I.net}</span><div class="sp"><b style="display:block;font-size:16px">${STORE.netFull}</b><span style="font-size:13px;color:var(--muted)">Les promos de votre centrale arrivent ici automatiquement</span></div></div>
     <div class="lbl">COMPTES CONNECTÉS</div>
     <div class="box">
-      <div class="li"><span class="ch fb" style="width:44px;height:44px">${I.fb}</span><div class="sp"><span style="font-size:13px;color:var(--muted)">Page Facebook</span><b style="display:block;font-size:15.5px">${STORE.page}</b></div><span class="pill p-ok">Connecté</span></div>
-      <div class="li" style="flex-wrap:wrap"><span class="ch ig" style="width:44px;height:44px;border-radius:12px">${I.ig}</span><div class="sp"><span style="font-size:13px;color:var(--muted)">Instagram</span><b style="display:block;font-size:15.5px">${STORE.insta}</b></div><span class="pill ${S.ig === "ok" ? "p-ok" : "p-ko"}">${S.ig === "ok" ? "Connecté" : "À reconnecter"}</span>
+      <div class="li"><span class="ch fb" style="width:44px;height:44px">${I.fb}</span><div class="sp"><span style="font-size:13px;color:var(--muted)">Page Facebook</span><b style="display:block;font-size:15.5px">${esc(STORE.page)}</b></div><span class="pill ${S.fb === "ok" ? "p-ok" : "p-ko"}">${S.fb === "ok" ? "Connecté" : "À connecter"}</span></div>
+      <div class="li" style="flex-wrap:wrap"><span class="ch ig" style="width:44px;height:44px;border-radius:12px">${I.ig}</span><div class="sp"><span style="font-size:13px;color:var(--muted)">Instagram</span><b style="display:block;font-size:15.5px">${esc(STORE.insta)}</b></div><span class="pill ${S.ig === "ok" ? "p-ok" : "p-ko"}">${S.ig === "ok" ? "Connecté" : "À reconnecter"}</span>
         ${S.ig === "broken" ? `<div class="btns" style="width:100%;margin-top:4px"><button class="btn-red" style="border-radius:13px;padding:13px" data-act="reconnect">Reconnecter</button><button style="background:#f3f1ed;border-radius:13px;font-weight:700" data-act="disconnect">Déconnecter</button></div>` : ""}</div>
     </div>
     <div class="lbl">NOTIFICATIONS</div>
@@ -590,7 +686,7 @@ function viewSettings() {
       <div class="li"><span class="sp" style="font-size:15.5px">Échecs de publication</span><button class="tg ${S.notifFail ? "on" : ""}" data-toggle="notifFail" aria-label="Échecs de publication"></button></div>
     </div>
     <button class="out" data-act="logout">Se déconnecter</button>
-    <button class="reset" data-act="reset">Réinitialiser la démo</button>
+    <p class="small" style="text-align:center;margin-top:18px">Démo : les publications Facebook et Instagram sont simulées.</p>
   </div>`;
 }
 
@@ -614,8 +710,8 @@ document.addEventListener("click", (e) => {
   const ds = t.dataset;
   if (ds.go) { const [a, b] = ds.go.split(":"); go(a, b); }
   else if (ds.ptab) { UI.promoTab = ds.ptab; render(); }
-  else if (ds.activate) { const p = find(ds.activate); p.status = "active"; save(); render(true); toast(`« ${p.title} » activée. Publiez-la ou programmez-la.`); }
-  else if (ds.decline) { const p = find(ds.decline); p.status = "declined"; save(); render(true); toast(`« ${p.title} » refusée. Votre centrale est informée.`); }
+  else if (ds.activate) setStatus(find(ds.activate), "active", (p) => `« ${p.title} » activée. Publiez-la ou programmez-la.`);
+  else if (ds.decline) setStatus(find(ds.decline), "declined", (p) => `« ${p.title} » refusée. Votre centrale est informée.`);
   else if (ds.pub) publish(find(ds.pub));
   else if (ds.sched) sheetSchedule(find(ds.sched));
   else if (ds.retry) { const p = find(ds.retry); publish(p, true); }
@@ -625,37 +721,44 @@ document.addEventListener("click", (e) => {
   else if (ds.act === "clients") clients(ds.id);
   else if (ds.act === "reconnect") reconnect();
   else if (ds.act === "disconnect") toast("Gardez Instagram connecté pour que vos promos y paraissent.");
-  else if (ds.act === "logout") toast("Mode démo : la déconnexion est désactivée.");
-  else if (ds.act === "reset") { S = seed(); save(); UI.promoTab = "net"; go("home"); toast("Démo réinitialisée."); }
+  else if (ds.act === "logout") sb.auth.signOut().then(() => location.reload());
 });
 const find = (id) => S.promos.find(p => p.id === id);
 
 /* ===================== Actions ===================== */
+async function setStatus(p, status, msg) {
+  const { error } = await sb.from("store_promotions").update({ status }).eq("id", p.spId);
+  if (error) return toast(errText(error));
+  p.status = status; render(true); toast(msg(p)); refresh();
+}
 function reconnect() {
   sheet(`<div class="pub"><div class="spin"></div><h2>Connexion à Instagram…</h2><p class="small" style="font-size:14px">Via votre Page Facebook ${esc(STORE.page)}</p></div>`);
-  setTimeout(() => {
-    S.ig = "ok";
-    const failed = S.promos.filter(p => p.ch?.ig === "ko");
-    failed.forEach(p => { p.ch.ig = "ok"; p.stats = p.stats || {}; p.stats.ig = p.stats.ig || [0, 0, 0, 0]; });
-    save(); closeLayer(); render(true);
+  const failed = S.promos.filter(p => p.ch?.ig === "ko");
+  Promise.all([sb.rpc("demo_reconnect", { p_store_id: STORE.id, p_channel: "instagram" }), new Promise(r => setTimeout(r, 1300))]).then(async ([{ error }]) => {
+    if (error) { closeLayer(); return toast(errText(error)); }
+    await loadData(); closeLayer(); render(true);
     toast(failed.length ? `Instagram reconnecté · « ${failed[0].title} » republiée` : "Instagram reconnecté");
-  }, 1300);
+  });
 }
 function publish(p, retryOnly) {
-  const chans = p._chans || ["fb", "ig"].filter(c => c === "fb" || S.ig === "ok");
-  sheet(`<div class="pub" id="pubbox"><div class="spin"></div><h2>Publication en cours…</h2><p class="small" style="font-size:14px">« ${esc(p.title)} » sur votre Page Facebook${chans.includes("ig") ? " et votre compte Instagram" : ""}</p>
+  const chans = p._chans || (retryOnly ? ["ig"] : ["fb", "ig"].filter(c => (c === "fb" ? S.fb : S.ig) === "ok"));
+  if (!chans.length) return toast("Connectez d'abord Facebook ou Instagram dans les Réglages.");
+  sheet(`<div class="pub" id="pubbox"><div class="spin"></div><h2>Publication en cours…</h2><p class="small" style="font-size:14px">« ${esc(p.title)} » sur ${chans.includes("fb") ? "votre Page Facebook" : ""}${chans.length > 1 ? " et " : ""}${chans.includes("ig") ? "votre compte Instagram" : ""}</p>
     <div class="lines">${chans.map(c => `<div><span class="ch ${c === "fb" ? "fb" : "ig"}">${c === "fb" ? I.fbs : I.igs}</span>${c === "fb" ? "Facebook" : "Instagram"}<em id="pl-${c}" style="color:var(--muted)">En cours…</em></div>`).join("")}</div></div>`);
+  // Publication simulée côté base (réseau de démo) : la centrale la voit aussitôt.
+  const call = Promise.resolve(sb.rpc("demo_publish", { p_store_promotion_id: p.spId, p_channels: chans.map(c => c === "fb" ? "facebook" : "instagram") }));
   let i = 0;
-  const step = () => {
+  const step = async () => {
     const c = chans[i];
     if (!c) {
-      p.status = "published"; p.pubAt = Date.now(); p.ch = p.ch || {};
-      chans.forEach(x => p.ch[x] = "ok");
-      if (S.ig !== "ok" && !p.ch.ig && !retryOnly) p.ch.ig = undefined;
-      delete p._chans; save();
+      const { error } = await call;
+      if (error) { closeLayer(); return toast(errText(error)); }
+      delete p._chans;
+      try { await loadData(); } catch {}
       $("#pubbox").innerHTML = `<div class="done">${I.check.replace('width="16" height="16"', 'width="30" height="30"')}</div><h2>C'est publié !</h2><p class="small" style="font-size:14px">Vos clients voient « ${esc(p.title)} » dès maintenant.</p>
         <div class="lines">${chans.map(x => `<div><span class="ch ${x === "fb" ? "fb" : "ig"}">${x === "fb" ? I.fbs : I.igs}</span>${x === "fb" ? "Facebook" : "Instagram"}<em style="color:var(--teal)">Publiée ✓</em></div>`).join("")}</div>
         ${S.ig !== "ok" ? '<p class="small" style="font-size:13.5px;margin-top:10px">Instagram est déconnecté : reconnectez-le pour y publier aussi.</p>' : ""}
+        <p class="small" style="font-size:12.5px;margin-top:10px;color:var(--muted)">Démo : publication simulée, rien n'est posté sur Facebook ni Instagram.</p>
         <button class="big-btn" id="pub-ok">Parfait</button>`;
       $("#pub-ok").onclick = () => { closeLayer(); UI.tab = "home"; render(); };
       return;
@@ -677,7 +780,16 @@ function sheetSchedule(p) {
       <button class="big-btn" id="s-go">Programmer</button><button class="txt-btn" data-close>Annuler</button>`);
     $$(".day").forEach(b => b.onclick = () => { sel = +b.dataset.k; time = $("#s-time").value || time; draw(); });
     $("#s-time").oninput = (e) => { time = e.target.value; $("#s-t").textContent = time; };
-    $("#s-go").onclick = () => { p.status = "scheduled"; p.schedAt = days[sel].getTime(); p.schedTime = time; p.schedSetAt = Date.now(); save(); closeLayer(); render(true); toast(`Programmée le ${fmtDay(days[sel])} à ${time}.`); };
+    $("#s-go").onclick = async () => {
+      const [hh, mm] = (time || "09:00").split(":").map(Number);
+      const at = new Date(days[sel]); at.setHours(hh, mm, 0, 0);
+      if (at <= new Date()) return toast("Choisissez une heure à venir.");
+      const chans = ["fb", "ig"].filter(c => (c === "fb" ? S.fb : S.ig) === "ok").map(c => c === "fb" ? "facebook" : "instagram");
+      $("#s-go").disabled = true;
+      const { error } = await sb.rpc("demo_publish", { p_store_promotion_id: p.spId, p_channels: chans, p_at: at.toISOString() });
+      if (error) { $("#s-go").disabled = false; return toast(errText(error)); }
+      await loadData(); closeLayer(); render(true); toast(`Programmée le ${fmtDay(days[sel])} à ${time}.`);
+    };
   };
   draw();
 }
@@ -745,7 +857,7 @@ function createForm(kind, draft) {
     $("#f-add", layer) && ($("#f-add").onclick = () => { const v = $("#f-code").value.trim().toUpperCase(); if (v.length < 3) return toast("Saisissez un code d'au moins 3 caractères."); F.codes.push(v); keepScroll(draw); });
     $$("[data-rmcode]", layer).forEach(b => b.onclick = (e) => { e.stopPropagation(); F.codes.splice(+b.dataset.rmcode, 1); keepScroll(draw); });
     $$("[data-chan]", layer).forEach(b => b.onclick = (e) => {
-      if (e.target.id === "f-reco") { S.ig = "ok"; save(); F.ig = true; toast("Instagram reconnecté"); return keepScroll(draw); }
+      if (e.target.id === "f-reco") { sb.rpc("demo_reconnect", { p_store_id: STORE.id, p_channel: "instagram" }).then(({ error }) => { if (error) return toast(errText(error)); S.ig = "ok"; F.ig = true; toast("Instagram reconnecté"); keepScroll(draw); }); return; }
       const c = b.dataset.chan; if (c === "ig" && S.ig !== "ok") return toast("Reconnectez d'abord Instagram.");
       F[c] = !F[c]; keepScroll(draw);
     });
@@ -755,22 +867,62 @@ function createForm(kind, draft) {
   const refreshFoot = () => { const isPost = F.kind === "post"; const missing = [!F.img && "photo", !isPost && !F.title.trim() && "titre", isPost && !F.text.trim() && "texte", !F.fb && !F.ig && "canal"].filter(Boolean); const todo = $(".todo", layer); if (missing.length) { if (todo) todo.textContent = "À compléter : " + missing.join(" · "); else $(".actions", layer).insertAdjacentHTML("afterbegin", `<div class="todo">À compléter : ${missing.join(" · ")}</div>`); } else todo?.remove(); $("#f-pub").disabled = !!missing.length; };
   const updCalc = () => { const pr = pricing(F); const c = $(".calc", layer); if (c && pr.price != null) c.innerHTML = `<span class="badge" style="font-size:15px;padding:3px 9px">${esc(pr.badge)}</span><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}`; };
   const keepScroll = (fn) => { const sc = $(".scroll", layer)?.scrollTop || 0; fn(); const s2 = $(".scroll", layer); if (s2) s2.scrollTop = sc; };
-  const submit = (asDraft) => {
+  const submit = async (asDraft) => {
     const isPost = F.kind === "post";
-    const p = draft || { id: "p" + Date.now(), src: "own", ch: {} };
-    Object.assign(p, {
-      kind: F.kind, title: isPost ? (F.text.trim().split(/\n/)[0].slice(0, 40) || "Post") : F.title.trim() || "Sans titre", img: F.img,
-      type: isPost ? "post" : F.type, orig: F.orig, val: F.val, xy: F.xy, sub: F.type === "free_with_condition" ? F.cond : F.type === "x_plus_y" ? `Les ${(F.xy[0] || 0) + (F.xy[1] || 0)} pour ${eur(F.val || 0)}` : (isPost ? F.text : ""),
-      start: F.start, end: F.end, code: F.codes[0] || null, status: asDraft ? "draft" : "pending",
-    });
-    if (!draft) S.promos.unshift(p);
-    save(); closeLayer();
-    if (asDraft) { UI.tab = "promos"; UI.promoTab = "own"; render(); return toast("Brouillon enregistré."); }
-    p._chans = ["fb", "ig"].filter(c => F[c]);
-    publish(p);
+    const btn = $("#f-pub", layer); if (btn) btn.disabled = true;
+    try {
+      const media = await ensureUploaded(F.img);
+      const pr = pricing({ ...F, mech: null });
+      const sub = F.type === "free_with_condition" ? F.cond : F.type === "x_plus_y" ? `Les ${(F.xy[0] || 0) + (F.xy[1] || 0)} pour ${eur(F.val || 0)}` : "";
+      const code = (F.codes[0] || "").replace(/\s+/g, "").toUpperCase();
+      const title = isPost ? (F.text.trim().split(/\n/)[0].slice(0, 40) || "Post") : F.title.trim() || "Sans titre";
+      const start = new Date(F.start); start.setHours(0, 0, 0, 0);
+      const end = new Date(F.end); end.setHours(23, 59, 0, 0);
+      const row = {
+        created_by_store_id: STORE.id, title, media_url: media,
+        mechanic: isPost ? null : (F.type === "free_with_condition" ? (F.cond || "Offert") : pr.price != null ? `${eur(pr.price)}${pr.old ? " au lieu de " + eur(pr.old) : ""}` : pr.badge),
+        description: isPost ? F.text.trim() : [sub, code ? `Code en caisse : ${code}` : ""].filter(Boolean).join("\n\n") || null,
+        promo_type: isPost ? null : F.type, discount_code: code && /^[A-Z0-9-]{3,24}$/.test(code) ? code : null,
+        details: isPost ? null : { orig: F.orig, val: F.val, xy: F.xy, sub },
+        starts_at: start.toISOString(), ends_at: end.toISOString(), status: asDraft ? "draft" : "active",
+      };
+      let spId = draft?.spId;
+      if (draft) {
+        const { error } = await sb.from("promotions").update(row).eq("id", draft.promoId);
+        if (error) throw error;
+      } else {
+        const { data: pz, error } = await sb.from("promotions").insert(row).select("id").single();
+        if (error) throw error;
+        const { data: sp, error: e2 } = await sb.from("store_promotions").insert({ promotion_id: pz.id, store_id: STORE.id }).select("id").single();
+        if (e2) throw e2;
+        spId = sp.id;
+      }
+      closeLayer();
+      if (asDraft) { await loadData(); UI.tab = "promos"; UI.promoTab = "own"; render(); return toast("Brouillon enregistré."); }
+      publish({ spId, title, _chans: ["fb", "ig"].filter(c => F[c]) });
+    } catch (e) { toast(errText(e)); if (btn) btn.disabled = false; }
   };
   document.body.style.overflow = "hidden";
   draw();
+}
+// Photo prise ou choisie sur le téléphone : convertie en JPEG au format
+// Instagram, puis déposée dans le dossier du magasin (bucket promo-media).
+async function ensureUploaded(src) {
+  if (!src || !src.startsWith("data:")) return src;
+  const blob = await (await fetch(src)).blob();
+  const bmp = await createImageBitmap(blob, { imageOrientation: "from-image" });
+  let sw = bmp.width, sh = bmp.height, sx = 0, sy = 0; const ratio = sw / sh;
+  if (ratio < 0.8) { const h = Math.round(sw / 0.8); sy = Math.round((sh - h) / 2); sh = h; }
+  else if (ratio > 1.91) { const w = Math.round(sh * 1.91); sx = Math.round((sw - w) / 2); sw = w; }
+  const k = Math.min(1, 1440 / Math.max(sw, sh));
+  const cv = document.createElement("canvas"); cv.width = Math.round(sw * k); cv.height = Math.round(sh * k);
+  const ctx = cv.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(bmp, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+  const jpeg = await new Promise((ok, ko) => cv.toBlob(b => b ? ok(b) : ko(new Error("Conversion impossible.")), "image/jpeg", 0.9));
+  const path = `${STORE.id}/${crypto.randomUUID()}.jpg`;
+  const { error } = await sb.storage.from("promo-media").upload(path, jpeg, { contentType: "image/jpeg", upsert: false });
+  if (error) throw error;
+  return sb.storage.from("promo-media").getPublicUrl(path).data.publicUrl;
 }
 function typeFields(F) {
   const v = (n) => n == null ? "" : String(n).replace(".", ",");
@@ -809,7 +961,7 @@ function clients(startId) {
   layer.innerHTML = `<div class="reels" id="reels">${list.map((p, k) => { const pr = pricing(p); return `<section class="reel">
     <img onerror="this.style.visibility='hidden'" src="${esc(p.img)}" alt=""><div class="shade"></div>
     <div class="prog">${list.map((_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("")}</div>
-    <div class="rh"><button class="back glass" data-close>${I.back}</button><span class="rav">A</span><div><b>${STORE.name}</b><span>${STORE.city} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
+    <div class="rh"><button class="back glass" data-close>${I.back}</button><span class="rav">${initial()}</span><div><b>${STORE.name}</b><span>${STORE.city} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
     <button class="pillback" data-close>${I.back.replace('width="20" height="20"', 'width="15" height="15"')}Côté clients · Revenir au magasin</button>
     <div class="side"><button data-fav="${p.id}"><i class="glass">${I.heart(p.liked)}</i><span id="fav-${p.id}">${(p.fav || 0) + (p.liked ? 1 : 0)}</span></button><button data-tip="Itinéraire vers ${STORE.address}"><i class="glass">${I.pin}</i>Itinéraire</button><button data-tip="Lien de la promo copié"><i class="glass">${I.share}</i>Partager</button><button data-savep="${p.id}"><i class="glass">${I.save(p.saved)}</i>${p.saved ? "Enregistré" : "Enregistrer"}</button></div>
     <div class="info"><small>${STORE.name} · Jusqu'au ${fmtShort(p.end)}</small><h3>${esc(p.title)}</h3><p>${esc(p.sub || `Valable du ${fmtShort(p.start)} au ${fmtShort(p.end)}`)}</p>
@@ -866,7 +1018,8 @@ function sheet(html, keepUnder) {
 function closeSheetOnly() { $("#subsheet")?.remove(); }
 function closeLayer() { $("#layer").innerHTML = ""; $("#subsheet")?.remove(); document.body.style.overflow = ""; }
 
-render();
+$("#nav").classList.add("hidden"); $("#fab").classList.add("hidden");
+boot();
 </script>
 </body>
 </html>

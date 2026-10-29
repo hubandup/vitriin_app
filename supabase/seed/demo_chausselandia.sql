@@ -6,8 +6,7 @@
 --   - le compte magasin de démo existe (magasin.demo@vitriin.co), créé à part
 --     pour que son mot de passe ne soit pas dans le dépôt.
 --
--- Rejouable : supprime d'abord les magasins et promos du réseau, puis recrée
--- tout avec des dates relatives à aujourd'hui.
+-- Dates relatives au jour d'exécution. S'exécute sur un réseau vide.
 --
 -- Rien ici n'appelle Meta : les comptes sociaux sont factices (identifiants
 -- « demo-… », sans jeton) et les publications portent metrics.demo = true.
@@ -68,12 +67,13 @@ begin
   select id into v_demo_user from auth.users where email = 'magasin.demo@vitriin.co';
   if v_demo_user is null then raise exception 'Compte magasin.demo@vitriin.co introuvable'; end if;
 
-  update public.networks set name = 'Chausselandia', is_demo = true where id = v_net;
+  -- Pas de nettoyage automatique : pour rejouer, supprimer d'abord les
+  -- magasins et promos du réseau (opération destructive, à faire à la main).
+  if exists (select 1 from public.stores where network_id = v_net) then
+    raise exception 'Le réseau contient déjà des magasins : nettoyage nécessaire avant de rejouer.';
+  end if;
 
-  -- Nettoyage (cascade : activations, publications, comptes sociaux, membres).
-  delete from public.promotions where created_by_network_id = v_net
-     or created_by_store_id in (select id from public.stores where network_id = v_net);
-  delete from public.stores where network_id = v_net;
+  update public.networks set name = 'Chausselandia', is_demo = true where id = v_net;
 
   -- ---------------------------------------------------------------------------
   -- 20 magasins
@@ -126,7 +126,7 @@ begin
         insert into public.social_accounts (store_id, channel, external_account_id, parent_external_id, display_name, status, last_error, connected_at)
         values (v_sp, 'instagram', 'demo-ig-' || v_store.k, 'demo-fb-' || v_store.k,
                 '@chausselandia.' || lower(regexp_replace(translate(v_store.city, 'éèêëàâîïôöûüçÉ', 'eeeeaaiioouucE'), '[^a-zA-Z0-9]+', '', 'g')) || v_store.k,
-                case when v_store.k % 10 = 8 then 'error' else 'active' end,
+                (case when v_store.k % 10 = 8 then 'error' else 'active' end)::public.social_account_status,
                 case when v_store.k % 10 = 8 then 'Session expirée' end,
                 now() - ((50 - v_store.k) || ' days')::interval);
       end if;

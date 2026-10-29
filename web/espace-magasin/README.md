@@ -28,7 +28,18 @@ Migration associée : `20261028223629_espace_centrale.sql`.
 
 `public/magasin/index.html` : l'app magasin calée sur la maquette Claude Design
 « Vitriin App » (magenta), installable en plein écran sur l'écran d'accueil
-(manifest + balises Apple). Données de démo locales (L'Atelier du Coureur,
-réseau Foulée Sport), mémorisées dans le navigateur ; « Réinitialiser la démo »
-en bas des Réglages. Aucune connexion à Supabase ni à Meta : les publications
-sont simulées. Le branchement aux vraies données suit pour la bêta.
+(manifest + balises Apple).
+
+Branchée sur Supabase, dans la même base que l'Espace Centrale : une promo
+envoyée par la centrale apparaît dans l'app (rafraîchissement toutes les 15 s
+et au retour sur l'onglet), et ce que fait le magasin (activer, refuser,
+programmer, publier) remonte dans le suivi de la centrale.
+
+Publication SIMULÉE : RPC `demo_publish`, `demo_reconnect`, `demo_tick`
+(migration `demo_mode`), autorisées uniquement pour un réseau `is_demo`.
+Aucun appel à Meta depuis cette page.
+
+Démo « Chausselandia » : 20 magasins, 10 promos centrale, 3 promos du magasin
+de Lyon (`supabase/seed/demo_chausselandia.sql`). Compte magasin :
+`magasin.demo@vitriin.co` (mot de passe hors dépôt). Centrale : compte
+administrateur du réseau Chausselandia.
