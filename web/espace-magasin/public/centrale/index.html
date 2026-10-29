@@ -20,7 +20,19 @@
   --rose:#fdeef6; --teal:#0c9875; --teal2:#5ebca3; --forest:#3a4a3a; --err:#D0342C;
   --t-green:#e7f5f0; --t-pink:#fdeef6; --t-indigo:#eef0fb; --c-indigo:#5b63c4;
   --t-amber:#fbf0e6; --c-amber:#c08a3e; --t-purple:#f3eefb; --c-purple:#8a5bc4; --t-red:#fbe9e7;
+  --card:#fff; --ink2:#6b6660; --hover:#fcfbf9; --chip:#f0eeec; --dash:#d9cfc2; --track:#e2ddd5;
 }
+/* Thème sombre : data-theme posé par le script (Paramètres > Préférences). */
+:root[data-theme=dark]{
+  --ink:#f1ede7; --ink2:#c9c2b8; --muted:#a39d94; --faint:#7d776f; --line:#2f2b27; --bg:#151312; --card:#1f1c1a;
+  --rose:#3a1a2b; --hover:#262220; --chip:#2b2724; --dash:#4a443d; --track:#3a3530; --forest:#26302a;
+  --t-green:#173129; --t-pink:#3a1a2b; --t-indigo:#23253d; --t-amber:#3a2c1b; --t-purple:#2d2338; --t-red:#3b1f1d;
+  color-scheme:dark;
+}
+:root[data-theme=dark] .bars i{background:#5a3a44}
+:root[data-theme=dark] .bulk{background:linear-gradient(160deg,#3a2430,#22322b)}
+:root[data-theme=dark] .uav{background:#3b3528;color:#d9c9a3}
+:root[data-theme=dark] .bars i.last{background:var(--p)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%}
 body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
@@ -31,7 +43,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 
 /* ---------- App shell ---------- */
 .app{display:flex;height:100vh;overflow:hidden}
-.side{flex:none;width:244px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;padding:22px 16px}
+.side{flex:none;width:244px;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:22px 16px}
 .brand{display:flex;align-items:center;gap:11px;padding:0 6px 4px}
 .brand img{width:38px;height:38px;border-radius:50%;flex:none}
 .brand b{display:block;font-weight:700;font-size:15.5px;letter-spacing:-.02em;line-height:1.1}
@@ -43,7 +55,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .net span{font-size:11px;color:var(--muted)}
 .sect{margin-top:18px;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#b3ada4;padding:0 8px}
 .nav{margin-top:8px;display:flex;flex-direction:column;gap:3px}
-.nav button{display:flex;align-items:center;gap:12px;padding:11px 12px;border:none;border-radius:11px;text-align:left;font-weight:600;font-size:14px;background:transparent;color:#6b6660}
+.nav button{display:flex;align-items:center;gap:12px;padding:11px 12px;border:none;border-radius:11px;text-align:left;font-weight:600;font-size:14px;background:transparent;color:var(--ink2)}
 .nav button.on{background:var(--rose);color:var(--v)}
 .nav svg{flex:none}
 .bulk{padding:14px;border-radius:14px;background:linear-gradient(160deg,#fdeef6,#eef6f2);border:1px solid var(--line)}
@@ -57,7 +69,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .me button{border:none;background:none;padding:0;font-size:10.5px;color:var(--muted);text-decoration:underline}
 
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
-.top{flex:none;height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 26px}
+.top{flex:none;height:70px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 26px}
 .top h1{font-weight:700;font-size:18px;letter-spacing:-.02em;margin:0}
 .top p{font-size:12px;color:var(--muted);margin:0}
 .search{display:flex;align-items:center;gap:9px;background:var(--bg);border-radius:11px;padding:9px 13px;width:240px}
@@ -71,7 +83,7 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .content{flex:1;min-height:0;overflow-y:auto;padding:26px}
 
 /* ---------- Building blocks ---------- */
-.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px}
 .card h3{font-weight:700;font-size:15.5px;margin:0}
 .card .sub{font-size:12px;color:var(--muted)}
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -81,15 +93,16 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .gx{display:grid;grid-template-columns:1.55fr 1fr;gap:16px}
 .mt{margin-top:16px}
-.kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
 .kpi .ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center}
 .kpi .tr{font-size:11.5px;font-weight:700;color:var(--teal)}
-.kpi .val{font-weight:700;font-size:25px;letter-spacing:-.03em;margin-top:12px}
-.kpi .lbl{font-size:12px;color:var(--muted);margin-top:1px}
-.mini{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px}
-.mini .lbl{font-size:12.5px;font-weight:600;color:#6b6660}
+.kpi .val{font-weight:700;font-size:36px;letter-spacing:-.03em;margin-top:14px;line-height:1.05}
+.kpi .lbl{font-size:14px;font-weight:600;color:var(--ink2);margin-top:4px}
+.kpi .tr{font-size:13px}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.mini .lbl{font-size:12.5px;font-weight:600;color:var(--ink2)}
 .mini .val{font-weight:700;font-size:25px;letter-spacing:-.03em;margin-top:6px}
-.wide{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;align-items:center;gap:14px}
+.wide{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;align-items:center;gap:14px}
 .wide .ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none}
 .wide .val{font-weight:700;font-size:22px;letter-spacing:-.02em;line-height:1.1}
 .wide .lbl{font-size:12px;color:var(--muted);line-height:1.35;margin-top:2px}
@@ -100,13 +113,13 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .bars i.last{background:var(--p)}
 .bars span{font-size:11px;color:var(--muted);font-weight:600}
 .dark{background:var(--forest);border-radius:18px;padding:20px;color:#fff;flex:1}
-.dark .t{font-size:12.5px;opacity:.75;font-weight:600}
-.dark .v{font-weight:700;font-size:34px;letter-spacing:-.03em;margin-top:6px}
+.dark .t{font-size:14px;opacity:.8;font-weight:600}
+.dark .v{font-weight:700;font-size:46px;letter-spacing:-.03em;margin-top:6px}
 .track{height:8px;border-radius:5px;background:var(--bg);overflow:hidden}
 .track i{display:block;height:100%;border-radius:5px;background:var(--teal)}
 .dark .track{background:rgba(255,255,255,.18);margin-top:12px}
 .dark .track i{background:var(--teal2)}
-.dark p{font-size:12px;opacity:.75;margin:10px 0 0;line-height:1.4}
+.dark p{font-size:13.5px;opacity:.8;margin:10px 0 0;line-height:1.4}
 .alert-ic{width:38px;height:38px;border-radius:11px;background:var(--t-pink);color:var(--v);display:flex;align-items:center;justify-content:center;flex:none}
 .line{display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid var(--line)}
 .line:last-child{border-bottom:none}
@@ -115,13 +128,13 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .empty{font-size:13px;color:var(--muted);padding:14px 0;line-height:1.5}
 
 /* Tables */
-.tcard{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.tcard{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .tscroll{overflow-x:auto}
 .thead,.trow{display:grid;gap:14px;padding:13px 22px;align-items:center;min-width:860px}
 .thead{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--faint);border-bottom:1px solid var(--line);text-transform:uppercase}
 .trow{padding:14px 22px;border-bottom:1px solid var(--line)}
 .trow:last-child{border-bottom:none}
-.trow.click{cursor:pointer}.trow.click:hover{background:#fcfbf9}
+.trow.click{cursor:pointer}.trow.click:hover{background:var(--hover)}
 .r{text-align:right}
 .cell-name{display:flex;align-items:center;gap:11px;min-width:0}
 .cell-name .av{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none}
@@ -131,26 +144,26 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .num{font-weight:600;font-size:13px}
 .pill{display:inline-block;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px;white-space:nowrap}
 .p-green{background:var(--t-green);color:var(--teal)} .p-amber{background:var(--t-amber);color:var(--c-amber)}
-.p-grey{background:#f0eeec;color:var(--muted)} .p-red{background:var(--t-red);color:var(--err)}
+.p-grey{background:var(--chip);color:var(--muted)} .p-red{background:var(--t-red);color:var(--err)}
 .p-pink{background:var(--t-pink);color:var(--p)} .p-indigo{background:var(--t-indigo);color:var(--c-indigo)} .p-purple{background:var(--t-purple);color:var(--c-purple)}
 .badge{display:inline-block;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:7px;white-space:nowrap}
 .soc{display:flex;gap:5px}
-.soc span{width:23px;height:23px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;background:#ece8e2;color:#b3ada4}
+.soc span{width:23px;height:23px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;background:var(--chip);color:#b3ada4}
 .soc .fb{background:#1877F2;color:#fff}.soc .ig{background:#E1306C;color:#fff}
 .relay{min-width:0}
 .relay .row{font-size:12px;font-weight:700}
 .relay .row span{font-weight:500;color:var(--muted)}
 .relay .track{margin-top:5px;height:6px}
 .chips{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:#fff;color:#6b6660;font-weight:600;font-size:13px;padding:8px 15px;border-radius:20px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink2);font-weight:600;font-size:13px;padding:8px 15px;border-radius:20px}
 .chip.on{background:var(--p);border-color:var(--p);color:#fff}
 .chip em{font-style:normal;font-size:11px;font-weight:700;margin-left:6px;padding:1px 7px;border-radius:10px;background:var(--bg);color:var(--muted)}
 .chip.on em{background:rgba(255,255,255,.25);color:#fff}
 .tbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 
 /* Sources (Promotions) */
-.src{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
-.src.dash{border:2px dashed #d9cfc2}
+.src{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.src.dash{border:2px dashed var(--dash)}
 .src .ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center}
 .src b{font-weight:700;font-size:15px;margin-top:13px}
 .src p{font-size:12.5px;color:var(--muted);margin:5px 0 0;line-height:1.45}
@@ -158,21 +171,21 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .soon{position:absolute;top:14px;right:14px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--bg);color:var(--muted)}
 
 /* Banner (Magasins) */
-.banner{background:#fff;border:1px solid #f6d3de;border-radius:18px;overflow:hidden}
-.banner .hd{background:#fdf1f3;display:flex;align-items:center;gap:14px;padding:16px 20px}
+.banner{background:var(--card);border:1px solid #f6d3de;border-radius:18px;overflow:hidden}
+.banner .hd{background:var(--t-red);display:flex;align-items:center;gap:14px;padding:16px 20px}
 .banner .hd b{display:block;font-weight:700;font-size:15px}
-.banner .hd span{font-size:12.5px;color:#6b6660}
+.banner .hd span{font-size:12.5px;color:var(--ink2)}
 .banner .hd .cnt{margin-left:auto;font-weight:700;font-size:13px;color:var(--err);white-space:nowrap}
 .banner .bd{padding:16px 20px;display:flex;gap:12px;flex-wrap:wrap}
 .tag{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-.tag .av{width:30px;height:30px;border-radius:8px;background:#f0eeec;color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11.5px;flex:none}
+.tag .av{width:30px;height:30px;border-radius:8px;background:var(--chip);color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11.5px;flex:none}
 .tag b{display:block;font-size:13px;font-weight:600}
 .tag small{font-size:11.5px;color:var(--muted)}
 .tag button{margin-left:8px;background:var(--grad);color:#fff;border:none;font-weight:700;font-size:12.5px;padding:8px 13px;border-radius:9px}
 
 /* Modal */
 .ov{position:fixed;inset:0;background:rgba(45,45,45,.38);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:20}
-.modal{background:#fff;border-radius:20px;width:100%;max-width:980px;box-shadow:0 24px 60px rgba(0,0,0,.18)}
+.modal{background:var(--card);border-radius:20px;width:100%;max-width:980px;box-shadow:0 24px 60px rgba(0,0,0,.18)}
 .modal.sm{max-width:560px}
 .mh{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--line)}
 .mh h2{font-size:18px;font-weight:700;letter-spacing:-.02em;margin:0}
@@ -185,38 +198,38 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .fl{display:block;font-size:12.5px;font-weight:700;margin:16px 0 7px}
 .fl:first-child{margin-top:0}
 .fl small{font-weight:500;color:var(--muted)}
-.in{width:100%;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;outline:none}
+.in{width:100%;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--card);outline:none}
 .in:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(229,8,126,.12)}
 textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.types button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px 8px;font-size:12.5px;font-weight:600;color:#6b6660;text-align:center;line-height:1.25}
+.types button{border:1px solid var(--line);background:var(--card);border-radius:11px;padding:10px 8px;font-size:12.5px;font-weight:600;color:var(--ink2);text-align:center;line-height:1.25}
 .types button b{display:block;font-size:16px;color:var(--ink);margin-bottom:2px}
 .types button.on{border-color:var(--p);background:var(--rose);color:var(--v)}
 .types button.on b{color:var(--p)}
-.drop{border:2px dashed #d9cfc2;border-radius:16px;padding:18px;display:flex;align-items:center;gap:16px;cursor:pointer;background:#fff}
+.drop{border:2px dashed var(--dash);border-radius:16px;padding:18px;display:flex;align-items:center;gap:16px;cursor:pointer;background:var(--card)}
 .drop img{width:86px;height:86px;border-radius:12px;object-fit:cover;flex:none;background:var(--bg)}
 .drop .ph{width:86px;height:86px;border-radius:12px;background:var(--t-pink);color:var(--p);display:flex;align-items:center;justify-content:center;flex:none}
 .drop b{display:block;font-size:14px}
 .drop span{font-size:12px;color:var(--muted);line-height:1.4}
 .sw{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
 .sw input{display:none}
-.sw .k{flex:none;width:38px;height:22px;border-radius:12px;background:#e2ddd5;position:relative;transition:.15s;margin-top:1px}
-.sw .k::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+.sw .k{flex:none;width:38px;height:22px;border-radius:12px;background:var(--track);position:relative;transition:.15s;margin-top:1px}
+.sw .k::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--card);transition:.15s}
 .sw input:checked + .k{background:var(--p)}
 .sw input:checked + .k::after{left:19px}
 .sw b{display:block;font-size:13.5px}
 .sw span{font-size:12px;color:var(--muted);line-height:1.4}
 .seg{display:flex;background:var(--bg);border-radius:11px;padding:4px;gap:4px}
-.seg button{flex:1;border:none;background:none;padding:9px;border-radius:8px;font-weight:700;font-size:13px;color:#6b6660}
-.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.seg button{flex:1;border:none;background:none;padding:9px;border-radius:8px;font-weight:700;font-size:13px;color:var(--ink2)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .picker{border:1px solid var(--line);border-radius:12px;margin-top:10px;max-height:240px;overflow-y:auto}
 .picker label{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer}
 .picker label:last-child{border-bottom:none}
 .picker input{accent-color:var(--p);width:16px;height:16px}
 .picker small{margin-left:auto;color:var(--muted);font-size:11.5px}
 /* Aperçu du post */
-.post{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;position:sticky;top:0}
+.post{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card);position:sticky;top:0}
 .post .ph{display:flex;align-items:center;gap:10px;padding:12px 14px}
 .post .ph i{width:30px;height:30px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;font-size:11px;color:var(--muted)}
 .post .ph b{font-size:13px}.post .ph small{display:block;font-size:11px;color:var(--muted)}
@@ -238,7 +251,7 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 /* Détail promo */
 .dw-ov{position:fixed;inset:0;background:rgba(45,45,45,.22);z-index:15;opacity:0;pointer-events:none;transition:opacity .25s}
 .dw-ov.open{opacity:1;pointer-events:auto}
-.drawer{position:fixed;top:0;right:0;height:100vh;width:33vw;min-width:420px;max-width:100vw;background:#fff;z-index:16;box-shadow:-18px 0 50px rgba(0,0,0,.12);transform:translateX(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:33vw;min-width:420px;max-width:100vw;background:var(--card);z-index:16;box-shadow:-18px 0 50px rgba(0,0,0,.12);transform:translateX(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
 .drawer.open{transform:none}
 .dw-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line)}
 .dw-h b{font-size:15px}
@@ -254,20 +267,75 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 .head img,.head .noimg{width:96px;height:120px;border-radius:14px;object-fit:cover;flex:none;background:var(--bg)}
 .head h2{margin:0;font-size:18px;letter-spacing:-.02em}
 .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.head p{font-size:13px;color:#6b6660;line-height:1.5;margin:10px 0 0;white-space:pre-wrap}
+.head p{font-size:13px;color:var(--ink2);line-height:1.5;margin:10px 0 0;white-space:pre-wrap}
 .ch{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600}
 .ch.ok{color:var(--teal)}.ch.ko{color:var(--err)}.ch.no{color:var(--faint)}
 
+/* Sidebar repliable */
+.side{transition:width .2s}
+.fold{margin-left:auto;width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--muted);flex:none}
+.app.folded .side{width:76px;padding:22px 12px}
+.app.folded .side .lbl,.app.folded .brand div,.app.folded .net div,.app.folded .sect,.app.folded .bulk,.app.folded .me div{display:none}
+.app.folded .nav button{justify-content:center;padding:11px 0}
+.app.folded .net{justify-content:center;padding:10px 0}
+.app.folded .brand{flex-direction:column;gap:10px}.app.folded .fold{margin:0;transform:rotate(180deg)}
+.app.folded .me{justify-content:center}
+
+/* Astuces */
+.tip{display:flex;gap:12px;align-items:flex-start;background:var(--t-indigo);border-radius:14px;padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.45}
+.tip b{color:var(--c-indigo)}
+.tip button{margin-left:auto;border:none;background:none;color:var(--muted);font-size:18px;line-height:1;padding:0 2px}
+.info{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--chip);color:var(--muted);font-size:11px;font-weight:700;font-style:normal;margin-left:6px;position:relative;cursor:help;vertical-align:1px}
+.info:hover::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:250px;background:var(--ink);color:var(--card);font-size:12px;font-weight:500;line-height:1.4;padding:9px 11px;border-radius:9px;z-index:30;white-space:normal}
+
+/* Formats de publication */
+.fmt{border:1px solid var(--line);border-radius:14px;padding:4px 12px;margin-top:10px}
+.fmt .nw{display:flex;align-items:center;gap:8px;padding:9px 0 4px;font-weight:700;font-size:13px}
+.fmt .nw em{font-style:normal;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--chip);color:var(--muted);margin-left:auto}
+.fmt label{display:flex;align-items:flex-start;gap:9px;padding:7px 0;font-size:12.5px;cursor:pointer;border-top:1px dashed var(--line)}
+.fmt label input{accent-color:var(--p);margin-top:2px}
+.fmt label small{display:block;color:var(--muted);font-size:11.5px}
+.fmt label.off{opacity:.42;cursor:not-allowed}
+.pvtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.pvtabs button{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:5px 11px;font-size:11.5px;font-weight:700;color:var(--ink2)}
+.pvtabs button.on{background:var(--p);border-color:var(--p);color:#fff}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.thumbs span{position:relative}.thumbs img{width:56px;height:56px;border-radius:10px;object-fit:cover;display:block}
+.thumbs span button{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:none;background:var(--ink);color:var(--card);font-size:12px;line-height:1}
+
+/* Panneau : formulaires */
+.dw-b .fl{margin-top:14px}
+.stores-cta{width:100%;margin-top:18px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px 14px;font-weight:700;font-size:13.5px}
+.stores-cta svg{transition:transform .2s}.stores-cta.open svg{transform:rotate(180deg)}
+.dw-f{display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--line)}
+.thumb{width:34px;height:42px;border-radius:8px;object-fit:cover;flex:none;background:var(--bg)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;margin-top:12px}
+.kv span{color:var(--muted)}
+
+/* Paramètres */
+.stabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.stabs button{border:none;background:none;padding:10px 14px;font-weight:700;font-size:13.5px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.stabs button.on{color:var(--p);border-bottom-color:var(--p)}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.sgrid .card .sw{margin-top:12px}
+.urow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.urow:last-child{border-bottom:none}
+.uav{width:38px;height:38px;border-radius:50%;background:#f5ecd3;color:#7a6a52;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;overflow:hidden}
+.uav img{width:100%;height:100%;object-fit:cover}
+.logo-box{width:84px;height:84px;border-radius:16px;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;color:var(--faint);font-size:11px;text-align:center}
+.logo-box img{width:100%;height:100%;object-fit:contain}
+.ro{opacity:.6;pointer-events:none}
+
 /* Écrans plein page */
 .full{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
-.auth{width:100%;max-width:420px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px 28px}
+.auth{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:30px 28px}
 .auth .brand{padding:0;margin-bottom:22px}
 .auth h2{font-size:20px;letter-spacing:-.02em;margin:0 0 4px}
 .auth > p{font-size:13px;color:var(--muted);margin:0 0 18px;line-height:1.45}
 .auth .btn-p{width:100%;margin-top:18px;padding:13px}
 .auth .alt{margin-top:14px;text-align:center;font-size:13px;color:var(--muted)}
 .auth .alt button{border:none;background:none;color:var(--p);font-weight:700;padding:0}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13.5px;font-weight:600;padding:12px 18px;border-radius:12px;z-index:40;box-shadow:0 10px 30px rgba(0,0,0,.2);max-width:calc(100% - 32px)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--card);font-size:13.5px;font-weight:600;padding:12px 18px;border-radius:12px;z-index:40;box-shadow:0 10px 30px rgba(0,0,0,.2);max-width:calc(100% - 32px)}
 .spin{display:flex;align-items:center;justify-content:center;height:100vh;color:var(--muted);font-size:14px}
 
 /* Responsive */
@@ -281,8 +349,8 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
   .gx,.g2,.g3,.g4,.two{grid-template-columns:1fr}.g5{grid-template-columns:1fr 1fr}.types{grid-template-columns:repeat(2,1fr)}
   .mnav{display:flex!important}.drawer{width:100vw;min-width:0}
 }
-.mnav{display:none;gap:6px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
-.mnav button{flex:none;border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 13px;font-weight:600;font-size:13px;color:#6b6660}
+.mnav{display:none;gap:6px;overflow-x:auto;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+.mnav button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:7px 13px;font-weight:600;font-size:13px;color:var(--ink2)}
 .mnav button.on{background:var(--rose);border-color:var(--rose);color:var(--v)}
 @media (max-width:980px){.mnav{display:flex}}
 </style>
@@ -324,14 +392,18 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 <!-- ============ APP ============ -->
 <div id="v-app" class="app hidden">
   <aside class="side">
-    <div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Pro</b><span>Centrale</span></div></div>
+    <div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Pro</b><span>Centrale</span></div><button class="fold" id="fold" title="Replier le menu" aria-label="Replier le menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button></div>
     <div class="net"><span class="av" id="net-av"></span><div style="min-width:0;line-height:1.15"><b id="net-name"></b><span id="net-count"></span></div></div>
     <div class="sect">PILOTAGE</div>
     <nav class="nav" id="nav">
-      <button data-v="overview"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tableau de bord</button>
-      <button data-v="promos"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H5a2 2 0 0 0-2 2v4.6a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.8Z"/><circle cx="7.5" cy="7.5" r="1.4" fill="currentColor"/></svg>Promotions</button>
-      <button data-v="stores"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4.6 4.5h14.8L21 9"/><path d="M3.4 9h17.2v1.6a2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0V9Z"/><path d="M5 11.4V20h14v-8.6"/></svg>Magasins</button>
-      <button data-v="audience"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6"/><path d="M17.5 13.5a5.5 5.5 0 0 1 3 5.5"/></svg>Audience</button>
+      <button data-v="overview"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="lbl">Tableau de bord</span></button>
+      <button data-v="promos"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H5a2 2 0 0 0-2 2v4.6a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.8Z"/><circle cx="7.5" cy="7.5" r="1.4" fill="currentColor"/></svg><span class="lbl">Promotions</span></button>
+      <button data-v="stores"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4.6 4.5h14.8L21 9"/><path d="M3.4 9h17.2v1.6a2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0V9Z"/><path d="M5 11.4V20h14v-8.6"/></svg><span class="lbl">Magasins</span></button>
+      <button data-v="audience"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6"/><path d="M17.5 13.5a5.5 5.5 0 0 1 3 5.5"/></svg><span class="lbl">Audience</span></button>
+    </nav>
+    <div class="sect">COMPTE</div>
+    <nav class="nav" id="nav2">
+      <button data-v="settings"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg><span class="lbl">Paramètres</span></button>
     </nav>
     <div style="flex:1"></div>
     <div class="bulk"><b>Importer en masse</b><p>Excel, visuels ou via ton PIM.</p><button id="bulk-go">Importer</button></div>
@@ -352,8 +424,9 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 </div>
 <div class="dw-ov" id="dw-ov"></div>
 <aside class="drawer" id="drawer" aria-hidden="true">
-  <div class="dw-h"><b>Suivi de la promo</b><button class="dw-x" id="dw-x" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="dw-h"><b id="dw-title">Suivi de la promo</b><button class="dw-x" id="dw-x" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="dw-b" id="dw-b"></div>
+  <div class="dw-f hidden" id="dw-f"><button class="btn-s" id="dw-cancel">Annuler</button><button class="btn-p" id="dw-save">Enregistrer</button></div>
 </aside>
 
 <!-- ============ MODALE : NOUVELLE PROMO ============ -->
@@ -363,20 +436,26 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
     <div class="mb">
       <div class="form">
         <div>
-          <label class="fl">Visuel <small>· une image, recadrée pour Facebook et Instagram</small></label>
+          <label class="fl">Publication</label>
+          <div class="seg" id="f-kind"><button type="button" data-k="promo" class="on">Une promo</button><button type="button" data-k="post">Un post</button></div>
+
+          <label class="fl">Visuels <small>· une ou plusieurs photos (carrousel), recadrées pour les réseaux</small></label>
           <div class="drop" id="f-drop"><span class="ph" id="f-ph"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="m21 15-5-5L5 21"/></svg></span><img id="f-img" class="hidden" alt="Visuel"><div><b id="f-drop-t">Choisir une image</b><span id="f-drop-s">JPEG ou PNG. Convertie et recadrée automatiquement (format 4:5 maximum).</span></div></div>
-          <input type="file" id="f-file" accept="image/*" hidden>
+          <input type="file" id="f-file" accept="image/*" multiple hidden>
+          <div class="thumbs" id="f-thumbs"></div>
 
           <label class="fl" for="f-title">Titre</label>
           <input class="in" id="f-title" maxlength="90" placeholder="Ex. Black Friday running">
 
+          <div id="f-promo-only">
           <label class="fl">Type de promotion</label>
           <div class="types" id="f-types"></div>
 
           <label class="fl" for="f-mech">Offre <small id="f-mech-h"></small></label>
           <input class="in" id="f-mech" maxlength="60">
+          </div>
 
-          <label class="fl" for="f-desc">Texte du post <small>· facultatif</small></label>
+          <label class="fl" for="f-desc">Texte du post <small id="f-desc-h">· facultatif</small></label>
           <textarea class="in" id="f-desc" maxlength="1500" placeholder="Ce que le client doit savoir : produits concernés, conditions…"></textarea>
 
           <div class="two">
@@ -384,11 +463,15 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
             <div><label class="fl" for="f-end">Au</label><input class="in" id="f-end" type="date"></div>
           </div>
 
-          <label class="fl" for="f-code">Code de réduction en caisse <small>· facultatif, fourni par la centrale</small></label>
-          <input class="in" id="f-code" maxlength="24" placeholder="Ex. BLACK25" style="text-transform:uppercase;letter-spacing:.06em">
+          <div id="f-codes">
+          <div id="f-code-w"><label class="fl" for="f-code">Code de réduction en caisse <small>· facultatif, fourni par la centrale</small></label>
+          <input class="in" id="f-code" maxlength="24" placeholder="Ex. BLACK25" style="text-transform:uppercase;letter-spacing:.06em"></div>
+          <div id="f-ean-w"><label class="fl" for="f-ean">Code EAN en caisse <small>· facultatif, 8 ou 13 chiffres</small></label>
+          <input class="in" id="f-ean" maxlength="13" inputmode="numeric" placeholder="Ex. 3012345678901"></div>
+          </div>
 
           <label class="fl">Règle</label>
-          <label class="sw"><input type="checkbox" id="f-mand"><span class="k"></span><span><b>Promo obligatoire</b><span>Vos magasins ne peuvent pas la refuser. Ils la publient eux-mêmes, depuis leur espace.</span></span></label>
+          <label class="sw"><input type="checkbox" id="f-mand"><span class="k"></span><span><b>Promo obligatoire<i class="info" data-tip="Vos magasins ne peuvent pas la refuser. Ils la publient eux-mêmes, depuis leur espace.">i</i></b></span></label>
 
           <label class="fl">Magasins</label>
           <div class="seg" id="f-target"><button data-t="all" class="on">Tout le réseau</button><button data-t="pick">Sélection</button></div>
@@ -399,9 +482,12 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
           <div class="hint" id="f-count"></div>
         </div>
         <div>
+          <label class="fl">Formats de publication <small>· selon vos visuels</small></label>
+          <div id="f-formats"></div>
           <label class="fl">Aperçu du post magasin</label>
+          <div class="pvtabs" id="pv-tabs"></div>
           <div class="post">
-            <div class="ph"><i>MG</i><div><b>Votre magasin</b><small>Publié par le magasin · Facebook et Instagram</small></div></div>
+            <div class="ph"><i>MG</i><div><b>Votre magasin</b><small id="pv-where">Publié par le magasin</small></div></div>
             <div class="img" id="pv-img">Votre visuel</div>
             <div class="cap" id="pv-cap"></div>
             <div class="code hidden" id="pv-code"></div>
@@ -477,7 +563,15 @@ const regionOf = (pc) => { const c = String(pc || "").trim(); return c.length >=
 const SHORT_REGION = { "Provence-Alpes-Côte d'Azur": "PACA", "Auvergne-Rhône-Alpes": "A.-Rhône-Alpes", "Nouvelle-Aquitaine": "N.-Aquitaine", "Bourgogne-Franche-Comté": "Bourgogne-F.-C.", "Centre-Val de Loire": "Centre-Val de L." };
 
 /* ---------- État ---------- */
-const S = { user: null, net: null, stores: [], accounts: [], promos: [], acts: [], view: "overview", zone: "all", filter: "all", q: "", detail: null };
+// dw : panneau latéral ouvert ({ k: "promo" | "store", id }). E : brouillon d'édition du panneau.
+const S = { user: null, profile: null, role: "member", net: null, stores: [], accounts: [], promos: [], acts: [], members: null,
+  view: "overview", zone: "all", filter: "all", q: "", dw: null, dwStores: false, topAll: false, stab: "prefs" };
+let E = null;
+const isAdmin = () => S.role === "owner" || S.role === "admin";
+const NS = () => (S.net && S.net.settings) || {};
+const feat = (k) => k === "discount_code" ? NS().discount_code !== false : k === "ean_code" ? NS().ean_code === true : !!NS()[k];
+const allTypes = () => [...TYPES, ...(NS().custom_types || []).map(t => ({ k: t.k, ico: "★", label: t.label, ph: "", help: "" }))];
+const typeOf = (k) => allTypes().find(x => x.k === k);
 const ICON = {
   store: '<path d="M3 9 4.6 4.5h14.8L21 9"/><path d="M3.4 9h17.2v1.6a2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0V9Z"/><path d="M5 11.4V20h14v-8.6"/>',
   tag: '<path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H5a2 2 0 0 0-2 2v4.6a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.8Z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"/>',
@@ -489,17 +583,47 @@ const ICON = {
   img: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="m21 15-5-5L5 21"/>',
   db: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
   people: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6"/><path d="M17.5 13.5a5.5 5.5 0 0 1 3 5.5"/>',
+  down: '<path d="m6 9 6 6 6-6"/>',
 };
 const svg = (p, s = 18, w = 2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const ls = { get: (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch { return d; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+
+/* ---------- Préférences de l'utilisateur (ce navigateur) ---------- */
+const darkMq = matchMedia("(prefers-color-scheme: dark)");
+function applyTheme() {
+  const t = ls.get("c-theme", "auto");
+  document.documentElement.dataset.theme = t === "dark" || (t === "auto" && darkMq.matches) ? "dark" : "light";
+}
+darkMq.addEventListener?.("change", applyTheme); applyTheme();
+function applyFold() { $("v-app").classList.toggle("folded", ls.get("c-fold", "0") === "1"); $("fold").title = ls.get("c-fold", "0") === "1" ? "Déplier le menu" : "Replier le menu"; }
+$("fold").onclick = () => { ls.set("c-fold", ls.get("c-fold", "0") === "1" ? "0" : "1"); applyFold(); };
+applyFold();
+// Bulles d'aide : activées par défaut, chacune peut être masquée.
+const tipsOn = () => ls.get("c-tips", "1") === "1";
+const tipsHidden = () => { try { return JSON.parse(ls.get("c-tips-x", "[]")); } catch { return []; } };
+const tip = (id, html) => !tipsOn() || tipsHidden().includes(id) ? "" : `<div class="tip"><span>💡</span><div>${html}</div><button data-tipx="${id}" aria-label="Masquer ce conseil">×</button></div>`;
+
+/* ---------- Modèles de messages (copiés, jamais envoyés par Vitriin) ---------- */
+const TPL = {
+  invite: { label: "Invitation d'un magasin", sub: "Envoyé pour qu'un magasin rejoigne le réseau.",
+    def: "Bonjour,\n\n{reseau} passe sur Vitriin pour diffuser ses promotions sur les pages Facebook et Instagram de chaque magasin.\n\n1. Ouvrez ce lien : {lien}\n2. Créez votre compte et votre magasin.\n3. Connectez votre Page Facebook et votre compte Instagram.\n\nCode réseau, si on vous le demande : {code}\n\nVous recevrez ensuite nos promos dans votre espace, prêtes à publier." },
+  relance: { label: "Relance connexion réseaux", sub: "Pour un magasin qui n'a pas connecté Facebook ou Instagram.",
+    def: "Bonjour {magasin},\n\nPour relayer les promos du réseau {reseau}, il reste une étape : connecter la Page Facebook et le compte Instagram du magasin. Ça prend deux minutes depuis votre espace : {lien}\n\nMerci !" },
+  promo: { label: "Annonce d'une promo", sub: "Pour prévenir les magasins qu'une campagne les attend.",
+    def: "Bonjour {magasin},\n\nNouvelle campagne du réseau {reseau} : « {promo} », du {debut} au {fin}.\nElle vous attend dans votre espace Vitriin, prête à publier : {lien}\n\nMerci de la relayer sur vos réseaux !" },
+};
+const tplText = (k) => (NS().email_templates || {})[k] || TPL[k].def;
+const fillTpl = (k, v) => tplText(k).replace(/\{(\w+)\}/g, (m, x) => v[x] ?? m);
 
 /* ---------- Données dérivées ---------- */
+const metric = (p, k) => (p.metrics && !p.metrics.hidden && Number(p.metrics[k])) || 0;
 function derive() {
   const now = Date.now();
   const acc = {}; S.accounts.forEach(a => { (acc[a.store_id] ||= []).push(a); });
   const actsByPromo = {}, actsByStore = {};
   S.acts.forEach(a => { (actsByPromo[a.promotion_id] ||= []).push(a); (actsByStore[a.store_id] ||= []).push(a); });
   const pubs = S.acts.flatMap(a => (a.publications || []).filter(p => p.status === "published").map(p => ({ ...p, store_id: a.store_id, promotion_id: a.promotion_id })));
-  const views = (p) => (p.metrics && !p.metrics.hidden && Number(p.metrics.views)) || 0;
+  const views = (p) => metric(p, "views");
 
   const stores = S.stores.map((s, i) => {
     const a = (acc[s.id] || []);
@@ -511,7 +635,7 @@ function derive() {
     const myActs = actsByStore[s.id] || [];
     const region = regionOf(s.postal_code);
     return {
-      ...s, i, region, zone: ZONE_OF[region] || null, fbOk, igOk, conn,
+      ...s, i, region, zone: ZONE_OF[region] || null, fbOk, igOk, conn, accounts: a, acts: myActs, pubs: sp,
       pending: myActs.filter(x => x.status === "pending").length,
       relayed: new Set(sp.map(p => p.promotion_id)).size,
       pubCount: sp.length,
@@ -535,7 +659,8 @@ function derive() {
       regions: !acts.length ? "—" : acts.length === stores.length && stores.length > 1 ? "Toutes régions" : regs.length ? regs.slice(0, 2).map(r => SHORT_REGION[r] || r).join(", ") + (regs.length > 2 ? ` +${regs.length - 2}` : "") : "—",
     };
   });
-  return { stores, byId, promos, pubs, views };
+  const promoById = Object.fromEntries(promos.map(p => [p.id, p]));
+  return { stores, byId, promos, promoById, pubs, views };
 }
 
 /* ---------- Navigation ---------- */
@@ -544,50 +669,75 @@ const TITLES = {
   promos: ["Promotions", "Importer, diffuser et piloter tes campagnes"],
   stores: ["Magasins", ""],
   audience: ["Audience", "Qui sont les clients de ton réseau"],
+  settings: ["Paramètres", "Préférences, équipe, identité de la centrale et messages aux magasins"],
 };
-function go(v) { S.view = v; S.detail = null; render(); $("content").scrollTop = 0; }
-document.querySelectorAll("#nav button").forEach(b => b.onclick = () => go(b.dataset.v));
-$("mnav").innerHTML = [...document.querySelectorAll("#nav button")].map(b => `<button data-v="${b.dataset.v}">${b.textContent}</button>`).join("");
+const navBtns = () => document.querySelectorAll("#nav button, #nav2 button");
+function go(v) { if (!confirmLeave()) return; S.view = v; S.dw = null; E = null; render(); $("content").scrollTop = 0; }
+navBtns().forEach(b => b.onclick = () => go(b.dataset.v));
+$("mnav").innerHTML = [...navBtns()].map(b => `<button data-v="${b.dataset.v}">${esc(b.querySelector(".lbl").textContent)}</button>`).join("");
 $("mnav").querySelectorAll("button").forEach(b => b.onclick = () => go(b.dataset.v));
 $("bulk-go").onclick = () => go("promos");
 $("bell").onclick = () => go("stores");
-$("q").oninput = (e) => { S.q = e.target.value.trim().toLowerCase(); if (S.view !== "stores") { S.view = "stores"; S.detail = null; } render(); const q = $("q"); q.focus(); };
+$("q").oninput = (e) => { S.q = e.target.value.trim().toLowerCase(); if (S.view !== "stores") { S.view = "stores"; S.dw = null; E = null; } render(); $("q").focus(); };
 
 function render() {
   const D = derive();
   const [t, sub] = TITLES[S.view];
   $("pg-title").textContent = t;
   $("pg-sub").textContent = S.view === "stores" ? `${nf.format(D.stores.length)} point${D.stores.length > 1 ? "s" : ""} de vente · segmentation par zone` : sub;
-  document.querySelectorAll("#nav button, #mnav button").forEach(b => b.classList.toggle("on", b.dataset.v === S.view));
+  document.querySelectorAll("#nav button, #nav2 button, #mnav button").forEach(b => b.classList.toggle("on", b.dataset.v === S.view));
   $("net-name").textContent = S.net.name;
   $("net-count").textContent = `${nf.format(D.stores.length)} magasin${D.stores.length > 1 ? "s" : ""}`;
   $("net-av").innerHTML = S.net.logo_url ? `<img src="${esc(S.net.logo_url)}" alt="">` : esc(initials(S.net.name));
+  renderMe();
   show("bell-dot", D.stores.some(s => s.conn === "none" || s.conn === "broken"));
   const y = $("content").scrollTop;
-  $("content").innerHTML = { overview: viewOverview, promos: viewPromos, stores: viewStores, audience: viewAudience }[S.view](D);
+  $("content").innerHTML = { overview: viewOverview, promos: viewPromos, stores: viewStores, audience: viewAudience, settings: viewSettings }[S.view](D);
   $("content").scrollTop = y;
   bindView(D);
   renderDrawer(D);
 }
-
-/* ---------- Panneau latéral : suivi d'une promo ---------- */
-function renderDrawer(D) {
-  const p = S.detail && D.promos.find(x => x.id === S.detail);
-  if (!p) S.detail = null;
-  $("drawer").classList.toggle("open", !!p); $("dw-ov").classList.toggle("open", !!p);
-  $("drawer").setAttribute("aria-hidden", p ? "false" : "true");
-  if (!p) return;
-  const b = $("dw-b"), y = b.dataset.id === p.id ? b.scrollTop : 0;
-  b.innerHTML = viewDetail(D, p); b.dataset.id = p.id; b.scrollTop = y;
-  b.querySelectorAll("[data-resend]").forEach(x => x.onclick = () => openPromo(S.detail));
+function renderMe() {
+  const p = S.profile || {}, name = [p.first_name, p.last_name].filter(Boolean).join(" ");
+  $("me-mail").textContent = name || S.user.email;
+  $("me-av").innerHTML = p.avatar_url ? `<img src="${esc(p.avatar_url)}" alt="">` : esc(initials(name || S.user.email.split("@")[0].replace(/[._]/g, " ")));
 }
-function closeDetail() { if (!S.detail) return; S.detail = null; render(); }
+
+/* ---------- Panneau latéral (promo ou magasin) ---------- */
+function confirmLeave() { return !(E && E.dirty) || confirm("Des modifications ne sont pas enregistrées. Les abandonner ?"); }
+function openDw(k, id) {
+  if (S.dw && S.dw.k === k && S.dw.id === id) return closeDetail();
+  if (!confirmLeave()) return;
+  S.dw = { k, id }; S.dwStores = false; E = null; render();
+}
+function renderDrawer(D) {
+  let html = null, title = "";
+  if (S.dw && S.dw.k === "promo" && D.promoById[S.dw.id]) { title = "Promotion"; html = viewPromoDw(D, D.promoById[S.dw.id]); }
+  else if (S.dw && S.dw.k === "store" && D.byId[S.dw.id]) { title = "Fiche magasin"; html = viewStoreDw(D, D.byId[S.dw.id]); }
+  else { S.dw = null; E = null; }
+  const on = !!html;
+  $("drawer").classList.toggle("open", on); $("dw-ov").classList.toggle("open", on);
+  $("drawer").setAttribute("aria-hidden", on ? "false" : "true");
+  if (!on) return;
+  $("dw-title").textContent = title;
+  const b = $("dw-b"), key = S.dw.k + S.dw.id, y = b.dataset.id === key ? b.scrollTop : 0;
+  b.innerHTML = html; b.dataset.id = key; b.scrollTop = y;
+  show("dw-f", !!E && E.editable);
+  $("dw-save").disabled = !(E && E.dirty);
+  bindDrawer(D);
+}
+function closeDetail() { if (!S.dw || !confirmLeave()) return; S.dw = null; E = null; render(); }
 $("dw-x").onclick = closeDetail; $("dw-ov").onclick = closeDetail;
+$("dw-cancel").onclick = () => { if (E) { E = null; render(); } };
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("m-promo").classList.contains("hidden") && $("m-invite").classList.contains("hidden")) closeDetail(); });
+const markDirty = () => { if (E) { E.dirty = true; $("dw-save").disabled = false; } };
 
 /* ---------- Tableau de bord ---------- */
 function kpi(ic, tint, color, val, lbl, trend) {
   return `<div class="kpi"><div class="row"><span class="ic" style="background:${tint};color:${color}">${svg(ic)}</span><span class="tr">${trend || ""}</span></div><div class="val">${val}</div><div class="lbl">${lbl}</div></div>`;
+}
+function topLine(s, i) {
+  return `<div class="line click" style="padding:10px 0;cursor:pointer" data-store="${s.id}"><span class="rank">${i + 1}</span><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name)}</div><div style="font-size:11.5px;color:var(--muted)">${esc([s.city, s.region && (SHORT_REGION[s.region] || s.region)].filter(Boolean).join(" · ") || "—")}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:13.5px">${compact(s.viewsAll)}</div><div style="font-size:11px;color:var(--teal);font-weight:700">${s.pubCount} pub.</div></div></div>`;
 }
 function viewOverview(D) {
   const now = Date.now();
@@ -602,7 +752,6 @@ function viewOverview(D) {
   const newPromos = D.promos.filter(p => recent(p.created_at)).length;
   const pub30 = D.pubs.filter(p => recent(p.published_at)).length;
 
-  // 8 dernières semaines de publications magasin.
   const weeks = Array.from({ length: 8 }, (_, i) => {
     const end = now - (7 - i) * 7 * DAY, start = end - 7 * DAY;
     return D.pubs.filter(p => { const t = new Date(p.published_at).getTime(); return t > start && t <= end; }).length;
@@ -614,9 +763,11 @@ function viewOverview(D) {
   const regions = Object.entries(D.stores.reduce((m, s) => { const r = s.region || "Non renseignée"; (m[r] ||= []).push(s); return m; }, {}))
     .map(([name, l]) => ({ name, count: l.length, perf: pct(l.filter(s => s.fbOk || s.igOk).length, l.length) }))
     .sort((a, b) => b.count - a.count).slice(0, 7);
-  const top = [...D.stores].sort((a, b) => b.viewsAll - a.viewsAll || b.pubCount - a.pubCount).slice(0, 5);
+  const ranked = [...D.stores].sort((a, b) => b.viewsAll - a.viewsAll || b.pubCount - a.pubCount);
+  const top = ranked.slice(0, 5), next = ranked.slice(5, 10);
 
   return `
+  ${tip("ov", "<b>Astuce :</b> cliquez sur un magasin du classement pour ouvrir sa fiche et ses statistiques détaillées.")}
   <div class="g5">
     ${kpi(ICON.store, "var(--t-green)", "var(--teal)", nf.format(n), "Magasins du réseau", newStores ? "+" + newStores : "")}
     ${kpi(ICON.tag, "var(--t-pink)", "var(--p)", nf.format(live), "Promos en cours", newPromos ? "+" + newPromos : "")}
@@ -631,12 +782,12 @@ function viewOverview(D) {
     </div>
     <div style="display:flex;flex-direction:column;gap:16px">
       <div class="card" style="padding:20px">
-        <div style="display:flex;align-items:center;gap:10px"><span class="alert-ic">${svg(ICON.warn, 20)}</span><div style="line-height:1.15"><div style="font-weight:700;font-size:24px;letter-spacing:-.02em">${nf.format(toActivate.length)} magasin${toActivate.length > 1 ? "s" : ""}</div><div style="font-size:12.5px;color:var(--muted)">sans réseaux sociaux connectés</div></div></div>
+        <div style="display:flex;align-items:center;gap:10px"><span class="alert-ic">${svg(ICON.warn, 20)}</span><div style="line-height:1.15"><div style="font-weight:700;font-size:26px;letter-spacing:-.02em">${nf.format(toActivate.length)} magasin${toActivate.length > 1 ? "s" : ""}</div><div style="font-size:13.5px;color:var(--muted)">sans réseaux sociaux connectés</div></div></div>
         <button class="btn-s" style="margin-top:15px;width:100%;padding:11px" data-go="stores">${toActivate.length ? "Relancer ces magasins" : "Voir les magasins"}</button>
       </div>
       <div class="dark">
         <div class="t">Taux de connexion réseau</div>
-        <div class="v">${rate}<span style="font-size:20px">%</span></div>
+        <div class="v">${rate}<span style="font-size:24px">%</span></div>
         <div class="track"><i style="width:${rate}%"></i></div>
         <p>${nf.format(connected)} magasin${connected > 1 ? "s" : ""} connecté${connected > 1 ? "s" : ""} sur ${nf.format(n)} · objectif 90 %</p>
       </div>
@@ -649,7 +800,9 @@ function viewOverview(D) {
     </div>
     <div class="card">
       <h3 style="margin-bottom:8px">Magasins les plus performants</h3>
-      ${top.length && top.some(s => s.pubCount) ? top.map((s, i) => `<div class="line" style="padding:10px 0"><span class="rank">${i + 1}</span><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name)}</div><div style="font-size:11.5px;color:var(--muted)">${esc([s.city, s.region && (SHORT_REGION[s.region] || s.region)].filter(Boolean).join(" · ") || "—")}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:13.5px">${compact(s.viewsAll)}</div><div style="font-size:11px;color:var(--teal);font-weight:700">${s.pubCount} pub.</div></div></div>`).join("") : `<div class="empty">Le classement apparaît dès que vos magasins publient vos promos.</div>`}
+      ${top.length && top.some(s => s.pubCount) ? top.map(topLine).join("") + (S.topAll ? next.map((s, i) => topLine(s, i + 5)).join("") : "")
+        + (next.length ? `<button class="link" style="margin-top:10px;font-size:13px" data-topall>${S.topAll ? "Masquer" : `Voir les ${next.length} autre${next.length > 1 ? "s" : ""} magasin${next.length > 1 ? "s" : ""}`}</button>` : "")
+        : `<div class="empty">Le classement apparaît dès que vos magasins publient vos promos.</div>`}
     </div>
   </div>`;
 }
@@ -667,6 +820,7 @@ function viewPromos(D) {
   const cols = "grid-template-columns:2.2fr 1.2fr 1.4fr 1.5fr .8fr .9fr";
   const chip = (k, l) => `<button class="chip ${S.filter === k ? "on" : ""}" data-filter="${k}">${l}<em>${counts[k]}</em></button>`;
   return `
+  ${tip("pr", "<b>Astuce :</b> cliquez sur une campagne pour modifier tous ses critères (visuel, offre, dates, codes…). Les magasins voient la version à jour.")}
   <div class="g3">
     <div class="src dash"><span class="soon">Bientôt</span><span class="ic" style="background:var(--t-green);color:var(--teal)">${svg(ICON.xls, 26, 1.9)}</span><b>Importer un fichier Excel</b><p>Glisse ton .xlsx ou .csv, on mappe automatiquement tes colonnes promo.</p><button class="btn-p" data-soon="L'import Excel arrive bientôt. En attendant, créez la promo avec un visuel.">Choisir un fichier</button></div>
     <div class="src"><span class="ic" style="background:var(--t-pink);color:var(--p)">${svg(ICON.img, 26, 1.9)}</span><b>Importer des visuels</b><p>Diffuse une affiche à tout ou partie de ton réseau.</p><button class="btn-s" data-new>Téléverser</button></div>
@@ -683,10 +837,11 @@ function viewPromos(D) {
     <div class="tscroll">
       <div class="thead" style="${cols}"><div>Campagne</div><div>Type</div><div>Régions</div><div>Relais magasins</div><div class="r">Vues</div><div class="r">Statut</div></div>
       ${list.length ? list.map(p => {
-        const pal = AV_PAL[p.i % AV_PAL.length], t = TYPES.find(x => x.k === p.promo_type), r = pct(p.relayed, p.target), [sl, sc] = ST_PILL[p.st];
-        return `<div class="trow click${S.detail === p.id ? " sel" : ""}" style="${cols}" data-promo="${p.id}">
-          <div class="cell-name"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(p.title)[0])}</span><div style="min-width:0"><b>${esc(p.title)}</b><small>${dshort(p.starts_at)} → ${dshort(p.ends_at)}${p.is_mandatory ? " · Obligatoire" : ""}</small></div></div>
-          <div>${t ? `<span class="badge ${TYPE_PILL[t.k]}">${t.label}</span>` : `<span class="mut">—</span>`}</div>
+        const pal = AV_PAL[p.i % AV_PAL.length], t = typeOf(p.promo_type), r = pct(p.relayed, p.target), [sl, sc] = ST_PILL[p.st];
+        const sel = S.dw && S.dw.k === "promo" && S.dw.id === p.id;
+        return `<div class="trow click${sel ? " sel" : ""}" style="${cols}" data-promo="${p.id}">
+          <div class="cell-name">${p.media_url ? `<img class="thumb" src="${esc(p.media_url)}" alt="" loading="lazy">` : `<span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(p.title)[0])}</span>`}<div style="min-width:0"><b>${esc(p.title)}</b><small>${dshort(p.starts_at)} → ${dshort(p.ends_at)}${p.is_mandatory ? " · Obligatoire" : ""}</small></div></div>
+          <div>${t ? `<span class="badge ${TYPE_PILL[t.k] || "p-grey"}">${esc(t.label)}</span>` : p.promo_type ? `<span class="badge p-grey">${esc(p.promo_type)}</span>` : `<span class="badge p-grey">Post</span>`}</div>
           <div class="mut">${esc(p.regions)}</div>
           <div class="relay"><div class="row"><b>${p.target ? `${nf.format(p.relayed)} / ${nf.format(p.target)}` : "— / 0"}</b><span>${r}%</span></div><div class="track"><i style="width:${r}%"></i></div></div>
           <div class="r num" style="font-weight:700">${p.views ? compact(p.views) : "—"}</div>
@@ -696,7 +851,67 @@ function viewPromos(D) {
   </div>`;
 }
 
-/* ---------- Suivi d'une promo ---------- */
+/* ---------- Formats de publication par réseau ---------- */
+// live : réseau branché dans Vitriin. need : ce que le format exige.
+const FORMATS = [
+  { net: "instagram", name: "Instagram", live: true, items: [
+    { k: "feed", l: "Publication Feed", d: "Photo unique 1:1, 4:5 ou 3:4", r: "4/5", need: "one" },
+    { k: "carousel", l: "Carrousel", d: "2 à 20 photos ou vidéos", r: "4/5", need: "multi", max: 20 },
+    { k: "reels", l: "Reels", d: "Vidéo verticale 9:16", r: "9/16", need: "video" },
+    { k: "stories", l: "Stories", d: "Plein écran 9:16, visible 24 h", r: "9/16" } ] },
+  { net: "facebook", name: "Facebook", live: true, items: [
+    { k: "photo", l: "Publication Photo / Vidéo", d: "Image carrée ou portrait 4:5", r: "4/5", need: "one" },
+    { k: "carousel", l: "Carrousel", d: "Plusieurs images", r: "1/1", need: "multi", max: 10 },
+    { k: "reels", l: "Reels", d: "Vidéo verticale 9:16", r: "9/16", need: "video" },
+    { k: "stories", l: "Stories", d: "Format vertical, visible 24 h", r: "9/16" } ] },
+  { net: "google", name: "Google Business", live: false, items: [
+    { k: "news", l: "Nouveautés", d: "Actualité avec bouton d'action", r: "4/3" },
+    { k: "offer", l: "Offres", d: "Dates de validité, code promo", r: "4/3", need: "promo" },
+    { k: "product", l: "Produits", d: "Fiche reliée au catalogue", r: "1/1", need: "catalog" } ] },
+  { net: "tiktok", name: "TikTok", live: false, items: [
+    { k: "video", l: "Vidéo", d: "Verticale plein écran 9:16", r: "9/16", need: "video" },
+    { k: "carousel", l: "Carrousel photo", d: "2 à 35 images avec musique", r: "9/16", need: "multi", max: 35 },
+    { k: "stories", l: "Stories", d: "Visible 24 h", r: "9/16" } ] },
+  { net: "pinterest", name: "Pinterest", live: false, items: [
+    { k: "pin", l: "Épingle image", d: "Visuel vertical 2:3 (1000 × 1500 px)", r: "2/3", need: "one" },
+    { k: "video", l: "Épingle vidéo", d: "Vidéo 2:3 ou 9:16", r: "2/3", need: "video" },
+    { k: "rich", l: "Épingle enrichie", d: "Prix et stock synchronisés avec un site", r: "2/3", need: "site" } ] },
+];
+const fmtItem = (key) => { const [n, k] = key.split(":"); const N = FORMATS.find(x => x.net === n); return N && { N, I: N.items.find(i => i.k === k) }; };
+// Raison pour laquelle un format est indisponible (null = utilisable).
+function fmtBlock(N, I, nMedia, kind) {
+  if (I.need === "video") return "Nécessite une vidéo";
+  if (I.need === "catalog") return "Nécessite un catalogue produits";
+  if (I.need === "site") return "Nécessite un site synchronisé";
+  if (I.need === "promo" && kind !== "promo") return "Réservé aux promos";
+  if (I.need === "multi" && nMedia < 2) return "Ajoutez au moins 2 photos";
+  if (I.need === "multi" && nMedia > I.max) return `${I.max} photos maximum`;
+  if (I.need === "one" && nMedia > 1) return "Plusieurs photos : choisissez le carrousel";
+  if (!N.live) return "Bientôt disponible";
+  return null;
+}
+// Garde les formats encore compatibles. Un réseau branché reçoit un format par défaut
+// au départ, ou quand son format vient de devenir incompatible (ex. 1 → 2 photos).
+function syncFormats(sel, nMedia, kind) {
+  const keep = [...sel].filter(key => { const f = fmtItem(key); return f && f.I && !fmtBlock(f.N, f.I, nMedia, kind); });
+  const out = new Set(keep), lost = [...sel].filter(k => !out.has(k));
+  FORMATS.filter(N => N.live).forEach(N => {
+    const has = keep.some(k => k.startsWith(N.net + ":")), lostHere = lost.some(k => k.startsWith(N.net + ":"));
+    if (!has && (!sel.size || lostHere)) {
+      const d = N.items.find(I => !fmtBlock(N, I, nMedia, kind));
+      if (d) out.add(N.net + ":" + d.k);
+    }
+  });
+  return out;
+}
+function formatsHtml(sel, nMedia, kind, attr) {
+  return FORMATS.map(N => `<div class="fmt"><div class="nw">${esc(N.name)}${N.live ? "" : "<em>Bientôt</em>"}</div>${N.items.map(I => {
+    const key = N.net + ":" + I.k, why = fmtBlock(N, I, nMedia, kind);
+    return `<label class="${why ? "off" : ""}"><input type="checkbox" ${attr}="${key}" ${sel.has(key) && !why ? "checked" : ""} ${why ? "disabled" : ""}><span><b>${esc(I.l)}</b><small>${esc(I.d)}${why ? " · " + esc(why) : ""}</small></span></label>`;
+  }).join("")}</div>`).join("");
+}
+
+/* ---------- Panneau : une promo (modifiable) ---------- */
 function chState(pubs, ch, acc) {
   const p = (pubs || []).find(x => x.channel === ch);
   if (p && p.status === "published") return `<span class="ch ok">✓ Publiée</span>`;
@@ -704,38 +919,205 @@ function chState(pubs, ch, acc) {
   if (p && p.status === "pending") return `<span class="ch no">En cours</span>`;
   return acc ? `<span class="ch no">—</span>` : `<span class="ch no">Non connecté</span>`;
 }
-function viewDetail(D, p) {
-  const t = TYPES.find(x => x.k === p.promo_type), [sl, sc] = ST_PILL[p.st];
+const stripCode = (d) => (d || "").replace(/\n*Code en caisse : [A-Z0-9-]+$/, "").trim();
+const isoDay = (d) => iso(new Date(d));
+function promoDraft(p) {
+  const det = p.details || {};
+  return { id: p.id, editable: true, dirty: false,
+    kind: det.kind || (p.promo_type || p.mechanic ? "promo" : "post"),
+    media: det.media && det.media.length ? [...det.media] : p.media_url ? [p.media_url] : [],
+    title: p.title || "", type: p.promo_type || "percent", mech: p.mechanic || "", desc: stripCode(p.description),
+    start: isoDay(p.starts_at), end: isoDay(p.ends_at), code: p.discount_code || "", ean: p.ean_code || "",
+    mand: !!p.is_mandatory, formats: new Set(det.formats || []) };
+}
+function viewPromoDw(D, p) {
+  if (!E || E.id !== p.id) E = promoDraft(p);
+  E.formats = syncFormats(E.formats, E.media.length, E.kind);
+  const [sl, sc] = ST_PILL[p.st];
   const rows = p.acts.map(a => ({ a, s: D.byId[a.store_id] })).filter(x => x.s).sort((x, y) => x.s.name.localeCompare(y.s.name, "fr"));
   const stLabel = (a) => (a.publications || []).some(x => x.status === "published") ? ["Publiée", "p-green"] : a.status === "active" ? ["Activée", "p-indigo"] : a.status === "declined" ? ["Refusée", "p-red"] : ["Reçue", "p-amber"];
   const others = D.stores.filter(s => !p.acts.some(a => a.store_id === s.id)).length;
-  const desc = (p.description || "").replace(/\n*Code en caisse : [A-Z0-9-]+$/, "").trim();
+  const active = p.activated + p.acts.filter(a => a.status !== "active" && (a.publications || []).some(x => x.status === "published")).length;
+  const showCode = feat("discount_code") || E.code, showEan = feat("ean_code") || E.ean;
   return `
-  <div class="head">
-    ${p.media_url ? `<img src="${esc(p.media_url)}" alt="">` : `<div class="noimg"></div>`}
-    <div style="flex:1;min-width:0">
-      <div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:8px"><h2>${esc(p.title)}</h2><span class="pill ${sc}">${sl}</span></div>
-      <div class="meta">${t ? `<span class="badge ${TYPE_PILL[t.k]}">${t.label}</span>` : ""}${p.mechanic ? `<span class="badge p-pink">${esc(p.mechanic)}</span>` : ""}${p.discount_code ? `<span class="badge p-grey">Code : ${esc(p.discount_code)}</span>` : ""}${p.is_mandatory ? `<span class="badge p-purple">Obligatoire</span>` : ""}<span class="badge p-grey">${dshort(p.starts_at)} → ${dshort(p.ends_at)}</span></div>
-    </div></div>
-  ${desc ? `<p style="font-size:13px;color:#6b6660;line-height:1.5;margin:14px 0 0;white-space:pre-wrap">${esc(desc)}</p>` : ""}
+  <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill ${sc}">${sl}</span><span style="font-size:12px;color:var(--muted)">Créée le ${dshort(p.created_at)}</span></div>
   <div class="dk">
     <div class="mini"><div class="lbl">Magasins ciblés</div><div class="val">${nf.format(p.target)}</div></div>
     <div class="mini"><div class="lbl">Publiées · relais</div><div class="val" style="color:var(--teal)">${nf.format(p.relayed)} <span style="font-size:13px;color:var(--muted)">· ${pct(p.relayed, p.target)}%</span></div></div>
-    <div class="mini"><div class="lbl">${p.is_mandatory ? "À publier" : "En attente"}</div><div class="val" style="color:var(--c-amber)">${nf.format(p.is_mandatory ? p.activated - p.relayed : p.pending)}</div></div>
+    <div class="mini"><div class="lbl">Vues</div><div class="val" style="color:var(--c-indigo)">${compact(p.views)}</div></div>
     <div class="mini"><div class="lbl">Refusées</div><div class="val" style="color:var(--err)">${nf.format(p.declined)}</div></div>
   </div>
-  <div class="row" style="margin:22px 0 4px;flex-wrap:wrap;gap:10px"><h3 style="font-size:15px;margin:0">Magasins</h3>${others && p.st !== "done" ? `<button class="btn-s" data-resend>Envoyer à ${others} autre${others > 1 ? "s" : ""}</button>` : ""}</div>
-  ${rows.length ? rows.map(({ a, s }) => {
-    const [l, c] = stLabel(a), pal = AV_PAL[s.i % AV_PAL.length];
-    const v = (a.publications || []).reduce((n, x) => n + (x.status === "published" ? D.views(x) : 0), 0);
-    return `<div class="srow"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span>
-      <div style="flex:1;min-width:0"><b style="display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name)}</b><div class="chs"><span style="font-size:12px;color:var(--muted)">FB ${chState(a.publications, "facebook", s.fbOk)}</span><span style="font-size:12px;color:var(--muted)">IG ${chState(a.publications, "instagram", s.igOk)}</span></div></div>
-      <div style="text-align:right;flex:none"><span class="pill ${c}">${l}</span><div style="font-size:12px;color:var(--muted);margin-top:4px">${v ? compact(v) + " vues" : dshort(a.created_at)}</div></div></div>`;
-  }).join("") : `<div class="empty" style="padding:18px 0">Cette promo n'a encore été envoyée à aucun magasin.</div>`}`;
+
+  <label class="fl">Publication</label>
+  <div class="seg" id="e-kind"><button type="button" data-k="promo" class="${E.kind === "promo" ? "on" : ""}">Une promo</button><button type="button" data-k="post" class="${E.kind === "post" ? "on" : ""}">Un post</button></div>
+  <label class="fl">Visuels</label>
+  <div class="thumbs" id="e-thumbs">${E.media.map((u, i) => `<span><img src="${esc(u)}" alt=""><button type="button" data-rm="${i}" aria-label="Retirer">×</button></span>`).join("")}<button type="button" class="btn-s" id="e-add" style="height:56px">+ Photo</button></div>
+  <input type="file" id="e-file" accept="image/*" multiple hidden>
+  <label class="fl" for="e-title">Titre</label>
+  <input class="in" id="e-title" data-e="title" maxlength="90" value="${esc(E.title)}">
+  ${E.kind === "promo" ? `<label class="fl">Type de promotion</label>
+  <div class="types" id="e-types">${allTypes().map(t => `<button type="button" data-type="${esc(t.k)}" class="${E.type === t.k ? "on" : ""}"><b>${esc(t.ico)}</b>${esc(t.label)}</button>`).join("")}</div>
+  <label class="fl" for="e-mech">Offre</label>
+  <input class="in" id="e-mech" data-e="mech" maxlength="60" value="${esc(E.mech)}" placeholder="${esc(typeOf(E.type)?.ph || "")}">` : ""}
+  <label class="fl" for="e-desc">Texte du post</label>
+  <textarea class="in" id="e-desc" data-e="desc" maxlength="1500">${esc(E.desc)}</textarea>
+  <div class="two">
+    <div><label class="fl" for="e-start">Du</label><input class="in" id="e-start" data-e="start" type="date" value="${E.start}"></div>
+    <div><label class="fl" for="e-end">Au</label><input class="in" id="e-end" data-e="end" type="date" value="${E.end}"></div>
+  </div>
+  ${E.kind === "promo" && showCode ? `<label class="fl" for="e-code">Code de réduction en caisse</label><input class="in" id="e-code" data-e="code" maxlength="24" value="${esc(E.code)}" style="text-transform:uppercase;letter-spacing:.06em">` : ""}
+  ${E.kind === "promo" && showEan ? `<label class="fl" for="e-ean">Code EAN en caisse</label><input class="in" id="e-ean" data-e="ean" maxlength="13" inputmode="numeric" value="${esc(E.ean)}">` : ""}
+  <label class="fl">Règle</label>
+  <label class="sw"><input type="checkbox" id="e-mand" ${E.mand ? "checked" : ""}><span class="k"></span><span><b>Promo obligatoire<i class="info" data-tip="Vos magasins ne peuvent pas la refuser. Ils la publient eux-mêmes, depuis leur espace.">i</i></b></span></label>
+  <label class="fl">Formats de publication</label>
+  <div id="e-formats">${formatsHtml(E.formats, E.media.length, E.kind, "data-ef")}</div>
+  <div class="err hidden" id="e-err"></div>
+
+  <button class="stores-cta ${S.dwStores ? "open" : ""}" id="dw-stores"><span>${nf.format(active)} magasin${active > 1 ? "s" : ""} actif${active > 1 ? "s" : ""} sur la promotion <small style="font-weight:600;color:var(--muted)">· ${nf.format(p.target)} ciblé${p.target > 1 ? "s" : ""}</small></span>${svg(ICON.down, 16, 2.4)}</button>
+  ${S.dwStores ? `<div style="margin-top:6px">
+    <div class="row" style="margin:10px 0 4px;flex-wrap:wrap;gap:10px;justify-content:flex-end">${p.target ? `<button class="btn-s" data-annonce>Copier l'annonce</button>` : ""}${others && p.st !== "done" ? `<button class="btn-s" data-resend>Envoyer à ${others} autre${others > 1 ? "s" : ""}</button>` : ""}</div>
+    ${rows.length ? rows.map(({ a, s }) => {
+      const [l, c] = stLabel(a), pal = AV_PAL[s.i % AV_PAL.length];
+      const v = (a.publications || []).reduce((n, x) => n + (x.status === "published" ? D.views(x) : 0), 0);
+      return `<div class="srow"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span>
+        <div style="flex:1;min-width:0"><b style="display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name)}</b><div class="chs"><span style="font-size:12px;color:var(--muted)">FB ${chState(a.publications, "facebook", s.fbOk)}</span><span style="font-size:12px;color:var(--muted)">IG ${chState(a.publications, "instagram", s.igOk)}</span></div></div>
+        <div style="text-align:right;flex:none"><span class="pill ${c}">${l}</span><div style="font-size:12px;color:var(--muted);margin-top:4px">${v ? compact(v) + " vues" : dshort(a.created_at)}</div></div></div>`;
+    }).join("") : `<div class="empty" style="padding:18px 0">Cette promo n'a encore été envoyée à aucun magasin.</div>`}</div>` : ""}`;
+}
+async function uploadPromoImages(files) {
+  const out = [];
+  for (const file of files) {
+    const jpeg = await toInstagramJpeg(file);
+    const path = `n/${S.net.id}/${crypto.randomUUID()}.jpg`;
+    const { error } = await sb.storage.from("promo-media").upload(path, jpeg, { contentType: "image/jpeg", upsert: false });
+    if (error) throw error;
+    out.push(sb.storage.from("promo-media").getPublicUrl(path).data.publicUrl);
+  }
+  return out;
+}
+// Contrôles communs (création et modification). Renvoie les colonnes à écrire.
+function promoRow(v) {
+  const title = v.title.trim(), mech = v.kind === "promo" ? v.mech.trim() : "", code = v.kind === "promo" ? v.code.trim().toUpperCase() : "", ean = v.kind === "promo" ? v.ean.trim() : "";
+  if (!v.media.length) throw new Error("Ajoutez au moins un visuel : Instagram ne publie pas sans image.");
+  if (v.media.length > 20) throw new Error("20 photos maximum.");
+  if (!title) throw new Error("Donnez un titre.");
+  if (v.kind === "promo" && !mech) throw new Error("Précisez l'offre (ex. -30 %).");
+  if (code && !/^[A-Z0-9-]{3,24}$/.test(code)) throw new Error("Le code de caisse : 3 à 24 caractères, lettres, chiffres ou tirets.");
+  if (ean && !/^(\d{8}|\d{13})$/.test(ean)) throw new Error("Le code EAN compte 8 ou 13 chiffres.");
+  const start = new Date(v.start + "T00:00:00"), end = new Date(v.end + "T23:59:59");
+  if (isNaN(start) || isNaN(end) || end <= start) throw new Error("Vérifiez les dates : la fin doit suivre le début.");
+  if (!v.formats.size) throw new Error("Choisissez au moins un format de publication.");
+  return {
+    title, mechanic: mech || null,
+    // Le code part dans le texte du post : c'est le client final qui doit le lire.
+    description: [v.desc.trim(), code ? `Code en caisse : ${code}` : ""].filter(Boolean).join("\n\n") || null,
+    promo_type: v.kind === "promo" ? v.type : null, discount_code: code || null, ean_code: ean || null,
+    media_url: v.media[0], details: { kind: v.kind, media: v.media, formats: [...v.formats] },
+    starts_at: start.toISOString(), ends_at: end.toISOString(), is_mandatory: v.mand,
+  };
+}
+function bindPromoDw(D) {
+  const b = $("dw-b"), p = D.promoById[E.id];
+  b.querySelectorAll("[data-e]").forEach(i => i.oninput = () => { E[i.dataset.e] = i.value; markDirty(); });
+  b.querySelectorAll("#e-kind button").forEach(x => x.onclick = () => { E.kind = x.dataset.k; markDirty(); render(); });
+  b.querySelectorAll("#e-types button").forEach(x => x.onclick = () => { E.type = x.dataset.type; markDirty(); render(); });
+  b.querySelectorAll("[data-rm]").forEach(x => x.onclick = () => { E.media.splice(+x.dataset.rm, 1); markDirty(); render(); });
+  b.querySelectorAll("[data-ef]").forEach(x => x.onchange = () => { x.checked ? E.formats.add(x.dataset.ef) : E.formats.delete(x.dataset.ef); markDirty(); $("dw-save").disabled = false; });
+  $("e-mand").onchange = () => { E.mand = $("e-mand").checked; markDirty(); };
+  $("e-add").onclick = () => $("e-file").click();
+  $("e-file").onchange = async () => {
+    const files = [...$("e-file").files]; if (!files.length) return;
+    $("e-add").textContent = "Envoi…"; $("e-add").disabled = true;
+    try { E.media.push(...await uploadPromoImages(files)); markDirty(); render(); }
+    catch (e) { $("e-err").textContent = "Envoi impossible : " + errText(e); show("e-err"); $("e-add").textContent = "+ Photo"; $("e-add").disabled = false; }
+  };
+  $("dw-stores").onclick = () => { S.dwStores = !S.dwStores; render(); };
+  b.querySelectorAll("[data-resend]").forEach(x => x.onclick = () => openPromo(E.id));
+  b.querySelectorAll("[data-annonce]").forEach(x => x.onclick = () => copy(fillTpl("promo", { magasin: "", reseau: S.net.name, promo: p.title, debut: dshort(p.starts_at), fin: dshort(p.ends_at), lien: location.origin + "/", code: S.net.join_code }).replace("Bonjour ,", "Bonjour,")));
+}
+async function savePromo() {
+  try {
+    const row = promoRow(E), old = S.promos.find(x => x.id === E.id);
+    row.details = { ...((old && old.details) || {}), ...row.details }; // garde les champs posés ailleurs (prix barré…)
+    $("dw-save").disabled = true;
+    const { error } = await sb.from("promotions").update(row).eq("id", E.id);
+    if (error) throw error;
+    E = null; await load(); render(); toast("Promotion mise à jour. Les magasins voient la nouvelle version.");
+  } catch (e) { const el = $("e-err"); if (el) { el.textContent = errText(e); show(el); el.scrollIntoView({ block: "nearest" }); } $("dw-save").disabled = false; }
+}
+
+/* ---------- Panneau : un magasin ---------- */
+const CONN = { full: ["Complet", "p-green"], partial: ["Partiel", "p-amber"], none: ["À activer", "p-red"], broken: ["À reconnecter", "p-red"] };
+const CH_NAME = { facebook: "Facebook", instagram: "Instagram", google: "Google Business", tiktok: "TikTok", whatsapp: "WhatsApp", pinterest: "Pinterest" };
+const ACC_ST = { active: ["Connecté", "p-green"], error: ["À reconnecter", "p-red"], expired: ["Expiré", "p-red"], revoked: ["Révoqué", "p-red"] };
+function viewStoreDw(D, s) {
+  if (!E || E.id !== s.id) E = { id: s.id, editable: isAdmin(), dirty: false, name: s.name || "", address: s.address || "", postal_code: s.postal_code || "", city: s.city || "" };
+  const pal = AV_PAL[s.i % AV_PAL.length], [cl, cc] = CONN[s.conn];
+  const received = s.acts.length, activated = s.acts.filter(a => a.status === "active").length, declined = s.acts.filter(a => a.status === "declined").length;
+  const reach = s.pubs.reduce((t, p) => t + metric(p, "reach"), 0);
+  const inter = s.pubs.reduce((t, p) => t + metric(p, "reactions") + metric(p, "comments") + metric(p, "shares") + metric(p, "likes"), 0);
+  const last = s.pubs.map(p => p.published_at).filter(Boolean).sort().pop();
+  const recent = [...s.acts].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6);
+  const ro = E.editable ? "" : "readonly";
+  return `
+  <div class="head" style="align-items:center"><span class="av" style="width:56px;height:56px;font-size:18px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex:none;background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span>
+    <div style="flex:1;min-width:0"><h2>${esc(s.name)}</h2><div class="meta"><span class="pill ${cc}">${cl}</span>${s.region ? `<span class="badge p-grey">${esc(SHORT_REGION[s.region] || s.region)}</span>` : ""}<span class="badge p-grey">${s.auto_accept === false ? "Validation manuelle" : "Acceptation auto"}</span></div></div></div>
+  <div class="dk">
+    <div class="mini"><div class="lbl">Promos reçues</div><div class="val">${nf.format(received)}</div></div>
+    <div class="mini"><div class="lbl">Relayées</div><div class="val" style="color:var(--teal)">${nf.format(s.relayed)} <span style="font-size:13px;color:var(--muted)">· ${pct(s.relayed, received)}%</span></div></div>
+    <div class="mini"><div class="lbl">Activées · en attente</div><div class="val" style="color:var(--c-indigo)">${nf.format(activated)} <span style="font-size:13px;color:var(--muted)">· ${nf.format(s.pending)}</span></div></div>
+    <div class="mini"><div class="lbl">Refusées</div><div class="val" style="color:var(--err)">${nf.format(declined)}</div></div>
+    <div class="mini"><div class="lbl">Vues 30 j · total</div><div class="val">${compact(s.views30)} <span style="font-size:13px;color:var(--muted)">· ${compact(s.viewsAll)}</span></div></div>
+    <div class="mini"><div class="lbl">Portée · interactions</div><div class="val">${compact(reach)} <span style="font-size:13px;color:var(--muted)">· ${compact(inter)}</span></div></div>
+  </div>
+  <div class="kv"><span>Publications</span><b>${nf.format(s.pubCount)}</b><span>Dernière publication</span><b>${last ? dshort(last) : "—"}</b><span>Dans le réseau depuis</span><b>${dshort(s.created_at)}</b></div>
+
+  <h3 style="font-size:15px;margin:22px 0 4px">Réseaux sociaux</h3>
+  ${s.accounts.length ? s.accounts.map(a => { const [l, c] = ACC_ST[a.status] || [a.status, "p-grey"]; return `<div class="srow"><div style="flex:1;min-width:0"><b style="font-size:13.5px">${esc(CH_NAME[a.channel] || a.channel)}</b><div style="font-size:12px;color:var(--muted)">${esc(a.display_name || "—")}</div></div><span class="pill ${c}">${l}</span></div>`; }).join("")
+    : `<div class="empty">Aucun compte connecté.</div>`}
+  ${s.conn !== "full" ? `<button class="btn-s" style="margin-top:10px" data-relance="${s.id}">Copier le message de relance</button>` : ""}
+
+  <h3 style="font-size:15px;margin:22px 0 0">Informations</h3>
+  ${E.editable ? "" : `<div class="hint">Seuls les administrateurs de la centrale peuvent modifier la fiche.</div>`}
+  <label class="fl" for="s-name">Nom du magasin</label><input class="in" id="s-name" data-s="name" maxlength="120" value="${esc(E.name)}" ${ro}>
+  <label class="fl" for="s-address">Adresse</label><input class="in" id="s-address" data-s="address" maxlength="200" value="${esc(E.address)}" ${ro}>
+  <div class="two"><div><label class="fl" for="s-pc">Code postal</label><input class="in" id="s-pc" data-s="postal_code" maxlength="10" value="${esc(E.postal_code)}" ${ro}></div>
+  <div><label class="fl" for="s-city">Ville</label><input class="in" id="s-city" data-s="city" maxlength="80" value="${esc(E.city)}" ${ro}></div></div>
+  <div class="err hidden" id="e-err"></div>
+
+  <h3 style="font-size:15px;margin:22px 0 4px">Promos récentes</h3>
+  ${recent.length ? recent.map(a => { const p = D.promoById[a.promotion_id]; if (!p) return ""; const pub = (a.publications || []).some(x => x.status === "published");
+    const [l, c] = pub ? ["Publiée", "p-green"] : a.status === "active" ? ["Activée", "p-indigo"] : a.status === "declined" ? ["Refusée", "p-red"] : ["Reçue", "p-amber"];
+    return `<div class="srow click" style="cursor:pointer" data-promo="${p.id}">${p.media_url ? `<img class="thumb" src="${esc(p.media_url)}" alt="">` : ""}<div style="flex:1;min-width:0"><b style="display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</b><small style="color:var(--muted)">${dshort(p.starts_at)} → ${dshort(p.ends_at)}</small></div><span class="pill ${c}">${l}</span></div>`; }).join("")
+    : `<div class="empty">Aucune promo reçue pour l'instant.</div>`}`;
+}
+function bindStoreDw() {
+  const b = $("dw-b");
+  b.querySelectorAll("[data-s]").forEach(i => i.oninput = () => { E[i.dataset.s] = i.value; markDirty(); });
+  b.querySelectorAll("[data-promo]").forEach(r => r.onclick = () => openDw("promo", r.dataset.promo));
+  b.querySelectorAll("[data-relance]").forEach(x => x.onclick = () => relance(x.dataset.relance));
+}
+async function saveStore() {
+  const name = E.name.trim(), pc = E.postal_code.trim();
+  const fail = (t) => { $("e-err").textContent = t; show("e-err"); };
+  if (name.length < 2) return fail("Indiquez le nom du magasin.");
+  if (pc && !/^[0-9A-Za-z -]{3,10}$/.test(pc)) return fail("Code postal invalide.");
+  $("dw-save").disabled = true;
+  const { data, error } = await sb.from("stores").update({ name, address: E.address.trim() || null, postal_code: pc || null, city: E.city.trim() || null }).eq("id", E.id).select("id");
+  if (error || !data?.length) { $("dw-save").disabled = false; return fail(error ? errText(error) : "Modification refusée : droits administrateur requis."); }
+  E = null; await load(); render(); toast("Fiche magasin mise à jour.");
+}
+function bindDrawer(D) {
+  if (!S.dw) return;
+  if (S.dw.k === "promo") bindPromoDw(D); else bindStoreDw();
+}
+$("dw-save").onclick = () => { if (!E) return; S.dw.k === "promo" ? savePromo() : saveStore(); };
+function relance(id) {
+  const s = S.stores.find(x => x.id === id); if (!s) return;
+  copy(fillTpl("relance", { magasin: s.name, reseau: S.net.name, lien: location.origin + "/", code: S.net.join_code }));
 }
 
 /* ---------- Magasins ---------- */
-const CONN = { full: ["Complet", "p-green"], partial: ["Partiel", "p-amber"], none: ["À activer", "p-red"], broken: ["À reconnecter", "p-red"] };
 function viewStores(D) {
   const n = D.stores.length;
   const regs = new Set(D.stores.map(s => s.region).filter(Boolean)).size;
@@ -745,6 +1127,7 @@ function viewStores(D) {
   const list = D.stores.filter(s => (S.zone === "all" || s.zone === S.zone) && (!S.q || (s.name + " " + (s.city || "")).toLowerCase().includes(S.q)));
   const cols = "grid-template-columns:1.9fr 1.1fr 1.4fr 1.3fr 1fr .9fr .9fr";
   return `
+  ${tip("st", "<b>Astuce :</b> cliquez sur un magasin pour ouvrir sa fiche : informations modifiables, comptes connectés et statistiques détaillées.")}
   <div class="g4">
     <div class="wide"><span class="ic" style="background:var(--t-green);color:var(--teal)">${svg(ICON.store, 20)}</span><div><div class="val" style="color:var(--teal)">${nf.format(n)}</div><div class="lbl">Points de vente · ${regs} région${regs > 1 ? "s" : ""}</div></div></div>
     <div class="wide"><span class="ic" style="background:var(--t-indigo);color:var(--c-indigo)">${svg(ICON.share, 20)}</span><div><div class="val" style="color:var(--c-indigo)">${pct(connected.length, n)}%</div><div class="lbl">Connectés ≥1 réseau · ${nf.format(connected.length)} magasin${connected.length > 1 ? "s" : ""}</div></div></div>
@@ -763,8 +1146,8 @@ function viewStores(D) {
     <div class="tscroll">
       <div class="thead" style="${cols}"><div>Magasin</div><div>Ville</div><div>Région</div><div>Réseaux</div><div>Connexion</div><div class="r">Vues 30j</div><div class="r">Publiées</div></div>
       ${list.length ? list.map(s => {
-        const pal = AV_PAL[s.i % AV_PAL.length], [cl, cc] = CONN[s.conn];
-        return `<div class="trow" style="${cols}">
+        const pal = AV_PAL[s.i % AV_PAL.length], [cl, cc] = CONN[s.conn], sel = S.dw && S.dw.k === "store" && S.dw.id === s.id;
+        return `<div class="trow click${sel ? " sel" : ""}" style="${cols}" data-store="${s.id}">
           <div class="cell-name"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span><div style="min-width:0"><b>${esc(s.name)}</b><small style="color:${s.pending ? "var(--c-amber)" : "var(--teal)"};font-weight:700">${s.pending ? `${s.pending} promo${s.pending > 1 ? "s" : ""} à valider` : "À jour"}</small></div></div>
           <div class="mut">${esc(s.city || "—")}</div><div class="mut">${esc(s.region ? (SHORT_REGION[s.region] || s.region) : "—")}</div>
           <div class="soc"><span class="${s.fbOk ? "fb" : ""}">f</span><span class="${s.igOk ? "ig" : ""}">IG</span><span title="Bientôt">TT</span><span title="Bientôt">WA</span></div>
@@ -785,6 +1168,238 @@ function viewAudience() {
   </div>`;
 }
 
+/* ---------- Paramètres ---------- */
+const STABS = [["prefs", "Préférences"], ["users", "Utilisateurs"], ["account", "Compte"], ["comms", "Communication"]];
+const ROLE_L = { owner: "Propriétaire", admin: "Administrateur", member: "Éditeur" };
+const swHtml = (id, on, title, sub, dis) => `<label class="sw ${dis ? "ro" : ""}"><input type="checkbox" id="${id}" ${on ? "checked" : ""} ${dis ? "disabled" : ""}><span class="k"></span><span><b>${title}</b><span>${sub}</span></span></label>`;
+function viewSettings() {
+  const tabs = `<div class="stabs">${STABS.map(([k, l]) => `<button data-stab="${k}" class="${S.stab === k ? "on" : ""}">${l}</button>`).join("")}</div>`;
+  const adminNote = isAdmin() ? "" : `<div class="hint" style="margin-bottom:14px">Vous êtes éditeur : les réglages de la centrale sont en lecture seule. Demandez à un administrateur pour les modifier.</div>`;
+  return tabs + ({ prefs: setPrefs, users: setUsers, account: setAccount, comms: setComms }[S.stab])(adminNote);
+}
+function setPrefs(note) {
+  const t = ls.get("c-theme", "auto"), ad = !isAdmin(), custom = NS().custom_types || [];
+  return `${note}<div class="sgrid">
+    <div class="card"><h3>Apparence</h3><div class="sub">Pour vous, sur cet appareil.</div>
+      <div class="seg" id="p-theme" style="margin-top:14px">${[["light", "Clair"], ["dark", "Sombre"], ["auto", "Auto"]].map(([k, l]) => `<button data-th="${k}" class="${t === k ? "on" : ""}">${l}</button>`).join("")}</div>
+      ${swHtml("p-tips", tipsOn(), "Astuces et conseils", "Afficher des bulles d'aide dans les pages de la centrale.")}
+      ${tipsHidden().length ? `<button class="link" style="margin-top:10px" id="p-tips-reset">Réafficher les ${tipsHidden().length} conseil${tipsHidden().length > 1 ? "s" : ""} masqué${tipsHidden().length > 1 ? "s" : ""}</button>` : ""}
+    </div>
+    <div class="card"><h3>Diffusion</h3><div class="sub">Pour tout le réseau.</div>
+      ${swHtml("p-auto", feat("auto_accept"), "Accepter automatiquement les promotions", "Les promos du réseau sont activées dès réception. Chaque magasin peut désactiver cette option dans ses réglages.", ad)}
+    </div>
+    <div class="card"><h3>Codes en caisse</h3><div class="sub">Champs proposés dans les promos.</div>
+      ${swHtml("p-code", feat("discount_code"), "Code de réduction en caisse", "Un code alphanumérique affiché dans le post (ex. BLACK25).", ad)}
+      ${swHtml("p-ean", feat("ean_code"), "Code EAN en caisse", "Un code-barres EAN-8 ou EAN-13 à scanner en caisse.", ad)}
+    </div>
+    <div class="card"><h3>Types de promotion</h3><div class="sub">Les types standards, plus les vôtres.</div>
+      <div class="chips" style="margin-top:12px">${TYPES.map(x => `<span class="badge ${TYPE_PILL[x.k]}">${esc(x.label)}</span>`).join("")}
+      ${custom.map(x => `<span class="badge p-grey">${esc(x.label)}${ad ? "" : ` <button class="link" data-rmtype="${esc(x.k)}" aria-label="Supprimer" style="margin-left:4px">×</button>`}</span>`).join("")}</div>
+      ${ad ? "" : `<div class="copy" style="margin-top:14px"><input class="in" id="p-newtype" maxlength="40" placeholder="Ex. Vente privée"><button class="btn-p" id="p-addtype">Ajouter</button></div>`}
+    </div>
+  </div>`;
+}
+function setUsers(note) {
+  const p = S.profile || {}, members = S.members;
+  return `<div class="sgrid">
+    <div class="card"><h3>Mon profil</h3>
+      <div class="row" style="justify-content:flex-start;gap:14px;margin-top:14px"><span class="uav" style="width:64px;height:64px;font-size:18px">${p.avatar_url ? `<img src="${esc(p.avatar_url)}" alt="">` : esc(initials([p.first_name, p.last_name].filter(Boolean).join(" ") || S.user.email))}</span>
+        <div><button class="btn-s" id="u-av">Changer la photo</button><input type="file" id="u-av-f" accept="image/*" hidden></div></div>
+      <div class="two"><div><label class="fl" for="u-fn">Prénom</label><input class="in" id="u-fn" maxlength="60" value="${esc(p.first_name || "")}"></div>
+      <div><label class="fl" for="u-ln">Nom</label><input class="in" id="u-ln" maxlength="60" value="${esc(p.last_name || "")}"></div></div>
+      <label class="fl" for="u-em">Email</label><input class="in" id="u-em" type="email" maxlength="200" value="${esc(S.user.email)}">
+      <div class="hint">Un changement d'email est confirmé par un lien envoyé à la nouvelle adresse.</div>
+      <div style="text-align:right;margin-top:14px"><button class="btn-p" id="u-save">Enregistrer</button></div>
+      <h3 style="margin-top:22px">Mot de passe</h3>
+      <label class="fl" for="u-pw">Nouveau mot de passe</label><input class="in" id="u-pw" type="password" autocomplete="new-password" minlength="8">
+      <label class="fl" for="u-pw2">Confirmation</label><input class="in" id="u-pw2" type="password" autocomplete="new-password">
+      <div style="text-align:right;margin-top:14px"><button class="btn-s" id="u-pw-go">Changer le mot de passe</button></div>
+      <div class="err hidden" id="u-err"></div>
+    </div>
+    <div class="card"><h3>Utilisateurs de la Centrale</h3><div class="sub">Administrateur : tous les droits, dont l'équipe et le compte. Éditeur : crée et envoie les promos.</div>
+      <div style="margin-top:10px">${members === null ? `<div class="empty">Chargement…</div>` : members.map(m => {
+        const nm = [m.first_name, m.last_name].filter(Boolean).join(" "), me = m.user_id === S.user.id, lock = !isAdmin() || m.role === "owner" || me;
+        return `<div class="urow"><span class="uav">${m.avatar_url ? `<img src="${esc(m.avatar_url)}" alt="">` : esc(initials(nm || m.email))}</span>
+          <div style="flex:1;min-width:0"><b style="display:block;font-size:13.5px">${esc(nm || m.email)}${me ? " · vous" : ""}</b><small style="color:var(--muted);font-size:12px">${esc(m.email)}</small></div>
+          ${lock ? `<span class="badge p-grey">${ROLE_L[m.role] || m.role}</span>` : `<select class="in" style="width:auto;padding:7px 10px;font-size:13px" data-role="${m.user_id}"><option value="admin" ${m.role === "admin" ? "selected" : ""}>Administrateur</option><option value="member" ${m.role === "member" ? "selected" : ""}>Éditeur</option></select><button class="link" style="color:var(--err)" data-rmuser="${m.user_id}">Retirer</button>`}</div>`;
+      }).join("")}</div>
+      ${isAdmin() ? `<h3 style="margin-top:20px;font-size:14px">Ajouter un utilisateur</h3>
+      <div class="copy" style="margin-top:10px;flex-wrap:wrap"><input class="in" id="t-em" type="email" placeholder="prenom.nom@enseigne.fr" style="flex:1;min-width:180px"><select class="in" id="t-role" style="width:auto"><option value="member">Éditeur</option><option value="admin">Administrateur</option></select><button class="btn-p" id="t-go">Inviter</button></div>
+      <div class="hint">S'il n'a pas de compte, il reçoit un email d'invitation pour choisir son mot de passe.</div>
+      <div class="err hidden" id="t-err"></div>` : ""}
+    </div>
+  </div>`;
+}
+function setAccount(note) {
+  const n = S.net, ro = isAdmin() ? "" : "readonly";
+  const f = (id, l, v, ph = "", extra = "") => `<label class="fl" for="${id}">${l}</label><input class="in" id="${id}" value="${esc(v || "")}" placeholder="${ph}" ${ro} ${extra}>`;
+  return `${note}<div class="sgrid">
+    <div class="card"><h3>Identité</h3>
+      <div class="row" style="justify-content:flex-start;gap:14px;margin-top:14px"><div class="logo-box">${n.logo_url ? `<img src="${esc(n.logo_url)}" alt="Logo">` : "Logo"}</div>
+        ${isAdmin() ? `<div><button class="btn-s" id="a-logo">Changer le logo</button><input type="file" id="a-logo-f" accept="image/png,image/jpeg,image/webp" hidden><div class="hint">PNG, JPEG ou WebP · fond blanc ajouté si transparent.</div></div>` : ""}</div>
+      ${f("a-name", "Nom de l'enseigne", n.name, "", 'maxlength="80"')}
+      ${f("a-legal", "Raison sociale", n.legal_name, "Ex. Chausselandia SAS", 'maxlength="120"')}
+      ${f("a-addr", "Adresse", n.address, "Siège social", 'maxlength="250"')}
+      <div class="two"><div>${f("a-mail", "Email support", n.support_email, "support@enseigne.fr", 'type="email" maxlength="200"')}</div><div>${f("a-tel", "Téléphone", n.phone, "01 23 45 67 89", 'maxlength="30"')}</div></div>
+    </div>
+    <div class="card"><h3>Informations légales</h3>
+      ${f("a-siret", "SIRET", n.siret, "14 chiffres", 'inputmode="numeric" maxlength="17"')}
+      ${f("a-siren", "SIREN", n.siren, "9 chiffres · déduit du SIRET", 'inputmode="numeric" maxlength="11"')}
+      ${f("a-vat", "TVA intracommunautaire", n.vat_number, "FR00123456789", 'maxlength="20"')}
+      ${f("a-cgv", "CGV (lien)", n.cgv_url, "https://enseigne.fr/cgv", 'type="url" maxlength="300"')}
+      <div class="err hidden" id="a-err2"></div>
+      ${isAdmin() ? `<div style="text-align:right;margin-top:16px"><button class="btn-p" id="a-save">Enregistrer</button></div>` : ""}
+    </div>
+  </div>`;
+}
+function setComms(note) {
+  const ro = isAdmin() ? "" : "readonly";
+  return `${note}<div class="tip" style="background:var(--chip)"><span>✉️</span><div>Vitriin n'envoie pas ces emails : copiez le message et envoyez-le depuis votre messagerie. Variables : <b>{magasin}</b> <b>{reseau}</b> <b>{lien}</b> <b>{code}</b> <b>{promo}</b> <b>{debut}</b> <b>{fin}</b>.</div></div>
+  <div class="sgrid">${Object.entries(TPL).map(([k, t]) => `<div class="card"><h3>${t.label}</h3><div class="sub">${t.sub}</div>
+    <textarea class="in" data-tpl="${k}" style="min-height:190px;margin-top:12px" maxlength="3000" ${ro}>${esc(tplText(k))}</textarea>
+    <div class="row" style="margin-top:10px;justify-content:flex-end;gap:8px">${isAdmin() ? `<button class="link" data-tplreset="${k}">Rétablir le modèle</button>` : ""}<button class="btn-s" data-tplcopy="${k}">Copier</button></div></div>`).join("")}</div>
+  ${isAdmin() ? `<div style="text-align:right;margin-top:16px"><button class="btn-p" id="c-save">Enregistrer les modèles</button></div>` : ""}`;
+}
+async function saveSettings(patch, msg = "Réglage enregistré.") {
+  const settings = { ...NS(), ...patch };
+  const { data, error } = await sb.from("networks").update({ settings }).eq("id", S.net.id).select("settings");
+  if (error || !data?.length) { toast(error ? errText(error) : "Modification refusée : droits administrateur requis."); render(); return false; }
+  S.net.settings = data[0].settings; render(); toast(msg); return true;
+}
+async function loadMembers() {
+  const { data, error } = await sb.rpc("network_members_list", { p_network_id: S.net.id });
+  S.members = error ? [] : data; if (error) toast(errText(error));
+  if (S.view === "settings") render();
+}
+// Logo et avatar : convertis en JPEG 512 px (le stockage n'accepte que du JPEG).
+async function uploadSmall(file, folder) {
+  if (!/^image\/(png|jpeg|webp)$/.test(file.type)) throw new Error("Format accepté : PNG, JPEG ou WebP.");
+  if (file.size > 8 * 1024 * 1024) throw new Error("Fichier trop lourd : 8 Mo maximum.");
+  const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+  const sc = Math.min(1, 512 / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement("canvas"); cv.width = Math.round(bmp.width * sc); cv.height = Math.round(bmp.height * sc);
+  const ctx = cv.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height); ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
+  const jpeg = await new Promise((ok, ko) => cv.toBlob(b => b ? ok(b) : ko(new Error("Conversion impossible.")), "image/jpeg", 0.9));
+  const path = `n/${S.net.id}/${folder}/${crypto.randomUUID()}.jpg`;
+  const { error } = await sb.storage.from("promo-media").upload(path, jpeg, { contentType: "image/jpeg", upsert: false });
+  if (error) throw error;
+  return sb.storage.from("promo-media").getPublicUrl(path).data.publicUrl;
+}
+function bindSettings() {
+  const c = $("content"), q = (s) => c.querySelector(s);
+  c.querySelectorAll("[data-stab]").forEach(b => b.onclick = () => { S.stab = b.dataset.stab; if (S.stab === "users" && S.members === null) loadMembers(); render(); });
+  if (S.stab === "prefs") {
+    c.querySelectorAll("[data-th]").forEach(b => b.onclick = () => { ls.set("c-theme", b.dataset.th); applyTheme(); render(); });
+    q("#p-tips").onchange = (e) => { ls.set("c-tips", e.target.checked ? "1" : "0"); render(); };
+    if (q("#p-tips-reset")) q("#p-tips-reset").onclick = () => { ls.set("c-tips-x", "[]"); render(); };
+    if (!isAdmin()) return;
+    q("#p-auto").onchange = (e) => saveSettings({ auto_accept: e.target.checked }, e.target.checked ? "Les nouvelles promos seront acceptées automatiquement." : "Les magasins valideront chaque promo.");
+    q("#p-code").onchange = (e) => saveSettings({ discount_code: e.target.checked });
+    q("#p-ean").onchange = (e) => saveSettings({ ean_code: e.target.checked });
+    q("#p-addtype").onclick = () => {
+      const label = q("#p-newtype").value.trim(); if (label.length < 2) return toast("Nommez le type (2 caractères minimum).");
+      const k = "c_" + label.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/(^_|_$)/g, "").slice(0, 36);
+      const list = NS().custom_types || [];
+      if (k.length < 4 || list.some(x => x.k === k) || TYPES.some(x => x.label.toLowerCase() === label.toLowerCase())) return toast("Ce type existe déjà.");
+      saveSettings({ custom_types: [...list, { k, label }] }, "Type de promotion ajouté.");
+    };
+    q("#p-newtype").onkeydown = (e) => { if (e.key === "Enter") q("#p-addtype").click(); };
+    c.querySelectorAll("[data-rmtype]").forEach(b => b.onclick = () => saveSettings({ custom_types: (NS().custom_types || []).filter(x => x.k !== b.dataset.rmtype) }, "Type supprimé. Les promos existantes le gardent."));
+  }
+  if (S.stab === "users") {
+    const err = (t) => { q("#u-err").textContent = t; show(q("#u-err"), !!t); };
+    q("#u-av").onclick = () => q("#u-av-f").click();
+    q("#u-av-f").onchange = async (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      try { const url = await uploadSmall(file, "avatars"); await saveProfile({ avatar_url: url }); toast("Photo mise à jour."); } catch (x) { err(errText(x)); }
+    };
+    q("#u-save").onclick = async () => {
+      err("");
+      try {
+        await saveProfile({ first_name: q("#u-fn").value.trim() || null, last_name: q("#u-ln").value.trim() || null });
+        const em = q("#u-em").value.trim().toLowerCase();
+        if (em && em !== S.user.email) {
+          const { error } = await sb.auth.updateUser({ email: em }, { emailRedirectTo: location.origin + "/centrale/" });
+          if (error) throw error; toast("Lien de confirmation envoyé à " + em + ".");
+        } else toast("Profil enregistré.");
+      } catch (x) { err(errText(x)); }
+    };
+    q("#u-pw-go").onclick = async () => {
+      const a = q("#u-pw").value, b = q("#u-pw2").value; err("");
+      if (a.length < 8) return err("Mot de passe : 8 caractères minimum.");
+      if (a !== b) return err("Les deux mots de passe ne correspondent pas.");
+      const { error } = await sb.auth.updateUser({ password: a });
+      if (error) return err(errText(error));
+      q("#u-pw").value = q("#u-pw2").value = ""; toast("Mot de passe modifié.");
+    };
+    c.querySelectorAll("[data-role]").forEach(s => s.onchange = async () => {
+      const { error } = await sb.from("network_members").update({ role: s.value }).eq("network_id", S.net.id).eq("user_id", s.dataset.role);
+      if (error) toast(errText(error)); else toast("Droits mis à jour."); loadMembers();
+    });
+    c.querySelectorAll("[data-rmuser]").forEach(b => b.onclick = async () => {
+      if (!confirm("Retirer cet utilisateur de la centrale ? Il perdra l'accès immédiatement.")) return;
+      const { error } = await sb.from("network_members").delete().eq("network_id", S.net.id).eq("user_id", b.dataset.rmuser);
+      if (error) toast(errText(error)); else toast("Utilisateur retiré."); loadMembers();
+    });
+    if (q("#t-go")) q("#t-go").onclick = async () => {
+      const te = (t) => { q("#t-err").textContent = t; show(q("#t-err"), !!t); };
+      const email = q("#t-em").value.trim().toLowerCase(); te("");
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return te("Email invalide.");
+      q("#t-go").disabled = true;
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/network-invite`, { method: "POST", headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: "Bearer " + session.access_token }, body: JSON.stringify({ network_id: S.net.id, email, role: q("#t-role").value }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || "Invitation impossible.");
+        toast(j.invited ? "Invitation envoyée à " + email + "." : email + " a accès à la centrale."); loadMembers();
+      } catch (x) { te(errText(x)); q("#t-go").disabled = false; }
+    };
+  }
+  if (S.stab === "account" && isAdmin()) {
+    q("#a-logo").onclick = () => q("#a-logo-f").click();
+    q("#a-logo-f").onchange = async (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      try { const url = await uploadSmall(file, "logo"); const { error } = await sb.from("networks").update({ logo_url: url }).eq("id", S.net.id); if (error) throw error; S.net.logo_url = url; render(); toast("Logo mis à jour."); }
+      catch (x) { toast(errText(x)); }
+    };
+    q("#a-siret").oninput = () => { const d = q("#a-siret").value.replace(/\D/g, ""); if (d.length >= 9 && !q("#a-siren").value.trim()) q("#a-siren").value = d.slice(0, 9); };
+    q("#a-save").onclick = async () => {
+      const v = (id) => q(id).value.trim(), digits = (s) => s.replace(/\s/g, "");
+      const fail = (t) => { q("#a-err2").textContent = t; show(q("#a-err2")); };
+      show(q("#a-err2"), false);
+      const row = { name: v("#a-name"), legal_name: v("#a-legal") || null, address: v("#a-addr") || null, support_email: v("#a-mail").toLowerCase() || null, phone: v("#a-tel") || null,
+        siret: digits(v("#a-siret")) || null, siren: digits(v("#a-siren")) || null, vat_number: v("#a-vat").replace(/\s/g, "").toUpperCase() || null, cgv_url: v("#a-cgv") || null };
+      if (row.name.length < 2) return fail("Indiquez le nom de l'enseigne.");
+      if (row.support_email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(row.support_email)) return fail("Email support invalide.");
+      if (row.siret && !/^\d{14}$/.test(row.siret)) return fail("Le SIRET compte 14 chiffres.");
+      if (row.siren && !/^\d{9}$/.test(row.siren)) return fail("Le SIREN compte 9 chiffres.");
+      if (row.siret && row.siren && !row.siret.startsWith(row.siren)) return fail("Le SIRET doit commencer par le SIREN.");
+      if (row.vat_number && !/^[A-Z]{2}[0-9A-Z]{2,13}$/.test(row.vat_number)) return fail("Numéro de TVA invalide (ex. FR00123456789).");
+      if (row.cgv_url && !/^https:\/\/\S+$/.test(row.cgv_url)) return fail("Le lien des CGV doit commencer par https://");
+      const { data, error } = await sb.from("networks").update(row).eq("id", S.net.id).select("id");
+      if (error || !data?.length) return fail(error ? errText(error) : "Modification refusée : droits administrateur requis.");
+      Object.assign(S.net, row); render(); toast("Informations de la centrale enregistrées.");
+    };
+  }
+  if (S.stab === "comms") {
+    c.querySelectorAll("[data-tplcopy]").forEach(b => b.onclick = () => copy(q(`[data-tpl="${b.dataset.tplcopy}"]`).value));
+    c.querySelectorAll("[data-tplreset]").forEach(b => b.onclick = () => { q(`[data-tpl="${b.dataset.tplreset}"]`).value = TPL[b.dataset.tplreset].def; });
+    if (q("#c-save")) q("#c-save").onclick = () => {
+      const t = {}; c.querySelectorAll("[data-tpl]").forEach(x => { const v = x.value.trim(); if (v && v !== TPL[x.dataset.tpl].def) t[x.dataset.tpl] = v; });
+      saveSettings({ email_templates: t }, "Modèles enregistrés.");
+    };
+  }
+}
+async function saveProfile(patch) {
+  const { data, error } = await sb.from("profiles").update(patch).eq("id", S.user.id).select("first_name, last_name, avatar_url");
+  if (error) throw error;
+  if (!data.length) { // pas encore de profil : on le crée, puis on complète
+    const { error: e1 } = await sb.from("profiles").insert({ id: S.user.id }); if (e1) throw e1;
+    return saveProfile(patch);
+  }
+  S.profile = data[0]; S.members = null; render();
+}
+
 /* ---------- Liaisons ---------- */
 function bindView(D) {
   const c = $("content");
@@ -793,12 +1408,13 @@ function bindView(D) {
   c.querySelectorAll("[data-soon]").forEach(b => b.onclick = () => toast(b.dataset.soon));
   c.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { S.filter = b.dataset.filter; render(); });
   c.querySelectorAll("[data-zone]").forEach(b => b.onclick = () => { S.zone = b.dataset.zone; render(); });
-  c.querySelectorAll("[data-promo]").forEach(r => r.onclick = () => { S.detail = S.detail === r.dataset.promo ? null : r.dataset.promo; render(); });
+  c.querySelectorAll("[data-promo]").forEach(r => r.onclick = () => openDw("promo", r.dataset.promo));
+  c.querySelectorAll("[data-store]").forEach(r => r.onclick = () => openDw("store", r.dataset.store));
   c.querySelectorAll("[data-invite]").forEach(b => b.onclick = openInvite);
-  c.querySelectorAll("[data-relance]").forEach(b => b.onclick = () => {
-    const s = D.byId[b.dataset.relance];
-    copy(`Bonjour ${s.name},\n\nPour relayer les promos du réseau ${S.net.name}, il reste une étape : connecter la Page Facebook et le compte Instagram du magasin. Ça prend deux minutes depuis votre espace : ${location.origin}/\n\nMerci !`);
-  });
+  c.querySelectorAll("[data-relance]").forEach(b => b.onclick = (e) => { e.stopPropagation(); relance(b.dataset.relance); });
+  c.querySelectorAll("[data-topall]").forEach(b => b.onclick = () => { S.topAll = !S.topAll; render(); });
+  c.querySelectorAll("[data-tipx]").forEach(b => b.onclick = () => { ls.set("c-tips-x", JSON.stringify([...tipsHidden(), b.dataset.tipx])); render(); });
+  if (S.view === "settings") bindSettings();
 }
 $("new-promo").onclick = () => openPromo();
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => { show("m-promo", false); show("m-invite", false); });
@@ -808,7 +1424,7 @@ function inviteLink() { return `${location.origin}/?rejoindre=${encodeURICompone
 function fillInvite() {
   $("i-code").textContent = S.net.join_code;
   $("i-link").value = inviteLink();
-  $("i-msg").value = `Bonjour,\n\n${S.net.name} passe sur Vitriin pour diffuser ses promotions sur les pages Facebook et Instagram de chaque magasin.\n\n1. Ouvrez ce lien : ${inviteLink()}\n2. Créez votre compte et votre magasin.\n3. Connectez votre Page Facebook et votre compte Instagram.\n\nCode réseau, si on vous le demande : ${S.net.join_code}\n\nVous recevrez ensuite nos promos dans votre espace, prêtes à publier.`;
+  $("i-msg").value = fillTpl("invite", { reseau: S.net.name, lien: inviteLink(), code: S.net.join_code, magasin: "" });
 }
 function openInvite() { fillInvite(); show("m-invite"); }
 $("i-copy").onclick = () => copy($("i-link").value);
@@ -822,14 +1438,43 @@ $("i-regen").onclick = async () => {
 };
 
 /* ---------- Nouvelle promo ---------- */
-const F = { type: "percent", media: null, target: "all", zone: "all", picked: new Set(), resend: null };
+const F = { kind: "promo", type: "percent", media: [], formats: new Set(), pv: null, target: "all", zone: "all", picked: new Set(), resend: null };
 const iso = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
-$("f-types").innerHTML = TYPES.map(t => `<button type="button" data-type="${t.k}"><b>${t.ico}</b>${t.label}</button>`).join("");
-$("f-types").querySelectorAll("button").forEach(b => b.onclick = () => { F.type = b.dataset.type; syncType(); preview(); });
+function syncKind() {
+  $("f-kind").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.k === F.kind));
+  show("f-promo-only", F.kind === "promo");
+  show("f-codes", F.kind === "promo" && (feat("discount_code") || feat("ean_code")));
+  show("f-code-w", feat("discount_code")); show("f-ean-w", feat("ean_code"));
+  $("f-desc-h").textContent = F.kind === "post" ? "· le message de votre post" : "· facultatif";
+  document.querySelector("#m-promo .mh h2").textContent = F.resend ? "Envoyer à d'autres magasins" : F.kind === "post" ? "Nouveau post" : "Nouvelle promo";
+  syncFmt();
+}
+$("f-kind").querySelectorAll("button").forEach(b => b.onclick = () => { F.kind = b.dataset.k; syncKind(); preview(); });
+function syncTypes() {
+  $("f-types").innerHTML = allTypes().map(t => `<button type="button" data-type="${esc(t.k)}"><b>${esc(t.ico)}</b>${esc(t.label)}</button>`).join("");
+  $("f-types").querySelectorAll("button").forEach(b => b.onclick = () => { F.type = b.dataset.type; syncType(); preview(); });
+}
 function syncType() {
-  const t = TYPES.find(x => x.k === F.type);
+  const t = typeOf(F.type) || TYPES[0];
   $("f-types").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.type === F.type));
-  $("f-mech").placeholder = t.ph; $("f-mech-h").textContent = t.help;
+  $("f-mech").placeholder = t.ph || "Décrivez l'offre"; $("f-mech-h").textContent = t.help;
+}
+function syncMedia() {
+  $("f-thumbs").innerHTML = F.media.map((u, i) => `<span><img src="${esc(u)}" alt=""><button type="button" data-fr="${i}" aria-label="Retirer">×</button></span>`).join("");
+  $("f-thumbs").querySelectorAll("[data-fr]").forEach(b => b.onclick = () => { F.media.splice(+b.dataset.fr, 1); syncMedia(); });
+  const n = F.media.length;
+  show("f-img", n > 0); show("f-ph", !n); if (n) $("f-img").src = F.media[0];
+  $("f-drop-t").textContent = n ? (n > 1 ? `${n} photos · carrousel possible` : "Image prête") : "Choisir des images";
+  $("f-drop-s").textContent = n ? "Cliquez pour ajouter d'autres photos." : "JPEG ou PNG. Plusieurs photos = carrousel. Converties et recadrées automatiquement.";
+  syncFmt(); preview();
+}
+function syncFmt() {
+  F.formats = syncFormats(F.formats, F.media.length, F.kind);
+  $("f-formats").innerHTML = formatsHtml(F.formats, F.media.length, F.kind, "data-ff");
+  $("f-formats").querySelectorAll("[data-ff]").forEach(x => x.onchange = () => { x.checked ? F.formats.add(x.dataset.ff) : F.formats.delete(x.dataset.ff); syncFmt(); preview(); });
+  if (!F.formats.has(F.pv)) F.pv = [...F.formats][0] || null;
+  $("pv-tabs").innerHTML = [...F.formats].map(k => { const f = fmtItem(k); return `<button type="button" data-pv="${k}" class="${F.pv === k ? "on" : ""}">${esc(f.N.name)} · ${esc(f.I.l)}</button>`; }).join("");
+  $("pv-tabs").querySelectorAll("[data-pv]").forEach(b => b.onclick = () => { F.pv = b.dataset.pv; syncFmt(); preview(); });
 }
 $("f-target").querySelectorAll("button").forEach(b => b.onclick = () => { F.target = b.dataset.t; syncTarget(); });
 function storesForPicker() { return derive().stores.filter(s => !F.resend || !S.acts.some(a => a.promotion_id === F.resend && a.store_id === s.id)); }
@@ -852,8 +1497,14 @@ function count() {
   $("f-send").textContent = ids.length ? `Envoyer à ${ids.length} magasin${ids.length > 1 ? "s" : ""}` : "Envoyer aux magasins";
 }
 function preview() {
-  const title = $("f-title").value.trim() || "Titre de la promo", mech = $("f-mech").value.trim(), desc = $("f-desc").value.trim(), code = $("f-code").value.trim().toUpperCase();
-  $("pv-img").innerHTML = F.media ? `<img src="${esc(F.media)}" alt="">${mech ? `<span class="stk">${esc(mech)}</span>` : ""}` : `Votre visuel${mech ? `<span class="stk">${esc(mech)}</span>` : ""}`;
+  const title = $("f-title").value.trim() || (F.kind === "post" ? "Titre du post" : "Titre de la promo");
+  const mech = F.kind === "promo" ? $("f-mech").value.trim() : "", desc = $("f-desc").value.trim();
+  const code = F.kind === "promo" && feat("discount_code") ? $("f-code").value.trim().toUpperCase() : "";
+  const f = F.pv && fmtItem(F.pv), n = F.media.length;
+  $("pv-img").style.aspectRatio = f ? f.I.r : "4/5";
+  $("pv-where").textContent = f ? `Publié par le magasin · ${f.N.name} · ${f.I.l}` : "Publié par le magasin";
+  const multi = f && f.I.need === "multi" && n > 1 ? `<span class="stk" style="left:auto;right:12px;font-size:12px;background:rgba(0,0,0,.55)">1/${n}</span>` : "";
+  $("pv-img").innerHTML = (n ? `<img src="${esc(F.media[0])}" alt="">` : "Votre visuel") + (mech ? `<span class="stk">${esc(mech)}</span>` : "") + multi;
   $("pv-cap").innerHTML = `<b>${esc(title)}</b>${mech ? esc(mech) + "\n" : ""}${esc(desc)}`;
   $("pv-code").textContent = code ? "Code en caisse : " + code : ""; show("pv-code", !!code);
 }
@@ -865,17 +1516,16 @@ function openPromo(resendId = null) {
   document.querySelectorAll("#m-promo .form > div:first-child > *").forEach(el => el.classList.toggle("hidden", isResend && !["f-target", "f-pick", "f-count"].includes(el.id) && !(el.textContent === "Magasins" && el.classList.contains("fl"))));
   document.querySelector("#m-promo .form > div:last-child").classList.toggle("hidden", isResend);
   document.querySelector("#m-promo .form").style.gridTemplateColumns = isResend ? "1fr" : "";
-  document.querySelector("#m-promo .mh h2").textContent = isResend ? "Envoyer à d'autres magasins" : "Nouvelle promo";
   if (!isResend) {
-    F.type = "percent"; F.media = null; F.target = "all";
-    ["f-title", "f-mech", "f-desc", "f-code"].forEach(id => $(id).value = "");
+    F.kind = "promo"; F.type = "percent"; F.media = []; F.formats = new Set(); F.pv = null; F.target = "all";
+    ["f-title", "f-mech", "f-desc", "f-code", "f-ean"].forEach(id => $(id).value = "");
     $("f-mand").checked = false;
     const t = new Date(); $("f-start").value = iso(t); $("f-end").value = iso(new Date(t.getTime() + 14 * DAY));
-    show("f-img", false); show("f-ph"); $("f-drop-t").textContent = "Choisir une image";
-    $("f-drop-s").textContent = "JPEG ou PNG. Convertie et recadrée automatiquement (format 4:5 maximum).";
+    syncTypes(); syncMedia();
   } else F.target = "pick";
   $("f-note").textContent = isResend ? "" : "Vitriin ne publie jamais à la place d'un magasin : chacun valide et publie depuis son espace.";
-  show("f-err", false); syncType(); syncTarget(); preview(); show("m-promo");
+  show("f-err", false); syncKind(); if (isResend) { show("f-promo-only", false); show("f-codes", false); }
+  syncType(); syncTarget(); preview(); show("m-promo");
 }
 
 // Le visuel : JPEG, ratio Instagram (4:5 à 1,91:1), 1440 px max, sous n/<réseau>/.
@@ -892,18 +1542,10 @@ async function toInstagramJpeg(file) {
 }
 $("f-drop").onclick = () => $("f-file").click();
 $("f-file").onchange = async () => {
-  const file = $("f-file").files[0]; if (!file) return;
-  $("f-drop-t").textContent = "Envoi de l'image…"; $("f-send").disabled = true;
-  try {
-    const jpeg = await toInstagramJpeg(file);
-    const path = `n/${S.net.id}/${crypto.randomUUID()}.jpg`;
-    const { error } = await sb.storage.from("promo-media").upload(path, jpeg, { contentType: "image/jpeg", upsert: false });
-    if (error) throw error;
-    F.media = sb.storage.from("promo-media").getPublicUrl(path).data.publicUrl;
-    $("f-img").src = F.media; show("f-img"); show("f-ph", false);
-    $("f-drop-t").textContent = "Image prête"; $("f-drop-s").textContent = "Cliquez pour la remplacer.";
-    preview();
-  } catch (e) { $("f-drop-t").textContent = "Envoi impossible"; $("f-drop-s").textContent = errText(e); }
+  const files = [...$("f-file").files]; if (!files.length) return;
+  $("f-drop-t").textContent = files.length > 1 ? `Envoi de ${files.length} images…` : "Envoi de l'image…"; $("f-send").disabled = true;
+  try { F.media.push(...await uploadPromoImages(files)); syncMedia(); }
+  catch (e) { $("f-drop-t").textContent = "Envoi impossible"; $("f-drop-s").textContent = errText(e); }
   finally { $("f-send").disabled = false; $("f-file").value = ""; }
 };
 
@@ -916,20 +1558,10 @@ $("f-send").onclick = async () => {
   try {
     let promoId = F.resend;
     if (!promoId) {
-      const title = $("f-title").value.trim(), mech = $("f-mech").value.trim(), code = $("f-code").value.trim().toUpperCase();
-      if (!F.media) throw new Error("Ajoutez un visuel : Instagram ne publie pas sans image.");
-      if (!title) throw new Error("Donnez un titre à la promo.");
-      if (!mech) throw new Error("Précisez l'offre (ex. -30 %).");
-      if (code && !/^[A-Z0-9-]{3,24}$/.test(code)) throw new Error("Le code de caisse : 3 à 24 caractères, lettres, chiffres ou tirets.");
-      const start = new Date($("f-start").value + "T00:00:00"), end = new Date($("f-end").value + "T23:59:59");
-      if (isNaN(start) || isNaN(end) || end <= start) throw new Error("Vérifiez les dates : la fin doit suivre le début.");
-      const { data, error } = await sb.from("promotions").insert({
-        created_by_network_id: S.net.id, title, mechanic: mech,
-        // Le code part dans le texte du post : c'est le client final qui doit le lire.
-        description: [$("f-desc").value.trim(), code ? `Code en caisse : ${code}` : ""].filter(Boolean).join("\n\n") || null,
-        promo_type: F.type, discount_code: code || null, media_url: F.media,
-        starts_at: start.toISOString(), ends_at: end.toISOString(), is_mandatory: $("f-mand").checked, status: "draft",
-      }).select("id").single();
+      const row = promoRow({ kind: F.kind, media: F.media, title: $("f-title").value, type: F.type, mech: $("f-mech").value,
+        desc: $("f-desc").value, start: $("f-start").value, end: $("f-end").value,
+        code: feat("discount_code") ? $("f-code").value : "", ean: feat("ean_code") ? $("f-ean").value : "", mand: $("f-mand").checked, formats: F.formats });
+      const { data, error } = await sb.from("promotions").insert({ ...row, created_by_network_id: S.net.id, status: "draft" }).select("id").single();
       if (error) throw error;
       promoId = data.id;
     }
@@ -937,8 +1569,8 @@ $("f-send").onclick = async () => {
     const { data: n, error: e2 } = await sb.rpc("send_promotion", { p_promotion_id: promoId, p_store_ids: F.target === "all" && !F.resend && ids.length === allIds.length ? null : ids });
     if (e2) throw e2;
     show("m-promo", false);
-    toast(`Promo envoyée à ${n} magasin${n > 1 ? "s" : ""}. Ils la retrouvent dans leur espace.`);
-    await load(); S.view = "promos"; S.detail = promoId; render();
+    toast(`${F.kind === "post" && !F.resend ? "Post" : "Promo"} envoyé${F.kind === "post" && !F.resend ? "" : "e"} à ${n} magasin${n > 1 ? "s" : ""}. Ils le retrouvent dans leur espace.`);
+    await load(); S.view = "promos"; S.dw = { k: "promo", id: promoId }; E = null; render();
   } catch (e) { err(errText(e)); }
   finally { btn.disabled = false; }
 };
@@ -947,9 +1579,9 @@ $("f-send").onclick = async () => {
 async function load() {
   const id = S.net.id;
   const [st, ac, pr, sp] = await Promise.all([
-    sb.from("stores").select("id, name, city, postal_code, created_at").eq("network_id", id).order("name").range(0, 4999),
-    sb.from("social_accounts").select("store_id, channel, status, stores!inner(network_id)").eq("stores.network_id", id).range(0, 9999),
-    sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, media_url, starts_at, ends_at, is_mandatory, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
+    sb.from("stores").select("id, name, address, city, postal_code, auto_accept, created_at").eq("network_id", id).order("name").range(0, 4999),
+    sb.from("social_accounts").select("store_id, channel, status, display_name, stores!inner(network_id)").eq("stores.network_id", id).range(0, 9999),
+    sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
     sb.from("store_promotions").select("id, promotion_id, store_id, status, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),
   ]);
   const e = st.error || ac.error || pr.error || sp.error; if (e) throw e;
@@ -1005,13 +1637,18 @@ async function boot() {
   show("loading", false);
   if (!session) { show("v-auth"); show("v-new", false); show("v-app", false); return; }
   S.user = session.user;
-  const { data, error } = await sb.from("network_members").select("role, networks(id, name, slug, join_code, logo_url)").limit(1);
+  const { data, error } = await sb.from("network_members").select("role, networks(id, name, slug, join_code, logo_url, legal_name, address, support_email, phone, siret, siren, vat_number, cgv_url, settings)").eq("user_id", S.user.id).limit(1);
   if (error) { show("v-auth"); $("a-err").textContent = errText(error); show("a-err"); return; }
   show("v-auth", false);
   if (!data.length) { show("v-new"); show("v-app", false); return; }
-  S.net = data[0].networks;
-  $("me-mail").textContent = S.user.email; $("me-av").textContent = initials(S.user.email.split("@")[0].replace(/[._]/g, " "));
+  S.net = data[0].networks; S.role = data[0].role;
+  const pr = await sb.from("profiles").select("first_name, last_name, avatar_url").eq("id", S.user.id).maybeSingle();
+  S.profile = pr.data || {};
   try { await load(); } catch (e) { toast(errText(e)); }
+  // Arrivée depuis l'email d'invitation : choisir son mot de passe.
+  const qs = new URLSearchParams(location.search);
+  if (qs.has("bienvenue")) { S.view = "settings"; S.stab = "users"; history.replaceState(null, "", location.pathname); setTimeout(() => toast("Bienvenue ! Choisissez votre mot de passe et complétez votre profil."), 300); }
+  if (S.view === "settings" && S.stab === "users") loadMembers();
   show("v-new", false); show("v-app"); render();
 }
 boot();
@@ -1022,6 +1659,7 @@ async function liveRefresh() {
   if (!S.net || document.visibilityState !== "visible") return;
   if (!$("m-promo").classList.contains("hidden") || !$("m-invite").classList.contains("hidden")) return;
   if (document.activeElement && ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+  if ((E && E.dirty) || S.view === "settings") return;
   const y = $("content").scrollTop;
   try { await load(); render(); $("content").scrollTop = y; } catch (e) { console.warn(e); }
 }

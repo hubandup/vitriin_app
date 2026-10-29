@@ -441,7 +441,7 @@ function mapRow(row, accounts) {
     id: row.id, spId: row.id, promoId: pr.id, src: pr.created_by_network_id ? "net" : "own",
     kind: pr.promo_type ? "promo" : "post", title: pr.title, img: pr.media_url, mech: pr.mechanic, text: pr.description || "",
     type: pr.promo_type, orig: det.orig ?? null, val: det.val ?? null, xy: det.xy || [2, 1], sub: det.sub || "", cond: det.sub || "",
-    start, end, code: pr.discount_code, mandatory: pr.is_mandatory, deadline: start > Date.now() ? start : end,
+    start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, deadline: start > Date.now() ? start : end,
     status, ch, stats, recAt: new Date(row.created_at).getTime(),
     pubAt: done.length ? Math.max(...done.map(x => new Date(x.published_at).getTime())) : null,
     schedAt: sched ? new Date(sched.getFullYear(), sched.getMonth(), sched.getDate()).getTime() : null,
@@ -452,7 +452,7 @@ function mapRow(row, accounts) {
 }
 
 async function loadData() {
-  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, name, address, city, postal_code)").limit(1);
+  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, name, address, city, postal_code, auto_accept)").limit(1);
   if (e0) throw e0;
   if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
   const st = mem[0].stores;
@@ -460,13 +460,13 @@ async function loadData() {
   const [net, acc, rows] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status").eq("store_id", st.id),
-    sb.from("store_promotions").select("id, status, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
+    sb.from("store_promotions").select("id, status, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
   const n = net.data?.[0];
   const fb = acc.data.find(a => a.channel === "facebook"), ig = acc.data.find(a => a.channel === "instagram");
   Object.assign(STORE, {
-    id: st.id, name: st.name, city: st.city || "", address: st.address || "",
+    id: st.id, name: st.name, city: st.city || "", address: st.address || "", autoAccept: st.auto_accept !== false, hasNet: !!n,
     net: n?.network_name || "votre réseau", netFull: n ? `${n.network_name} · ${st.city || ""}` : "Magasin indépendant",
     page: fb?.display_name || "Non connectée", insta: ig?.display_name || "Non connecté",
   });
@@ -519,6 +519,12 @@ const save = () => {
   store.set(PREFS_KEY, prefs);
 };
 const UI = { tab: "home", promoTab: "net" };
+async function setAutoAccept(on) {
+  STORE.autoAccept = on; render(true);
+  const { data, error } = await sb.from("stores").update({ auto_accept: on }).eq("id", STORE.id).select("id");
+  if (error || !data?.length) { STORE.autoAccept = !on; render(true); return toast("Réglage non enregistré. Réessayez."); }
+  toast(on ? "Les promos du réseau seront activées dès réception." : "Vous validerez chaque promo du réseau.");
+}
 const STORE = { id: null, name: "", net: "", city: "", address: "", netFull: "", page: "", insta: "" };
 const initial = () => (STORE.city || STORE.name || "?").trim()[0].toUpperCase();
 
@@ -625,7 +631,8 @@ function cardPromo(p) {
   const pr = pricing(p);
   const pending = p.status === "received" || (p.mandatory && !["published", "scheduled"].includes(p.status));
   const tags = `${tagSrc(p)}${p.mandatory ? '<span class="st s-mand">Obligatoire</span>' : ""}${statusPill(p)}`;
-  const codeLine = p.code ? `<div class="code">${I.bar}<span>Code caisse ${esc(p.code)}${p.src === "net" ? " · Code fourni par votre réseau" : ""}</span></div>` : "";
+  const codeLine = (p.code ? `<div class="code">${I.bar}<span>Code caisse ${esc(p.code)}${p.src === "net" ? " · Code fourni par votre réseau" : ""}</span></div>` : "")
+    + (p.ean ? `<div class="code">${I.bar}<span>EAN caisse ${esc(p.ean)}</span></div>` : "");
   let bottom = "";
   if (p.status === "received" && p.mandatory || (p.mandatory && p.status === "active")) {
     bottom = `<div class="band"><div class="row">${I.clock}<span>À publier avant le <b>${fmtLong(p.deadline)}</b></span></div><div class="btns"><button class="b-sand" data-sched="${p.id}">Programmer</button><button class="b-grad" data-pub="${p.id}">Publier maintenant</button></div></div>`;
@@ -680,6 +687,10 @@ function viewSettings() {
       <div class="li" style="flex-wrap:wrap"><span class="ch ig" style="width:44px;height:44px;border-radius:12px">${I.ig}</span><div class="sp"><span style="font-size:13px;color:var(--muted)">Instagram</span><b style="display:block;font-size:15.5px">${esc(STORE.insta)}</b></div><span class="pill ${S.ig === "ok" ? "p-ok" : "p-ko"}">${S.ig === "ok" ? "Connecté" : "À reconnecter"}</span>
         ${S.ig === "broken" ? `<div class="btns" style="width:100%;margin-top:4px"><button class="btn-red" style="border-radius:13px;padding:13px" data-act="reconnect">Reconnecter</button><button style="background:#f3f1ed;border-radius:13px;font-weight:700" data-act="disconnect">Déconnecter</button></div>` : ""}</div>
     </div>
+    ${STORE.hasNet ? `<div class="lbl">PROMOS DU RÉSEAU</div>
+    <div class="box">
+      <div class="li"><div class="sp"><span style="font-size:15.5px;display:block">Accepter automatiquement les promos du réseau</span><span style="font-size:13px;color:var(--muted)">Activées dès réception, si votre centrale le permet. Les promos obligatoires restent à publier.</span></div><button class="tg ${STORE.autoAccept ? "on" : ""}" data-toggle="autoAccept" aria-label="Accepter automatiquement les promos du réseau"></button></div>
+    </div>` : ""}
     <div class="lbl">NOTIFICATIONS</div>
     <div class="box">
       <div class="li"><span class="sp" style="font-size:15.5px">Nouvelles promos du réseau</span><button class="tg ${S.notifNet ? "on" : ""}" data-toggle="notifNet" aria-label="Nouvelles promos du réseau"></button></div>
@@ -715,6 +726,7 @@ document.addEventListener("click", (e) => {
   else if (ds.pub) publish(find(ds.pub));
   else if (ds.sched) sheetSchedule(find(ds.sched));
   else if (ds.retry) { const p = find(ds.retry); publish(p, true); }
+  else if (ds.toggle === "autoAccept") setAutoAccept(!STORE.autoAccept);
   else if (ds.toggle) { S[ds.toggle] = !S[ds.toggle]; save(); render(true); }
   else if (ds.open) clients(ds.open);
   else if (ds.edit) createForm("promo", find(ds.edit));

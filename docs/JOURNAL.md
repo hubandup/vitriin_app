@@ -20,6 +20,50 @@ Repères :
 
 ## 2026-10-29
 
+### MOD-005 · Centrale : Paramètres, panneaux éditables, formats par réseau
+- **Paramètres** (nouvelle page) :
+  - Préférences : thème clair / sombre / auto et astuces (par navigateur),
+    acceptation automatique des promos, codes caisse (réduction, EAN), types
+    de promotion personnalisés (`networks.settings`, admins seulement).
+  - Utilisateurs : mon profil (photo, prénom, nom, email, mot de passe) ;
+    équipe avec rôles Administrateur / Éditeur, retrait, invitation par email
+    (fonction `network-invite`, la clé service_role reste côté serveur).
+  - Compte : logo, raison sociale, adresse, email support, téléphone, SIRET,
+    SIREN, TVA, CGV (contrôles de format en base et dans l'écran).
+  - Communication : modèles éditables (invitation, relance, annonce promo).
+    Vitriin n'envoie rien : on copie le message.
+- **Sidebar** repliable (mémorisé par navigateur).
+- **Tableau de bord** : chiffres des cartes agrandis, « Voir les 5 autres
+  magasins » dans le classement, magasins cliquables.
+- **Promotions** : vignette dans le tableau ; panneau 33 % où tout se modifie
+  (visuels, post ou promo, type, offre, texte, dates, codes, obligatoire,
+  formats) ; liste des magasins repliée derrière « N magasins actifs ».
+- **Nouvelle promo** : choix promo / post, plusieurs photos (carrousel), EAN,
+  info-bulle « i » sur Promo obligatoire, formats par réseau avec les
+  incompatibilités grisées, aperçu au ratio du format choisi. Stocké dans
+  `promotions.details` (`kind`, `media`, `formats`). Seuls Facebook et
+  Instagram sont actifs ; Google Business, TikTok, Pinterest affichés « Bientôt ».
+- **Magasins** : fiche en panneau 33 % (infos modifiables par les admins,
+  comptes connectés, stats détaillées, promos récentes).
+- **App magasin** : réglage « Accepter automatiquement les promos du réseau »
+  (`stores.auto_accept`), affichage du code EAN.
+- **Base** : migrations `20261029211203_centrale_settings`,
+  `20261029211256_network_invite_grants`. Fonction `network-invite` déployée.
+- **Fichiers** : `web/espace-magasin/public/centrale/index.html`,
+  `web/espace-magasin/public/magasin/index.html`,
+  `supabase/functions/network-invite/index.ts`, `supabase/config.toml`.
+- **Retour arrière** : `git revert <commit MOD-005>` puis redéploiement. En
+  base, les colonnes ajoutées sont sans effet sur l'ancien code ; à retirer
+  seulement si besoin, par une nouvelle migration.
+
+### SEC-002 · TRUNCATE retiré aux rôles clients
+- **Quoi** : `truncate`, `trigger`, `references` retirés à `anon` et
+  `authenticated` sur toutes les tables (TRUNCATE ignore la RLS).
+- **Migration** : `20261029212703_revoke_truncate_trigger_references`.
+- **Tests** : un magasin ne peut modifier ni le réseau, ni les autres magasins,
+  ni les promos de la centrale ; il peut modifier son propre `auto_accept`.
+- **Retour arrière** : inutile (aucun usage légitime côté client).
+
 ### MOD-004 · Centrale, page Promotions : suivi en panneau latéral
 - **Quoi** :
   - « Pousser des visuels » devient « Importer des visuels ».
