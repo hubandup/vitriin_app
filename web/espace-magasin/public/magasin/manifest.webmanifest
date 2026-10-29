@@ -1,0 +1,16 @@
+{
+  "name": "Vitriin",
+  "short_name": "Vitriin",
+  "description": "Les promos de votre magasin, sur Facebook et Instagram.",
+  "start_url": "/magasin/",
+  "scope": "/magasin/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "lang": "fr",
+  "icons": [
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

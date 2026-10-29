@@ -23,3 +23,12 @@ Côté magasin, `index.html` gagne deux étapes : « Mon réseau » (rejoindre p
 code ou lien d'invitation) et « Promos du réseau » (activer, refuser, publier).
 
 Migration associée : `20261028223629_espace_centrale.sql`.
+
+## App magasin, version démo (app.vitriin.co/magasin)
+
+`public/magasin/index.html` : l'app magasin calée sur la maquette Claude Design
+« Vitriin App » (magenta), installable en plein écran sur l'écran d'accueil
+(manifest + balises Apple). Données de démo locales (L'Atelier du Coureur,
+réseau Foulée Sport), mémorisées dans le navigateur ; « Réinitialiser la démo »
+en bas des Réglages. Aucune connexion à Supabase ni à Meta : les publications
+sont simulées. Le branchement aux vraies données suit pour la bêta.
