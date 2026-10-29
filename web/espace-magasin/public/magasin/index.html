@@ -141,7 +141,8 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .card .btns{margin-top:7px}
 .card .btns button{padding:10px 8px;font-size:14px;border-radius:11px}
 .swipe{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden;background:var(--red)}
-.swipe .card{margin-bottom:0;transition:transform .2s ease;touch-action:pan-y}
+.swipe .card{margin-bottom:0;transition:transform .2s ease;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.swipe img{-webkit-user-drag:none;pointer-events:none}
 .swipe.drag .card{transition:none}
 .swipe.sw-blue{background:var(--blue)}
 .st.s-susp{background:#e6eefb;color:var(--blue)}
@@ -589,6 +590,7 @@ const nf = (n) => new Intl.NumberFormat("fr-FR").format(n).replace(/ /g, " ");
 /* ===================== Fragments ===================== */
 const tagSrc = (p) => p.src === "net" ? '<span class="st t-net">Centrale</span>' : '<span class="st t-own">Créée par vous</span>';
 function statusPill(p) {
+  if (p.status !== "draft" && Date.now() > new Date(p.end).getTime()) return '<span class="st s-draft">Terminée</span>';
   if (p.suspended) return '<span class="st s-susp">Suspendue</span>';
   if (p.status === "published") return '<span class="st s-pub">Publiée</span>';
   if (p.status === "scheduled") return '<span class="st s-sch">Programmée</span>';
@@ -683,7 +685,9 @@ function cardPromo(p) {
   const codes = [p.code && `Code ${esc(p.code)}`, p.ean && `EAN ${esc(p.ean)}`].filter(Boolean).join(" · ");
   const codeLine = codes ? `<div class="code">${I.bar}<span>${codes}</span></div>` : "";
   let bottom = "";
-  if (p.suspended) {
+  if (p.status !== "draft" && isOver(p)) {
+    bottom = `<div class="foot"><div class="row" style="font-size:13.5px"><span class="sp" style="color:var(--muted)">Terminée le ${fmtShort(p.end)}${p.status === "published" ? "" : " · pas publiée"}</span>${chanIcons(p)}</div></div>`;
+  } else if (p.suspended) {
     bottom = `<div class="foot"><div class="row" style="font-size:13.5px"><span class="sp" style="color:var(--muted)">Suspendue : retirée de votre vitrine.</span><button class="link" style="font-size:14px" data-resume="${p.id}">Reprendre</button></div></div>`;
   } else if (p.status === "received" && p.mandatory || (p.mandatory && p.status === "active")) {
     bottom = `<div class="band"><div class="row">${I.clock}<span>À publier avant le <b>${fmtLong(p.deadline)}</b></span></div><div class="btns"><button class="b-sand" data-sched="${p.id}">Programmer</button><button class="b-grad" data-pub="${p.id}">Publier maintenant</button></div></div>`;
@@ -811,27 +815,40 @@ function closeSwipes(except) {
   $$(".swipe.open").forEach(w => { if (w !== except) { w.classList.remove("open"); w.querySelector(".card").style.transform = ""; had = true; } });
   return had;
 }
-document.addEventListener("pointerdown", (e) => {
-  const w = e.target.closest(".swipe"); if (!w || e.target.closest(".sw-del")) return;
-  drag = { w, x: e.clientX, y: e.clientY, dx: 0, base: w.classList.contains("open") ? -96 : 0, on: false };
-});
-document.addEventListener("pointermove", (e) => {
-  if (!drag) return;
-  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-  if (!drag.on) { if (Math.abs(dx) < 8 || Math.abs(dy) > Math.abs(dx)) { if (Math.abs(dy) > 10) drag = null; return; } drag.on = true; drag.w.classList.add("drag"); closeSwipes(drag.w); }
-  drag.dx = dx; const x = Math.max(-110, Math.min(0, drag.base + dx));
-  drag.w.querySelector(".card").style.transform = `translateX(${x}px)`;
-});
-document.addEventListener("pointercancel", () => { if (drag) { drag.w.classList.remove("drag"); drag.w.querySelector(".card").style.transform = drag.base ? "translateX(-96px)" : ""; drag = null; } });
-document.addEventListener("pointerup", () => {
+// Événements tactiles (iPhone, Android) et souris (ordinateur), gérés à part :
+// plus fiable sur Safari iOS que les « pointer events ».
+function swStart(target, x, y) {
+  const w = target.closest(".swipe"); if (!w || target.closest(".sw-del")) return;
+  drag = { w, x, y, dx: 0, base: w.classList.contains("open") ? -96 : 0, on: false, dead: false };
+}
+function swMove(x, y, ev) {
+  if (!drag || drag.dead) return;
+  const dx = x - drag.x, dy = y - drag.y;
+  if (!drag.on) {
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+    if (Math.abs(dy) >= Math.abs(dx)) { drag.dead = true; return; } // défilement vertical
+    drag.on = true; drag.w.classList.add("drag"); closeSwipes(drag.w);
+  }
+  if (ev && ev.cancelable) ev.preventDefault();
+  drag.dx = dx; const v = Math.max(-110, Math.min(0, drag.base + dx));
+  drag.w.querySelector(".card").style.transform = `translateX(${v}px)`;
+}
+function swEnd() {
   if (!drag) return;
   const { w, on, base, dx } = drag; drag = null;
   if (!on) return;
-  swiped = true; setTimeout(() => swiped = false, 50);
+  swiped = true; setTimeout(() => swiped = false, 350);
   w.classList.remove("drag");
   const open = base + dx < -48;
   w.classList.toggle("open", open); w.querySelector(".card").style.transform = open ? "translateX(-96px)" : "";
-});
+}
+document.addEventListener("touchstart", (e) => { const t = e.touches[0]; swStart(e.target, t.clientX, t.clientY); }, { passive: true });
+document.addEventListener("touchmove", (e) => { const t = e.touches[0]; swMove(t.clientX, t.clientY, e); }, { passive: false });
+document.addEventListener("touchend", swEnd);
+document.addEventListener("touchcancel", swEnd);
+document.addEventListener("mousedown", (e) => { if (e.button === 0) swStart(e.target, e.clientX, e.clientY); });
+document.addEventListener("mousemove", (e) => { if (drag) swMove(e.clientX, e.clientY, e); });
+document.addEventListener("mouseup", swEnd);
 function askDelete(p) {
   if (!p) return;
   sheet(`<div class="grab"></div><h2>Supprimer « ${esc(p.title)} » ?</h2>
@@ -884,7 +901,12 @@ function sheetNet(p) {
       <div class="ro-line">${[pr.badge, `Du ${fmtShort(p.start)} au ${fmtShort(p.end)}`, p.code && `Code ${esc(p.code)}`, p.ean && `EAN ${esc(p.ean)}`, p.mandatory && "Obligatoire"].filter(Boolean).map(esc).join(" · ")}</div>
       </div>
       ${can ? `<button class="big-btn" id="n-save">Enregistrer</button>${Object.keys(p.ov || {}).length ? '<button class="txt-btn" id="n-reset">Revenir à la version de la centrale</button>' : ""}` : ""}
+      ${p.suspended ? `<button class="txt-btn" id="n-resume" style="color:var(--blue);font-weight:700">Reprendre la promo</button>` : swipeAction(p) === "susp" ? `<button class="txt-btn" id="n-susp" style="color:var(--blue);font-weight:700">${I.pause} Suspendre la promo</button>` : swipeAction(p) === "del" ? `<button class="txt-btn" id="n-del" style="color:var(--red);font-weight:700">Supprimer la promo</button>` : ""}
       <button class="txt-btn" data-close>${can ? "Annuler" : "Fermer"}</button>`);
+    // Mêmes actions que le glisser, pour qui ne le découvre pas.
+    $("#n-resume") && ($("#n-resume").onclick = () => setSuspended(p, false));
+    $("#n-susp") && ($("#n-susp").onclick = () => askSuspend(p));
+    $("#n-del") && ($("#n-del").onclick = () => askDelete(p));
     if (!can) return;
     $("#n-title").oninput = (e) => F.title = e.target.value;
     $("#n-text").oninput = (e) => F.text = e.target.value;

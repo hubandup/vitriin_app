@@ -20,6 +20,23 @@ Repères :
 
 ## 2026-10-29
 
+### BUG-004 · Glisser sans effet (Suspendre / Supprimer) — corrigé
+- **Cause** : le glisser reposait sur les « pointer events ». Sur iPhone
+  (Safari) et à la souris (glisser natif de l'image, sélection de texte), le
+  geste était annulé : aucun bouton n'apparaissait, aucune requête ne partait
+  (vérifié dans les journaux Supabase : aucune mise à jour `suspended`).
+- **Correction** : gestes gérés en événements tactiles + souris séparés,
+  sélection et glisser d'image désactivés sur les cartes. Testé en tactile
+  (iPhone émulé) et à la souris. En plus, la fiche d'une promo de la centrale
+  propose « Suspendre / Reprendre / Supprimer la promo », sans glisser.
+- **Promo terminée** : la carte affiche « Terminée » sans boutons de
+  publication. Le magasin de Lyon n'avait aucune promo terminée : ajout d'une
+  promo démo « Rentrée des classes » (terminée il y a 20 jours, envoyée aux
+  20 magasins) pour tester « Supprimer ».
+  Retour arrière : `delete from promotions where title = 'Rentrée des classes'
+  and created_by_network_id = '<id Chausselandia>';`
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+
 ### BUG-003 · Centrale affichait « Créez votre réseau » — corrigé
 - **Cause** : /centrale et /magasin partagent le domaine app.vitriin.co et
   donc la même session Supabase. La connexion du compte démo magasin sur
