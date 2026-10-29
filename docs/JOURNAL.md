@@ -20,6 +20,13 @@ Repères :
 
 ## 2026-10-29
 
+### BUG-002 · Photo de profil géante dans le menu de la Centrale — corrigé
+- **Quoi** : l'avatar du bas du menu n'était pas contraint à sa pastille
+  (image affichée en taille réelle, par-dessus « Importer en masse »).
+- **Correction** : `overflow:hidden` + règle `.me .av img` (32 px, recadrée).
+- **Fichier** : `web/espace-magasin/public/centrale/index.html`.
+- **Retour arrière** : `git revert` du commit BUG-002.
+
 ### MOD-005 · Centrale : Paramètres, panneaux éditables, formats par réseau
 - **Paramètres** (nouvelle page) :
   - Préférences : thème clair / sombre / auto et astuces (par navigateur),
