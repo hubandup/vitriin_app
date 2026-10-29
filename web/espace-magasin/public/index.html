@@ -370,7 +370,7 @@ async function loadAccounts() {
     if (best) pages.sort((a, b) => (a === best ? -1 : b === best ? 1 : 0));
     $("choose-list").innerHTML = pages.map(p => {
       const ig = active.find(a => a.channel === "instagram" && a.parent_external_id === p.external_account_id);
-      return `<label class="opt"><input type="radio" name="page" value="${p.id}"${p === best ? " checked" : ""}><span><strong>${p.display_name}</strong>${p === best ? ' <span class="pill ok">Nom du magasin</span>' : ""}${ig ? " · Instagram @" + ig.display_name.replace(/^@/, "") : ""}</span></label>`;
+      return `<label class="opt"><input type="radio" name="page" value="${p.id}"${p === best ? " checked" : ""}><span><strong>${esc(p.display_name)}</strong>${p === best ? ' <span class="pill ok">Nom du magasin</span>' : ""}${ig ? " · Instagram @" + esc(ig.display_name.replace(/^@/, "")) : ""}</span></label>`;
     }).join("");
     $("btn-choose").disabled = !best;
     document.querySelectorAll('input[name=page]').forEach(r => r.onchange = () => { $("btn-choose").disabled = false; });
@@ -390,7 +390,7 @@ async function loadAccounts() {
   $("accounts").innerHTML = data.map(a => {
     const cls = a.status === "active" ? "ok" : "ko";
     const txt = a.status === "active" ? "Connecté" : "À reconnecter";
-    return `<div class="acct"><span><strong>${labels[a.channel] || a.channel}</strong> · ${a.display_name}</span><span class="pill ${cls}">${txt}</span></div>`;
+    return `<div class="acct"><span><strong>${labels[a.channel] || a.channel}</strong> · ${esc(a.display_name)}</span><span class="pill ${cls}">${txt}</span></div>`;
   }).join("");
   const connected = pages.length === 1;
   $("btn-connect").textContent = connected ? "Changer de Page" : "Connecter Facebook et Instagram";
@@ -452,7 +452,7 @@ function renderStats(items) {
     const date = it.published_at ? new Date(it.published_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "";
     const label = it.channel === "facebook" ? "Facebook" : "Instagram";
     const third = it.channel === "facebook" ? ["Réactions", m.reactions] : ["J'aime", m.reactions];
-    return `<div class="stat"><div class="stat-head"><span><strong>${it.title || "Publication"}</strong><br><span class="muted">${date}</span></span><span><span class="chan ${it.channel}">${label}</span></span></div>
+    return `<div class="stat"><div class="stat-head"><span><strong>${esc(it.title || "Publication")}</strong><br><span class="muted">${date}</span></span><span><span class="chan ${it.channel}">${label}</span></span></div>
       ${it.metrics ? `<div class="grid">
         <div class="kpi"><b>${fmt(m.reach)}</b><span>Portée</span></div>
         <div class="kpi"><b>${fmt(m.views)}</b><span>Vues</span></div>

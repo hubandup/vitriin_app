@@ -20,6 +20,47 @@ Repères :
 
 ## 2026-10-29
 
+### SEC-001 · Audit sécurité et durcissement
+- **Vérifié** :
+  - RLS active sur toutes les tables du schéma `public`.
+  - Le schéma `private` (jetons Meta chiffrés, états OAuth, registre de
+    suppression) n'est lisible ni par `anon` ni par `authenticated`.
+  - Seule la clé publique `anon` figure dans le code (pages web et
+    keep-alive). Elle est conçue pour être publique : la RLS s'applique.
+  - Aucune clé `service_role`, aucun secret Meta, aucun jeton ni mot de passe
+    dans le dépôt, ni dans son historique Git.
+  - Secrets serveur : variables des Edge Functions Supabase uniquement.
+- **Corrigé** (migrations `20261029193343_security_hardening` et
+  `20261029193441_revoke_is_demo_store`) :
+  - Colonnes modifiables restreintes : un magasin ne peut plus réaffecter une
+    activation à une autre promo, ni changer l'auteur d'une promo.
+  - Un magasin ne peut plus s'abonner à la promo d'un autre réseau.
+  - Les fonctions internes ne sont plus appelables sans connexion, et les
+    fonctions de trigger plus du tout.
+  - `search_path` figé sur `set_updated_at`.
+  - Désormais, une nouvelle fonction n'est exécutable qu'avec un GRANT
+    explicite.
+- **Corrigé (code)** :
+  - Échappement HTML des noms de magasin, de Page et des titres dans
+    `/magasin` et `/` (risque d'injection de script via un nom de magasin).
+  - L'app magasin n'envoie plus `created_by_store_id` en modification.
+- **Testé en SQL** :
+  - Compte magasin : activer, créer un brouillon et son activation, publier
+    en simulation. Tout passe.
+  - Changer la promo d'une activation : refusé.
+  - Compte centrale : créer une promo puis `send_promotion` (20 magasins).
+    Passe.
+  - Appel anonyme de `is_store_member` : refusé.
+- **Reste à faire, côté tableau de bord Supabase** : activer « Leaked password
+  protection » (Authentication → Policies). Avertissement accepté : les RPC
+  `SECURITY DEFINER` appelables par un utilisateur connecté sont voulues.
+  Chacune vérifie l'appartenance au magasin ou au réseau.
+- **Retour arrière** : nouvelle migration qui ré-accorde
+  `insert, update on store_promotions, promotions to authenticated`, `update
+  on store_members, network_members`, et recrée l'ancienne policy
+  `store_promotions_insert_members` (`with check (is_store_member(store_id))`).
+  Code : `git revert` du commit de cette entrée.
+
 ### BUG-001 · Création de promo impossible dans la Centrale — corrigé
 - **Symptôme** : « new row violates row-level security policy for table
   "promotions" » en créant une promo sur /centrale.

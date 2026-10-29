@@ -467,7 +467,7 @@ async function loadData() {
   const fb = acc.data.find(a => a.channel === "facebook"), ig = acc.data.find(a => a.channel === "instagram");
   Object.assign(STORE, {
     id: st.id, name: st.name, city: st.city || "", address: st.address || "",
-    net: n?.network_name || "votre réseau", netFull: n ? `${n.network_name} · ${st.city}` : "Magasin indépendant",
+    net: n?.network_name || "votre réseau", netFull: n ? `${n.network_name} · ${st.city || ""}` : "Magasin indépendant",
     page: fb?.display_name || "Non connectée", insta: ig?.display_name || "Non connecté",
   });
   S.fb = fb ? (fb.status === "active" ? "ok" : "broken") : "none";
@@ -574,7 +574,7 @@ function viewHome() {
   const pend = pendingNet(), due = mandatoryDue();
   const carousel = S.promos.filter(p => p.status === "published" || p.status === "scheduled").sort((a, b) => (b.pubAt || 0) - (a.pubAt || 0));
   return `<div class="screen">
-    <div class="head"><span class="av">${initial()}</span><div class="sp"><b>${STORE.name}</b><span>Réseau ${STORE.net} · ${STORE.city}</span></div></div>
+    <div class="head"><span class="av">${initial()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>Réseau ${esc(STORE.net)} · ${esc(STORE.city)}</span></div></div>
     <button class="client-btn" data-act="clients">${I.eye}Voir côté clients</button>
     ${pend.length ? `<button class="hero" data-go="promos:net"><span class="ic">${I.net}</span><span class="sp"><b>${pend.length} nouvelle${pend.length > 1 ? "s" : ""} promo${pend.length > 1 ? "s" : ""} du réseau à valider</b><span>${pend.map(p => esc(p.title)).join(" · ")}</span></span><span class="chev">${I.chev}</span></button>` : ""}
     ${due.map(p => `<button class="due" data-go="promos:net"><span class="ic">${I.clock}</span><span class="sp"><b>${esc(p.title)} : à publier avant le ${fmtLong(p.deadline)}</b><span>Promo obligatoire du réseau · publiez-la ou programmez-la</span></span><span class="chev">${I.chev}</span></button>`).join("")}
@@ -617,7 +617,7 @@ function viewPromos() {
   return `<div class="screen">
     <h1 class="title">Promos</h1>
     <div class="seg"><button class="${UI.promoTab === "net" ? "on" : ""}" data-ptab="net">Promos du réseau ${pend ? `<span class="c">${pend}</span>` : ""}</button><button class="${UI.promoTab === "own" ? "on" : ""}" data-ptab="own">Créées par vous · ${own.length}</button></div>
-    <p class="intro">${UI.promoTab === "net" ? `Envoyées par votre centrale ${STORE.net}. Activez ou refusez en un geste. Les promos obligatoires ne se refusent pas : publiez-les ou programmez-les avant leur échéance.` : "Vos promos et vos posts, créés avec le bouton +. Touchez-en un pour le modifier."}</p>
+    <p class="intro">${UI.promoTab === "net" ? `Envoyées par votre centrale ${esc(STORE.net)}. Activez ou refusez en un geste. Les promos obligatoires ne se refusent pas : publiez-les ou programmez-les avant leur échéance.` : "Vos promos et vos posts, créés avec le bouton +. Touchez-en un pour le modifier."}</p>
     ${list.map(cardPromo).join("") || '<div class="empty">Rien pour l\'instant.</div>'}
   </div>`;
 }
@@ -671,9 +671,9 @@ function viewStats() {
 function viewSettings() {
   return `<div class="screen">
     <h1 class="title">Réglages</h1>
-    <div class="head" style="margin:16px 0 0"><span class="av" style="width:56px;height:56px;font-size:23px">${initial()}</span><div class="sp"><b>${STORE.name}</b><span>${STORE.address}</span></div></div>
+    <div class="head" style="margin:16px 0 0"><span class="av" style="width:56px;height:56px;font-size:23px">${initial()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>${esc(STORE.address)}</span></div></div>
     <div class="lbl">RÉSEAU</div>
-    <div class="net"><span class="ic" style="color:#fff">${I.net}</span><div class="sp"><b style="display:block;font-size:16px">${STORE.netFull}</b><span style="font-size:13px;color:var(--muted)">Les promos de votre centrale arrivent ici automatiquement</span></div></div>
+    <div class="net"><span class="ic" style="color:#fff">${I.net}</span><div class="sp"><b style="display:block;font-size:16px">${esc(STORE.netFull)}</b><span style="font-size:13px;color:var(--muted)">Les promos de votre centrale arrivent ici automatiquement</span></div></div>
     <div class="lbl">COMPTES CONNECTÉS</div>
     <div class="box">
       <div class="li"><span class="ch fb" style="width:44px;height:44px">${I.fb}</span><div class="sp"><span style="font-size:13px;color:var(--muted)">Page Facebook</span><b style="display:block;font-size:15.5px">${esc(STORE.page)}</b></div><span class="pill ${S.fb === "ok" ? "p-ok" : "p-ko"}">${S.fb === "ok" ? "Connecté" : "À connecter"}</span></div>
@@ -888,7 +888,8 @@ function createForm(kind, draft) {
       };
       let spId = draft?.spId;
       if (draft) {
-        const { error } = await sb.from("promotions").update(row).eq("id", draft.promoId);
+        const { created_by_store_id, ...changes } = row; // le magasin auteur ne change pas
+        const { error } = await sb.from("promotions").update(changes).eq("id", draft.promoId);
         if (error) throw error;
       } else {
         const { data: pz, error } = await sb.from("promotions").insert(row).select("id").single();
@@ -941,7 +942,7 @@ const iso = (t) => { const x = new Date(t); return new Date(x.getTime() - x.getT
 function pickMedia(src, done) {
   if (src === "lib") {
     const items = [LIB.air, LIB.trail, LIB.bf, LIB.phantom, LIB.red, LIB.grey];
-    sheet(`<div class="grab"></div><h2>Médiathèque du réseau</h2><p class="small" style="font-size:14px;margin-top:4px">Visuels partagés par ${STORE.net}, prêts à l'emploi.</p>
+    sheet(`<div class="grab"></div><h2>Médiathèque du réseau</h2><p class="small" style="font-size:14px;margin-top:4px">Visuels partagés par ${esc(STORE.net)}, prêts à l'emploi.</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">${items.map((s, k) => `<button data-lib="${k}" style="aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--bg)"><img onerror="this.style.visibility='hidden'" src="${esc(s)}" alt="" style="width:100%;height:100%;object-fit:cover"></button>`).join("")}</div>
       <button class="txt-btn" data-close>Annuler</button>`, true);
     $$("[data-lib]").forEach(b => b.onclick = () => { const s = items[+b.dataset.lib]; closeSheetOnly(); done(s); });
@@ -961,10 +962,10 @@ function clients(startId) {
   layer.innerHTML = `<div class="reels" id="reels">${list.map((p, k) => { const pr = pricing(p); return `<section class="reel">
     <img onerror="this.style.visibility='hidden'" src="${esc(p.img)}" alt=""><div class="shade"></div>
     <div class="prog">${list.map((_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("")}</div>
-    <div class="rh"><button class="back glass" data-close>${I.back}</button><span class="rav">${initial()}</span><div><b>${STORE.name}</b><span>${STORE.city} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
+    <div class="rh"><button class="back glass" data-close>${I.back}</button><span class="rav">${initial()}</span><div><b>${esc(STORE.name)}</b><span>${esc(STORE.city)} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
     <button class="pillback" data-close>${I.back.replace('width="20" height="20"', 'width="15" height="15"')}Côté clients · Revenir au magasin</button>
-    <div class="side"><button data-fav="${p.id}"><i class="glass">${I.heart(p.liked)}</i><span id="fav-${p.id}">${(p.fav || 0) + (p.liked ? 1 : 0)}</span></button><button data-tip="Itinéraire vers ${STORE.address}"><i class="glass">${I.pin}</i>Itinéraire</button><button data-tip="Lien de la promo copié"><i class="glass">${I.share}</i>Partager</button><button data-savep="${p.id}"><i class="glass">${I.save(p.saved)}</i>${p.saved ? "Enregistré" : "Enregistrer"}</button></div>
-    <div class="info"><small>${STORE.name} · Jusqu'au ${fmtShort(p.end)}</small><h3>${esc(p.title)}</h3><p>${esc(p.sub || `Valable du ${fmtShort(p.start)} au ${fmtShort(p.end)}`)}</p>
+    <div class="side"><button data-fav="${p.id}"><i class="glass">${I.heart(p.liked)}</i><span id="fav-${p.id}">${(p.fav || 0) + (p.liked ? 1 : 0)}</span></button><button data-tip="Itinéraire vers ${esc(STORE.address)}"><i class="glass">${I.pin}</i>Itinéraire</button><button data-tip="Lien de la promo copié"><i class="glass">${I.share}</i>Partager</button><button data-savep="${p.id}"><i class="glass">${I.save(p.saved)}</i>${p.saved ? "Enregistré" : "Enregistrer"}</button></div>
+    <div class="info"><small>${esc(STORE.name)} · Jusqu'au ${fmtShort(p.end)}</small><h3>${esc(p.title)}</h3><p>${esc(p.sub || `Valable du ${fmtShort(p.start)} au ${fmtShort(p.end)}`)}</p>
       <div class="pr">${pr.price != null ? `<b>${eur(pr.price)}</b>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}` : ""}<em>${esc(pr.badge)}</em></div></div>
     <button class="cta" data-code="${p.id}">${I.bar.replace('width="14" height="14"', 'width="20" height="20"')}J'en profite</button>
   </section>`; }).join("")}</div>`;
