@@ -20,6 +20,26 @@ Repères :
 
 ## 2026-10-29
 
+### MOD-009 · Glisser à gauche : Supprimer ou Suspendre selon la promo
+- **Règle** (corrige MOD-008) :
+  - promo du magasin → bouton rouge « Supprimer » puis confirmation ;
+  - promo de la centrale en cours ou à venir → bouton bleu « Suspendre » puis
+    confirmation, si la centrale l'autorise, jamais pour une obligatoire.
+    La promo suspendue sort de la vitrine ; « Reprendre » la remet ;
+  - promo de la centrale terminée → bouton rouge « Supprimer » (retirée de
+    la liste du magasin), toujours possible.
+- **Centrale** : l'interrupteur devient « Les magasins peuvent suspendre une
+  promo » (même réglage `store_delete`) ; le suivi affiche « Suspendue ».
+- **Base** : migration `20261029222520_store_suspend` : colonne
+  `store_promotions.suspended`, trigger `guard_store_customization` mis à
+  jour (suspendre = autorisation centrale + non obligatoire ; supprimer une
+  promo centrale = seulement une fois terminée), vitrine publique sans les
+  promos suspendues ou retirées. Testé en base (4 cas).
+- **Fichiers** : `web/espace-magasin/public/magasin/index.html`,
+  `web/espace-magasin/public/centrale/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-009 ; la colonne
+  `suspended` reste à false et n'a pas d'effet.
+
 ### MOD-008 · App magasin : cartes compactes, ouvrir, glisser pour supprimer
 - **Accueil** : l'activité affiche les logos Facebook / Instagram au lieu des
   lignes « Publiée sur … ✓ ». « Réseau » devient « Centrale » partout dans

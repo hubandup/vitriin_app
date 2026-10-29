@@ -22,7 +22,7 @@
   --p:#e5087e; --v:#951b81; --grad:linear-gradient(100deg,#e5087e 0%,#951b81 100%);
   --ink:#2D2D2D; --muted:#7b766f; --faint:#a8a29b; --line:#EEECE8; --bg:#f6f3ee;
   --rose:#fdf1f4; --rose2:#fde7ef; --mint:#eef5f0; --teal:#0c9875; --teal2:#5ebca3;
-  --sand:#faf6ee; --sandline:#ecdcc0; --red:#c8342b; --redbg:#fdeeec; --lilac:#f7eef6;
+  --sand:#faf6ee; --sandline:#ecdcc0; --red:#c8342b;--blue:#2f6fdb; --redbg:#fdeeec; --lilac:#f7eef6;
   --fb:#1877F2; --ig:linear-gradient(45deg,#f9ce34,#ee2a7b,#6228d7);
   --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
   --nav:64px;
@@ -143,6 +143,8 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .swipe{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden;background:var(--red)}
 .swipe .card{margin-bottom:0;transition:transform .2s ease;touch-action:pan-y}
 .swipe.drag .card{transition:none}
+.swipe.sw-blue{background:var(--blue)}
+.st.s-susp{background:#e6eefb;color:var(--blue)}
 .sw-del{position:absolute;right:0;top:0;bottom:0;width:96px;color:#fff;font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
 .tags{display:flex;gap:5px;flex-wrap:wrap}
 .card h3{font-size:15.5px;margin:4px 0 0;letter-spacing:-.01em;line-height:1.25}
@@ -375,6 +377,7 @@ const IMG = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=90
 
 /* ===================== Icônes ===================== */
 const I = {
+  pause: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>',
   trash: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>',
   eye: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
   net: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.4"/><circle cx="5.5" cy="18" r="2.4"/><circle cx="18.5" cy="18" r="2.4"/><path d="M12 7.4V11l-5 5M12 11l5 5"/></svg>',
@@ -457,7 +460,7 @@ function mapRow(row, accounts) {
   return {
     id: row.id, spId: row.id, promoId: pr.id, src: pr.created_by_network_id ? "net" : "own",
     // Personnalisation du magasin (si la centrale l'autorise) par-dessus la version centrale.
-    ov: row.overrides || {}, base: { title: pr.title, text: pr.description || "", img: pr.media_url },
+    suspended: !!row.suspended, ov: row.overrides || {}, base: { title: pr.title, text: pr.description || "", img: pr.media_url },
     kind: pr.promo_type ? "promo" : "post", title: row.overrides?.title || pr.title, img: row.overrides?.media_url || pr.media_url,
     media: row.overrides?.media_url ? [row.overrides.media_url] : Array.isArray(det.media) && det.media.length ? det.media : (pr.media_url ? [pr.media_url] : []),
     formats: Array.isArray(det.formats) ? det.formats : [], mech: pr.mechanic, text: row.overrides?.text || pr.description || "",
@@ -481,7 +484,7 @@ async function loadData() {
   const [net, acc, rows] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status").eq("store_id", st.id),
-    sb.from("store_promotions").select("id, status, overrides, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).eq("hidden", false).order("created_at", { ascending: false }),
+    sb.from("store_promotions").select("id, status, overrides, suspended, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).eq("hidden", false).order("created_at", { ascending: false }),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
   const n = net.data?.[0];
@@ -585,6 +588,7 @@ const nf = (n) => new Intl.NumberFormat("fr-FR").format(n).replace(/ /g, " ");
 /* ===================== Fragments ===================== */
 const tagSrc = (p) => p.src === "net" ? '<span class="st t-net">Centrale</span>' : '<span class="st t-own">Créée par vous</span>';
 function statusPill(p) {
+  if (p.suspended) return '<span class="st s-susp">Suspendue</span>';
   if (p.status === "published") return '<span class="st s-pub">Publiée</span>';
   if (p.status === "scheduled") return '<span class="st s-sch">Programmée</span>';
   if (p.status === "active") return '<span class="st s-act">Activée</span>';
@@ -648,7 +652,7 @@ function viewPromos() {
   return `<div class="screen">
     <h1 class="title">Promos</h1>
     <div class="seg"><button class="${UI.promoTab === "net" ? "on" : ""}" data-ptab="net">De la centrale ${pend ? `<span class="c">${pend}</span>` : ""}</button><button class="${UI.promoTab === "own" ? "on" : ""}" data-ptab="own">Créées par vous · ${own.length}</button></div>
-    <p class="intro">${UI.promoTab === "net" ? `Touchez une promo pour l'ouvrir.${canDel({ src: "net" }) ? " Glissez vers la gauche pour la supprimer." : ""}` : "Touchez une promo pour la modifier, glissez vers la gauche pour la supprimer."}</p>
+    <p class="intro">${UI.promoTab === "net" ? `Touchez une promo pour l'ouvrir.${STORE.canDelete ? " Glissez vers la gauche pour la suspendre." : ""}` : "Touchez une promo pour la modifier, glissez vers la gauche pour la supprimer."}</p>
     ${list.map(cardPromo).join("") || '<div class="empty">Rien pour l\'instant.</div>'}
   </div>`;
 }
@@ -660,8 +664,17 @@ function fmtLine(p) {
   const photos = p.media.length > 1 ? `${p.media.length} photos` : "";
   return f.length || photos ? `<div class="small">${esc([photos, f.join(" · ")].filter(Boolean).join(" · "))}</div>` : "";
 }
-// Le magasin supprime ses propres promos ; celles de la centrale seulement si elle l'autorise.
-const canDel = (p) => p.src === "own" || (STORE.canDelete && !p.mandatory);
+// Glisser vers la gauche :
+// - promo du magasin → Supprimer ;
+// - promo de la centrale terminée → Supprimer (la retire de l'app) ;
+// - promo de la centrale en cours ou à venir → Suspendre, si la centrale
+//   l'autorise et qu'elle n'est pas obligatoire (déjà suspendue : rien).
+const isOver = (p) => Date.now() > new Date(p.end).getTime();
+function swipeAction(p) {
+  if (p.src === "own" || isOver(p)) return "del";
+  if (STORE.canDelete && !p.mandatory && !p.suspended) return "susp";
+  return null;
+}
 function cardPromo(p) {
   const pr = pricing(p);
   const pending = p.status === "received" || (p.mandatory && !["published", "scheduled"].includes(p.status));
@@ -669,7 +682,9 @@ function cardPromo(p) {
   const codes = [p.code && `Code ${esc(p.code)}`, p.ean && `EAN ${esc(p.ean)}`].filter(Boolean).join(" · ");
   const codeLine = codes ? `<div class="code">${I.bar}<span>${codes}</span></div>` : "";
   let bottom = "";
-  if (p.status === "received" && p.mandatory || (p.mandatory && p.status === "active")) {
+  if (p.suspended) {
+    bottom = `<div class="foot"><div class="row" style="font-size:13.5px"><span class="sp" style="color:var(--muted)">Suspendue : retirée de votre vitrine.</span><button class="link" style="font-size:14px" data-resume="${p.id}">Reprendre</button></div></div>`;
+  } else if (p.status === "received" && p.mandatory || (p.mandatory && p.status === "active")) {
     bottom = `<div class="band"><div class="row">${I.clock}<span>À publier avant le <b>${fmtLong(p.deadline)}</b></span></div><div class="btns"><button class="b-sand" data-sched="${p.id}">Programmer</button><button class="b-grad" data-pub="${p.id}">Publier maintenant</button></div></div>`;
   } else if (p.status === "received") {
     bottom = `<div style="padding:0 13px 13px"><div class="btns" style="margin-top:0"><button class="b-ghost" data-decline="${p.id}">Refuser</button><button class="b-grad" data-activate="${p.id}">Activer</button></div></div>`;
@@ -689,7 +704,9 @@ function cardPromo(p) {
   const card = `<div class="card ${pending ? "pending" : ""}" data-card="${p.id}">${eye}<div class="top">${imgOr(p.img)}<div class="sp"><div class="tags">${tags}</div><h3>${esc(p.title)}</h3>${pr.price != null ? `<div class="price"><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}<span class="badge">${esc(pr.badge)}</span></div>` : pr.badge ? `<div class="price"><span class="num">${esc(pr.badge)}</span></div>` : ""}
     <div class="small">${p.sub ? `<span style="color:var(--ink)">${esc(p.sub)}</span> · ` : ""}Du ${fmtShort(p.start)} au ${fmtShort(p.end)}</div>${codeLine}${fmtLine(p)}</div></div>${bottom}</div>`;
   // Glisser vers la gauche pour supprimer, si c'est permis.
-  return canDel(p) ? `<div class="swipe" data-sw="${p.id}"><button class="sw-del" data-del="${p.id}">${I.trash}Supprimer</button>${card}</div>` : card;
+  const act = swipeAction(p);
+  return act === "del" ? `<div class="swipe" data-sw="${p.id}"><button class="sw-del" data-del="${p.id}">${I.trash}Supprimer</button>${card}</div>`
+    : act === "susp" ? `<div class="swipe sw-blue" data-sw="${p.id}"><button class="sw-del" data-susp="${p.id}">${I.pause}Suspendre</button>${card}</div>` : card;
 }
 
 function viewStats() {
@@ -761,7 +778,7 @@ $("#fab").onclick = () => sheetChoose();
 
 document.addEventListener("click", (e) => {
   if (swiped) { swiped = false; return; }
-  const t = e.target.closest("[data-go],[data-act],[data-ptab],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-del],[data-card]");
+  const t = e.target.closest("[data-go],[data-act],[data-ptab],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-del],[data-susp],[data-resume],[data-card]");
   if (!t || t.closest("#layer")) return;
   const ds = t.dataset;
   if (ds.go) { const [a, b] = ds.go.split(":"); go(a, b); }
@@ -777,6 +794,8 @@ document.addEventListener("click", (e) => {
   else if (ds.edit) createForm("promo", find(ds.edit));
   else if (ds.act === "clients") clients(ds.id);
   else if (ds.del) askDelete(find(ds.del));
+  else if (ds.susp) askSuspend(find(ds.susp));
+  else if (ds.resume) setSuspended(find(ds.resume), false);
   else if (ds.card) { if (closeSwipes()) return; openPromo(find(ds.card)); }
   else if (ds.act === "reconnect") reconnect();
   else if (ds.act === "disconnect") toast("Gardez Instagram connecté pour que vos promos y paraissent.");
@@ -815,7 +834,7 @@ document.addEventListener("pointerup", () => {
 function askDelete(p) {
   if (!p) return;
   sheet(`<div class="grab"></div><h2>Supprimer « ${esc(p.title)} » ?</h2>
-    <p class="small" style="font-size:14px;margin-top:6px">${p.src === "own" ? "La promo disparaît de votre app et de votre vitrine. Les publications déjà faites sur Facebook et Instagram restent en ligne." : "La promo disparaît de votre app et de votre vitrine. Votre centrale le voit dans son suivi."}</p>
+    <p class="small" style="font-size:14px;margin-top:6px">${p.src === "own" ? "La promo disparaît de votre app et de votre vitrine. Les publications déjà faites sur Facebook et Instagram restent en ligne." : "Cette promo est terminée : elle disparaît de votre liste. Votre centrale le voit dans son suivi."}</p>
     <button class="big-btn" id="d-go" style="background:var(--red)">${I.trash}Supprimer</button><button class="txt-btn" data-close>Annuler</button>`);
   $("#d-go").onclick = async () => {
     $("#d-go").disabled = true;
@@ -825,6 +844,21 @@ function askDelete(p) {
     if (error) { closeLayer(); return toast(errText(error)); }
     S.promos = S.promos.filter(x => x.id !== p.id); closeLayer(); render(true); toast("Promo supprimée."); refresh();
   };
+}
+
+function askSuspend(p) {
+  if (!p) return;
+  sheet(`<div class="grab"></div><h2>Suspendre « ${esc(p.title)} » ?</h2>
+    <p class="small" style="font-size:14px;margin-top:6px">La promo est retirée de votre vitrine et vous ne la publiez plus. Vous pourrez la reprendre à tout moment tant qu'elle court. Votre centrale le voit dans son suivi.</p>
+    <button class="big-btn" id="s-go" style="background:var(--blue)">${I.pause}Suspendre</button><button class="txt-btn" data-close>Annuler</button>`);
+  $("#s-go").onclick = () => { $("#s-go").disabled = true; setSuspended(p, true); };
+}
+async function setSuspended(p, on) {
+  if (!p) return;
+  const { error } = await sb.from("store_promotions").update({ suspended: on }).eq("id", p.spId);
+  if ($("#layer").innerHTML) closeLayer();
+  if (error) return toast(errText(error));
+  p.suspended = on; render(true); toast(on ? "Promo suspendue." : "Promo reprise."); refresh();
 }
 
 /* ===================== Ouvrir une promo ===================== */
