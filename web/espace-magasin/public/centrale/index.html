@@ -236,10 +236,23 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 .copy input{flex:1;min-width:0}
 
 /* Détail promo */
-.back{display:inline-flex;align-items:center;gap:6px;border:none;background:none;font-weight:700;font-size:13px;color:#6b6660;padding:0;margin-bottom:14px}
-.head{display:flex;gap:20px;align-items:flex-start}
-.head img,.head .noimg{width:120px;height:150px;border-radius:14px;object-fit:cover;flex:none;background:var(--bg)}
-.head h2{margin:0;font-size:20px;letter-spacing:-.02em}
+.dw-ov{position:fixed;inset:0;background:rgba(45,45,45,.22);z-index:15;opacity:0;pointer-events:none;transition:opacity .25s}
+.dw-ov.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:33vw;min-width:420px;max-width:100vw;background:#fff;z-index:16;box-shadow:-18px 0 50px rgba(0,0,0,.12);transform:translateX(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.dw-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line)}
+.dw-h b{font-size:15px}
+.dw-x{border:none;background:var(--bg);width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink)}
+.dw-b{flex:1;overflow-y:auto;padding:20px 22px 28px}
+.dk{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.dk .val{font-size:22px}
+.srow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.srow:last-child{border-bottom:none}
+.srow .chs{display:flex;gap:10px;margin-top:3px}
+.trow.sel{background:var(--t-pink)}
+.head{display:flex;gap:16px;align-items:flex-start}
+.head img,.head .noimg{width:96px;height:120px;border-radius:14px;object-fit:cover;flex:none;background:var(--bg)}
+.head h2{margin:0;font-size:18px;letter-spacing:-.02em}
 .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .head p{font-size:13px;color:#6b6660;line-height:1.5;margin:10px 0 0;white-space:pre-wrap}
 .ch{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600}
@@ -266,7 +279,7 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 @media (max-width:640px){
   .app{height:auto;min-height:100vh}.content{padding:16px}.top{padding:0 16px;height:auto;min-height:64px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
   .gx,.g2,.g3,.g4,.two{grid-template-columns:1fr}.g5{grid-template-columns:1fr 1fr}.types{grid-template-columns:repeat(2,1fr)}
-  .mnav{display:flex!important}.head{flex-direction:column}
+  .mnav{display:flex!important}.drawer{width:100vw;min-width:0}
 }
 .mnav{display:none;gap:6px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
 .mnav button{flex:none;border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 13px;font-weight:600;font-size:13px;color:#6b6660}
@@ -337,6 +350,11 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
     <div class="content" id="content"></div>
   </div>
 </div>
+<div class="dw-ov" id="dw-ov"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="dw-h"><b>Suivi de la promo</b><button class="dw-x" id="dw-x" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="dw-b" id="dw-b"></div>
+</aside>
 
 <!-- ============ MODALE : NOUVELLE PROMO ============ -->
 <div class="ov hidden" id="m-promo">
@@ -538,17 +556,34 @@ $("q").oninput = (e) => { S.q = e.target.value.trim().toLowerCase(); if (S.view 
 function render() {
   const D = derive();
   const [t, sub] = TITLES[S.view];
-  $("pg-title").textContent = S.detail ? "Suivi de la promo" : t;
-  $("pg-sub").textContent = S.detail ? "Magasin par magasin : reçue, activée, publiée" : S.view === "stores" ? `${nf.format(D.stores.length)} point${D.stores.length > 1 ? "s" : ""} de vente · segmentation par zone` : sub;
+  $("pg-title").textContent = t;
+  $("pg-sub").textContent = S.view === "stores" ? `${nf.format(D.stores.length)} point${D.stores.length > 1 ? "s" : ""} de vente · segmentation par zone` : sub;
   document.querySelectorAll("#nav button, #mnav button").forEach(b => b.classList.toggle("on", b.dataset.v === S.view));
   $("net-name").textContent = S.net.name;
   $("net-count").textContent = `${nf.format(D.stores.length)} magasin${D.stores.length > 1 ? "s" : ""}`;
   $("net-av").innerHTML = S.net.logo_url ? `<img src="${esc(S.net.logo_url)}" alt="">` : esc(initials(S.net.name));
   show("bell-dot", D.stores.some(s => s.conn === "none" || s.conn === "broken"));
-  const html = S.detail ? viewDetail(D) : { overview: viewOverview, promos: viewPromos, stores: viewStores, audience: viewAudience }[S.view](D);
-  $("content").innerHTML = html;
+  const y = $("content").scrollTop;
+  $("content").innerHTML = { overview: viewOverview, promos: viewPromos, stores: viewStores, audience: viewAudience }[S.view](D);
+  $("content").scrollTop = y;
   bindView(D);
+  renderDrawer(D);
 }
+
+/* ---------- Panneau latéral : suivi d'une promo ---------- */
+function renderDrawer(D) {
+  const p = S.detail && D.promos.find(x => x.id === S.detail);
+  if (!p) S.detail = null;
+  $("drawer").classList.toggle("open", !!p); $("dw-ov").classList.toggle("open", !!p);
+  $("drawer").setAttribute("aria-hidden", p ? "false" : "true");
+  if (!p) return;
+  const b = $("dw-b"), y = b.dataset.id === p.id ? b.scrollTop : 0;
+  b.innerHTML = viewDetail(D, p); b.dataset.id = p.id; b.scrollTop = y;
+  b.querySelectorAll("[data-resend]").forEach(x => x.onclick = () => openPromo(S.detail));
+}
+function closeDetail() { if (!S.detail) return; S.detail = null; render(); }
+$("dw-x").onclick = closeDetail; $("dw-ov").onclick = closeDetail;
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("m-promo").classList.contains("hidden") && $("m-invite").classList.contains("hidden")) closeDetail(); });
 
 /* ---------- Tableau de bord ---------- */
 function kpi(ic, tint, color, val, lbl, trend) {
@@ -634,7 +669,7 @@ function viewPromos(D) {
   return `
   <div class="g3">
     <div class="src dash"><span class="soon">Bientôt</span><span class="ic" style="background:var(--t-green);color:var(--teal)">${svg(ICON.xls, 26, 1.9)}</span><b>Importer un fichier Excel</b><p>Glisse ton .xlsx ou .csv, on mappe automatiquement tes colonnes promo.</p><button class="btn-p" data-soon="L'import Excel arrive bientôt. En attendant, créez la promo avec un visuel.">Choisir un fichier</button></div>
-    <div class="src"><span class="ic" style="background:var(--t-pink);color:var(--p)">${svg(ICON.img, 26, 1.9)}</span><b>Pousser des visuels</b><p>Diffuse une affiche à tout ou partie de ton réseau.</p><button class="btn-s" data-new>Téléverser</button></div>
+    <div class="src"><span class="ic" style="background:var(--t-pink);color:var(--p)">${svg(ICON.img, 26, 1.9)}</span><b>Importer des visuels</b><p>Diffuse une affiche à tout ou partie de ton réseau.</p><button class="btn-s" data-new>Téléverser</button></div>
     <div class="src"><span class="soon">Bientôt</span><span class="ic" style="background:var(--t-indigo);color:var(--c-indigo)">${svg(ICON.db, 26, 1.9)}</span><b>Connecter mon PIM</b><p>Synchronise ton catalogue produits en temps réel via l'API.</p><button class="btn-s" data-soon="La connexion PIM arrive bientôt.">Configurer</button></div>
   </div>
   <div class="g4 mt">
@@ -649,7 +684,7 @@ function viewPromos(D) {
       <div class="thead" style="${cols}"><div>Campagne</div><div>Type</div><div>Régions</div><div>Relais magasins</div><div class="r">Vues</div><div class="r">Statut</div></div>
       ${list.length ? list.map(p => {
         const pal = AV_PAL[p.i % AV_PAL.length], t = TYPES.find(x => x.k === p.promo_type), r = pct(p.relayed, p.target), [sl, sc] = ST_PILL[p.st];
-        return `<div class="trow click" style="${cols}" data-promo="${p.id}">
+        return `<div class="trow click${S.detail === p.id ? " sel" : ""}" style="${cols}" data-promo="${p.id}">
           <div class="cell-name"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(p.title)[0])}</span><div style="min-width:0"><b>${esc(p.title)}</b><small>${dshort(p.starts_at)} → ${dshort(p.ends_at)}${p.is_mandatory ? " · Obligatoire" : ""}</small></div></div>
           <div>${t ? `<span class="badge ${TYPE_PILL[t.k]}">${t.label}</span>` : `<span class="mut">—</span>`}</div>
           <div class="mut">${esc(p.regions)}</div>
@@ -669,42 +704,34 @@ function chState(pubs, ch, acc) {
   if (p && p.status === "pending") return `<span class="ch no">En cours</span>`;
   return acc ? `<span class="ch no">—</span>` : `<span class="ch no">Non connecté</span>`;
 }
-function viewDetail(D) {
-  const p = D.promos.find(x => x.id === S.detail);
-  if (!p) { S.detail = null; return viewPromos(D); }
+function viewDetail(D, p) {
   const t = TYPES.find(x => x.k === p.promo_type), [sl, sc] = ST_PILL[p.st];
-  const cols = "grid-template-columns:2fr 1.2fr 1fr 1fr 1fr .8fr";
   const rows = p.acts.map(a => ({ a, s: D.byId[a.store_id] })).filter(x => x.s).sort((x, y) => x.s.name.localeCompare(y.s.name, "fr"));
   const stLabel = (a) => (a.publications || []).some(x => x.status === "published") ? ["Publiée", "p-green"] : a.status === "active" ? ["Activée", "p-indigo"] : a.status === "declined" ? ["Refusée", "p-red"] : ["Reçue", "p-amber"];
   const others = D.stores.filter(s => !p.acts.some(a => a.store_id === s.id)).length;
+  const desc = (p.description || "").replace(/\n*Code en caisse : [A-Z0-9-]+$/, "").trim();
   return `
-  <button class="back" data-back>${svg('<path d="m15 18-6-6 6-6"/>', 16, 2.4)}Toutes les campagnes</button>
-  <div class="card"><div class="head">
+  <div class="head">
     ${p.media_url ? `<img src="${esc(p.media_url)}" alt="">` : `<div class="noimg"></div>`}
     <div style="flex:1;min-width:0">
-      <div class="row" style="align-items:flex-start;flex-wrap:wrap"><h2>${esc(p.title)}</h2><span class="pill ${sc}">${sl}</span></div>
-      <div class="meta">${t ? `<span class="badge ${TYPE_PILL[t.k]}">${t.label}</span>` : ""}${p.mechanic ? `<span class="badge p-pink">${esc(p.mechanic)}</span>` : ""}${p.discount_code ? `<span class="badge p-grey">Code en caisse : ${esc(p.discount_code)}</span>` : ""}${p.is_mandatory ? `<span class="badge p-purple">Obligatoire</span>` : ""}<span class="badge p-grey">${dshort(p.starts_at)} → ${dshort(p.ends_at)}</span></div>
-      ${p.description && p.description.replace(/\n*Code en caisse : [A-Z0-9-]+$/, "").trim() ? `<p>${esc(p.description.replace(/\n*Code en caisse : [A-Z0-9-]+$/, "").trim())}</p>` : ""}
-    </div></div></div>
-  <div class="g4 mt">
+      <div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:8px"><h2>${esc(p.title)}</h2><span class="pill ${sc}">${sl}</span></div>
+      <div class="meta">${t ? `<span class="badge ${TYPE_PILL[t.k]}">${t.label}</span>` : ""}${p.mechanic ? `<span class="badge p-pink">${esc(p.mechanic)}</span>` : ""}${p.discount_code ? `<span class="badge p-grey">Code : ${esc(p.discount_code)}</span>` : ""}${p.is_mandatory ? `<span class="badge p-purple">Obligatoire</span>` : ""}<span class="badge p-grey">${dshort(p.starts_at)} → ${dshort(p.ends_at)}</span></div>
+    </div></div>
+  ${desc ? `<p style="font-size:13px;color:#6b6660;line-height:1.5;margin:14px 0 0;white-space:pre-wrap">${esc(desc)}</p>` : ""}
+  <div class="dk">
     <div class="mini"><div class="lbl">Magasins ciblés</div><div class="val">${nf.format(p.target)}</div></div>
-    <div class="mini"><div class="lbl">${p.is_mandatory ? "À publier" : "En attente de réponse"}</div><div class="val" style="color:var(--c-amber)">${nf.format(p.is_mandatory ? p.activated - p.relayed : p.pending)}</div></div>
+    <div class="mini"><div class="lbl">Publiées · relais</div><div class="val" style="color:var(--teal)">${nf.format(p.relayed)} <span style="font-size:13px;color:var(--muted)">· ${pct(p.relayed, p.target)}%</span></div></div>
+    <div class="mini"><div class="lbl">${p.is_mandatory ? "À publier" : "En attente"}</div><div class="val" style="color:var(--c-amber)">${nf.format(p.is_mandatory ? p.activated - p.relayed : p.pending)}</div></div>
     <div class="mini"><div class="lbl">Refusées</div><div class="val" style="color:var(--err)">${nf.format(p.declined)}</div></div>
-    <div class="mini"><div class="lbl">Publiées · taux de relais</div><div class="val" style="color:var(--teal)">${nf.format(p.relayed)} <span style="font-size:15px;color:var(--muted)">· ${pct(p.relayed, p.target)}%</span></div></div>
   </div>
-  <div class="tcard mt">
-    <div class="tbar"><h3 style="font-size:15.5px;margin:0">Magasins</h3>${others && p.st !== "done" ? `<button class="btn-s" data-resend>Envoyer à ${others} autre${others > 1 ? "s" : ""} magasin${others > 1 ? "s" : ""}</button>` : ""}</div>
-    <div class="tscroll">
-      <div class="thead" style="${cols}"><div>Magasin</div><div>Statut</div><div>Facebook</div><div>Instagram</div><div class="r">Vues</div><div class="r">Depuis</div></div>
-      ${rows.length ? rows.map(({ a, s }) => {
-        const [l, c] = stLabel(a), pal = AV_PAL[s.i % AV_PAL.length];
-        const v = (a.publications || []).reduce((t, x) => t + (x.status === "published" ? D.views(x) : 0), 0);
-        return `<div class="trow" style="${cols}"><div class="cell-name"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span><div style="min-width:0"><b>${esc(s.name)}</b><small>${esc(s.city || "—")}</small></div></div>
-          <div><span class="pill ${c}">${l}</span></div><div>${chState(a.publications, "facebook", s.fbOk)}</div><div>${chState(a.publications, "instagram", s.igOk)}</div>
-          <div class="r num">${v ? compact(v) : "—"}</div><div class="r mut">${dshort(a.created_at)}</div></div>`;
-      }).join("") : `<div class="empty" style="padding:22px">Cette promo n'a encore été envoyée à aucun magasin.</div>`}
-    </div>
-  </div>`;
+  <div class="row" style="margin:22px 0 4px;flex-wrap:wrap;gap:10px"><h3 style="font-size:15px;margin:0">Magasins</h3>${others && p.st !== "done" ? `<button class="btn-s" data-resend>Envoyer à ${others} autre${others > 1 ? "s" : ""}</button>` : ""}</div>
+  ${rows.length ? rows.map(({ a, s }) => {
+    const [l, c] = stLabel(a), pal = AV_PAL[s.i % AV_PAL.length];
+    const v = (a.publications || []).reduce((n, x) => n + (x.status === "published" ? D.views(x) : 0), 0);
+    return `<div class="srow"><span class="av" style="background:${pal[0]};color:${pal[1]}">${esc(initials(s.name))}</span>
+      <div style="flex:1;min-width:0"><b style="display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name)}</b><div class="chs"><span style="font-size:12px;color:var(--muted)">FB ${chState(a.publications, "facebook", s.fbOk)}</span><span style="font-size:12px;color:var(--muted)">IG ${chState(a.publications, "instagram", s.igOk)}</span></div></div>
+      <div style="text-align:right;flex:none"><span class="pill ${c}">${l}</span><div style="font-size:12px;color:var(--muted);margin-top:4px">${v ? compact(v) + " vues" : dshort(a.created_at)}</div></div></div>`;
+  }).join("") : `<div class="empty" style="padding:18px 0">Cette promo n'a encore été envoyée à aucun magasin.</div>`}`;
 }
 
 /* ---------- Magasins ---------- */
@@ -766,14 +793,12 @@ function bindView(D) {
   c.querySelectorAll("[data-soon]").forEach(b => b.onclick = () => toast(b.dataset.soon));
   c.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { S.filter = b.dataset.filter; render(); });
   c.querySelectorAll("[data-zone]").forEach(b => b.onclick = () => { S.zone = b.dataset.zone; render(); });
-  c.querySelectorAll("[data-promo]").forEach(r => r.onclick = () => { S.detail = r.dataset.promo; render(); c.scrollTop = 0; });
-  c.querySelectorAll("[data-back]").forEach(b => b.onclick = () => { S.detail = null; render(); });
+  c.querySelectorAll("[data-promo]").forEach(r => r.onclick = () => { S.detail = S.detail === r.dataset.promo ? null : r.dataset.promo; render(); });
   c.querySelectorAll("[data-invite]").forEach(b => b.onclick = openInvite);
   c.querySelectorAll("[data-relance]").forEach(b => b.onclick = () => {
     const s = D.byId[b.dataset.relance];
     copy(`Bonjour ${s.name},\n\nPour relayer les promos du réseau ${S.net.name}, il reste une étape : connecter la Page Facebook et le compte Instagram du magasin. Ça prend deux minutes depuis votre espace : ${location.origin}/\n\nMerci !`);
   });
-  c.querySelectorAll("[data-resend]").forEach(b => b.onclick = () => openPromo(S.detail));
 }
 $("new-promo").onclick = () => openPromo();
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => { show("m-promo", false); show("m-invite", false); });

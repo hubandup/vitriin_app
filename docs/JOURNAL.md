@@ -20,6 +20,19 @@ Repères :
 
 ## 2026-10-29
 
+### MOD-004 · Centrale, page Promotions : suivi en panneau latéral
+- **Quoi** :
+  - « Pousser des visuels » devient « Importer des visuels ».
+  - Un clic sur une campagne ouvre son suivi dans un panneau qui glisse de la
+    droite, sur 33 % de la largeur (420 px minimum, plein écran sur mobile).
+  - La liste reste visible derrière, et la ligne ouverte est surlignée.
+  - Pour fermer : la croix, un clic à côté ou la touche Échap.
+  - L'ancienne page de détail pleine largeur et son bouton « Toutes les
+    campagnes » sont supprimés, remplacés par le panneau.
+- **Fichier** : `web/espace-magasin/public/centrale/index.html` (CSS du détail,
+  `render`, `renderDrawer`, `viewDetail`, `bindView`).
+- **Retour arrière** : `git revert` du commit de cette entrée.
+
 ### SEC-001 · Audit sécurité et durcissement
 - **Vérifié** :
   - RLS active sur toutes les tables du schéma `public`.
