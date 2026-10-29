@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
   // --- L'activation --------------------------------------------------------
   const { data: activation, error: activationError } = await service
     .from("store_promotions")
-    .select("id, store_id, promotion_id, status")
+    .select("id, store_id, promotion_id, status, overrides")
     .eq("id", storePromotionId)
     .maybeSingle();
 
@@ -154,6 +154,14 @@ Deno.serve(async (req) => {
     });
     return fail(req, 500, "Erreur interne.");
   }
+
+  // Personnalisation du magasin (titre, texte, visuel), si sa centrale l'a
+  // autorisée : le trigger guard_store_customization l'a déjà vérifié en base.
+  const ov = (activation.overrides ?? {}) as Record<string, unknown>;
+  const pick = (k: string) => typeof ov[k] === "string" && (ov[k] as string).trim() !== "" ? (ov[k] as string) : null;
+  if (pick("title")) promotion.title = pick("title");
+  if (pick("text")) promotion.description = pick("text");
+  if (pick("media_url")?.startsWith("https://")) promotion.media_url = pick("media_url");
 
   const caption = buildCaption(promotion);
   const mediaUrl = typeof promotion.media_url === "string" &&

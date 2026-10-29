@@ -939,7 +939,7 @@ function viewPromoDw(D, p) {
   E.formats = syncFormats(E.formats, E.media.length, E.kind);
   const [sl, sc] = ST_PILL[p.st];
   const rows = p.acts.map(a => ({ a, s: D.byId[a.store_id] })).filter(x => x.s).sort((x, y) => x.s.name.localeCompare(y.s.name, "fr"));
-  const stLabel = (a) => (a.publications || []).some(x => x.status === "published") ? ["Publiée", "p-green"] : a.status === "active" ? ["Activée", "p-indigo"] : a.status === "declined" ? ["Refusée", "p-red"] : ["Reçue", "p-amber"];
+  const stLabel = (a) => a.hidden ? ["Supprimée", "p-grey"] : (a.publications || []).some(x => x.status === "published") ? ["Publiée", "p-green"] : a.status === "active" ? ["Activée", "p-indigo"] : a.status === "declined" ? ["Refusée", "p-red"] : ["Reçue", "p-amber"];
   const others = D.stores.filter(s => !p.acts.some(a => a.store_id === s.id)).length;
   const active = p.activated + p.acts.filter(a => a.status !== "active" && (a.publications || []).some(x => x.status === "published")).length;
   const showCode = feat("discount_code") || E.code, showEan = feat("ean_code") || E.ean;
@@ -1210,6 +1210,8 @@ function setPrefs(note) {
     </div>
     <div class="card"><h3>Diffusion</h3><div class="sub">Pour tout le réseau.</div>
       ${swHtml("p-auto", feat("auto_accept"), "Accepter automatiquement les promotions", "Les promos du réseau sont activées dès réception. Chaque magasin peut désactiver cette option dans ses réglages.", ad)}
+      ${swHtml("p-sedit", feat("store_edit"), "Les magasins peuvent personnaliser les promos", "Titre, texte et visuel, sur leurs propres publications. L'offre, les dates et les codes restent ceux de la centrale.", ad)}
+      ${swHtml("p-sdel", feat("store_delete"), "Les magasins peuvent supprimer une promo", "Elle disparaît de leur app et de leur vitrine. Les promos obligatoires ne se suppriment jamais.", ad)}
     </div>
     <div class="card"><h3>Codes en caisse</h3><div class="sub">Champs proposés dans les promos.</div>
       ${swHtml("p-code", feat("discount_code"), "Code de réduction en caisse", "Un code alphanumérique affiché dans le post (ex. BLACK25).", ad)}
@@ -1318,6 +1320,8 @@ function bindSettings() {
     if (!isAdmin()) return;
     q("#p-auto").onchange = (e) => saveSettings({ auto_accept: e.target.checked }, e.target.checked ? "Les nouvelles promos seront acceptées automatiquement." : "Les magasins valideront chaque promo.");
     q("#p-code").onchange = (e) => saveSettings({ discount_code: e.target.checked });
+    q("#p-sedit").onchange = (e) => saveSettings({ store_edit: e.target.checked }, e.target.checked ? "Les magasins peuvent personnaliser vos promos." : "Vos promos ne sont plus modifiables par les magasins.");
+    q("#p-sdel").onchange = (e) => saveSettings({ store_delete: e.target.checked }, e.target.checked ? "Les magasins peuvent supprimer vos promos non obligatoires." : "Les magasins ne peuvent plus supprimer vos promos.");
     q("#p-ean").onchange = (e) => saveSettings({ ean_code: e.target.checked });
     q("#p-addtype").onclick = () => {
       const label = q("#p-newtype").value.trim(); if (label.length < 2) return toast("Nommez le type (2 caractères minimum).");
@@ -1605,7 +1609,7 @@ async function load() {
     sb.from("stores").select("id, name, address, city, postal_code, auto_accept, logo_url, created_at").eq("network_id", id).order("name").range(0, 4999),
     sb.from("social_accounts").select("store_id, channel, status, display_name, stores!inner(network_id)").eq("stores.network_id", id).range(0, 9999),
     sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
-    sb.from("store_promotions").select("id, promotion_id, store_id, status, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),
+    sb.from("store_promotions").select("id, promotion_id, store_id, status, hidden, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),
   ]);
   const e = st.error || ac.error || pr.error || sp.error; if (e) throw e;
   S.stores = st.data; S.accounts = ac.data; S.promos = pr.data; S.acts = sp.data;

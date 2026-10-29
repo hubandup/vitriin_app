@@ -20,6 +20,43 @@ Repères :
 
 ## 2026-10-29
 
+### MOD-008 · App magasin : cartes compactes, ouvrir, glisser pour supprimer
+- **Accueil** : l'activité affiche les logos Facebook / Instagram au lieu des
+  lignes « Publiée sur … ✓ ». « Réseau » devient « Centrale » partout dans
+  l'app (étiquettes, onglet « De la centrale », réglages).
+- **Promos** :
+  - texte d'explication des promos de la centrale en pop-in, une seule fois
+    par magasin et par appareil (clé `vitriin-intro-<magasin>`) ;
+  - cartes moins hautes (visuel 56 px, une ligne dates, codes regroupés) ;
+  - œil « Voir côté clients » en haut à droite des promos publiées ;
+  - toucher une carte l'ouvre : promo du magasin → formulaire de modification
+    (« Enregistrer les modifications » sans republier si déjà publiée) ;
+    promo de la centrale → titre, texte et visuel personnalisables si la
+    centrale l'autorise, sinon fiche grisée en lecture seule ;
+  - glisser vers la gauche → « Supprimer » : promo du magasin supprimée ;
+    promo de la centrale retirée de l'app et de la vitrine (si autorisé,
+    jamais pour une obligatoire).
+- **Centrale** : Paramètres > Préférences, deux interrupteurs « Les magasins
+  peuvent personnaliser les promos » et « … supprimer une promo » (désactivés
+  par défaut). Le suivi d'une promo affiche « Supprimée » pour ces magasins.
+- **Base** (règles appliquées côté serveur, testées) :
+  - migration `20261029220821_store_customization` : `store_promotions.overrides`
+    (titre, texte, visuel https uniquement) et `hidden` ; trigger
+    `guard_store_customization` qui refuse toute personnalisation ou
+    suppression non autorisée par la centrale, et toute suppression d'une
+    promo obligatoire ; `get_store_network` renvoie `store_edit`, `store_delete` ;
+  - migration `20261029220831_store_promotions_public_not_hidden` : une promo
+    retirée n'est plus lisible publiquement.
+- **Fonction `meta-publish`** : utilise la personnalisation du magasin (titre,
+  texte, visuel) pour la vraie publication Meta. **Modifiée dans le dépôt,
+  pas encore redéployée** (sans effet tant qu'aucune centrale réelle n'active
+  la personnalisation ; la démo publie en simulé).
+- **Fichiers** : `web/espace-magasin/public/magasin/index.html`,
+  `web/espace-magasin/public/centrale/index.html`,
+  `supabase/functions/meta-publish/index.ts`.
+- **Retour arrière** : `git revert` du commit MOD-008. En base, colonnes et
+  trigger sans effet sur l'ancien code (overrides vides, hidden à false).
+
 ### MOD-007 · App magasin alignée sur la Centrale
 - **Quoi** :
   - Logo : la pastille du magasin (accueil, réglages, aperçu côté clients)

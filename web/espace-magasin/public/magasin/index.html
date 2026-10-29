@@ -128,13 +128,25 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .seg .c{background:var(--p);color:#fff;font-size:11.5px;min-width:20px;height:20px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
 .intro{font-size:14px;color:var(--muted);line-height:1.45;margin:14px 0}
-.card{border:1.5px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:12px;background:#fff}
+.card{border:1.5px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:10px;background:#fff;position:relative;cursor:pointer}
 .card.pending{border-color:#f5b8d4}
-.card .top{display:flex;gap:13px;padding:13px}
-.card .top>img,.card .top>.ph{width:72px;height:72px;border-radius:12px;object-fit:cover;flex:none;background:var(--bg)}
+.card .top{display:flex;gap:11px;padding:10px 11px}
+.card .top>img,.card .top>.ph{width:56px;height:56px;border-radius:11px;object-fit:cover;flex:none;background:var(--bg)}
+.card .eye{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;background:var(--rose);color:var(--p);display:flex;align-items:center;justify-content:center;z-index:1}
+.card .eye svg{width:18px;height:18px}
+.card .eye ~ .top .tags{padding-right:38px}
+.card .tags .st{font-size:11px;padding:2px 8px}
+.card .small,.card .code{font-size:12.5px;margin-top:3px}
+.card .band,.card .foot{padding:8px 11px 10px}
+.card .btns{margin-top:7px}
+.card .btns button{padding:10px 8px;font-size:14px;border-radius:11px}
+.swipe{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden;background:var(--red)}
+.swipe .card{margin-bottom:0;transition:transform .2s ease;touch-action:pan-y}
+.swipe.drag .card{transition:none}
+.sw-del{position:absolute;right:0;top:0;bottom:0;width:96px;color:#fff;font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
 .tags{display:flex;gap:5px;flex-wrap:wrap}
-.card h3{font-size:17px;margin:6px 0 0;letter-spacing:-.01em}
-.card .price .num{font-size:22px}
+.card h3{font-size:15.5px;margin:4px 0 0;letter-spacing:-.01em;line-height:1.25}
+.card .price .num{font-size:18px}
 .badge{background:var(--p);color:#fff;font-family:'Racing Sans One',sans-serif;font-size:13px;padding:2px 8px;border-radius:7px}
 .small{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.35}
 .code{display:flex;gap:6px;align-items:flex-start;font-size:13px;margin-top:5px;line-height:1.35}
@@ -239,6 +251,9 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .media button.net{background:var(--lilac);border-color:#efdcef}
 .preview-img{position:relative;border-radius:16px;overflow:hidden;height:190px;background:var(--bg)}
 .preview-img img{width:100%;height:100%;object-fit:cover}
+.ro-box{opacity:.55}
+.ro-line{font-size:14px;color:var(--muted);line-height:1.45;background:var(--bg);border-radius:12px;padding:11px 13px}
+.in:disabled{background:#f6f4f1;color:var(--muted)}
 .preview-img button{position:absolute;right:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;font-size:13px;font-weight:700;padding:7px 12px;border-radius:999px}
 .types{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .types button{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:14px;padding:13px 12px;font-weight:700;font-size:14.5px;text-align:left}
@@ -360,6 +375,7 @@ const IMG = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=90
 
 /* ===================== Icônes ===================== */
 const I = {
+  trash: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>',
   eye: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
   net: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.4"/><circle cx="5.5" cy="18" r="2.4"/><circle cx="18.5" cy="18" r="2.4"/><path d="M12 7.4V11l-5 5M12 11l5 5"/></svg>',
   clock: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
@@ -440,9 +456,11 @@ function mapRow(row, accounts) {
   const sched = planned ? new Date(planned.published_at) : null;
   return {
     id: row.id, spId: row.id, promoId: pr.id, src: pr.created_by_network_id ? "net" : "own",
-    kind: pr.promo_type ? "promo" : "post", title: pr.title, img: pr.media_url,
-    media: Array.isArray(det.media) && det.media.length ? det.media : (pr.media_url ? [pr.media_url] : []),
-    formats: Array.isArray(det.formats) ? det.formats : [], mech: pr.mechanic, text: pr.description || "",
+    // Personnalisation du magasin (si la centrale l'autorise) par-dessus la version centrale.
+    ov: row.overrides || {}, base: { title: pr.title, text: pr.description || "", img: pr.media_url },
+    kind: pr.promo_type ? "promo" : "post", title: row.overrides?.title || pr.title, img: row.overrides?.media_url || pr.media_url,
+    media: row.overrides?.media_url ? [row.overrides.media_url] : Array.isArray(det.media) && det.media.length ? det.media : (pr.media_url ? [pr.media_url] : []),
+    formats: Array.isArray(det.formats) ? det.formats : [], mech: pr.mechanic, text: row.overrides?.text || pr.description || "",
     type: pr.promo_type, orig: det.orig ?? null, val: det.val ?? null, xy: det.xy || [2, 1], sub: det.sub || "", cond: det.sub || "",
     start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, deadline: start > Date.now() ? start : end,
     status, ch, stats, recAt: new Date(row.created_at).getTime(),
@@ -463,7 +481,7 @@ async function loadData() {
   const [net, acc, rows] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status").eq("store_id", st.id),
-    sb.from("store_promotions").select("id, status, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
+    sb.from("store_promotions").select("id, status, overrides, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).eq("hidden", false).order("created_at", { ascending: false }),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
   const n = net.data?.[0];
@@ -471,8 +489,8 @@ async function loadData() {
   Object.assign(STORE, {
     id: st.id, name: st.name, city: st.city || "", address: st.address || "", autoAccept: st.auto_accept !== false, hasNet: !!n,
     // Logo du magasin, sinon celui de l'enseigne (même règle que la Centrale).
-    logo: st.logo_url || n?.logo_url || null, support: n?.support_email || "", phone: n?.phone || "", cgv: n?.cgv_url || "",
-    net: n?.network_name || "votre réseau", netFull: n ? `${n.network_name} · ${st.city || ""}` : "Magasin indépendant",
+    logo: st.logo_url || n?.logo_url || null, canEdit: !!n?.store_edit, canDelete: !!n?.store_delete, support: n?.support_email || "", phone: n?.phone || "", cgv: n?.cgv_url || "",
+    net: n?.network_name || "votre centrale", netFull: n ? `${n.network_name} · ${st.city || ""}` : "Magasin indépendant",
     page: fb?.display_name || "Non connectée", insta: ig?.display_name || "Non connecté",
   });
   S.fb = fb ? (fb.status === "active" ? "ok" : "broken") : "none";
@@ -514,7 +532,7 @@ async function boot() {
   try { await loadData(); }
   catch (e) { return showLogin(errText(e)); }
   $("#nav").classList.remove("hidden");
-  render();
+  render(); introOnce();
 }
 
 let S = { ig: "none", fb: "none", notifNet: prefs.notifNet, notifFail: prefs.notifFail, promos: [] };
@@ -528,7 +546,7 @@ async function setAutoAccept(on) {
   STORE.autoAccept = on; render(true);
   const { data, error } = await sb.from("stores").update({ auto_accept: on }).eq("id", STORE.id).select("id");
   if (error || !data?.length) { STORE.autoAccept = !on; render(true); return toast("Réglage non enregistré. Réessayez."); }
-  toast(on ? "Les promos du réseau seront activées dès réception." : "Vous validerez chaque promo du réseau.");
+  toast(on ? "Les promos de la centrale seront activées dès réception." : "Vous validerez chaque promo de la centrale.");
 }
 const STORE = { id: null, name: "", net: "", city: "", address: "", netFull: "", page: "", insta: "", logo: null, support: "", phone: "", cgv: "" };
 const initial = () => (STORE.city || STORE.name || "?").trim()[0].toUpperCase();
@@ -565,7 +583,7 @@ function totals() {
 const nf = (n) => new Intl.NumberFormat("fr-FR").format(n).replace(/ /g, " ");
 
 /* ===================== Fragments ===================== */
-const tagSrc = (p) => p.src === "net" ? '<span class="st t-net">Réseau</span>' : '<span class="st t-own">Créée par vous</span>';
+const tagSrc = (p) => p.src === "net" ? '<span class="st t-net">Centrale</span>' : '<span class="st t-own">Créée par vous</span>';
 function statusPill(p) {
   if (p.status === "published") return '<span class="st s-pub">Publiée</span>';
   if (p.status === "scheduled") return '<span class="st s-sch">Programmée</span>';
@@ -587,10 +605,10 @@ function viewHome() {
   const pend = pendingNet(), due = mandatoryDue();
   const carousel = S.promos.filter(p => p.status === "published" || p.status === "scheduled").sort((a, b) => (b.pubAt || 0) - (a.pubAt || 0));
   return `<div class="screen">
-    <div class="head"><span class="av">${avatar()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>Réseau ${esc(STORE.net)} · ${esc(STORE.city)}</span></div></div>
+    <div class="head"><span class="av">${avatar()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>Centrale ${esc(STORE.net)} · ${esc(STORE.city)}</span></div></div>
     <button class="client-btn" data-act="clients">${I.eye}Voir côté clients</button>
-    ${pend.length ? `<button class="hero" data-go="promos:net"><span class="ic">${I.net}</span><span class="sp"><b>${pend.length} nouvelle${pend.length > 1 ? "s" : ""} promo${pend.length > 1 ? "s" : ""} du réseau à valider</b><span>${pend.map(p => esc(p.title)).join(" · ")}</span></span><span class="chev">${I.chev}</span></button>` : ""}
-    ${due.map(p => `<button class="due" data-go="promos:net"><span class="ic">${I.clock}</span><span class="sp"><b>${esc(p.title)} : à publier avant le ${fmtLong(p.deadline)}</b><span>Promo obligatoire du réseau · publiez-la ou programmez-la</span></span><span class="chev">${I.chev}</span></button>`).join("")}
+    ${pend.length ? `<button class="hero" data-go="promos:net"><span class="ic">${I.net}</span><span class="sp"><b>${pend.length} nouvelle${pend.length > 1 ? "s" : ""} promo${pend.length > 1 ? "s" : ""} de la centrale à valider</b><span>${pend.map(p => esc(p.title)).join(" · ")}</span></span><span class="chev">${I.chev}</span></button>` : ""}
+    ${due.map(p => `<button class="due" data-go="promos:net"><span class="ic">${I.clock}</span><span class="sp"><b>${esc(p.title)} : à publier avant le ${fmtLong(p.deadline)}</b><span>Promo obligatoire de la centrale · publiez-la ou programmez-la</span></span><span class="chev">${I.chev}</span></button>`).join("")}
     ${S.ig === "broken" ? `<div class="warn"><span class="igi">${I.ig}</span><p>Instagram est déconnecté : vos publications échouent.</p><button class="btn-red" data-act="reconnect">Reconnecter</button></div>` : ""}
     <div class="kpis">
       <div class="kpi k1"><div class="num">${activeCount()}</div><span>promos actives</span></div>
@@ -599,7 +617,7 @@ function viewHome() {
     </div>
     <div class="sec"><h2>Mes promotions</h2><button class="link" data-go="promos:own">Tout voir ${I.chev}</button></div>
     <div class="carousel">${carousel.map(p => { const pr = pricing(p); return `<button class="pc" data-open="${p.id}">
-      <div class="im">${imgOr(p.img)}<span class="tag ${p.src === "net" ? "t-net" : "t-own"}">${p.src === "net" ? "Réseau" : "Créée par vous"}</span>${pr.badge ? `<span class="disc">${esc(pr.badge)}</span>` : ""}</div>
+      <div class="im">${imgOr(p.img)}<span class="tag ${p.src === "net" ? "t-net" : "t-own"}">${p.src === "net" ? "Centrale" : "Créée par vous"}</span>${pr.badge ? `<span class="disc">${esc(pr.badge)}</span>` : ""}</div>
       <div class="body"><b>${esc(p.title)}</b>${priceLine(p)}<div style="margin-top:7px">${statusPill(p)}<span class="meta">${p.status === "scheduled" ? fmtDay(p.schedAt) : "au " + fmtShort(p.end)}</span></div></div></button>`; }).join("")}</div>
     <div class="sec" style="margin-top:28px"><h2>Activité récente</h2></div>
     <div>${activity()}</div>
@@ -615,9 +633,9 @@ function activity() {
   ev.sort((a, b) => b.t - a.t);
   return ev.slice(0, 7).map(({ t, p, kind }) => {
     let lines = "";
-    if (kind === "pub") lines = ["fb", "ig"].map(c => p.ch[c] === "ok" ? `<div class="dot d-ok">Publiée sur ${c === "fb" ? "Facebook" : "Instagram"} ✓</div>` : p.ch[c] === "ko" ? `<div class="row" style="gap:8px;align-items:flex-start"><div class="dot d-ko sp">Échec Instagram : reconnecter le compte</div>${S.ig === "broken" ? '<button class="btn-red" style="padding:8px 13px" data-act="reconnect">Reconnecter</button>' : ""}</div>` : "").join("");
+    if (kind === "pub") lines = `<div class="row" style="gap:8px;margin-top:7px">${chanIcons(p)}<span class="sp"></span>${p.ch.ig === "ko" && S.ig === "broken" ? '<button class="btn-red" style="padding:7px 12px" data-act="reconnect">Reconnecter</button>' : ""}</div>`;
     else if (kind === "sch") lines = `<div class="ln">Programmée le ${fmtDay(p.schedAt)} à ${p.schedTime} · Facebook${S.ig === "ok" ? " et Instagram" : ""}</div>`;
-    else lines = `<div class="ln">Reçue du réseau · ${p.status === "declined" ? "refusée" : p.status === "active" ? "activée, à publier" : p.mandatory ? `obligatoire, à publier avant le ${fmtLong(p.deadline)}` : "à valider"}</div>`;
+    else lines = `<div class="ln">Reçue de la centrale · ${p.status === "declined" ? "refusée" : p.status === "active" ? "activée, à publier" : p.mandatory ? `obligatoire, à publier avant le ${fmtLong(p.deadline)}` : "à valider"}</div>`;
     return `<div class="act">${p.img ? `<img class="th" src="${esc(p.img)}" alt="" loading="lazy">` : '<div class="th"></div>'}<div class="sp"><div class="row" style="gap:8px;align-items:flex-start"><b class="sp">« ${esc(p.title)} »</b>${tagSrc(p)}<span class="when">${ago(t)}</span></div>${lines}</div></div>`;
   }).join("") || '<div class="empty">Aucune activité pour l\'instant.</div>';
 }
@@ -629,8 +647,8 @@ function viewPromos() {
   const list = UI.promoTab === "net" ? net : own;
   return `<div class="screen">
     <h1 class="title">Promos</h1>
-    <div class="seg"><button class="${UI.promoTab === "net" ? "on" : ""}" data-ptab="net">Promos du réseau ${pend ? `<span class="c">${pend}</span>` : ""}</button><button class="${UI.promoTab === "own" ? "on" : ""}" data-ptab="own">Créées par vous · ${own.length}</button></div>
-    <p class="intro">${UI.promoTab === "net" ? `Envoyées par votre centrale ${esc(STORE.net)}. Activez ou refusez en un geste. Les promos obligatoires ne se refusent pas : publiez-les ou programmez-les avant leur échéance.` : "Vos promos et vos posts, créés avec le bouton +. Touchez-en un pour le modifier."}</p>
+    <div class="seg"><button class="${UI.promoTab === "net" ? "on" : ""}" data-ptab="net">De la centrale ${pend ? `<span class="c">${pend}</span>` : ""}</button><button class="${UI.promoTab === "own" ? "on" : ""}" data-ptab="own">Créées par vous · ${own.length}</button></div>
+    <p class="intro">${UI.promoTab === "net" ? `Touchez une promo pour l'ouvrir.${canDel({ src: "net" }) ? " Glissez vers la gauche pour la supprimer." : ""}` : "Touchez une promo pour la modifier, glissez vers la gauche pour la supprimer."}</p>
     ${list.map(cardPromo).join("") || '<div class="empty">Rien pour l\'instant.</div>'}
   </div>`;
 }
@@ -642,12 +660,14 @@ function fmtLine(p) {
   const photos = p.media.length > 1 ? `${p.media.length} photos` : "";
   return f.length || photos ? `<div class="small">${esc([photos, f.join(" · ")].filter(Boolean).join(" · "))}</div>` : "";
 }
+// Le magasin supprime ses propres promos ; celles de la centrale seulement si elle l'autorise.
+const canDel = (p) => p.src === "own" || (STORE.canDelete && !p.mandatory);
 function cardPromo(p) {
   const pr = pricing(p);
   const pending = p.status === "received" || (p.mandatory && !["published", "scheduled"].includes(p.status));
   const tags = `${tagSrc(p)}${p.mandatory ? '<span class="st s-mand">Obligatoire</span>' : ""}${statusPill(p)}`;
-  const codeLine = (p.code ? `<div class="code">${I.bar}<span>Code caisse ${esc(p.code)}${p.src === "net" ? " · Code fourni par votre réseau" : ""}</span></div>` : "")
-    + (p.ean ? `<div class="code">${I.bar}<span>EAN caisse ${esc(p.ean)}</span></div>` : "");
+  const codes = [p.code && `Code ${esc(p.code)}`, p.ean && `EAN ${esc(p.ean)}`].filter(Boolean).join(" · ");
+  const codeLine = codes ? `<div class="code">${I.bar}<span>${codes}</span></div>` : "";
   let bottom = "";
   if (p.status === "received" && p.mandatory || (p.mandatory && p.status === "active")) {
     bottom = `<div class="band"><div class="row">${I.clock}<span>À publier avant le <b>${fmtLong(p.deadline)}</b></span></div><div class="btns"><button class="b-sand" data-sched="${p.id}">Programmer</button><button class="b-grad" data-pub="${p.id}">Publier maintenant</button></div></div>`;
@@ -660,12 +680,16 @@ function cardPromo(p) {
   } else if (p.status === "declined") {
     bottom = `<div class="foot"><div class="row" style="font-size:14px"><span class="sp" style="color:var(--muted)">Vous avez refusé cette promo.</span><button class="link" style="font-size:14px" data-activate="${p.id}">L'activer</button></div></div>`;
   } else if (p.status === "published") {
-    bottom = `<div class="foot"><div class="row">${chanIcons(p)}<span class="sp"></span>${p.ch.ig === "ko" && S.ig === "broken" ? '<button class="btn-red" data-act="reconnect">Reconnecter</button>' : ""}</div><button class="see" data-act="clients" data-id="${p.id}">${I.eye}Voir côté clients</button></div>`;
+    bottom = `<div class="foot"><div class="row">${chanIcons(p)}<span class="sp"></span>${p.ch.ig === "ko" && S.ig === "broken" ? '<button class="btn-red" data-act="reconnect">Reconnecter</button>' : ""}</div></div>`;
   } else if (p.status === "draft") {
-    bottom = `<div class="foot"><div class="row"><span class="sp" style="font-size:14px;color:var(--muted)">Brouillon · pas encore publié</span><button class="b-ghost" style="padding:9px 16px;border-radius:12px;font-weight:700" data-edit="${p.id}">Modifier</button></div></div>`;
+    bottom = `<div class="foot"><div class="row"><span class="sp" style="font-size:13.5px;color:var(--muted)">Brouillon · pas encore publié</span></div></div>`;
   }
-  return `<div class="card ${pending ? "pending" : ""}"><div class="top">${imgOr(p.img)}<div class="sp"><div class="tags">${tags}</div><h3>${esc(p.title)}</h3>${pr.price != null ? `<div class="price"><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}<span class="badge">${esc(pr.badge)}</span></div>` : pr.badge ? `<div class="price"><span class="num">${esc(pr.badge)}</span></div>` : ""}
-    ${p.sub ? `<div class="small" style="color:var(--ink)">${esc(p.sub)}</div>` : ""}<div class="small">Du ${fmtShort(p.start)} au ${fmtShort(p.end)}</div>${codeLine}${fmtLine(p)}</div></div>${bottom}</div>`;
+  // Œil « Voir côté clients » en haut à droite, pour ce que les clients voient déjà.
+  const eye = p.status === "published" && p.img && p.kind !== "post" ? `<button class="eye" data-act="clients" data-id="${p.id}" aria-label="Voir côté clients">${I.eye}</button>` : "";
+  const card = `<div class="card ${pending ? "pending" : ""}" data-card="${p.id}">${eye}<div class="top">${imgOr(p.img)}<div class="sp"><div class="tags">${tags}</div><h3>${esc(p.title)}</h3>${pr.price != null ? `<div class="price"><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}<span class="badge">${esc(pr.badge)}</span></div>` : pr.badge ? `<div class="price"><span class="num">${esc(pr.badge)}</span></div>` : ""}
+    <div class="small">${p.sub ? `<span style="color:var(--ink)">${esc(p.sub)}</span> · ` : ""}Du ${fmtShort(p.start)} au ${fmtShort(p.end)}</div>${codeLine}${fmtLine(p)}</div></div>${bottom}</div>`;
+  // Glisser vers la gauche pour supprimer, si c'est permis.
+  return canDel(p) ? `<div class="swipe" data-sw="${p.id}"><button class="sw-del" data-del="${p.id}">${I.trash}Supprimer</button>${card}</div>` : card;
 }
 
 function viewStats() {
@@ -694,7 +718,7 @@ function viewSettings() {
   return `<div class="screen">
     <h1 class="title">Réglages</h1>
     <div class="head" style="margin:16px 0 0"><span class="av" style="width:56px;height:56px;font-size:23px">${avatar()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>${esc(STORE.address)}</span></div></div>
-    <div class="lbl">RÉSEAU</div>
+    <div class="lbl">CENTRALE</div>
     <div class="net"><span class="ic" style="color:#fff">${I.net}</span><div class="sp"><b style="display:block;font-size:16px">${esc(STORE.netFull)}</b><span style="font-size:13px;color:var(--muted)">Les promos de votre centrale arrivent ici automatiquement</span></div></div>
     ${STORE.support || STORE.phone || STORE.cgv ? `<div class="box" style="margin-top:10px">
       ${STORE.support ? `<a class="li" href="mailto:${esc(STORE.support)}" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Support de l'enseigne</span><b style="font-size:15.5px">${esc(STORE.support)}</b></span></a>` : ""}
@@ -707,13 +731,13 @@ function viewSettings() {
       <div class="li" style="flex-wrap:wrap"><span class="ch ig" style="width:44px;height:44px;border-radius:12px">${I.ig}</span><div class="sp"><span style="font-size:13px;color:var(--muted)">Instagram</span><b style="display:block;font-size:15.5px">${esc(STORE.insta)}</b></div><span class="pill ${S.ig === "ok" ? "p-ok" : "p-ko"}">${S.ig === "ok" ? "Connecté" : "À reconnecter"}</span>
         ${S.ig === "broken" ? `<div class="btns" style="width:100%;margin-top:4px"><button class="btn-red" style="border-radius:13px;padding:13px" data-act="reconnect">Reconnecter</button><button style="background:#f3f1ed;border-radius:13px;font-weight:700" data-act="disconnect">Déconnecter</button></div>` : ""}</div>
     </div>
-    ${STORE.hasNet ? `<div class="lbl">PROMOS DU RÉSEAU</div>
+    ${STORE.hasNet ? `<div class="lbl">PROMOS DE LA CENTRALE</div>
     <div class="box">
-      <div class="li"><div class="sp"><span style="font-size:15.5px;display:block">Accepter automatiquement les promos du réseau</span><span style="font-size:13px;color:var(--muted)">Activées dès réception, si votre centrale le permet. Les promos obligatoires restent à publier.</span></div><button class="tg ${STORE.autoAccept ? "on" : ""}" data-toggle="autoAccept" aria-label="Accepter automatiquement les promos du réseau"></button></div>
+      <div class="li"><div class="sp"><span style="font-size:15.5px;display:block">Accepter automatiquement les promos de la centrale</span><span style="font-size:13px;color:var(--muted)">Activées dès réception, si votre centrale le permet. Les promos obligatoires restent à publier.</span></div><button class="tg ${STORE.autoAccept ? "on" : ""}" data-toggle="autoAccept" aria-label="Accepter automatiquement les promos de la centrale"></button></div>
     </div>` : ""}
     <div class="lbl">NOTIFICATIONS</div>
     <div class="box">
-      <div class="li"><span class="sp" style="font-size:15.5px">Nouvelles promos du réseau</span><button class="tg ${S.notifNet ? "on" : ""}" data-toggle="notifNet" aria-label="Nouvelles promos du réseau"></button></div>
+      <div class="li"><span class="sp" style="font-size:15.5px">Nouvelles promos de la centrale</span><button class="tg ${S.notifNet ? "on" : ""}" data-toggle="notifNet" aria-label="Nouvelles promos de la centrale"></button></div>
       <div class="li"><span class="sp" style="font-size:15.5px">Échecs de publication</span><button class="tg ${S.notifFail ? "on" : ""}" data-toggle="notifFail" aria-label="Échecs de publication"></button></div>
     </div>
     <button class="out" data-act="logout">Se déconnecter</button>
@@ -736,7 +760,8 @@ $$("#nav button").forEach(b => b.onclick = () => go(b.dataset.tab));
 $("#fab").onclick = () => sheetChoose();
 
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-act],[data-ptab],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry]");
+  if (swiped) { swiped = false; return; }
+  const t = e.target.closest("[data-go],[data-act],[data-ptab],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-del],[data-card]");
   if (!t || t.closest("#layer")) return;
   const ds = t.dataset;
   if (ds.go) { const [a, b] = ds.go.split(":"); go(a, b); }
@@ -751,11 +776,114 @@ document.addEventListener("click", (e) => {
   else if (ds.open) clients(ds.open);
   else if (ds.edit) createForm("promo", find(ds.edit));
   else if (ds.act === "clients") clients(ds.id);
+  else if (ds.del) askDelete(find(ds.del));
+  else if (ds.card) { if (closeSwipes()) return; openPromo(find(ds.card)); }
   else if (ds.act === "reconnect") reconnect();
   else if (ds.act === "disconnect") toast("Gardez Instagram connecté pour que vos promos y paraissent.");
   else if (ds.act === "logout") sb.auth.signOut().then(() => location.reload());
 });
 const find = (id) => S.promos.find(p => p.id === id);
+
+/* ===================== Glisser pour supprimer ===================== */
+let swiped = false, drag = null;
+function closeSwipes(except) {
+  let had = false;
+  $$(".swipe.open").forEach(w => { if (w !== except) { w.classList.remove("open"); w.querySelector(".card").style.transform = ""; had = true; } });
+  return had;
+}
+document.addEventListener("pointerdown", (e) => {
+  const w = e.target.closest(".swipe"); if (!w || e.target.closest(".sw-del")) return;
+  drag = { w, x: e.clientX, y: e.clientY, dx: 0, base: w.classList.contains("open") ? -96 : 0, on: false };
+});
+document.addEventListener("pointermove", (e) => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (!drag.on) { if (Math.abs(dx) < 8 || Math.abs(dy) > Math.abs(dx)) { if (Math.abs(dy) > 10) drag = null; return; } drag.on = true; drag.w.classList.add("drag"); closeSwipes(drag.w); }
+  drag.dx = dx; const x = Math.max(-110, Math.min(0, drag.base + dx));
+  drag.w.querySelector(".card").style.transform = `translateX(${x}px)`;
+});
+document.addEventListener("pointercancel", () => { if (drag) { drag.w.classList.remove("drag"); drag.w.querySelector(".card").style.transform = drag.base ? "translateX(-96px)" : ""; drag = null; } });
+document.addEventListener("pointerup", () => {
+  if (!drag) return;
+  const { w, on, base, dx } = drag; drag = null;
+  if (!on) return;
+  swiped = true; setTimeout(() => swiped = false, 50);
+  w.classList.remove("drag");
+  const open = base + dx < -48;
+  w.classList.toggle("open", open); w.querySelector(".card").style.transform = open ? "translateX(-96px)" : "";
+});
+function askDelete(p) {
+  if (!p) return;
+  sheet(`<div class="grab"></div><h2>Supprimer « ${esc(p.title)} » ?</h2>
+    <p class="small" style="font-size:14px;margin-top:6px">${p.src === "own" ? "La promo disparaît de votre app et de votre vitrine. Les publications déjà faites sur Facebook et Instagram restent en ligne." : "La promo disparaît de votre app et de votre vitrine. Votre centrale le voit dans son suivi."}</p>
+    <button class="big-btn" id="d-go" style="background:var(--red)">${I.trash}Supprimer</button><button class="txt-btn" data-close>Annuler</button>`);
+  $("#d-go").onclick = async () => {
+    $("#d-go").disabled = true;
+    const { error } = p.src === "own"
+      ? await sb.from("promotions").delete().eq("id", p.promoId)
+      : await sb.from("store_promotions").update({ hidden: true }).eq("id", p.spId);
+    if (error) { closeLayer(); return toast(errText(error)); }
+    S.promos = S.promos.filter(x => x.id !== p.id); closeLayer(); render(true); toast("Promo supprimée."); refresh();
+  };
+}
+
+/* ===================== Ouvrir une promo ===================== */
+function openPromo(p) {
+  if (!p) return;
+  if (p.src === "own") return createForm(p.kind, p);
+  sheetNet(p);
+}
+// Promo de la centrale : personnalisable (titre, texte, visuel) si la centrale
+// l'autorise ; sinon affichée en lecture seule, grisée.
+function sheetNet(p) {
+  const can = STORE.canEdit, F = { title: p.title, text: p.text, img: p.img };
+  const pr = pricing(p), dis = can ? "" : "disabled";
+  const draw = () => {
+    sheet(`<div class="grab"></div><h2>${can ? "Personnaliser la promo" : "Promo de la centrale"}</h2>
+      ${can ? "" : `<p class="hint" style="color:var(--muted)">Votre centrale ${esc(STORE.net)} ne permet pas de modifier ses promos.</p>`}
+      <div class="${can ? "" : "ro-box"}">
+      <div class="preview-img" style="margin-top:12px"><img onerror="this.style.visibility='hidden'" src="${esc(F.img || "")}" alt="">${can ? '<button id="n-img">Changer</button>' : ""}</div>
+      <div class="fl">TITRE</div><input class="in" id="n-title" maxlength="90" value="${esc(F.title)}" ${dis}>
+      <div class="fl">TEXTE DU POST</div><textarea class="in" id="n-text" rows="5" maxlength="1500" ${dis}>${esc(F.text)}</textarea>
+      <div class="fl">FIXÉ PAR LA CENTRALE</div>
+      <div class="ro-line">${[pr.badge, `Du ${fmtShort(p.start)} au ${fmtShort(p.end)}`, p.code && `Code ${esc(p.code)}`, p.ean && `EAN ${esc(p.ean)}`, p.mandatory && "Obligatoire"].filter(Boolean).map(esc).join(" · ")}</div>
+      </div>
+      ${can ? `<button class="big-btn" id="n-save">Enregistrer</button>${Object.keys(p.ov || {}).length ? '<button class="txt-btn" id="n-reset">Revenir à la version de la centrale</button>' : ""}` : ""}
+      <button class="txt-btn" data-close>${can ? "Annuler" : "Fermer"}</button>`);
+    if (!can) return;
+    $("#n-title").oninput = (e) => F.title = e.target.value;
+    $("#n-text").oninput = (e) => F.text = e.target.value;
+    $("#n-img").onclick = () => pickMedia("file", (src) => { F.img = src; draw(); });
+    const saveOv = async (ov) => {
+      const { error } = await sb.from("store_promotions").update({ overrides: ov }).eq("id", p.spId);
+      if (error) return toast(errText(error));
+      closeLayer(); await refresh(); toast(Object.keys(ov).length ? "Promo personnalisée." : "Version de la centrale rétablie.");
+    };
+    $("#n-save").onclick = async () => {
+      $("#n-save").disabled = true;
+      try {
+        const ov = {};
+        if (F.title.trim() && F.title.trim() !== p.base.title) ov.title = F.title.trim();
+        if (F.text.trim() !== (p.base.text || "").trim()) ov.text = F.text.trim();
+        const img = await ensureUploaded(F.img);
+        if (img && img !== p.base.img) ov.media_url = img;
+        await saveOv(ov);
+      } catch (e) { toast(errText(e)); $("#n-save").disabled = false; }
+    };
+    $("#n-reset") && ($("#n-reset").onclick = () => saveOv({}));
+  };
+  draw();
+}
+
+/* ===================== Pop-in d'accueil (première connexion) ===================== */
+function introOnce() {
+  if (!STORE.hasNet) return;
+  const k = "vitriin-intro-" + STORE.id;
+  try { if (localStorage.getItem(k)) return; localStorage.setItem(k, "1"); } catch { return; }
+  sheet(`<div class="grab"></div><h2>Les promos de votre centrale</h2>
+    <p class="small" style="font-size:15px;line-height:1.5;margin-top:8px;color:var(--ink)">Envoyées par votre centrale ${esc(STORE.net)}. Activez ou refusez en un geste. Les promos obligatoires ne se refusent pas : publiez-les ou programmez-les avant leur échéance.</p>
+    <button class="big-btn" data-close>J'ai compris</button>`);
+}
 
 /* ===================== Actions ===================== */
 async function setStatus(p, status, msg) {
@@ -806,7 +934,7 @@ function sheetSchedule(p) {
   const draw = () => {
     sheet(`<div class="grab"></div><h2>Programmer la publication</h2><p class="small" style="font-size:14px;margin-top:4px">« ${esc(p.title)} »${p.deadline ? ` · à publier avant le ${fmtLong(p.deadline)}` : ""}</p>
       <div class="fl">DATE</div><div class="days">${days.map((x, k) => `<button class="day ${k === sel ? "on" : ""}" data-k="${k}" ${x > last ? "disabled" : ""}><small>${k === 0 ? "Auj." : x.toLocaleDateString("fr-FR", { weekday: "short" })}</small><b>${x.getDate()}</b><span>${x.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "")}</span></button>`).join("")}</div>
-      ${p.deadline ? `<div class="hint">Dernier jour possible : ${fmtDay(last)} (échéance du réseau : ${fmtLong(p.deadline)})</div>` : ""}
+      ${p.deadline ? `<div class="hint">Dernier jour possible : ${fmtDay(last)} (échéance de la centrale : ${fmtLong(p.deadline)})</div>` : ""}
       <div class="fl">HEURE</div><input class="in" type="time" id="s-time" value="${time}">
       <div class="recap">Publication le <b>${fmtDay(days[sel])} à <span id="s-t">${time}</span></b> sur Facebook${S.ig === "ok" ? " et Instagram" : ""}.</div>
       <button class="big-btn" id="s-go">Programmer</button><button class="txt-btn" data-close>Annuler</button>`);
@@ -838,16 +966,18 @@ function createForm(kind, draft) {
   const F = draft ? { kind: "promo", xy: [2, 1], cond: "", text: "", ...draft, codes: draft.code ? [draft.code] : [], fb: true, ig: S.ig === "ok" } :
     { kind, title: "", img: null, type: "percent", orig: 129, val: 30, xy: [2, 1], cond: "", text: "", start: d(0), end: d(13), codes: [], fb: true, ig: S.ig === "ok" };
   const layer = $("#layer");
+  // Promo déjà publiée ou programmée : on enregistre sans republier.
+  const editLive = !!draft && draft.status !== "draft";
   const draw = () => {
     const isPost = F.kind === "post";
     const missing = [!F.img && "photo", !isPost && !F.title.trim() && "titre", isPost && !F.text.trim() && "texte", !F.fb && !F.ig && "canal"].filter(Boolean);
     const pr = pricing(F);
     layer.innerHTML = `<div class="full">
-      <div class="bar"><button class="x" data-close aria-label="Fermer">${I.x}</button><b>${isPost ? "Nouveau post" : draft ? "Modifier la promo" : "Nouvelle promo"}</b></div>
+      <div class="bar"><button class="x" data-close aria-label="Fermer">${I.x}</button><b>${draft ? (isPost ? "Modifier le post" : "Modifier la promo") : isPost ? "Nouveau post" : "Nouvelle promo"}</b></div>
       <div class="scroll">
         <span class="label">Photo ou vidéo <span class="req">*</span></span>
         ${F.img ? `<div class="preview-img"><img onerror="this.style.visibility='hidden'" src="${esc(F.img)}" alt=""><button id="f-rm">Changer</button></div>` :
-        `<div class="media"><button data-src="cam"><span style="color:var(--p)">${I.cam}</span>Photo</button><button data-src="file"><span style="color:var(--p)">${I.vid}</span>Vidéo</button><button data-src="file"><span style="color:var(--p)">${I.img}</span>Galerie</button><button class="net" data-src="lib"><span style="color:var(--v)">${I.net}</span>Médiathèque du réseau</button></div>`}
+        `<div class="media"><button data-src="cam"><span style="color:var(--p)">${I.cam}</span>Photo</button><button data-src="file"><span style="color:var(--p)">${I.vid}</span>Vidéo</button><button data-src="file"><span style="color:var(--p)">${I.img}</span>Galerie</button><button class="net" data-src="lib"><span style="color:var(--v)">${I.net}</span>Médiathèque de la centrale</button></div>`}
         ${isPost ? `<span class="label">Texte <span class="req">*</span></span><textarea class="in" id="f-text" rows="5" placeholder="Ex : Nouvelle collection trail en magasin, venez l'essayer !">${esc(F.text)}</textarea>` : `
         <span class="label">Titre <span class="req">*</span></span><input class="in" id="f-title" placeholder="Ex : Air Runner 95" value="${esc(F.title)}" maxlength="60">
         <span class="label">Type de promo</span>
@@ -869,8 +999,8 @@ function createForm(kind, draft) {
       </div>
       <div class="actions">
         ${missing.length ? `<div class="todo">À compléter : ${missing.join(" · ")}</div>` : ""}
-        <button class="big-btn" id="f-pub" ${missing.length ? "disabled" : ""} style="margin-top:8px">${I.send}Publier</button>
-        ${isPost ? "" : '<button class="txt-btn" id="f-draft" style="border:1.5px solid var(--line);border-radius:16px;color:var(--ink);font-weight:700">Enregistrer en brouillon</button>'}
+        <button class="big-btn" id="f-pub" ${missing.length ? "disabled" : ""} style="margin-top:8px">${editLive ? "Enregistrer les modifications" : `${I.send}Publier`}</button>
+        ${isPost || editLive ? "" : '<button class="txt-btn" id="f-draft" style="border:1.5px solid var(--line);border-radius:16px;color:var(--ink);font-weight:700">Enregistrer en brouillon</button>'}
       </div></div>`;
     bindForm();
   };
@@ -931,6 +1061,7 @@ function createForm(kind, draft) {
         spId = sp.id;
       }
       closeLayer();
+      if (editLive) { await loadData(); render(true); return toast("Modifications enregistrées."); }
       if (asDraft) { await loadData(); UI.tab = "promos"; UI.promoTab = "own"; render(); return toast("Brouillon enregistré."); }
       publish({ spId, title, _chans: ["fb", "ig"].filter(c => F[c]) });
     } catch (e) { toast(errText(e)); if (btn) btn.disabled = false; }
@@ -974,7 +1105,7 @@ const iso = (t) => { const x = new Date(t); return new Date(x.getTime() - x.getT
 function pickMedia(src, done) {
   if (src === "lib") {
     const items = [LIB.air, LIB.trail, LIB.bf, LIB.phantom, LIB.red, LIB.grey];
-    sheet(`<div class="grab"></div><h2>Médiathèque du réseau</h2><p class="small" style="font-size:14px;margin-top:4px">Visuels partagés par ${esc(STORE.net)}, prêts à l'emploi.</p>
+    sheet(`<div class="grab"></div><h2>Médiathèque de la centrale</h2><p class="small" style="font-size:14px;margin-top:4px">Visuels partagés par ${esc(STORE.net)}, prêts à l'emploi.</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">${items.map((s, k) => `<button data-lib="${k}" style="aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--bg)"><img onerror="this.style.visibility='hidden'" src="${esc(s)}" alt="" style="width:100%;height:100%;object-fit:cover"></button>`).join("")}</div>
       <button class="txt-btn" data-close>Annuler</button>`, true);
     $$("[data-lib]").forEach(b => b.onclick = () => { const s = items[+b.dataset.lib]; closeSheetOnly(); done(s); });
