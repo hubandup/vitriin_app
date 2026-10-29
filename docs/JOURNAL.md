@@ -20,6 +20,19 @@ Repères :
 
 ## 2026-10-29
 
+### BUG-003 · Centrale affichait « Créez votre réseau » — corrigé
+- **Cause** : /centrale et /magasin partagent le domaine app.vitriin.co et
+  donc la même session Supabase. La connexion du compte démo magasin sur
+  /magasin a remplacé celle de Charles ; la Centrale a vu un compte sans
+  réseau. Aucune donnée perdue (Chausselandia : 20 magasins, 11 promos).
+- **Correction** : session séparée par espace (`storageKey`
+  `vitriin-centrale-auth` et `vitriin-magasin-auth`). Un compte magasin qui
+  ouvre la Centrale voit « Ce compte est un compte magasin » au lieu du
+  formulaire de création de réseau.
+- **Effet de bord** : une reconnexion est demandée une fois sur chaque espace.
+- **Fichiers** : `centrale/index.html`, `magasin/index.html`.
+- **Retour arrière** : `git revert` du commit BUG-003.
+
 ### MOD-009 · Glisser à gauche : Supprimer ou Suspendre selon la promo
 - **Règle** (corrige MOD-008) :
   - promo du magasin → bouton rouge « Supprimer » puis confirmation ;

@@ -528,7 +528,9 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 <script>
 const SUPABASE_URL = "https://zjugauidrijghesgsmap.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU";
-const sb = supabase.createClient(SUPABASE_URL, ANON_KEY);
+// Session propre à la Centrale : un compte magasin connecté sur /magasin
+// dans le même navigateur ne prend pas la place du compte centrale.
+const sb = supabase.createClient(SUPABASE_URL, ANON_KEY, { auth: { storageKey: "vitriin-centrale-auth" } });
 const $ = (id) => document.getElementById(id);
 const show = (el, on = true) => (typeof el === "string" ? $(el) : el).classList.toggle("hidden", !on);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -1667,7 +1669,15 @@ async function boot() {
   const { data, error } = await sb.from("network_members").select("role, networks(id, name, slug, join_code, logo_url, legal_name, address, support_email, phone, siret, siren, vat_number, cgv_url, settings)").eq("user_id", S.user.id).limit(1);
   if (error) { show("v-auth"); $("a-err").textContent = errText(error); show("a-err"); return; }
   show("v-auth", false);
-  if (!data.length) { show("v-new"); show("v-app", false); return; }
+  if (!data.length) {
+    // Compte magasin sans centrale : on le dit, plutôt que de proposer de créer un réseau.
+    const { count } = await sb.from("store_members").select("store_id", { count: "exact", head: true }).eq("user_id", S.user.id);
+    const isStore = (count || 0) > 0;
+    document.querySelector("#v-new h2").textContent = isStore ? "Ce compte est un compte magasin" : "Créez votre réseau";
+    document.querySelector("#v-new .auth > p").textContent = isStore ? `${S.user.email} gère un magasin, pas une centrale. Déconnectez-vous puis reconnectez-vous avec le compte de la centrale.` : "Le nom que verront vos magasins quand ils vous rejoindront. Vous pourrez ensuite les inviter.";
+    ["n-name", "n-go"].forEach(id => show(id, !isStore)); document.querySelector('#v-new label[for="n-name"]').classList.toggle("hidden", isStore);
+    show("v-new"); show("v-app", false); return;
+  }
   S.net = data[0].networks; S.role = data[0].role;
   const pr = await sb.from("profiles").select("first_name, last_name, avatar_url").eq("id", S.user.id).maybeSingle();
   S.profile = pr.data || {};

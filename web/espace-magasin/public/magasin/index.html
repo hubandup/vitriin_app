@@ -433,7 +433,8 @@ const HOUR = 36e5;
 // Aucun appel à Meta depuis cette page.
 const SUPABASE_URL = "https://zjugauidrijghesgsmap.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU";
-const sb = supabase.createClient(SUPABASE_URL, ANON_KEY);
+// Session propre à l'app magasin (distincte de la Centrale, même domaine).
+const sb = supabase.createClient(SUPABASE_URL, ANON_KEY, { auth: { storageKey: "vitriin-magasin-auth" } });
 const PREFS_KEY = "vitriin-app-prefs";
 const prefs = Object.assign({ notifNet: true, notifFail: true, liked: {}, saved: {} }, store.get(PREFS_KEY) || {});
 const errText = (e) => (e && (e.message || e.error_description)) || String(e);
