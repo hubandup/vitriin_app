@@ -18,6 +18,25 @@ Repères :
 
 ---
 
+## 2026-10-30
+
+### MOD-011 · App magasin : nouvelles cartes promo et fiche promo
+- **Choix de Charles** : « À traiter » en tête façon piste B, puis grandes
+  cartes façon piste A (maquettes sur la planche « Vitriin · Cartes promo »).
+- **Liste** : par onglet (De la centrale / Mes promos), trois sections :
+  « À traiter » (visuel 104 px, un statut, titre, offre + date, une seule
+  action Activer ou Publier), « En cours et à venir » et « Suspendues et
+  terminées » (grand visuel 190 px, statut en pastille, offre posée sur
+  l'image, titre + une date). Un seul statut coloré par promo. Le glisser
+  (Suspendre / Reprendre / Supprimer) est inchangé sur les deux formes.
+- **Fiche promo** commune (toucher une carte) : grand visuel, statut, prix,
+  dates, état Facebook / Instagram (date, vues, reconnexion), détails repliés
+  (codes, formats, texte), une action principale selon l'état et les liens
+  Modifier / Suspendre / Reprendre / Supprimer.
+- **Code retiré** : ancienne carte `cardPromo`, ancien bloc CSS `.card …`.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-011.
+
 ## 2026-10-29
 
 ### MOD-010 · Une seule règle de glisser, centrale comme magasin

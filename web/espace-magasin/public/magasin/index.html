@@ -128,29 +128,58 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .seg .c{background:var(--p);color:#fff;font-size:11.5px;min-width:20px;height:20px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
 .intro{font-size:14px;color:var(--muted);line-height:1.45;margin:14px 0}
-.card{border:1.5px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:10px;background:#fff;position:relative;cursor:pointer}
-.card.pending{border-color:#f5b8d4}
-.card .top{display:flex;gap:11px;padding:10px 11px}
-.card .top>img,.card .top>.ph{width:56px;height:56px;border-radius:11px;object-fit:cover;flex:none;background:var(--bg)}
-.card .eye{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;background:var(--rose);color:var(--p);display:flex;align-items:center;justify-content:center;z-index:1}
-.card .eye svg{width:18px;height:18px}
-.card .eye ~ .top .tags{padding-right:38px}
-.card .tags .st{font-size:11px;padding:2px 8px}
-.card .small,.card .code{font-size:12.5px;margin-top:3px}
-.card .band,.card .foot{padding:8px 11px 10px}
-.card .btns{margin-top:7px}
-.card .btns button{padding:10px 8px;font-size:14px;border-radius:11px}
-.swipe{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden}
+/* Cartes promo : « à traiter » (ligne, piste B) et grande carte (piste A) */
+.card{position:relative;background:#fff;cursor:pointer}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;margin:20px 0 10px}
+.sec-h h2{font-size:17px;margin:0}.sec-h span{font-size:13px;color:var(--muted)}
+.tcard{display:flex;gap:12px;border-radius:18px;padding:10px;background:#fdf0f6;margin-bottom:10px}
+.tcard.mand{background:#f4f1ec}
+.tcard>img,.tcard>.ph{width:104px;height:104px;border-radius:13px;object-fit:cover;flex:none;background:var(--bg)}
+.tcard .tx{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:6px}
+.tcard .k{font-size:12px;font-weight:700;color:#b5005f}.tcard.mand .k{color:var(--ink)}
+.tcard h3{font-size:16px;margin:2px 0 0;line-height:1.2}
+.tcard .d{font-size:13px;color:var(--muted);margin-top:2px}
+.tcard .go{align-self:flex-start;min-height:40px;padding:0 18px;border-radius:12px;font-weight:700;font-size:14px;color:#fff;background:var(--grad)}
+.tcard.mand .go{background:var(--ink)}
+.big{border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:12px}
+.big .im{position:relative;height:190px;background:var(--bg)}
+.big .im img{width:100%;height:100%;object-fit:cover;display:block}
+.big .bd{padding:12px 16px 14px}
+.big h3{font-size:17px;margin:0;letter-spacing:-.01em}
+.big .d{font-size:14px;color:var(--muted);margin-top:3px}
+.chip{position:absolute;top:12px;left:12px;background:#fff;color:var(--ink);font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;display:flex;align-items:center;gap:6px}
+.chip i{width:8px;height:8px;border-radius:50%;display:block}
+.offer{position:absolute;left:12px;bottom:12px;background:var(--p);color:#fff;font-weight:700;font-size:19px;padding:5px 11px;border-radius:12px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.big .eye{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;background:#fff;color:var(--p);display:flex;align-items:center;justify-content:center}
+.big .eye svg{width:19px;height:19px}
+/* Fiche promo */
+.fiche .fhero{position:relative;height:290px;background:var(--bg);flex:none}
+.fiche .fhero img{width:100%;height:100%;object-fit:cover;display:block}
+.fiche .fhero .fx,.fiche .fhero .cl{position:absolute;top:calc(var(--sat) + 12px);height:44px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:13.5px}
+.fiche .fhero .fx{left:14px;width:44px;color:var(--ink)}.fiche .fhero .cl{right:14px;padding:0 14px;color:var(--p)}
+.fiche .scroll{padding:16px 18px 20px}
+.fiche h1{font-size:23px;margin:6px 0 4px;letter-spacing:-.02em}
+.fiche .pr{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.fiche .pr b{font-size:26px;color:var(--p)}.fiche .pr s{color:var(--muted);font-size:15px}
+.fiche .box{border:1px solid var(--line);border-radius:16px;padding:2px 14px;margin-top:14px}
+.fiche .box .li{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.fiche .box .li:last-child{border-bottom:none}
+.fiche details{border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:12px}
+.fiche summary{font-weight:700;font-size:14.5px;cursor:pointer}
+.fiche .acts{display:flex;gap:10px}
+.fiche .acts button{flex:1;min-height:50px;border-radius:15px;font-weight:700;font-size:15px}
+.fiche .links{display:flex;justify-content:center;gap:22px;margin-top:8px}
+.fiche .links button{font-weight:700;font-size:14px;padding:8px}
+.swipe{position:relative;margin-bottom:12px;border-radius:20px;overflow:hidden}
+.swipe .tcard,.swipe .big{margin-bottom:0}
 .swipe .card{margin-bottom:0;transition:transform .2s ease;touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .swipe img{-webkit-user-drag:none;pointer-events:none}
 .swipe.drag .card{transition:none}
 .st.s-susp{background:#e6eefb;color:var(--blue)}
 .sw-btn{position:absolute;top:0;bottom:0;width:96px;color:#fff;font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.sw-r{right:0;border-radius:0 16px 16px 0}.sw-l{left:0;border-radius:16px 0 0 16px}
+.sw-r{right:0}.sw-l{left:0}
 .b-red{background:var(--red)}.b-blue{background:var(--blue)}.b-teal{background:var(--teal)}
 .tags{display:flex;gap:5px;flex-wrap:wrap}
-.card h3{font-size:15.5px;margin:4px 0 0;letter-spacing:-.01em;line-height:1.25}
-.card .price .num{font-size:18px}
 .badge{background:var(--p);color:#fff;font-family:'Racing Sans One',sans-serif;font-size:13px;padding:2px 8px;border-radius:7px}
 .small{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.35}
 .code{display:flex;gap:6px;align-items:flex-start;font-size:13px;margin-top:5px;line-height:1.35}
@@ -460,6 +489,7 @@ function mapRow(row, accounts) {
   const start = new Date(pr.starts_at), end = new Date(pr.ends_at);
   const m = (x) => x?.status === "published" && x.metrics ? [+x.metrics.reach || 0, +x.metrics.views || 0, (+x.metrics.reactions || 0) + (+x.metrics.shares || 0), +x.metrics.comments || 0] : null;
   const stats = done.length ? { fb: m(byCh.fb), ig: m(byCh.ig) } : null;
+  const chAt = { fb: byCh.fb?.status === "published" ? byCh.fb.published_at : null, ig: byCh.ig?.status === "published" ? byCh.ig.published_at : null };
   const sched = planned ? new Date(planned.published_at) : null;
   return {
     id: row.id, spId: row.id, promoId: pr.id, src: pr.created_by_network_id ? "net" : "own",
@@ -470,7 +500,7 @@ function mapRow(row, accounts) {
     formats: Array.isArray(det.formats) ? det.formats : [], mech: pr.mechanic, text: row.overrides?.text || pr.description || "",
     type: pr.promo_type, orig: det.orig ?? null, val: det.val ?? null, xy: det.xy || [2, 1], sub: det.sub || "", cond: det.sub || "",
     start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, deadline: start > Date.now() ? start : end,
-    status, ch, stats, recAt: new Date(row.created_at).getTime(),
+    status, ch, chAt, stats, recAt: new Date(row.created_at).getTime(),
     pubAt: done.length ? Math.max(...done.map(x => new Date(x.published_at).getTime())) : null,
     schedAt: sched ? new Date(sched.getFullYear(), sched.getMonth(), sched.getDate()).getTime() : null,
     schedTime: sched ? sched.toTimeString().slice(0, 5) : null, schedSetAt: planned ? new Date(row.activated_at || row.created_at).getTime() : null,
@@ -650,15 +680,22 @@ function activity() {
 }
 
 function viewPromos() {
-  const net = S.promos.filter(p => p.src === "net");
   const own = S.promos.filter(p => p.src === "own");
   const pend = pendingNet().length;
-  const list = UI.promoTab === "net" ? net : own;
+  const list = S.promos.filter(p => p.src === (UI.promoTab === "net" ? "net" : "own"));
+  // En tête : ce qui attend une action (piste B). Ensuite : grandes cartes (piste A).
+  const todo = list.filter(isTodo).sort((a, b) => (b.mandatory - a.mandatory) || (a.deadline - b.deadline));
+  const rest = list.filter(p => !isTodo(p));
+  const live = rest.filter(p => !p.suspended && !isOver(p)).sort((a, b) => a.start - b.start);
+  const off = rest.filter(p => p.suspended || isOver(p)).sort((a, b) => b.end - a.end);
+  const sec = (t, n) => `<div class="sec-h"><h2>${t}</h2><span>${n} promo${n > 1 ? "s" : ""}</span></div>`;
   return `<div class="screen">
     <h1 class="title">Promos</h1>
-    <div class="seg"><button class="${UI.promoTab === "net" ? "on" : ""}" data-ptab="net">De la centrale ${pend ? `<span class="c">${pend}</span>` : ""}</button><button class="${UI.promoTab === "own" ? "on" : ""}" data-ptab="own">Créées par vous · ${own.length}</button></div>
-    <p class="intro">${UI.promoTab === "net" ? "Touchez une promo pour l'ouvrir. Glissez-la vers la gauche pour la suspendre ou la supprimer." : "Touchez une promo pour la modifier. Glissez-la vers la gauche pour la suspendre ou la supprimer."}</p>
-    ${list.map(cardPromo).join("") || '<div class="empty">Rien pour l\'instant.</div>'}
+    <div class="seg"><button class="${UI.promoTab === "net" ? "on" : ""}" data-ptab="net">De la centrale ${pend ? `<span class="c">${pend}</span>` : ""}</button><button class="${UI.promoTab === "own" ? "on" : ""}" data-ptab="own">Mes promos · ${own.length}</button></div>
+    ${todo.length ? sec("À traiter", todo.length) + todo.map(p => swipeWrap(p, cardTodo(p))).join("") : ""}
+    ${live.length ? sec("En cours et à venir", live.length) + live.map(p => swipeWrap(p, cardBig(p))).join("") : ""}
+    ${off.length ? sec("Suspendues et terminées", off.length) + off.map(p => swipeWrap(p, cardBig(p))).join("") : ""}
+    ${list.length ? "" : '<div class="empty">Rien pour l\'instant.</div>'}
   </div>`;
 }
 // Formats choisis par la centrale (« instagram:carousel »…) et nombre de photos.
@@ -682,37 +719,38 @@ function swipeAction(p) {
   if (p.src === "own" || (STORE.canDelete && !p.mandatory)) return { left: "susp" };
   return {};
 }
-function cardPromo(p) {
-  const pr = pricing(p);
-  const pending = p.status === "received" || (p.mandatory && !["published", "scheduled"].includes(p.status));
-  const tags = `${tagSrc(p)}${p.mandatory ? '<span class="st s-mand">Obligatoire</span>' : ""}${statusPill(p)}`;
-  const codes = [p.code && `Code ${esc(p.code)}`, p.ean && `EAN ${esc(p.ean)}`].filter(Boolean).join(" · ");
-  const codeLine = codes ? `<div class="code">${I.bar}<span>${codes}</span></div>` : "";
-  let bottom = "";
-  if (p.status !== "draft" && isOver(p)) {
-    bottom = `<div class="foot"><div class="row" style="font-size:13.5px"><span class="sp" style="color:var(--muted)">Terminée le ${fmtShort(p.end)}${p.status === "published" ? "" : " · pas publiée"}</span>${chanIcons(p)}</div></div>`;
-  } else if (p.suspended) {
-    bottom = `<div class="foot"><div class="row" style="font-size:13.5px"><span class="sp" style="color:var(--muted)">Suspendue : retirée de votre vitrine.</span><button class="link" style="font-size:14px" data-resume="${p.id}">Reprendre</button></div></div>`;
-  } else if (p.status === "received" && p.mandatory || (p.mandatory && p.status === "active")) {
-    bottom = `<div class="band"><div class="row">${I.clock}<span>À publier avant le <b>${fmtLong(p.deadline)}</b></span></div><div class="btns"><button class="b-sand" data-sched="${p.id}">Programmer</button><button class="b-grad" data-pub="${p.id}">Publier maintenant</button></div></div>`;
-  } else if (p.status === "received") {
-    bottom = `<div style="padding:0 13px 13px"><div class="btns" style="margin-top:0"><button class="b-ghost" data-decline="${p.id}">Refuser</button><button class="b-grad" data-activate="${p.id}">Activer</button></div></div>`;
-  } else if (p.status === "active") {
-    bottom = `<div class="foot"><div class="btns" style="margin-top:0"><button class="b-ghost" data-sched="${p.id}">Programmer</button><button class="b-grad" data-pub="${p.id}">Publier maintenant</button></div></div>`;
-  } else if (p.status === "scheduled") {
-    bottom = `<div class="foot"><div class="row" style="font-size:14px;gap:8px">${I.clock}<span class="sp">Publication le <b>${fmtDay(p.schedAt)} à ${p.schedTime}</b></span><button class="link" style="font-size:14px" data-pub="${p.id}">Publier maintenant</button></div></div>`;
-  } else if (p.status === "declined") {
-    bottom = `<div class="foot"><div class="row" style="font-size:14px"><span class="sp" style="color:var(--muted)">Vous avez refusé cette promo.</span><button class="link" style="font-size:14px" data-activate="${p.id}">L'activer</button></div></div>`;
-  } else if (p.status === "published") {
-    bottom = `<div class="foot"><div class="row">${chanIcons(p)}<span class="sp"></span>${p.ch.ig === "ko" && S.ig === "broken" ? '<button class="btn-red" data-act="reconnect">Reconnecter</button>' : ""}</div></div>`;
-  } else if (p.status === "draft") {
-    bottom = `<div class="foot"><div class="row"><span class="sp" style="font-size:13.5px;color:var(--muted)">Brouillon · pas encore publié</span></div></div>`;
-  }
-  // Œil « Voir côté clients » en haut à droite, pour ce que les clients voient déjà.
-  const eye = p.status === "published" && p.img && p.kind !== "post" ? `<button class="eye" data-act="clients" data-id="${p.id}" aria-label="Voir côté clients">${I.eye}</button>` : "";
-  const card = `<div class="card ${pending ? "pending" : ""}" data-card="${p.id}">${eye}<div class="top">${imgOr(p.img)}<div class="sp"><div class="tags">${tags}</div><h3>${esc(p.title)}</h3>${pr.price != null ? `<div class="price"><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}<span class="badge">${esc(pr.badge)}</span></div>` : pr.badge ? `<div class="price"><span class="num">${esc(pr.badge)}</span></div>` : ""}
-    <div class="small">${p.sub ? `<span style="color:var(--ink)">${esc(p.sub)}</span> · ` : ""}Du ${fmtShort(p.start)} au ${fmtShort(p.end)}</div>${codeLine}${fmtLine(p)}</div></div>${bottom}</div>`;
-  // Glisser vers la gauche pour supprimer, si c'est permis.
+// Un seul statut par promo, avec sa couleur.
+function promoState(p) {
+  if (p.status === "draft") return { l: "Brouillon", c: "#8a847c" };
+  if (isOver(p)) return { l: "Terminée", c: "#8a847c" };
+  if (p.suspended) return { l: "Suspendue", c: "var(--blue)" };
+  if (p.status === "published") return p.ch.ig === "ko" || p.ch.fb === "ko" ? { l: "Échec d'une publication", c: "var(--red)" } : { l: "En ligne", c: "var(--teal)" };
+  if (p.status === "scheduled") return { l: `Programmée · ${fmtShort(new Date(p.schedAt))}`, c: "var(--v)" };
+  if (p.status === "declined") return { l: "Refusée", c: "#8a847c" };
+  if (p.mandatory) return { l: `Obligatoire · avant le ${fmtShort(p.deadline)}`, c: "var(--ink)" };
+  if (p.status === "received") return { l: "À valider", c: "#c47a00" };
+  return { l: "À publier", c: "var(--p)" };
+}
+const isTodo = (p) => !isOver(p) && !p.suspended && p.status !== "draft" && (p.status === "received" || p.status === "active");
+const offerTxt = (p) => { const pr = pricing(p); return pr.badge || ""; };
+const dateTxt = (p) => p.start > Date.now() ? `Dès le ${fmtShort(p.start)}` : isOver(p) ? `Terminée le ${fmtShort(p.end)}` : `Jusqu'au ${fmtShort(p.end)}`;
+// « À traiter » : visuel moyen, une seule action.
+function cardTodo(p) {
+  const st = promoState(p);
+  const go = p.status === "received" && !p.mandatory ? `<button class="go" data-activate="${p.id}">Activer</button>` : `<button class="go" data-pub="${p.id}">Publier</button>`;
+  return `<div class="card tcard ${p.mandatory ? "mand" : ""}" data-card="${p.id}">${imgOr(p.img)}
+    <div class="tx"><div><div class="k">${esc(st.l)}</div><h3>${esc(p.title)}</h3><div class="d">${esc([offerTxt(p), dateTxt(p)].filter(Boolean).join(" · "))}</div></div>${go}</div></div>`;
+}
+// Grande carte : le visuel d'abord, l'offre dessus, deux lignes de texte.
+function cardBig(p) {
+  const st = promoState(p), off = offerTxt(p);
+  const eye = p.status === "published" && p.img && p.kind !== "post" && !isOver(p) && !p.suspended ? `<button class="eye" data-act="clients" data-id="${p.id}" aria-label="Voir côté clients">${I.eye}</button>` : "";
+  return `<div class="card big" data-card="${p.id}"><div class="im">${p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}
+    <span class="chip"><i style="background:${st.c}"></i>${esc(st.l)}</span>${off ? `<span class="offer">${esc(off)}</span>` : ""}${eye}</div>
+    <div class="bd"><h3>${esc(p.title)}</h3><div class="d">${esc(dateTxt(p))}</div></div></div>`;
+}
+// Glisser : mêmes règles quelle que soit la forme de la carte.
+function swipeWrap(p, card) {
   const act = swipeAction(p);
   if (!act.left && !act.right) return card;
   const L = act.left === "del" ? `<button class="sw-btn sw-r b-red" data-del="${p.id}">${I.trash}Supprimer</button>`
@@ -899,8 +937,65 @@ async function setSuspended(p, on) {
 /* ===================== Ouvrir une promo ===================== */
 function openPromo(p) {
   if (!p) return;
-  if (p.src === "own") return createForm(p.kind, p);
-  sheetNet(p);
+  sheetPromo(p);
+}
+// Modifier : promo du magasin → formulaire ; promo de la centrale → personnalisation (ou lecture seule).
+const editPromo = (p) => p.src === "own" ? createForm(p.kind, p) : sheetNet(p);
+const canModify = (p) => p.src === "own" || STORE.canEdit;
+
+/* ===================== Fiche promo (tout le détail ici) ===================== */
+function sheetPromo(p) {
+  const st = promoState(p), pr = pricing(p), act = swipeAction(p);
+  const chLine = (c) => {
+    const name = c === "fb" ? "Facebook" : "Instagram", ok = (c === "fb" ? S.fb : S.ig) === "ok";
+    const s = p.ch[c], at = p.chAt?.[c], v = p.stats?.[c]?.[1];
+    const sub = s === "ok" ? `Publiée le ${fmtShort(new Date(at))}${v ? ` · ${nf(v)} vues` : ""}` : s === "ko" ? "Échec de publication" : ok ? "Pas encore publiée" : (c === "ig" ? "Compte à reconnecter" : "Page à connecter");
+    const right = s === "ok" ? `<span style="color:var(--teal)">${I.check}</span>` : !ok && c === "ig" && S.ig === "broken" ? '<button class="btn-red" style="padding:8px 12px" data-fx="reco">Reconnecter</button>' : "";
+    return `<div class="li"><span class="ch ${c}" style="width:30px;height:30px">${c === "fb" ? I.fbs : I.igs}</span><div class="sp"><b style="font-size:14.5px">${name}</b><div style="font-size:12.5px;color:${s === "ko" || (!ok && !s) ? "var(--red)" : "var(--muted)"}">${sub}</div></div>${right}</div>`;
+  };
+  const details = [
+    p.code && `<div>Code caisse : <b>${esc(p.code)}</b></div>`, p.ean && `<div>EAN caisse : <b>${esc(p.ean)}</b></div>`,
+    fmtLine(p), p.sub && `<div>${esc(p.sub)}</div>`, p.text && `<p style="white-space:pre-wrap;margin:8px 0 0;color:var(--ink)">${esc(p.text)}</p>`,
+  ].filter(Boolean).join("");
+  // Une action principale selon l'état, le reste en liens.
+  let main = "";
+  if (!isOver(p) && !p.suspended && p.status !== "draft") {
+    if (p.status === "received" && !p.mandatory) main = `<button class="b-ghost" data-fx="decline">Refuser</button><button class="b-grad" data-fx="activate">Activer</button>`;
+    else if (p.status === "received" || p.status === "active") main = `<button class="b-ghost" data-fx="sched">Programmer</button><button class="b-grad" data-fx="pub">Publier</button>`;
+    else if (p.status === "scheduled") main = `<button class="b-grad" data-fx="pub">Publier maintenant</button>`;
+    else if (p.status === "declined") main = `<button class="b-grad" data-fx="activate">L'activer</button>`;
+  }
+  if (!main && canModify(p) && !isOver(p)) main = `<button class="b-grad" data-fx="edit">Modifier</button>`;
+  const links = [
+    main.includes('data-fx="edit"') || !canModify(p) || isOver(p) ? "" : `<button data-fx="edit" style="color:var(--ink)">Modifier</button>`,
+    act.right === "resume" ? `<button data-fx="resume" style="color:var(--teal)">Reprendre</button>` : "",
+    act.left === "susp" ? `<button data-fx="susp" style="color:var(--blue)">Suspendre</button>` : act.left === "del" ? `<button data-fx="del" style="color:var(--red)">Supprimer</button>` : "",
+  ].filter(Boolean).join("");
+  const seeable = p.status === "published" && p.img && p.kind !== "post" && !isOver(p) && !p.suspended;
+  const layer = $("#layer");
+  layer.innerHTML = `<div class="full fiche">
+    <div class="fhero">${p.img ? `<img src="${esc(p.img)}" alt="" onerror="this.style.visibility='hidden'">` : ""}
+      <button class="fx" data-fx="close" aria-label="Fermer">${I.x}</button>${seeable ? `<button class="cl" data-fx="clients">${I.eye}Côté clients</button>` : ""}</div>
+    <div class="scroll">
+      <div class="row" style="gap:6px;justify-content:flex-start">${tagSrc(p)}<span class="st" style="background:#f4f2ef;color:var(--ink);display:inline-flex;align-items:center;gap:5px"><i style="width:7px;height:7px;border-radius:50%;background:${st.c};display:block"></i>${esc(st.l)}</span></div>
+      <h1>${esc(p.title)}</h1>
+      ${pr.price != null ? `<div class="pr"><b>${eur(pr.price)}</b>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}${pr.badge ? `<span class="badge">${esc(pr.badge)}</span>` : ""}</div>` : pr.badge ? `<div class="pr"><b>${esc(pr.badge)}</b></div>` : ""}
+      <div class="small" style="font-size:14px">Du ${fmtShort(p.start)} au ${fmtShort(p.end)}</div>
+      ${p.kind === "post" && p.status === "draft" ? "" : `<div class="box">${chLine("fb")}${chLine("ig")}</div>`}
+      ${details ? `<details><summary>Détails : codes, formats, texte</summary><div class="small" style="font-size:13.5px;color:var(--ink);line-height:1.5;margin-top:8px">${details}</div></details>` : ""}
+    </div>
+    ${main || links ? `<div class="actions">${main ? `<div class="acts">${main}</div>` : ""}${links ? `<div class="links">${links}</div>` : ""}</div>` : ""}
+  </div>`;
+  document.body.style.overflow = "hidden";
+  $$("[data-fx]", layer).forEach(b => b.onclick = () => {
+    const f = b.dataset.fx;
+    if (f === "close") return closeLayer();
+    closeLayer();
+    ({ activate: () => setStatus(p, "active", (q) => `« ${q.title} » activée. Publiez-la ou programmez-la.`),
+       decline: () => setStatus(p, "declined", (q) => `« ${q.title} » refusée. Votre centrale est informée.`),
+       pub: () => publish(p), sched: () => sheetSchedule(p), edit: () => editPromo(p), clients: () => clients(p.id),
+       resume: () => askResume(p), susp: () => askSuspend(p), del: () => askDelete(p), reco: () => reconnect() })[f]?.();
+  });
 }
 // Promo de la centrale : personnalisable (titre, texte, visuel) si la centrale
 // l'autorise ; sinon affichée en lecture seule, grisée.
