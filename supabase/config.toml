@@ -400,3 +400,13 @@ content_path = "./supabase/templates/email_change.html"
 [auth.email.template.reauthentication]
 subject = "Votre code de vérification Vitriin"
 content_path = "./supabase/templates/reauthentication.html"
+
+# Alertes de sécurité (activées dans le Dashboard).
+[auth.email.notification.password_changed]
+enabled = true
+subject = "Votre mot de passe Vitriin a été modifié"
+content_path = "./supabase/templates/password_changed_notification.html"
+[auth.email.notification.email_changed]
+enabled = true
+subject = "Votre adresse email Vitriin a été modifiée"
+content_path = "./supabase/templates/email_changed_notification.html"

@@ -20,6 +20,15 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-046 · Alertes de sécurité par email
+- **Quoi** : deux emails automatiques Supabase, en français et à la charte : « mot de passe modifié » et
+  « adresse email modifiée » (envoyé à l'ancienne adresse, avec contact hello@vitriin.co si ce n'est pas
+  la personne). Pas de lien d'action dans ces emails.
+- **Où** : `supabase/templates/password_changed_notification.html`, `email_changed_notification.html`,
+  `supabase/config.toml` (`[auth.email.notification.*]`).
+- **En place** : activés dans Dashboard > Authentication > Emails, objet et contenu vérifiés après rechargement.
+- **Retour arrière** : désactiver « Enable notification » sur les deux modèles ; `git revert`.
+
 ### MOD-045 · Liens des emails sur app.vitriin.co (page /auth/)
 - **Quoi** : les liens des emails (connexion, invitation, mot de passe, confirmation, changement d'email)
   pointent vers `https://app.vitriin.co/auth/?t=…&type=…&next=…` au lieu de `…supabase.co/auth/v1/verify…`.
