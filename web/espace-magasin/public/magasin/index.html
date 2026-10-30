@@ -230,10 +230,15 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .box{border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .li{display:flex;align-items:center;gap:12px;padding:14px}
 .li+.li{border-top:1px solid var(--line)}
-.net{background:var(--lilac);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center}
-.net .ic{width:42px;height:42px;border-radius:12px;background:var(--v);display:flex;align-items:center;justify-content:center;flex:none}
 .pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
-.p-ok{background:#e3f3ec;color:var(--teal)}.p-ko{background:var(--redbg);color:var(--red)}
+.p-ok{background:#e3f3ec;color:var(--teal)}.p-ko{background:var(--redbg);color:var(--red)}.p-off{background:#f0eeec;color:var(--muted)}
+.tg:disabled{opacity:.45}
+.li.soon .ch{opacity:.45}
+.store-card{padding-bottom:12px}
+.store-card .infos{padding:0 0 4px 68px;display:flex;flex-direction:column;gap:6px}
+.info-l{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink)}.info-l svg{color:var(--muted);flex:none}
+.edit-btn{margin:10px 0 0 68px;color:var(--p);font-weight:700;font-size:14.5px;padding:6px 0}
+.affil{display:flex;align-items:center;gap:8px;margin:14px 2px 0;font-size:14px;color:var(--muted)}.affil svg{width:18px;height:18px;color:var(--v);flex:none}.affil b{color:var(--ink)}
 .tg{width:48px;height:28px;border-radius:999px;background:#dcd8d1;position:relative;flex:none;transition:.15s}
 .tg::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.15s}
 .tg.on{background:var(--teal2)}.tg.on::after{left:23px}
@@ -402,6 +407,10 @@ const IMG = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=90
 
 /* ===================== Icônes ===================== */
 const I = {
+  user: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+  phone: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/></svg>',
+  mail: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  globe: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
   play: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/></svg>',
   pause: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>',
   trash: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>',
@@ -504,14 +513,14 @@ function mapRow(row, accounts) {
 }
 
 async function loadData() {
-  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, name, address, city, postal_code, auto_accept, logo_url)").limit(1);
+  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, name, address, city, postal_code, auto_accept, logo_url, contact_first_name, contact_last_name, contact_phone, contact_email, website)").limit(1);
   if (e0) throw e0;
   if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
   const st = mem[0].stores;
   await sb.rpc("demo_tick", { p_store_id: st.id }); // fait avancer la démo ; sans effet ailleurs
   const [net, acc, rows, rev] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
-    sb.from("social_accounts").select("channel, display_name, status").eq("store_id", st.id),
+    sb.from("social_accounts").select("channel, display_name, status, enabled").eq("store_id", st.id),
     sb.from("store_promotions").select("id, status, overrides, suspended, hidden, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
     // Codes révélés par les clients (drive to store), lisibles par le magasin seulement.
     sb.from("code_reveals").select("store_promotion_id, revealed_at").eq("store_id", st.id).order("revealed_at", { ascending: false }).range(0, 9999),
@@ -528,9 +537,10 @@ async function loadData() {
     logo: st.logo_url || n?.logo_url || null, canEdit: !!n?.store_edit, canDelete: !!n?.store_delete, support: n?.support_email || "", phone: n?.phone || "", cgv: n?.cgv_url || "",
     net: n?.network_name || "votre centrale", netFull: n ? `${n.network_name} · ${st.city || ""}` : "Magasin indépendant",
     page: fb?.display_name || "Non connectée", insta: ig?.display_name || "Non connecté",
+    postal: st.postal_code || "", contact: { first: st.contact_first_name || "", last: st.contact_last_name || "", phone: st.contact_phone || "", email: st.contact_email || "", web: st.website || "" },
   });
-  S.fb = fb ? (fb.status === "active" ? "ok" : "broken") : "none";
-  S.ig = ig ? (ig.status === "active" ? "ok" : "broken") : "none";
+  const chState = (a) => !a ? "none" : a.enabled === false ? "off" : a.status === "active" ? "ok" : "broken";
+  S.fb = chState(fb); S.ig = chState(ig);
   const all = rows.data.filter(r => r.promotions).map(r => mapRow(r, acc.data));
   S.promos = all.filter(p => !p.hidden); S.trash = all.filter(p => p.hidden); // corbeille : onglet « Supprimées »
 }
@@ -771,35 +781,100 @@ function viewStats() {
   </div>`;
 }
 
+// Réglages, dans l'ordre : magasin · affiliation · promos de la centrale ·
+// notifications · comptes connectés · support.
 function viewSettings() {
+  const C = STORE.contact, who = [C.first, C.last].filter(Boolean).join(" ");
+  const line = (ic, txt) => txt ? `<div class="info-l">${ic}<span>${esc(txt)}</span></div>` : "";
+  const acc = (key, name, ic, sub) => {
+    const st = key === "fb" ? S.fb : S.ig;
+    const on = st === "ok" || st === "broken";
+    const pill = st === "ok" ? '<span class="pill p-ok">Connecté</span>' : st === "broken" ? '<span class="pill p-ko">À reconnecter</span>' : st === "off" ? '<span class="pill p-off">Désactivé</span>' : '<span class="pill p-off">Non connecté</span>';
+    return `<div class="li">${ic}<div class="sp"><b style="display:block;font-size:15.5px">${name}</b><span style="font-size:13px;color:var(--muted)">${esc(sub)}</span><div style="margin-top:5px">${pill}</div></div><button class="tg ${on ? "on" : ""}" data-chan-t="${key}" aria-label="${on ? "Désactiver" : "Activer"} ${name}"></button></div>`;
+  };
+  const soon = (name, ic) => `<div class="li soon">${ic}<div class="sp"><b style="display:block;font-size:15.5px">${name}</b><i style="font-size:13px;color:var(--muted)">Bientôt disponible</i><div style="margin-top:5px"><span class="pill p-off">Non connecté</span></div></div><button class="tg" disabled aria-label="${name} : bientôt disponible"></button></div>`;
+  const mono = (t, bg) => `<span class="ch" style="width:44px;height:44px;border-radius:12px;background:${bg};color:#fff;font-weight:700;font-size:15px">${t}</span>`;
   return `<div class="screen">
     <h1 class="title">Réglages</h1>
-    <div class="head" style="margin:16px 0 0"><span class="av" style="width:56px;height:56px;font-size:23px">${avatar()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>${esc(STORE.address)}</span></div></div>
-    <div class="lbl">CENTRALE</div>
-    <div class="net"><span class="ic" style="color:#fff">${I.net}</span><div class="sp"><b style="display:block;font-size:16px">${esc(STORE.netFull)}</b><span style="font-size:13px;color:var(--muted)">Les promos de votre centrale arrivent ici automatiquement</span></div></div>
-    ${STORE.support || STORE.phone || STORE.cgv ? `<div class="box" style="margin-top:10px">
-      ${STORE.support ? `<a class="li" href="mailto:${esc(STORE.support)}" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Support de l'enseigne</span><b style="font-size:15.5px">${esc(STORE.support)}</b></span></a>` : ""}
-      ${STORE.phone ? `<a class="li" href="tel:${esc(STORE.phone.replace(/[^+0-9]/g, ""))}" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Téléphone</span><b style="font-size:15.5px">${esc(STORE.phone)}</b></span></a>` : ""}
-      ${/^https:\/\//.test(STORE.cgv) ? `<a class="li" href="${esc(STORE.cgv)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span class="sp" style="font-size:15.5px">Conditions générales de vente</span></a>` : ""}
-    </div>` : ""}
-    <div class="lbl">COMPTES CONNECTÉS</div>
-    <div class="box">
-      <div class="li"><span class="ch fb" style="width:44px;height:44px">${I.fb}</span><div class="sp"><span style="font-size:13px;color:var(--muted)">Page Facebook</span><b style="display:block;font-size:15.5px">${esc(STORE.page)}</b></div><span class="pill ${S.fb === "ok" ? "p-ok" : "p-ko"}">${S.fb === "ok" ? "Connecté" : "À connecter"}</span></div>
-      <div class="li" style="flex-wrap:wrap"><span class="ch ig" style="width:44px;height:44px;border-radius:12px">${I.ig}</span><div class="sp"><span style="font-size:13px;color:var(--muted)">Instagram</span><b style="display:block;font-size:15.5px">${esc(STORE.insta)}</b></div><span class="pill ${S.ig === "ok" ? "p-ok" : "p-ko"}">${S.ig === "ok" ? "Connecté" : "À reconnecter"}</span>
-        ${S.ig === "broken" ? `<div class="btns" style="width:100%;margin-top:4px"><button class="btn-red" style="border-radius:13px;padding:13px" data-act="reconnect">Reconnecter</button><button style="background:#f3f1ed;border-radius:13px;font-weight:700" data-act="disconnect">Déconnecter</button></div>` : ""}</div>
+
+    <div class="box store-card">
+      <div class="li" style="border-bottom:none"><span class="av" style="width:56px;height:56px;font-size:23px">${avatar()}</span><div class="sp"><b style="display:block;font-size:17px">${esc(STORE.name)}</b><span style="font-size:13.5px;color:var(--muted)">${esc(STORE.postal && STORE.address.includes(STORE.postal) ? STORE.address : [STORE.address, [STORE.postal, STORE.city].filter(Boolean).join(" ")].filter(Boolean).join(", "))}</span></div></div>
+      <div class="infos">${line(I.user, who)}${line(I.phone, C.phone)}${line(I.mail, C.email)}${line(I.globe, C.web.replace(/^https?:\/\//, ""))}
+        ${who || C.phone || C.email || C.web ? "" : `<p class="small" style="margin:0">Ajoutez le contact principal, le téléphone, l'email et le site du magasin.</p>`}</div>
+      <button class="edit-btn" data-act="store-edit">${who || C.phone ? "Modifier les informations" : "Compléter les informations"}</button>
     </div>
+
+    ${STORE.hasNet ? `<p class="affil">${I.net}<span>Affilié à la centrale <b>${esc(STORE.net)}</b></span></p>` : ""}
+
     ${STORE.hasNet ? `<div class="lbl">PROMOS DE LA CENTRALE</div>
     <div class="box">
       <div class="li"><div class="sp"><span style="font-size:15.5px;display:block">Accepter automatiquement les promos de la centrale</span><span style="font-size:13px;color:var(--muted)">Activées dès réception, si votre centrale le permet. Les promos obligatoires restent à publier.</span></div><button class="tg ${STORE.autoAccept ? "on" : ""}" data-toggle="autoAccept" aria-label="Accepter automatiquement les promos de la centrale"></button></div>
     </div>` : ""}
+
     <div class="lbl">NOTIFICATIONS</div>
     <div class="box">
       <div class="li"><span class="sp" style="font-size:15.5px">Nouvelles promos de la centrale</span><button class="tg ${S.notifNet ? "on" : ""}" data-toggle="notifNet" aria-label="Nouvelles promos de la centrale"></button></div>
       <div class="li"><span class="sp" style="font-size:15.5px">Échecs de publication</span><button class="tg ${S.notifFail ? "on" : ""}" data-toggle="notifFail" aria-label="Échecs de publication"></button></div>
     </div>
+
+    <div class="lbl">COMPTES CONNECTÉS</div>
+    <div class="box">
+      ${acc("fb", "Facebook", `<span class="ch fb" style="width:44px;height:44px">${I.fb}</span>`, STORE.page)}
+      ${acc("ig", "Instagram", `<span class="ch ig" style="width:44px;height:44px;border-radius:12px">${I.ig}</span>`, STORE.insta)}
+      ${soon("TikTok", mono("TT", "#111"))}
+      ${soon("Google Business Profile", mono("G", "#4285f4"))}
+      ${soon("Pinterest", mono("P", "#e60023"))}
+    </div>
+
+    ${STORE.support || STORE.phone || STORE.cgv ? `<div class="lbl">SUPPORT</div>
+    <div class="box">
+      ${STORE.support ? `<a class="li" href="mailto:${esc(STORE.support)}" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Support de l'enseigne</span><b style="font-size:15.5px">${esc(STORE.support)}</b></span></a>` : ""}
+      ${STORE.phone ? `<a class="li" href="tel:${esc(STORE.phone.replace(/[^+0-9]/g, ""))}" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Téléphone</span><b style="font-size:15.5px">${esc(STORE.phone)}</b></span></a>` : ""}
+      ${/^https:\/\//.test(STORE.cgv) ? `<a class="li" href="${esc(STORE.cgv)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span class="sp" style="font-size:15.5px">Conditions générales de vente</span></a>` : ""}
+    </div>` : ""}
+
     <button class="out" data-act="logout">Se déconnecter</button>
     <p class="small" style="text-align:center;margin-top:18px">Démo : les publications Facebook et Instagram sont simulées.</p>
   </div>`;
+}
+// Fiche du magasin : coordonnées et contact principal.
+function sheetStore() {
+  const C = STORE.contact;
+  const f = (id, label, val, attrs = "") => `<div class="fl">${label}</div><input class="in" id="${id}" value="${esc(val)}" ${attrs}>`;
+  sheet(`<div class="grab"></div><h2>Informations du magasin</h2>
+    ${f("se-name", "NOM DU MAGASIN", STORE.name, 'maxlength="120"')}
+    ${f("se-addr", "ADRESSE", STORE.address, 'maxlength="200"')}
+    <div class="two"><div>${f("se-pc", "CODE POSTAL", STORE.postal, 'maxlength="10" inputmode="numeric"')}</div><div>${f("se-city", "VILLE", STORE.city, 'maxlength="80"')}</div></div>
+    <div class="two"><div>${f("se-first", "PRÉNOM DU CONTACT", C.first, 'maxlength="60" autocomplete="given-name"')}</div><div>${f("se-last", "NOM", C.last, 'maxlength="60" autocomplete="family-name"')}</div></div>
+    ${f("se-phone", "TÉLÉPHONE", C.phone, 'type="tel" maxlength="25" autocomplete="tel"')}
+    ${f("se-mail", "EMAIL", C.email, 'type="email" maxlength="200" autocomplete="email"')}
+    ${f("se-web", "SITE WEB", C.web, 'type="url" maxlength="300" placeholder="https://"')}
+    <button class="big-btn" id="se-go">Enregistrer</button><button class="txt-btn" data-close>Annuler</button>`);
+  $("#se-go").onclick = async () => {
+    const v = (id) => $("#" + id).value.trim();
+    let web = v("se-web"); if (web && !/^https?:\/\//.test(web)) web = "https://" + web;
+    const row = { name: v("se-name"), address: v("se-addr") || null, postal_code: v("se-pc") || null, city: v("se-city") || null,
+      contact_first_name: v("se-first") || null, contact_last_name: v("se-last") || null, contact_phone: v("se-phone") || null,
+      contact_email: v("se-mail").toLowerCase() || null, website: web || null };
+    if (row.name.length < 2) return toast("Indiquez le nom du magasin.");
+    if (row.contact_phone && !/^[0-9 +().-]{6,25}$/.test(row.contact_phone)) return toast("Numéro de téléphone invalide.");
+    if (row.contact_email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(row.contact_email)) return toast("Adresse email invalide.");
+    if (row.website && !/^https?:\/\/[^\s]+$/.test(row.website)) return toast("Adresse du site invalide.");
+    $("#se-go").disabled = true;
+    const { data, error } = await sb.from("stores").update(row).eq("id", STORE.id).select("id");
+    if (error || !data?.length) { $("#se-go").disabled = false; return toast(error ? errText(error) : "Modification refusée."); }
+    closeLayer(); await loadData(); render(true); toast("Informations enregistrées.");
+  };
+}
+// Activer / désactiver un compte : désactivé = connecté, mais on n'y publie plus.
+async function toggleChannel(key) {
+  const st = key === "fb" ? S.fb : S.ig, ch = key === "fb" ? "facebook" : "instagram";
+  if (st === "none") return toast("Connectez d'abord ce compte depuis votre espace (bientôt depuis l'app).");
+  const on = st === "off";
+  const { data, error } = await sb.from("social_accounts").update({ enabled: on }).eq("store_id", STORE.id).eq("channel", ch).select("channel");
+  if (error || !data?.length) return toast(error ? errText(error) : "Modification refusée.");
+  await loadData(); render(true);
+  toast(on ? `${key === "fb" ? "Facebook" : "Instagram"} réactivé.` : `${key === "fb" ? "Facebook" : "Instagram"} désactivé : vos promos n'y seront plus publiées.`);
 }
 
 /* ===================== Rendu ===================== */
@@ -818,7 +893,7 @@ $$("#nav button").forEach(b => b.onclick = () => go(b.dataset.tab));
 $("#fab").onclick = () => sheetChoose();
 
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-act],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-cat],[data-card]");
+  const t = e.target.closest("[data-go],[data-act],[data-chan-t],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-cat],[data-card]");
   if (!t || t.closest("#layer")) return;
   const ds = t.dataset;
   if (ds.go) { const [a, b] = ds.go.split(":"); go(a, b); }
@@ -835,6 +910,8 @@ document.addEventListener("click", (e) => {
   else if (ds.cat) { UI.cat = ds.cat; const pg = $("#pager"), k = CATS.findIndex(c => c.k === ds.cat); pg && pg.scrollTo({ left: k * pg.clientWidth, behavior: "smooth" }); $$("#cats button").forEach(b => b.classList.toggle("on", b.dataset.cat === ds.cat)); }
   else if (ds.card) openPromo(find(ds.card));
   else if (ds.act === "reconnect") reconnect();
+  else if (ds.act === "store-edit") sheetStore();
+  else if (ds.chanT) toggleChannel(ds.chanT);
   else if (ds.act === "disconnect") toast("Gardez Instagram connecté pour que vos promos y paraissent.");
   else if (ds.act === "logout") sb.auth.signOut().then(() => location.reload());
 });

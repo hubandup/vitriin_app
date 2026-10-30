@@ -20,6 +20,25 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-018 · App magasin : Réglages réorganisés
+- **Ordre** : 1. fiche du magasin (nom, adresse, contact principal, téléphone,
+  email, site web ; bouton « Compléter / Modifier les informations ») ·
+  2. une ligne « Affilié à la centrale X » · 3. promos de la centrale ·
+  4. notifications · 5. comptes connectés · 6. support de l'enseigne.
+- **Comptes connectés** : Facebook et Instagram avec interrupteur
+  activer / désactiver (désactivé = reste connecté mais n'y publie plus) ;
+  TikTok, Google Business Profile, Pinterest affichés « Bientôt disponible ·
+  Non connecté », interrupteur grisé.
+- **Base** : migration `20261030123854_store_contact_and_channel_toggle` :
+  `stores.contact_first_name / contact_last_name / contact_phone /
+  contact_email / website` (formats contrôlés), `social_accounts.enabled`
+  (seule colonne modifiable par le magasin sur cette table, politique dédiée).
+  Testé : le magasin ne modifie que ses comptes, et pas leur statut.
+- **À faire** : `meta-publish` doit aussi ignorer un compte désactivé (l'app
+  ne propose déjà plus de publier dessus).
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-018.
+
 ### MOD-017 · Codes utilisés rattachés au magasin où se trouve le client ; vue clients épurée
 - **Géolocalisation** : quand le client révèle le code, l'app lui demande sa
   position (il peut refuser). Le serveur rattache l'utilisation au magasin du
