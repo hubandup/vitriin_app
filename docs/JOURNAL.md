@@ -20,6 +20,16 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-042 · Manager > Utilisateurs > Gérants : pictos et « Modifier l'email » ; emails d'authentification en français
+- **Gérants des magasins** : actions en pictos (modifier l'email, renvoyer l'accès, bloquer / débloquer,
+  retirer). « Modifier » : saisie en ligne ; l'email du compte et du magasin est remplacé, un lien pour choisir
+  un mot de passe part à la nouvelle adresse. Refusé si l'adresse appartient à un autre compte.
+- **Fonction Edge** `manager-invite` v2 : action `change_email` (équipe Vitriin, gérant de ce magasin seulement).
+- **Emails Supabase Auth** : 6 modèles HTML en français dans `supabase/templates/` (invitation, lien de connexion,
+  confirmation, mot de passe, changement d'email, code), référencés dans `config.toml`. À coller dans le
+  Dashboard (pas d'outil pour les pousser d'ici).
+- **Retour arrière** : `git revert` ; redéployer `manager-invite` v1.
+
 ### MOD-041 · Manager > fiche client > Utilisateurs : gestion des comptes
 - **Quoi** : onglet « Utilisateurs ». Équipe de la centrale : ajouter (email + rôle, invitation si nouveau
   compte), changer le rôle, renvoyer l'accès, bloquer / débloquer, retirer. Gérants des magasins : recherche,

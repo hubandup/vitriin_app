@@ -7,6 +7,10 @@
 //   POST { network_id, store_id, email }                                 -> gérant d'un magasin de cette centrale
 //   - le compte existe : il est rattaché (son rôle centrale est mis à jour) ;
 //   - sinon : Supabase envoie l'email d'invitation, le compte est créé et rattaché.
+//   POST { action: "change_email", network_id, store_id, user_id, email }
+//                                                                        -> nouvel email du gérant d'un magasin de cette
+//      centrale : l'email du compte est remplacé, le magasin mis à jour, et un lien pour choisir un mot de passe part
+//      à la nouvelle adresse.
 //
 // La clé service_role reste dans la fonction : elle ne sort jamais vers le navigateur.
 
@@ -34,7 +38,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(req) });
   if (req.method !== "POST") return json(req, { error: "Méthode non autorisée." }, 405);
 
-  let body: { network_id?: unknown; store_id?: unknown; email?: unknown; role?: unknown };
+  let body: { action?: unknown; network_id?: unknown; store_id?: unknown; user_id?: unknown; email?: unknown; role?: unknown };
   try { body = await req.json(); } catch { return json(req, { error: "Requête invalide." }, 400); }
   const networkId = String(body.network_id ?? "");
   const storeId = body.store_id ? String(body.store_id) : null;
@@ -57,6 +61,27 @@ Deno.serve(async (req) => {
   } else {
     const { data: n } = await admin.from("networks").select("id").eq("id", networkId).maybeSingle();
     if (!n) return json(req, { error: "Centrale introuvable." }, 404);
+  }
+
+  // Changement d'email d'un gérant de magasin.
+  if (body.action === "change_email") {
+    const userId = String(body.user_id ?? "");
+    if (!storeId || !UUID.test(userId)) return json(req, { error: "Requête invalide." }, 400);
+    const { data: link } = await admin.from("store_members").select("user_id").eq("store_id", storeId).eq("user_id", userId).maybeSingle();
+    if (!link) return json(req, { error: "Ce compte n'est pas gérant de ce magasin." }, 400);
+    const { data: staffTarget } = await admin.from("platform_admins").select("user_id").eq("user_id", userId).maybeSingle();
+    if (staffTarget) return json(req, { error: "Un compte de l'équipe Vitriin ne se modifie pas d'ici." }, 400);
+    const { data: other } = await admin.rpc("user_id_by_email", { p_email: email });
+    if (other && other !== userId) return json(req, { error: "Cette adresse est déjà utilisée par un autre compte." }, 409);
+    const { error: e3 } = await admin.auth.admin.updateUserById(userId, { email, email_confirm: true });
+    if (e3) return json(req, { error: "Modification impossible : " + e3.message }, 502);
+    await admin.from("stores").update({ contact_email: email }).eq("id", storeId);
+    // Lien pour choisir un mot de passe, envoyé à la nouvelle adresse.
+    const origin = req.headers.get("Origin");
+    const base = origin && ORIGINS.includes(origin) ? origin : ORIGINS[0];
+    const anon = createClient(URL_, ANON, { auth: { persistSession: false } });
+    const { error: e4 } = await anon.auth.resetPasswordForEmail(email, { redirectTo: `${base}/magasin/?bienvenue=1` });
+    return json(req, { ok: true, changed: true, mailed: !e4 });
   }
 
   // 2. Compte existant, sinon invitation par email.

@@ -71,6 +71,7 @@ h2{font-size:18px;margin:0}h3{font-size:15px;margin:0 0 10px}
 .btn-p{border:none;border-radius:12px;background:var(--grad);color:#fff;font-weight:700;padding:10px 14px}
 .btn-s{border:1.5px solid var(--line);border-radius:12px;background:var(--card);font-weight:700;padding:8px 12px;text-decoration:none;display:inline-block;color:var(--ink)}
 .btn-s.sm{padding:5px 9px;font-size:12px;border-radius:9px}
+.ibs{display:inline-flex;gap:6px}.ib{width:34px;height:34px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);display:inline-flex;align-items:center;justify-content:center;color:var(--ink);cursor:pointer}.ib:hover{border-color:var(--p);color:var(--p)}
 button:disabled{opacity:.5;cursor:default}
 .pill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 8px;background:var(--t-ok);color:var(--ok);white-space:nowrap}
 .pill.err{background:var(--t-err);color:var(--err)}.pill.warn{background:var(--t-warn);color:var(--warn)}.pill.grey{background:var(--bg);color:var(--muted)}.pill.p{background:var(--t-p);color:var(--p)}
@@ -398,6 +399,21 @@ function userActs(u, to, storeId) {
     ${u.staff ? "" : `<button class="btn-s sm" data-ublock="${u.user_id}" data-on="${u.blocked ? 0 : 1}">${u.blocked ? "Débloquer" : "Bloquer"}</button>`}
     <button class="btn-s sm" data-urm="${u.user_id}" ${storeId ? `data-store="${storeId}"` : ""} style="color:var(--err)">Retirer</button>`;
 }
+const UI_IC = {
+  edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  mail: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  lock: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  unlock: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></svg>',
+  out: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>',
+};
+// Gérant de magasin : actions en pictos (modifier l'email, renvoyer l'accès, bloquer, retirer).
+function storeUserActs(u, storeId) {
+  const b = (attrs, ic, label, extra = "") => `<button class="ib" ${attrs} aria-label="${label}" title="${label}" ${extra}>${ic}</button>`;
+  return `<span class="ibs">${u.staff ? "" : b(`data-uedit="${u.user_id}" data-store="${storeId}"`, UI_IC.edit, "Modifier l'email")}
+    ${b(`data-reset="${esc(u.email)}" data-to="magasin"`, UI_IC.mail, "Renvoyer l'accès")}
+    ${u.staff ? "" : b(`data-ublock="${u.user_id}" data-on="${u.blocked ? 0 : 1}"`, u.blocked ? UI_IC.unlock : UI_IC.lock, u.blocked ? "Débloquer le compte" : "Bloquer le compte")}
+    ${b(`data-urm="${u.user_id}" data-store="${storeId}"`, UI_IC.out, "Retirer du magasin", 'style="color:var(--err)"')}</span>`;
+}
 function usersHtml(U, n) {
   if (!U) return `<p class="empty">Chargement…</p>`;
   const q = (UI.uq || "").toLowerCase();
@@ -411,7 +427,9 @@ function usersHtml(U, n) {
     <p class="sub" style="margin-top:10px">Propriétaire : tous les droits. Administrateur : gère magasins, équipe et promos. Éditeur : crée et envoie des promos. Bloquer coupe l'accès au compte partout, tout de suite.</p></div>
   <div class="card" style="margin-top:14px"><div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><h3 style="margin:0">Gérants des magasins</h3>
     <input class="in" id="u-q" type="search" placeholder="Rechercher un magasin ou un email" value="${esc(UI.uq || "")}" aria-label="Rechercher un magasin ou un email" style="width:auto;min-width:240px"></div>
-    <div class="tw" style="margin-top:10px"><table><tr><th>Magasin</th><th>Compte</th><th>Statut</th><th></th></tr>${st.map(x => x.users.length ? x.users.map((u, i) => `<tr><td>${i ? "" : `<b>${esc(x.store)}</b><small>${esc(x.city || "")}</small>`}</td><td>${esc(u.email)}</td><td>${userState(u)}</td><td class="r" style="white-space:nowrap">${userActs(u, "magasin", x.store_id)}</td></tr>`).join("")
+    <div class="tw" style="margin-top:10px"><table><tr><th>Magasin</th><th>Compte</th><th>Statut</th><th></th></tr>${st.map(x => x.users.length ? x.users.map((u, i) => `<tr><td>${i ? "" : `<b>${esc(x.store)}</b><small>${esc(x.city || "")}</small>`}</td><td>${UI.uedit === u.user_id + x.store_id
+        ? `<form class="row" data-uemail="${u.user_id}" data-store="${x.store_id}" style="gap:6px;flex-wrap:nowrap"><input class="in" type="email" required value="${esc(u.email)}" aria-label="Nouvel email du gérant" style="flex:1;min-width:180px"><button class="btn-p" style="padding:6px 10px;font-size:12px">Enregistrer</button><button type="button" class="btn-s sm" data-ucancel>Annuler</button></form><small style="color:var(--muted)">Un lien pour choisir un mot de passe part à la nouvelle adresse.</small>`
+        : esc(u.email)}</td><td>${userState(u)}</td><td class="r" style="white-space:nowrap">${storeUserActs(u, x.store_id)}</td></tr>`).join("")
       : `<tr><td><b>${esc(x.store)}</b><small>${esc(x.city || "")}</small></td><td colspan="2"><form class="row" data-sadd="${x.store_id}" style="gap:6px;flex-wrap:nowrap"><input class="in" type="email" required placeholder="email du gérant" value="${esc(x.contact_email || "")}" aria-label="Email du gérant de ${esc(x.store)}" style="flex:1;min-width:180px"><button class="btn-s sm">Inviter</button></form></td><td></td></tr>`).join("") || `<tr><td colspan="4" class="empty">Aucun magasin.</td></tr>`}</table></div></div>`;
 }
 async function managerInvite(body) {
@@ -599,6 +617,14 @@ function bind() {
   v.querySelectorAll("[data-urole]").forEach(sel => sel.onchange = () => act(null, async () => { try { await rpc("manager_user_set_role", { p_net: UI.net, p_user: sel.dataset.urole, p_role: sel.value }); } finally { await reloadUsers(); } return "Rôle mis à jour."; }));
   v.querySelectorAll("[data-ublock]").forEach(b => b.onclick = () => { const on = b.dataset.on === "1"; if (on && !confirm("Bloquer ce compte ? La personne est déconnectée et ne peut plus se connecter, sur toutes les centrales et magasins.")) return; act(b, async () => { await rpc("manager_user_block", { p_user: b.dataset.ublock, p_block: on }); await reloadUsers(); return on ? "Compte bloqué." : "Compte débloqué."; }); });
   v.querySelectorAll("[data-urm]").forEach(b => b.onclick = () => { if (!confirm(b.dataset.store ? "Retirer ce gérant du magasin ? Son compte n'est pas supprimé." : "Retirer cet utilisateur de la centrale ? Son compte n'est pas supprimé.")) return; act(b, async () => { await rpc("manager_user_remove", { p_net: UI.net, p_user: b.dataset.urm, p_store: b.dataset.store || null }); await reloadUsers(); return "Accès retiré."; }); });
+  v.querySelectorAll("[data-uedit]").forEach(b => b.onclick = () => { UI.uedit = b.dataset.uedit + b.dataset.store; $("view").innerHTML = vNet(); bind(); v.querySelector("[data-uemail] input")?.focus(); });
+  v.querySelectorAll("[data-ucancel]").forEach(b => b.onclick = () => { UI.uedit = null; $("view").innerHTML = vNet(); bind(); });
+  v.querySelectorAll("[data-uemail]").forEach(f => f.onsubmit = (e) => { e.preventDefault(); const email = f.querySelector("input").value.trim().toLowerCase(); act(e.submitter, async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/manager-invite`, { method: "POST", headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: "Bearer " + session.access_token }, body: JSON.stringify({ action: "change_email", network_id: UI.net, store_id: f.dataset.store, user_id: f.dataset.uemail, email }) });
+    const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || "Modification impossible.");
+    UI.uedit = null; await reloadUsers(); return j.mailed ? `Email modifié : lien envoyé à ${email}.` : "Email modifié, mais l'envoi du lien a échoué : utilisez « Renvoyer l'accès ».";
+  }); });
   if ($("u-q")) $("u-q").oninput = (e) => { UI.uq = e.target.value; const pos = e.target.selectionStart; $("view").innerHTML = vNet(); bind(); $("u-q").focus(); $("u-q").setSelectionRange(pos, pos); };
   // Intégration
   v.querySelectorAll("[data-onb]").forEach(c => c.onclick = () => act(null, async () => { const done = c.dataset.done !== "1"; C.netOnb = await rpc("manager_onboarding_toggle", { p_net: UI.net, p_step: c.dataset.onb, p_done: done }); $("view").innerHTML = vNet(); bind(); return done ? "Étape validée." : "Étape remise à faire."; }));

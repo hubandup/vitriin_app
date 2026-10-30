@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Confirmez votre adresse</title></head>
+<body style="margin:0;padding:0;background:#f6f3ee;font-family:Helvetica,Arial,sans-serif;color:#2d2d2d">
+<span style="display:none;max-height:0;overflow:hidden;opacity:0">Confirmez votre adresse email pour Vitriin.</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f3ee;padding:32px 12px">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:20px;overflow:hidden">
+<tr><td style="background:#e5087e;background-image:linear-gradient(100deg,#e5087e,#951b81);padding:22px 28px">
+<span style="font-size:24px;font-weight:bold;color:#ffffff;letter-spacing:.5px">Vitriin</span></td></tr>
+<tr><td style="padding:30px 28px 8px">
+<h1 style="margin:0 0 14px;font-size:22px;line-height:1.3;color:#2d2d2d">Confirmez votre adresse email</h1>
+<p style="margin:0 0 12px;font-size:15px;line-height:1.6">Merci de votre inscription sur Vitriin. Confirmez votre adresse email pour activer votre compte.</p>
+</td></tr>
+<tr><td style="padding:10px 28px 8px" align="left">
+<a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#e5087e;color:#ffffff;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 26px;border-radius:12px">Confirmer mon adresse</a>
+</td></tr>
+<tr><td style="padding:16px 28px 28px;font-size:13px;line-height:1.55;color:#7b766f">
+Si vous n’êtes pas à l’origine de cette inscription, ignorez cet email.
+<p style="margin:12px 0 0">Le bouton ne fonctionne pas ? Copiez ce lien dans votre navigateur :<br><span style="word-break:break-all;color:#951b81">{{ .ConfirmationURL }}</span></p>
+</td></tr>
+</table>
+<p style="max-width:520px;margin:16px auto 0;font-size:12px;line-height:1.5;color:#a8a29b;text-align:center">Vitriin, une marque de Hub &amp; Up · 71 chemin du Moulin Carron, 69570 Dardilly<br>Vous recevez cet email car une action a été demandée avec votre adresse sur Vitriin.</p>
+</td></tr></table>
+</body></html>
