@@ -20,6 +20,13 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-028 · vitriin.fr : compteur de visites installé
+- **Quoi** : script du Manager (onglet Site web) ajouté au site Lovable
+  « Vitrine Locale » dans `src/routes/__root.tsx` (exécuté une fois, côté
+  navigateur), commit Lovable `5a3d74f`, site republié.
+- **Retour arrière** : dans Lovable, revenir à la version précédente de
+  `src/routes/__root.tsx` puis republier.
+
 ### MOD-027 · Manager : navigation en barre latérale
 - **Quoi** : les onglets du haut deviennent une barre latérale, comme dans
   l'Espace Centrale, regroupée en Pilotage (Accueil, Clients, Magasins),
