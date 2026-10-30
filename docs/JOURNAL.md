@@ -20,6 +20,23 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-031 · Manager : démos au nom d'un prospect
+- **Quoi** : Manager > Démos > « Démos au nom d'un prospect ». On saisit le
+  nom de l'enseigne, le secteur et (facultatif) son logo ; le Manager génère
+  une démo complète à ce nom (centrale, 20 magasins « Enseigne Ville »,
+  promos du secteur, statistiques, codes utilisés) et propose de l'activer.
+  Chaque démo prospect a ses boutons Utiliser / Ouvrir / Supprimer.
+  30 démos prospects au plus.
+- **Technique** : générateur interne `demo_build_network` dérivé de
+  `manager_build_demo` (nom, logo, drapeau `settings.prospect`) ;
+  `manager_prospect_demo`, `manager_delete_demo` (démos prospects
+  uniquement, bascule sur Chausselandia si elle était active) ; la
+  réinitialisation d'une démo sectorielle ne touche jamais les démos
+  prospects. Logo envoyé dans `promo-media/demo/`, dépôt réservé à
+  l'équipe Vitriin (policy `promo_media_insert_platform_admin`).
+- **Fichiers** : `manager/index.html`, migration `20261030155446_manager_prospect_demos`.
+- **Retour arrière** : `git revert` ; supprimer les démos prospects depuis le Manager.
+
 ### MOD-030 · Support : messages en direct et délai de réponse affiché
 - **Quoi** : une conversation ouverte se met à jour toute seule toutes les
   4 secondes (app magasin, Espace Centrale, Manager), sans perdre le message

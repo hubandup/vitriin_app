@@ -51,6 +51,8 @@ h2{font-size:18px;margin:0}h3{font-size:15px;margin:0 0 10px}
 .up{color:var(--ok)}.down{color:var(--err)}
 .two{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px}
 @media (max-width:860px){.two{grid-template-columns:1fr}}
+.pd-form{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:12px;align-items:end}
+@media (max-width:860px){.pd-form{grid-template-columns:1fr}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
 .card.on{border-color:var(--p);box-shadow:0 0 0 2px rgba(229,8,126,.15)}
 .chart{display:flex;align-items:flex-end;gap:3px;height:120px;margin-top:8px}
@@ -435,7 +437,7 @@ function vStores() {
 
 /* ---------- Démos ---------- */
 function demoCard(sec) {
-  const n = C.ov.networks.find(x => x.is_demo && x.demo_sector === sec.key);
+  const n = C.ov.networks.find(x => x.is_demo && !x.prospect && x.demo_sector === sec.key);
   const st = n ? `<div class="stats"><div><b>${nf(n.stores)}</b><span>magasins</span></div><div><b>${nf(n.connected)}</b><span>connectés</span></div><div><b>${nf(n.promos)}</b><span>promos</span></div><div><b>${nf(n.published)}</b><span>publiées</span></div></div>` : `<p class="sub" style="margin:14px 0">Démo pas encore générée.</p>`;
   return `<div class="card ${n?.active ? "on" : ""}">
     <div class="row" style="justify-content:space-between"><span class="lbl">${esc(sec.label)}</span>${n?.active ? `<span class="pill">Démo active</span>` : ""}</div>
@@ -446,9 +448,26 @@ function demoCard(sec) {
       ${sec.generated ? `<button class="btn-s" data-build="${sec.key}" data-has="${n ? 1 : 0}">${n ? "Réinitialiser" : "Générer"}</button>` : ""}
     </div></div>`;
 }
+function prospectCard(n) {
+  const sec = C.ov.sectors.find(x => x.key === n.demo_sector);
+  return `<div class="card ${n.active ? "on" : ""}">
+    <div class="row" style="justify-content:space-between"><span class="lbl">Prospect · ${esc(sec?.label || n.demo_sector)}</span>${n.active ? `<span class="pill">Démo active</span>` : ""}</div>
+    <div class="row" style="gap:12px;margin-top:10px;flex-wrap:nowrap">${logo(n)}<h3 style="margin:0">${esc(n.name)}</h3></div>
+    <div class="stats"><div><b>${nf(n.stores)}</b><span>magasins</span></div><div><b>${nf(n.connected)}</b><span>connectés</span></div><div><b>${nf(n.promos)}</b><span>promos</span></div><div><b>${nf(n.published)}</b><span>publiées</span></div></div>
+    <div class="row">${n.active ? `<a class="btn-s" href="/centrale/" target="_blank" rel="noopener">Ouvrir la centrale</a><a class="btn-s" href="/magasin/" target="_blank" rel="noopener">Ouvrir l'app magasin</a>` : `<button class="btn-p" data-use="${n.id}">Utiliser cette démo</button>`}
+      <button class="btn-s" data-del-demo="${n.id}" data-name="${esc(n.name)}">Supprimer</button></div></div>`;
+}
 function vDemos() {
   return `<div class="bar"><div><h2>Démos</h2><p class="sub">Choisissez la démo à montrer : votre centrale et le compte magasin de démonstration basculent dessus. « Réinitialiser » remet les dates et les chiffres à jour.</p></div></div>
   <div class="grid">${C.ov.sectors.map(demoCard).join("")}</div>
+  <div class="bar" style="margin-top:26px"><div><h2>Démos au nom d'un prospect</h2><p class="sub">Le prospect se voit dans l'outil dès le rendez-vous : son nom sur la centrale et sur les 20 magasins, son logo, des promos de son secteur.</p></div></div>
+  <div class="card"><div class="pd-form">
+    <label class="f" style="margin:0">Nom de l'enseigne<input class="in" id="pd-name" maxlength="60" placeholder="Ex : Jardival" style="margin-top:6px"></label>
+    <label class="f" style="margin:0">Secteur<select class="in" id="pd-sector" style="margin-top:6px;width:100%">${C.ov.sectors.filter(x => x.generated).map(x => `<option value="${x.key}">${esc(x.label)}</option>`).join("")}</select></label>
+    <label class="f" style="margin:0">Logo (facultatif)<input class="in" id="pd-logo" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="margin-top:6px;padding:8px"></label>
+    <button class="btn-p" id="pd-go">Créer la démo</button></div>
+    <p class="sub" style="margin-top:10px">Sans logo, l'initiale de l'enseigne s'affiche. Comptez une dizaine de secondes de génération.</p></div>
+  ${C.ov.networks.some(x => x.prospect) ? `<div class="grid" style="margin-top:14px">${C.ov.networks.filter(x => x.prospect).map(prospectCard).join("")}</div>` : ""}
   <div class="help" style="margin-top:14px"><b>Pour la présenter :</b> centrale sur <b>app.vitriin.co/centrale</b> avec votre compte ; app magasin sur <b>app.vitriin.co/magasin</b> avec magasin.demo@vitriin.co. Rechargez les onglets déjà ouverts.</div>`;
 }
 
@@ -542,6 +561,29 @@ function bind() {
   v.querySelectorAll("[data-inv]").forEach(b => b.onclick = () => act(b, async () => { const m = await invite([b.dataset.inv], C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }));
   if ($("inv-all")) $("inv-all").onclick = () => { const ids = C.net.stores.filter(s => !s.activated && s.contact_email).map(s => s.id); if (!confirm(`Envoyer l'invitation à ${ids.length} gérant(s) ?`)) return; act($("inv-all"), async () => { const m = await invite(ids.slice(0, 200), C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }); };
   v.querySelectorAll("[data-use]").forEach(b => b.onclick = () => act(b, async () => { await rpc("manager_activate_demo", { p_network_id: b.dataset.use }); await need("demos"); $("view").innerHTML = vDemos(); bind(); return "Démo activée. Rechargez la centrale et l'app magasin si elles sont ouvertes."; }));
+  if ($("pd-go")) $("pd-go").onclick = () => {
+    const name = $("pd-name").value.trim(), sector = $("pd-sector").value, file = $("pd-logo").files[0];
+    if (name.length < 2) return toast("Indiquez le nom de l'enseigne.");
+    if (file && file.size > 2e6) return toast("Logo trop lourd (2 Mo maximum).");
+    $("pd-go").textContent = "Génération…";
+    act($("pd-go"), async () => {
+      let url = null;
+      if (file) {
+        const ext = { "image/png": "png", "image/jpeg": "jpg", "image/svg+xml": "svg", "image/webp": "webp" }[file.type] || "png";
+        const path = `demo/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error } = await sb.storage.from("promo-media").upload(path, file, { contentType: file.type, upsert: false });
+        if (error) throw error;
+        url = sb.storage.from("promo-media").getPublicUrl(path).data.publicUrl;
+      }
+      const id = await rpc("manager_prospect_demo", { p_sector: sector, p_brand: name, p_logo: url });
+      if (confirm(`Démo « ${name} » prête. L'activer maintenant ?`)) await rpc("manager_activate_demo", { p_network_id: id });
+      await need("demos"); $("view").innerHTML = vDemos(); bind(); return `Démo « ${name} » créée.`;
+    }).finally(() => { if ($("pd-go")) $("pd-go").textContent = "Créer la démo"; });
+  };
+  v.querySelectorAll("[data-del-demo]").forEach(b => b.onclick = () => {
+    if (!confirm(`Supprimer la démo « ${b.dataset.name} » ? Ses magasins, promos et chiffres seront effacés.`)) return;
+    act(b, async () => { await rpc("manager_delete_demo", { p_id: b.dataset.delDemo }); await need("demos"); $("view").innerHTML = vDemos(); bind(); return "Démo supprimée."; });
+  });
   v.querySelectorAll("[data-build]").forEach(b => b.onclick = () => {
     if (b.dataset.has === "1" && !confirm("Réinitialiser cette démo ? Ses magasins, promos et chiffres seront recréés.")) return;
     b.textContent = "Génération…";
