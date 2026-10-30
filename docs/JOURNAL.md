@@ -20,6 +20,14 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-024 · App magasin : Stats sans « Activité récente »
+- **Quoi** : la section « Activité récente » faisait doublon avec « Statut par
+  promo » ; elle est retirée (fonction `activity`, styles `.act`, champs
+  `recAt` / `schedSetAt` et utilitaire `ago` devenus inutiles). Toucher une
+  ligne de « Statut par promo » ouvre toujours toutes les stats de la promo.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-024.
+
 ### MOD-023 · Vitriin Manager (super admin) et démos sectorielles
 - **Quoi** : nouvelle page `app.vitriin.co/manager`, réservée à l'équipe Vitriin
   (au départ : charles@hubandup.com). Bloc « Démos » : une carte par secteur

@@ -92,12 +92,6 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .meta{font-size:12.5px;color:var(--muted);margin-left:6px}
 
 /* ---- Activité ---- */
-.act{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
-.act:last-child{border-bottom:none}
-.act .th{width:44px;height:44px;border-radius:11px;object-fit:cover;flex:none;background:var(--bg)}
-.act b{font-size:14.5px}
-.act .ln{font-size:13.5px;color:var(--muted);margin-top:4px;line-height:1.35}
-.act .when{font-size:12px;color:var(--faint);white-space:nowrap}
 .dot{display:flex;align-items:flex-start;gap:7px;font-size:13.5px;font-weight:600;margin-top:4px;line-height:1.35}
 .dot::before{content:"";width:7px;height:7px;border-radius:50%;margin-top:6px;flex:none;background:currentColor}
 .d-ok{color:var(--teal)}.d-ko{color:var(--red)}
@@ -408,7 +402,6 @@ const fmtShort = (t) => new Date(t).toLocaleDateString("fr-FR", { day: "numeric"
 const fmtLong = (t) => new Date(t).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
 const fmtDay = (t) => new Date(t).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
 const eur = (n) => new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) + " €";
-const ago = (t) => { const m = Math.round((Date.now() - t) / 6e4); if (m < 1) return "à l'instant"; if (m < 60) return `il y a ${m} min`; const h = Math.round(m / 60); if (h < 24) return `il y a ${h} h`; const j = Math.round(h / 24); return j === 1 ? "hier" : `il y a ${j} j`; };
 const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 let toastT; function toast(t) { $(".toast")?.remove(); const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); clearTimeout(toastT); toastT = setTimeout(() => el.remove(), 2600); }
 const IMG = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=75`;
@@ -511,10 +504,10 @@ function mapRow(row, accounts) {
     formats: Array.isArray(det.formats) ? det.formats : [], mech: pr.mechanic, text: row.overrides?.text || pr.description || "",
     type: pr.promo_type, orig: det.orig ?? null, val: det.val ?? null, xy: det.xy || [2, 1], sub: det.sub || "", cond: det.sub || "",
     start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, deadline: start > Date.now() ? start : end,
-    status, ch, chAt, stats, recAt: new Date(row.created_at).getTime(),
+    status, ch, chAt, stats,
     pubAt: done.length ? Math.max(...done.map(x => new Date(x.published_at).getTime())) : null,
     schedAt: sched ? new Date(sched.getFullYear(), sched.getMonth(), sched.getDate()).getTime() : null,
-    schedTime: sched ? sched.toTimeString().slice(0, 5) : null, schedSetAt: planned ? new Date(row.activated_at || row.created_at).getTime() : null,
+    schedTime: sched ? sched.toTimeString().slice(0, 5) : null,
     fav: stats ? (stats.fb?.[2] || 0) + (stats.ig?.[2] || 0) : 0,
     liked: !!prefs.liked[row.id], saved: !!prefs.saved[row.id],
   };
@@ -690,23 +683,6 @@ function viewHome() {
     <button class="week" data-go="stats"><span class="sp"><b>7 derniers jours</b><span>${nf(sum(1))} vues · ${nf(S.codes7 || 0)} code${(S.codes7 || 0) > 1 ? "s" : ""} utilisé${(S.codes7 || 0) > 1 ? "s" : ""} en magasin</span></span><span class="chev">${I.chev}</span></button>
   </div>`;
 }
-function activity() {
-  const ev = [];
-  S.promos.forEach(p => {
-    if (p.pubAt) ev.push({ t: p.pubAt, p, kind: "pub" });
-    if (p.src === "net" && p.status !== "published" && p.recAt) ev.push({ t: p.recAt, p, kind: "rec" });
-    if (p.status === "scheduled") ev.push({ t: p.schedSetAt || Date.now(), p, kind: "sch" });
-  });
-  ev.sort((a, b) => b.t - a.t);
-  return ev.slice(0, 7).map(({ t, p, kind }) => {
-    let lines = "";
-    if (kind === "pub") lines = `<div class="row" style="gap:8px;margin-top:7px">${chanIcons(p)}<span class="sp"></span>${p.ch.ig === "ko" && S.ig === "broken" ? '<button class="btn-red" style="padding:7px 12px" data-act="reconnect">Reconnecter</button>' : ""}</div>`;
-    else if (kind === "sch") lines = `<div class="ln">Programmée le ${fmtDay(p.schedAt)} à ${p.schedTime} · Facebook${S.ig === "ok" ? " et Instagram" : ""}</div>`;
-    else lines = `<div class="ln">Reçue de la centrale · ${p.status === "declined" ? "refusée" : p.status === "active" ? "activée, à publier" : p.mandatory ? `obligatoire, à publier avant le ${fmtLong(p.deadline)}` : "à valider"}</div>`;
-    return `<div class="act tap" data-stat="${p.id}">${p.img ? `<img class="th" src="${esc(p.img)}" alt="" loading="lazy">` : '<div class="th"></div>'}<div class="sp"><div class="row" style="gap:8px;align-items:flex-start"><b class="sp">« ${esc(p.title)} »</b>${tagSrc(p)}<span class="when">${ago(t)}</span></div>${lines}</div></div>`;
-  }).join("") || '<div class="empty">Aucune activité pour l\'instant.</div>';
-}
-
 // Catégories de la page Promos, chacune avec sa couleur.
 const CATS = [
   { k: "todo", l: "À traiter", c: "#e5087e" }, { k: "live", l: "En cours", c: "#0c9875" }, { k: "soon", l: "À venir", c: "#951b81" },
@@ -804,8 +780,6 @@ function viewStats() {
     <div class="eng"><span>Taux d'engagement</span><span class="num">${eng} %</span></div>
     <div class="legend"><span class="f">Facebook</span><span class="i">Instagram</span><span>· source : Meta</span></div>
     ${fails.length ? `<div class="sec" style="margin-bottom:0"><h2 style="font-size:17px;color:var(--red)">À résoudre</h2></div>${fails.map(p => `<div class="resolve"><p class="sp"><b>« ${esc(p.title)} »</b>Échec Instagram : reconnecter le compte</p>${S.ig === "broken" ? '<button class="btn-red" data-act="reconnect">Reconnecter</button>' : `<button class="btn-red" data-retry="${p.id}">Republier</button>`}</div>`).join("")}` : ""}
-    <div class="sec"><h2 style="font-size:17px">Activité récente</h2></div>
-    <div>${activity()}</div>
     <div class="sec"><h2 style="font-size:17px">Statut par promo</h2></div>
     ${pubs.map(p => { const s = (i) => (p.stats?.fb?.[i] || 0) + (p.stats?.ig?.[i] || 0); return `<div class="sp-row tap" data-stat="${p.id}"><img onerror="this.style.visibility='hidden'" src="${esc(p.img)}" alt="" loading="lazy"><div class="sp"><div class="row" style="gap:8px"><b class="sp" style="font-size:15px">${esc(p.title)}</b>${tagSrc(p)}</div><div style="margin-top:6px">${chanIcons(p)}</div>${p.stats ? `<div class="mini"><div><b>${nf(s(0))}</b>portée</div><div><b>${nf(s(1))}</b>vues</div><div><b>${nf(s(2))}</b>interactions</div><div><b>${nf(s(3))}</b>commentaires</div></div>` : '<div class="small">Statistiques disponibles dans quelques heures.</div>'}</div></div>`; }).join("")}
   </div>`;
