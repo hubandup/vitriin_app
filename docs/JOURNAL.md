@@ -20,6 +20,17 @@ Repères :
 
 ## 2026-10-30
 
+### BUG-006 · Médiathèque du magasin figée sur les images Chausselandia
+- **Symptôme** : dans une promo, « Médiathèque » proposait toujours les mêmes
+  photos de chaussures, quelle que soit l'enseigne.
+- **Cause** : liste d'images de démo écrite en dur dans l'app (`LIB`).
+- **Correction** : la médiathèque affiche les visuels des promos réellement
+  envoyées par la centrale du magasin (champ `netMedia`, visuels d'origine,
+  plus récents d'abord, sans doublon, https uniquement). Message si la
+  centrale n'a encore rien partagé. Constantes `LIB` et `IMG` supprimées.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit BUG-006.
+
 ### MOD-024 · App magasin : Stats sans « Activité récente »
 - **Quoi** : la section « Activité récente » faisait doublon avec « Statut par
   promo » ; elle est retirée (fonction `activity`, styles `.act`, champs

@@ -404,7 +404,6 @@ const fmtDay = (t) => new Date(t).toLocaleDateString("fr-FR", { weekday: "short"
 const eur = (n) => new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) + " €";
 const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 let toastT; function toast(t) { $(".toast")?.remove(); const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); clearTimeout(toastT); toastT = setTimeout(() => el.remove(), 2600); }
-const IMG = (id) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=75`;
 
 /* ===================== Icônes ===================== */
 const I = {
@@ -448,17 +447,6 @@ const TYPES = [
   { k: "free_with_condition", l: "Produit offert", i: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9Z"/></svg>' },
 ];
 
-/* ===================== Données de démo ===================== */
-const LIB = {
-  lacing: IMG("photo-1597892657493-6847b9640bac"),
-  phantom: IMG("photo-1606107557195-0e29a4b5b4aa"),
-  air: IMG("photo-1600185365926-3a2ce3cdb9eb"),
-  trail: IMG("photo-1560769629-975ec94e6a86"),
-  bf: IMG("photo-1758506971683-c080e6f16ce9"),
-  socks: IMG("photo-1571008887538-b36bb32f4571"),
-  red: IMG("photo-1542291026-7eec264c27ff"),
-  grey: IMG("photo-1491553895911-0055eca6402d"),
-};
 const HOUR = 36e5;
 
 /* ===================== Données réelles (Supabase) ===================== */
@@ -501,6 +489,8 @@ function mapRow(row, accounts) {
     suspended: !!row.suspended, hidden: !!row.hidden, ov: row.overrides || {}, base: { title: pr.title, text: pr.description || "", img: pr.media_url },
     kind: pr.promo_type ? "promo" : "post", title: row.overrides?.title || pr.title, img: row.overrides?.media_url || pr.media_url,
     media: row.overrides?.media_url ? [row.overrides.media_url] : Array.isArray(det.media) && det.media.length ? det.media : (pr.media_url ? [pr.media_url] : []),
+    // Visuels d'origine de la centrale : alimentent la médiathèque du magasin.
+    netMedia: pr.created_by_network_id ? (Array.isArray(det.media) && det.media.length ? det.media : (pr.media_url ? [pr.media_url] : [])) : [],
     formats: Array.isArray(det.formats) ? det.formats : [], mech: pr.mechanic, text: row.overrides?.text || pr.description || "",
     type: pr.promo_type, orig: det.orig ?? null, val: det.val ?? null, xy: det.xy || [2, 1], sub: det.sub || "", cond: det.sub || "",
     start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, deadline: start > Date.now() ? start : end,
@@ -1293,8 +1283,10 @@ function typeFields(F) {
 const iso = (t) => { const x = new Date(t); return new Date(x.getTime() - x.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
 function pickMedia(src, done) {
   if (src === "lib") {
-    const items = [LIB.air, LIB.trail, LIB.bf, LIB.phantom, LIB.red, LIB.grey];
+    // Les visuels des promos envoyées par la centrale, les plus récents d'abord, sans doublon.
+    const items = [...new Set([...S.promos, ...(S.trash || [])].sort((x, y) => y.start - x.start).flatMap(p => p.netMedia || []).filter(u => /^https:\/\//.test(u)))].slice(0, 60);
     sheet(`<div class="grab"></div><h2>Médiathèque de la centrale</h2><p class="small" style="font-size:14px;margin-top:4px">Visuels partagés par ${esc(STORE.net)}, prêts à l'emploi.</p>
+      ${items.length ? "" : `<div class="empty" style="margin-top:14px">Votre centrale n'a pas encore partagé de visuel.</div>`}
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">${items.map((s, k) => `<button data-lib="${k}" style="aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--bg)"><img onerror="this.style.visibility='hidden'" src="${esc(s)}" alt="" style="width:100%;height:100%;object-fit:cover"></button>`).join("")}</div>
       <button class="txt-btn" data-close>Annuler</button>`, true);
     $$("[data-lib]").forEach(b => b.onclick = () => { const s = items[+b.dataset.lib]; closeSheetOnly(); done(s); });
