@@ -20,6 +20,16 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-025 · Manager : logo des enseignes de démo
+- **Quoi** : chaque carte de démo affiche le logo de l'enseigne (sinon son
+  initiale). Logos créés pour Flamme & Foyer et Jardins & Saisons
+  (`public/demo/*.svg`, servis par app.vitriin.co), enregistrés dans
+  `demo_sectors.logo_url` et repris à chaque génération ; ils apparaissent
+  aussi dans la centrale et l'app magasin de ces démos.
+- **Fichiers** : `manager/index.html`, `public/demo/`, migration
+  `20261030143000_manager_demos_logos`.
+- **Retour arrière** : `git revert` du commit ; `update networks set logo_url = null` sur les démos.
+
 ### BUG-006 · Médiathèque du magasin figée sur les images Chausselandia
 - **Symptôme** : dans une promo, « Médiathèque » proposait toujours les mêmes
   photos de chaussures, quelle que soit l'enseigne.

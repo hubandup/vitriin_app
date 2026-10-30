@@ -23,7 +23,8 @@ h2{font-size:17px;margin:28px 0 4px}.sub{color:var(--muted);font-size:13px;margi
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
 .card.on{border-color:var(--p);box-shadow:0 0 0 2px rgba(229,8,126,.15)}
-.card h3{margin:0;font-size:16px}.card .lbl{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.card h3{margin:0;font-size:16px}
+.logo{width:48px;height:48px;border-radius:12px;object-fit:cover;flex:none;background:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:var(--muted)}.card .lbl{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:14px 0}
 .stats div{background:var(--bg);border-radius:10px;padding:8px 6px;text-align:center}.stats b{display:block;font-size:16px}.stats span{font-size:11px;color:var(--muted)}
 .row{display:flex;gap:8px;flex-wrap:wrap}
@@ -94,7 +95,7 @@ function demoCard(sec) {
   const st = n ? `<div class="stats"><div><b>${nf(n.stores)}</b><span>magasins</span></div><div><b>${nf(n.connected)}</b><span>connectés</span></div><div><b>${nf(n.promos)}</b><span>promos</span></div><div><b>${nf(n.published)}</b><span>publiées</span></div></div>` : `<p class="sub" style="margin:14px 0">Démo pas encore générée.</p>`;
   return `<div class="card ${n?.active ? "on" : ""}">
     <div class="row" style="justify-content:space-between;align-items:center"><span class="lbl">${esc(sec.label)}</span>${n?.active ? `<span class="pill">Démo active</span>` : ""}</div>
-    <h3 style="margin-top:6px">${esc(n?.name || sec.brand)}</h3>${st}
+    <div class="row" style="align-items:center;gap:12px;margin-top:10px">${n?.logo_url ? `<img class="logo" src="${esc(n.logo_url)}" alt="">` : `<span class="logo">${esc((n?.name || sec.brand).slice(0, 1))}</span>`}<h3>${esc(n?.name || sec.brand)}</h3></div>${st}
     <div class="row">
       ${n && !n.active ? `<button class="btn-p" data-use="${n.id}">Utiliser cette démo</button>` : ""}
       ${n?.active ? `<a class="btn-s" href="/centrale/" target="_blank" rel="noopener">Ouvrir la centrale</a><a class="btn-s" href="/magasin/" target="_blank" rel="noopener">Ouvrir l'app magasin</a>` : ""}
