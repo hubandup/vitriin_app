@@ -188,6 +188,14 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .tag button{margin-left:8px;background:var(--grad);color:#fff;border:none;font-weight:700;font-size:12.5px;padding:8px 13px;border-radius:9px}
 
 /* Modal */
+.help-btn{display:flex;align-items:center;gap:10px;margin:14px 6px 0;padding:9px 10px;border:1px dashed var(--line);border-radius:11px;background:transparent;color:var(--muted);font-weight:600;font-size:13px;text-align:left}
+.help-btn:hover{color:var(--p);border-color:var(--p)}.help-btn em{font-style:normal;margin-left:auto;background:var(--p);color:#fff;font-size:11px;font-weight:700;border-radius:9px;padding:1px 7px}
+.tk-list button{display:flex;width:100%;align-items:center;gap:10px;text-align:left;border:none;border-bottom:1px solid var(--line);background:none;padding:11px 2px;color:var(--ink)}
+.tk-list button:last-child{border-bottom:none}.tk-list small{display:block;color:var(--muted);font-size:12px}
+.tk-tag{margin-left:auto;font-size:11.5px;font-weight:700;color:#fff;background:var(--p);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.tk-msg{border-radius:13px;padding:10px 12px;margin-top:8px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;max-width:88%}
+.tk-msg small{display:block;font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:3px}
+.tk-msg.client{background:var(--bg);margin-left:auto}.tk-msg.staff{background:var(--rose)}
 .ov{position:fixed;inset:0;background:rgba(45,45,45,.38);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:20}
 .modal{background:var(--card);border-radius:20px;width:100%;max-width:980px;box-shadow:0 24px 60px rgba(0,0,0,.18)}
 .modal.sm{max-width:560px}
@@ -415,6 +423,7 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
     <nav class="nav" id="nav2">
       <button data-v="settings"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg><span class="lbl">Paramètres</span></button>
     </nav>
+    <button class="help-btn" id="help-go"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg><span class="lbl">Support Vitriin</span><em id="help-new" class="hidden">1</em></button>
     <div style="flex:1"></div>
     <div class="bulk"><b>Importer en masse</b><p>Excel, visuels ou via ton PIM.</p><button id="bulk-go">Importer</button></div>
     <div class="me"><span class="av" id="me-av"></span><div><b id="me-mail"></b><button id="logout">Se déconnecter</button></div></div>
@@ -1480,6 +1489,61 @@ function bindView(D) {
 $("new-promo").onclick = () => openPromo();
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => { show("m-promo", false); show("m-invite", false); show("m-pimp", false); });
 
+/* ---------- Support Vitriin ---------- */
+const TK_TOPICS = [["social", "Connexion des magasins à Facebook / Instagram"], ["publication", "Publication"], ["promo", "Créer ou envoyer une promo"], ["account", "Comptes et accès"], ["billing", "Facturation"], ["other", "Autre"]];
+const TK_ST = { new: "Envoyée", open: "En cours", waiting: "Réponse reçue", resolved: "Résolue" };
+function helpModal(inner) {
+  $("m-help")?.remove();
+  const ov = document.createElement("div"); ov.className = "ov"; ov.id = "m-help";
+  ov.innerHTML = `<div class="modal sm"><div class="mh"><div><h2>Support Vitriin</h2><p>L'équipe Vitriin vous répond ici, en général dans la journée.</p></div><button class="x" data-hx aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="mb">${inner}</div></div>`;
+  ov.onclick = (e) => { if (e.target === ov || e.target.closest("[data-hx]")) ov.remove(); };
+  document.body.appendChild(ov); return ov;
+}
+async function helpList() {
+  const { data } = await sb.rpc("support_mine"); const L = data || [];
+  $("help-new").classList.toggle("hidden", !L.some(t => t.unread));
+  const ov = helpModal(`<button class="btn-p" id="hp-new">Nouvelle demande</button>
+    ${L.length ? `<label class="fl">Mes demandes</label><div class="tk-list">${L.map(t => `<button data-hp="${t.id}"><span><b>${esc(t.subject)}</b><small>${TK_ST[t.status] || ""} · ${dshort(t.updated_at)}</small></span>${t.unread ? '<span class="tk-tag">Nouvelle réponse</span>' : ""}</button>`).join("")}</div>` : ""}`);
+  $("hp-new").onclick = helpNew;
+  ov.querySelectorAll("[data-hp]").forEach(b => b.onclick = () => helpThread(b.dataset.hp));
+}
+function helpNew() {
+  helpModal(`<label class="fl">De quoi s'agit-il ?</label><select class="in" id="hp-topic">${TK_TOPICS.map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select>
+    <label class="fl">En quelques mots</label><input class="in" id="hp-subj" maxlength="140" placeholder="Ex : 12 magasins n'arrivent pas à connecter Instagram">
+    <label class="fl">Votre message</label><textarea class="in" id="hp-body" style="min-height:130px" maxlength="5000" placeholder="Que se passe-t-il ? Quels magasins ? Depuis quand ?"></textarea>
+    <div class="hint">L'équipe Vitriin voit l'état de votre réseau : inutile de joindre des captures d'écran.</div>
+    <div class="copy" style="justify-content:flex-end"><button class="btn-s" id="hp-back">Retour</button><button class="btn-p" id="hp-send">Envoyer</button></div>`);
+  $("hp-back").onclick = helpList;
+  $("hp-send").onclick = async () => {
+    const body = $("hp-body").value.trim(), topic = $("hp-topic").value, subj = $("hp-subj").value.trim() || TK_TOPICS.find(t => t[0] === topic)[1];
+    if (body.length < 5) return toast("Décrivez le problème en quelques mots.");
+    $("hp-send").disabled = true;
+    const { data, error } = await sb.rpc("support_create", { p_subject: subj, p_body: body, p_topic: topic, p_store_id: null, p_network_id: S.net.id, p_client: { ua: navigator.userAgent, app: "centrale" } });
+    if (error) { $("hp-send").disabled = false; return toast(errText(error)); }
+    toast("Demande envoyée à l'équipe Vitriin."); helpThread(data);
+  };
+}
+async function helpThread(id) {
+  const { data, error } = await sb.rpc("support_thread", { p_id: id });
+  if (error) return toast(errText(error));
+  const t = data.ticket;
+  helpModal(`<b style="font-size:15px">${esc(t.subject)}</b><div class="hint" style="margin-top:2px">${TK_STxt(t.status)}</div>
+    ${data.messages.map(m => `<div class="tk-msg ${m.kind}"><small>${m.kind === "staff" ? "Équipe Vitriin" : "Vous"} · ${dshort(m.at)} ${new Date(m.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(m.body)}</div>`).join("")}
+    <textarea class="in" id="hp-rep" style="min-height:90px;margin-top:14px" maxlength="5000" placeholder="Votre réponse…"></textarea>
+    <div class="copy" style="justify-content:flex-end"><button class="btn-s" id="hp-back">Mes demandes</button><button class="btn-p" id="hp-go">Envoyer</button></div>`);
+  $("hp-back").onclick = helpList;
+  $("hp-go").onclick = async () => {
+    const body = $("hp-rep").value.trim(); if (!body) return toast("Écrivez votre message.");
+    $("hp-go").disabled = true;
+    const { error: e2 } = await sb.rpc("support_reply", { p_id: id, p_body: body });
+    if (e2) { $("hp-go").disabled = false; return toast(errText(e2)); }
+    helpThread(id);
+  };
+}
+const TK_STxt = (s) => TK_ST[s] || "";
+$("help-go").onclick = helpList;
+async function helpBadge() { try { const { data } = await sb.rpc("support_mine"); $("help-new").classList.toggle("hidden", !(data || []).some(t => t.unread)); } catch {} }
+
 /* ---------- Invitation ---------- */
 function inviteLink() { return `${location.origin}/?rejoindre=${encodeURIComponent(S.net.join_code)}`; }
 function fillInvite() {
@@ -1902,7 +1966,7 @@ async function boot() {
   const qs = new URLSearchParams(location.search);
   if (qs.has("bienvenue")) { S.view = "settings"; S.stab = "users"; history.replaceState(null, "", location.pathname); setTimeout(() => toast("Bienvenue ! Choisissez votre mot de passe et complétez votre profil."), 300); }
   if (S.view === "settings" && S.stab === "users") loadMembers();
-  show("v-new", false); show("v-app"); render();
+  show("v-new", false); show("v-app"); render(); helpBadge();
 }
 boot();
 

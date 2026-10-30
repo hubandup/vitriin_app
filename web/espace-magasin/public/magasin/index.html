@@ -374,6 +374,15 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 @keyframes rot{to{transform:rotate(360deg)}}
+/* Support Vitriin */
+.tk-new{font-size:12px;font-weight:700;color:#fff;background:var(--p);border-radius:999px;padding:3px 9px;white-space:nowrap;margin-right:6px}
+.tk-topics{display:flex;flex-wrap:wrap;gap:8px}
+.tk-chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;font:600 14px 'DM Sans',sans-serif;color:var(--ink)}
+.tk-chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tk-thread{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.tmsg{border-radius:14px;padding:11px 13px;font-size:15px;line-height:1.45;white-space:pre-wrap;max-width:88%}
+.tmsg small{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:4px}
+.tmsg.client{background:var(--bg);align-self:flex-end}.tmsg.staff{background:#fdf0f6;align-self:flex-start}
 </style>
 </head>
 <body>
@@ -509,15 +518,17 @@ async function loadData() {
   if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
   const st = mem[0].stores;
   await sb.rpc("demo_tick", { p_store_id: st.id }); // fait avancer la démo ; sans effet ailleurs
-  const [net, acc, rows, rev] = await Promise.all([
+  const [net, acc, rows, rev, tk] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status, enabled").eq("store_id", st.id),
     sb.from("store_promotions").select("id, status, overrides, suspended, hidden, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
     // Codes révélés par les clients (drive to store), lisibles par le magasin seulement.
     sb.from("code_reveals").select("store_promotion_id, revealed_at").eq("store_id", st.id).order("revealed_at", { ascending: false }).range(0, 9999),
+    sb.rpc("support_mine"),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
   const reveals = (!rev.error && rev.data) || [];
+  S.tickets = (!tk.error && tk.data) || [];
   S.codes7 = reveals.filter(r => Date.now() - new Date(r.revealed_at) < 7 * DAY).length;
   S.codesBy = reveals.reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
   S.codes7By = reveals.filter(r => Date.now() - new Date(r.revealed_at) < 7 * DAY).reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
@@ -820,12 +831,13 @@ function viewSettings() {
       ${soon("Pinterest", mono("P", "#e60023"))}
     </div>
 
-    ${STORE.support || STORE.phone || STORE.cgv ? `<div class="lbl">SUPPORT</div>
+    <div class="lbl">SUPPORT</div>
     <div class="box">
+      <button class="li" data-act="support" style="width:100%;text-align:left;border:none;background:none;font:inherit;color:inherit"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Une question, un souci ?</span><b style="font-size:15.5px">Contacter le support Vitriin</b></span>${(S.tickets || []).some(t => t.unread) ? '<span class="tk-new">Nouvelle réponse</span>' : ""}<span class="chev">${I.chev}</span></button>
       ${STORE.support ? `<a class="li" href="mailto:${esc(STORE.support)}" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Support de l'enseigne</span><b style="font-size:15.5px">${esc(STORE.support)}</b></span></a>` : ""}
       ${STORE.phone ? `<a class="li" href="tel:${esc(STORE.phone.replace(/[^+0-9]/g, ""))}" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Téléphone</span><b style="font-size:15.5px">${esc(STORE.phone)}</b></span></a>` : ""}
       ${/^https:\/\//.test(STORE.cgv) ? `<a class="li" href="${esc(STORE.cgv)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span class="sp" style="font-size:15.5px">Conditions générales de vente</span></a>` : ""}
-    </div>` : ""}
+    </div>
 
     <button class="out" data-act="logout">Se déconnecter</button>
     <p class="small" style="text-align:center;margin-top:18px">Démo : les publications Facebook et Instagram sont simulées.</p>
@@ -859,6 +871,56 @@ function sheetStore() {
     if (error || !data?.length) { $("#se-go").disabled = false; return toast(error ? errText(error) : "Modification refusée."); }
     closeLayer(); await loadData(); render(true); toast("Informations enregistrées.");
   };
+}
+// Support Vitriin : mes demandes, nouvelle demande, fil de discussion.
+const TK_TOPICS = [["social", "Connexion Facebook / Instagram"], ["publication", "Une promo ne s'est pas publiée"], ["promo", "Créer ou modifier une promo"], ["account", "Mon compte, mon accès"], ["other", "Autre chose"]];
+const TK_ST = { new: "Envoyée", open: "En cours", waiting: "Réponse reçue", resolved: "Résolue" };
+async function sheetSupport() {
+  const r = await sb.rpc("support_mine"); S.tickets = (!r.error && r.data) || S.tickets || [];
+  sheet(`<div class="grab"></div><h2>Support Vitriin</h2><p class="small" style="font-size:14px;margin-top:4px">Décrivez votre souci : l'équipe Vitriin voit directement l'état de vos comptes et vous répond ici.</p>
+    <button class="big-btn" id="tk-new" style="margin-top:14px">Nouvelle demande</button>
+    ${S.tickets.length ? `<div class="lbl" style="margin-top:18px">MES DEMANDES</div><div class="box">${S.tickets.map(t => `<button class="li" data-tk="${t.id}" style="width:100%;text-align:left;border:none;background:none;font:inherit;color:inherit"><span class="sp"><b style="font-size:15px">${esc(t.subject)}</b><span style="font-size:13px;color:var(--muted);display:block">${TK_ST[t.status] || ""} · ${fmtDay(new Date(t.updated_at).getTime())}</span></span>${t.unread ? '<span class="tk-new">Nouvelle réponse</span>' : ""}<span class="chev">${I.chev}</span></button>`).join("")}</div>` : ""}
+    <button class="txt-btn" data-close>Fermer</button>`);
+  $("#tk-new").onclick = sheetSupportNew;
+  $$("[data-tk]").forEach(b => b.onclick = () => sheetTicket(b.dataset.tk));
+}
+function sheetSupportNew() {
+  let topic = S.fb === "broken" || S.ig === "broken" ? "social" : "other";
+  sheet(`<div class="grab"></div><h2>Nouvelle demande</h2>
+    <div class="fl">DE QUOI S'AGIT-IL ?</div><div class="tk-topics">${TK_TOPICS.map(([k, l]) => `<button class="tk-chip ${k === topic ? "on" : ""}" data-topic="${k}">${l}</button>`).join("")}</div>
+    <div class="fl">EN QUELQUES MOTS</div><input class="in" id="tk-subj" maxlength="140" placeholder="Ex : Instagram ne publie plus mes promos">
+    <div class="fl">VOTRE MESSAGE</div><textarea class="in" id="tk-body" rows="5" maxlength="5000" placeholder="Que s'est-il passé ? Depuis quand ?"></textarea>
+    <p class="small" style="margin-top:8px">L'état de vos comptes Facebook et Instagram est joint automatiquement à votre demande.</p>
+    <button class="big-btn" id="tk-send">Envoyer</button><button class="txt-btn" id="tk-back">Retour</button>`);
+  $$("[data-topic]").forEach(b => b.onclick = () => { topic = b.dataset.topic; $$("[data-topic]").forEach(x => x.classList.toggle("on", x === b)); });
+  $("#tk-back").onclick = sheetSupport;
+  $("#tk-send").onclick = async () => {
+    const body = $("#tk-body").value.trim(), subj = $("#tk-subj").value.trim() || (TK_TOPICS.find(t => t[0] === topic) || [])[1];
+    if (body.length < 5) return toast("Décrivez le problème en quelques mots.");
+    $("#tk-send").disabled = true;
+    const { data, error } = await sb.rpc("support_create", { p_subject: subj, p_body: body, p_topic: topic, p_store_id: STORE.id, p_network_id: null, p_client: { ua: navigator.userAgent, app: "magasin" } });
+    if (error) { $("#tk-send").disabled = false; return toast(errText(error)); }
+    toast("Demande envoyée. Nous vous répondons ici, en général dans la journée.");
+    sheetTicket(data);
+  };
+}
+async function sheetTicket(id) {
+  const { data, error } = await sb.rpc("support_thread", { p_id: id });
+  if (error) return toast(errText(error));
+  const t = data.ticket;
+  sheet(`<div class="grab"></div><h2>${esc(t.subject)}</h2><p class="small" style="font-size:13.5px;margin-top:4px">${TK_ST[t.status] || ""}</p>
+    <div class="tk-thread">${data.messages.map(m => `<div class="tmsg ${m.kind}"><small>${m.kind === "staff" ? "Équipe Vitriin" : "Vous"} · ${fmtDay(new Date(m.at).getTime())} ${new Date(m.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(m.body)}</div>`).join("")}</div>
+    <textarea class="in" id="tk-rep" rows="3" maxlength="5000" placeholder="${t.status === "resolved" ? "Le souci revient ? Écrivez-nous ici." : "Votre réponse…"}" style="margin-top:12px"></textarea>
+    <button class="big-btn" id="tk-go">Envoyer</button><button class="txt-btn" id="tk-back">Mes demandes</button>`);
+  $("#tk-back").onclick = sheetSupport;
+  $("#tk-go").onclick = async () => {
+    const body = $("#tk-rep").value.trim(); if (!body) return toast("Écrivez votre message.");
+    $("#tk-go").disabled = true;
+    const { error: e2 } = await sb.rpc("support_reply", { p_id: id, p_body: body });
+    if (e2) { $("#tk-go").disabled = false; return toast(errText(e2)); }
+    sheetTicket(id);
+  };
+  const r = await sb.rpc("support_mine"); if (!r.error) S.tickets = r.data;
 }
 // Activer / désactiver un compte : désactivé = connecté, mais on n'y publie plus.
 async function toggleChannel(key) {
@@ -928,6 +990,7 @@ document.addEventListener("click", (e) => {
   else if (ds.stat) statsPromo(find(ds.stat));
   else if (ds.act === "reconnect") reconnect();
   else if (ds.act === "store-edit") sheetStore();
+  else if (ds.act === "support") sheetSupport();
   else if (ds.chanT) toggleChannel(ds.chanT);
   else if (ds.act === "disconnect") toast("Gardez Instagram connecté pour que vos promos y paraissent.");
   else if (ds.act === "logout") sb.auth.signOut().then(() => location.reload());

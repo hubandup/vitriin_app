@@ -20,6 +20,40 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-029 · Manager : « À traiter » actionnable, support (tickets), checklist d'intégration
+- **À traiter** : chaque élément se marque comme lu (« Lu ✓ », ou « Tout
+  marquer comme lu », avec « Annuler » quelques secondes). Un élément lu
+  revient si la situation change (nouvelle erreur, nouvelle date). Au clic,
+  une fenêtre explique la cause et les étapes pour résoudre, avec les
+  actions prêtes : email au gérant pré-rédigé (reconnexion, publication
+  refusée, connexion des réseaux, relance de centrale), copier le message,
+  renvoyer l'accès, renvoyer l'invitation, ouvrir la fiche client ou le
+  ticket. Les nouveaux tickets apparaissent aussi dans « À traiter ».
+- **Support** : bouton « Contacter le support Vitriin » dans l'app magasin
+  (Réglages > Support) et « Support Vitriin » dans l'Espace Centrale (barre
+  latérale). Le client choisit un sujet, écrit, suit ses demandes et voit
+  « Nouvelle réponse ». La demande joint automatiquement l'état des comptes
+  et le dernier échec. Manager > Support : liste filtrable, fil de
+  discussion, réponse, note interne (jamais visible du client), statut,
+  urgence, situation au moment de la demande et situation actuelle, autres
+  demandes du même client.
+- **Intégration** : sur chaque fiche client, 11 étapes avec barre
+  d'avancement : 7 calculées automatiquement (logo et coordonnées, magasins
+  importés, invitations, 80 % activés, 80 % connectés, première promo,
+  première publication) et 4 à cocher (contrat, mandat SEPA, formation de
+  la centrale, formation des magasins). Avancement visible dans la liste
+  Clients.
+- **Sécurité** : tables `support_tickets`, `support_messages`,
+  `manager_dismissed`, `network_onboarding` sans policy ; accès par
+  fonctions vérifiées côté serveur (membre du magasin ou de la centrale pour
+  créer, auteur seulement pour lire et répondre, notes internes filtrées ;
+  équipe Vitriin pour le reste). Limites : 10 demandes et 40 messages par
+  heure et par personne. Testé : autre magasin refusé, accès direct aux
+  tables refusé, notes internes invisibles.
+- **Fichiers** : `manager/index.html`, `magasin/index.html`,
+  `centrale/index.html`, migration `20261030160000_manager_support_onboarding`.
+- **Retour arrière** : `git revert` du commit ; les tables peuvent rester.
+
 ### MOD-028 · vitriin.fr : compteur de visites installé
 - **Quoi** : script du Manager (onglet Site web) ajouté au site Lovable
   « Vitrine Locale » dans `src/routes/__root.tsx` (exécuté une fois, côté

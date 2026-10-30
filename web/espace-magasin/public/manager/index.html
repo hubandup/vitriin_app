@@ -94,6 +94,24 @@ pre{background:var(--bg);border-radius:12px;padding:12px;font-size:12px;overflow
 .ch{display:inline-flex;gap:4px}.ch span{font-size:11px;font-weight:700;border-radius:6px;padding:2px 5px;background:var(--bg);color:var(--muted)}
 .ch .ok{background:var(--t-ok);color:var(--ok)}.ch .ko{background:var(--t-err);color:var(--err)}
 .back{border:none;background:none;color:var(--muted);font-weight:700;padding:0;margin-bottom:8px}
+.todo{cursor:pointer;border-radius:10px}.todo:hover{background:var(--bg)}.todo>div{flex:1;min-width:0}
+.todo .x{border:none;background:none;color:var(--muted);font-size:12px;font-weight:700;padding:2px 4px;white-space:nowrap;opacity:.8}.todo .x:hover{color:var(--p)}
+.todo .dot.b{background:#2f6fdb}
+.ov{position:fixed;inset:0;background:rgba(20,16,12,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:8}
+.modal{background:var(--card);border-radius:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:22px}
+.modal h3{font-size:17px;margin:0 0 4px}.modal .why{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.55;margin:14px 0}
+.modal ol{margin:8px 0 0;padding-left:20px;font-size:13.5px;line-height:1.6}
+.acts{display:flex;flex-direction:column;gap:8px;margin-top:14px}.acts>*{text-align:center}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-weight:700;font-size:12.5px;color:var(--muted)}.chip.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.msg{border-radius:14px;padding:11px 13px;margin-top:10px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;max-width:85%}
+.msg.client{background:var(--bg)}.msg.staff{background:var(--t-p);margin-left:auto}.msg.internal{background:var(--t-warn);margin-left:auto;border:1px dashed var(--warn)}
+.msg small{display:block;font-size:11.5px;color:var(--muted);margin-bottom:4px;font-weight:700}
+textarea.in{min-height:110px;resize:vertical}
+.prog{height:8px;border-radius:999px;background:var(--bg);overflow:hidden;margin:8px 0 4px}.prog i{display:block;height:100%;background:var(--grad);border-radius:999px}
+.step{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}.step:last-child{border-bottom:none}
+.step .ok{width:20px;height:20px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--bg);color:var(--muted)}
+.step .ok.y{background:var(--ok);color:#fff}.step small{color:var(--muted);margin-left:auto;white-space:nowrap}
+.unread{width:8px;height:8px;border-radius:50%;background:var(--p);display:inline-block;margin-right:6px}
 </style>
 </head>
 <body>
@@ -120,6 +138,7 @@ const rpc = async (n, a) => { const { data, error } = await sb.rpc(n, a); if (er
 const svg = (p) => `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const NAV = [
   ["PILOTAGE", [["home", "Accueil", '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'],
+    ["support", "Support", '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/>'],
     ["clients", "Clients", '<path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/>'],
     ["stores", "Magasins", '<path d="M3 9 4.6 4.5h14.8L21 9"/><path d="M3.4 9h17.2v1.6a2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0V9Z"/><path d="M5 11.4V20h14v-8.6"/>']]],
   ["COMMERCIAL", [["demos", "Démos", '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>'],
@@ -159,22 +178,26 @@ async function need(tab) {
   const d = UI.demo;
   if (tab === "home") C.home = await rpc("manager_dashboard", { p_demo: d });
   if (tab === "clients" || tab === "demos") C.ov = await rpc("manager_overview");
+  if (tab === "clients") C.onb = await rpc("manager_onboarding_all");
+  if (tab === "support") C.tk = await rpc("manager_tickets", { p_status: UI.tkf || "active" });
+  if (tab === "ticket") C.ticket = await rpc("manager_ticket", { p_id: UI.ticket });
+  if (tab !== "home" && !C.home) C.home = await rpc("manager_dashboard", { p_demo: d }).catch(() => null);
   if (tab === "stores") C.stores = await rpc("manager_stores", { p_demo: d });
   if (tab === "health") C.health = await rpc("manager_health", { p_demo: d });
   if (tab === "site") C.site = await rpc("manager_site", { p_days: 30 });
-  if (tab === "net") C.net = await rpc("manager_network", { p_id: UI.net });
+  if (tab === "net") [C.net, C.netOnb] = await Promise.all([rpc("manager_network", { p_id: UI.net }), rpc("manager_onboarding", { p_net: UI.net })]);
 }
 async function show(tab = UI.tab) {
-  UI.tab = tab; ls.set("m-tab", tab === "net" ? "clients" : tab);
+  UI.tab = tab; ls.set("m-tab", tab === "net" ? "clients" : tab === "ticket" ? "support" : tab);
   frame(`<div class="empty" style="padding:40px 0">Chargement…</div>`);
   try { await need(tab); frame(VIEWS[tab]()); bind(); }
   catch (e) { frame(`<div class="help" style="margin-top:16px">Chargement impossible : ${esc(errText(e))}</div>`); }
 }
 function frame(inner) {
-  const todo = C.home ? C.home.todo.accounts.length + C.home.todo.failures.length + C.home.todo.invites.length + C.home.todo.idle.length : 0;
+  const todo = C.home ? todoItems().length : 0, tk = C.home?.ticketsUnread || 0;
   $("app").innerHTML = `<div class="shell">
     <aside class="side"><div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Manager</b><span>Poste de pilotage</span></div></div>
-      <div class="navs">${NAV.map(([sect, items]) => `<div class="sect">${sect}</div><nav class="nav">${items.map(([k, l, ic]) => `<button class="${(UI.tab === k || (UI.tab === "net" && k === "clients")) ? "on" : ""}" data-tab="${k}">${svg(ic)}<span>${l}</span>${k === "home" && todo ? `<em>${todo}</em>` : ""}</button>`).join("")}</nav>`).join("")}</div>
+      <div class="navs">${NAV.map(([sect, items]) => `<div class="sect">${sect}</div><nav class="nav">${items.map(([k, l, ic]) => `<button class="${(UI.tab === k || (UI.tab === "net" && k === "clients") || (UI.tab === "ticket" && k === "support")) ? "on" : ""}" data-tab="${k}">${svg(ic)}<span>${l}</span>${k === "home" && todo ? `<em>${todo}</em>` : k === "support" && tk ? `<em>${tk}</em>` : ""}</button>`).join("")}</nav>`).join("")}</div>
       <div class="side-foot"><label class="ck"><input type="checkbox" id="demo-ck" ${UI.demo ? "checked" : ""}> Inclure les démos</label>
         <div class="me"><span class="mail">${esc(UI.email || "")}</span><button id="out">Se déconnecter</button></div></div></aside>
     <main class="main"><div class="wrap"><div id="view">${inner}</div></div></main></div>`;
@@ -198,12 +221,7 @@ const logo = (n) => n.logo_url ? `<img class="logo" src="${esc(n.logo_url)}" alt
 function vHome() {
   const D = C.home, T = D.todo, st = D.stores || 0;
   const pct = (a) => st ? Math.round(a / st * 100) + " %" : "—";
-  const items = [
-    ...T.accounts.map(a => ({ w: 0, t: `${a.store} · ${a.channel === "instagram" ? "Instagram" : "Facebook"} à reconnecter`, s: `${a.network || "Indépendant"}${a.last_error ? " · " + a.last_error : ""}` })),
-    ...T.failures.map(f => ({ w: 0, t: `Échec ${f.channel === "instagram" ? "Instagram" : "Facebook"} · « ${f.promo} »`, s: `${f.store} · ${f.network || "Indépendant"} · ${day(f.created_at)}${f.error_message ? " · " + f.error_message : ""}` })),
-    ...T.invites.map(i => ({ w: 1, t: `${i.store} n'a rien connecté`, s: `Invité le ${day(i.invited_at)} · ${i.contact_email || "sans email"} · ${i.network || ""}` })),
-    ...T.idle.map(n => ({ w: 1, t: `${n.name} ne s'est pas connectée`, s: `Dernière connexion de l'équipe : ${since(n.last_seen)}` })),
-  ];
+  const items = todoItems();
   return `<div class="bar"><div><h2>Accueil</h2><p class="sub">${UI.demo ? "Chiffres démos comprises." : "Centrales clientes et magasins indépendants, hors démos."}</p></div></div>
   <div class="kpis">
     ${kpi(nf(D.networks), "centrales" + (UI.demo ? " (dont démos)" : ""))}
@@ -217,18 +235,151 @@ function vHome() {
   </div>
   <div class="two">
     <div class="card"><h3>Publications par jour</h3>${bars(D.series, "pub")}<h3 style="margin-top:18px">Visites de vitriin.fr</h3>${bars(D.series, "visits", "v")}</div>
-    <div class="card"><h3>À traiter <span class="pill ${items.length ? "err" : ""}">${items.length || "Rien"}</span></h3>
-      ${items.length ? items.slice(0, 14).map(i => `<div class="todo"><span class="dot ${i.w ? "w" : ""}"></span><div><b>${esc(i.t)}</b><span>${esc(i.s)}</span></div></div>`).join("") + (items.length > 14 ? `<p class="sub">… et ${items.length - 14} autres, détail dans Santé et Magasins.</p>` : "") : `<p class="empty">Tout va bien : aucun compte à reconnecter, aucun échec, aucune invitation en souffrance.</p>`}
+    <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">À traiter <span class="pill ${items.length ? "err" : ""}">${items.length || "Rien"}</span></h3>${items.length ? `<button class="btn-s sm" id="read-all">Tout marquer comme lu</button>` : ""}</div>
+      <p class="sub" style="margin-bottom:6px">Cliquez sur un élément pour voir comment le résoudre.</p>
+      ${items.length ? items.slice(0, 20).map((i, k) => `<div class="todo" data-todo="${k}"><span class="dot ${i.w === 2 ? "b" : i.w ? "w" : ""}"></span><div><b>${esc(i.t)}</b><span>${esc(i.s)}</span></div><button class="x" data-read="${k}" title="Marquer comme lu">Lu ✓</button></div>`).join("") + (items.length > 20 ? `<p class="sub">… et ${items.length - 20} autres.</p>` : "") : `<p class="empty">Tout va bien : rien à traiter.</p>`}
+      ${D.dismissed ? `<p class="sub">${D.dismissed} élément${D.dismissed > 1 ? "s" : ""} marqué${D.dismissed > 1 ? "s" : ""} comme lu${D.dismissed > 1 ? "s" : ""}, masqué${D.dismissed > 1 ? "s" : ""}. Ils reviennent si la situation change.</p>` : ""}
       <h3 style="margin-top:18px">Échéances</h3><ul class="list">${MILESTONES.map(([l, d]) => `<li><span>${l}</span><b>${day(d)} · ${Math.ceil((new Date(d) - Date.now()) / 864e5)} j</b></li>`).join("")}</ul></div>
   </div>`;
+}
+
+/* ---------- À traiter : liste, actions, marquer comme lu ---------- */
+const CH = (c) => c === "instagram" ? "Instagram" : "Facebook";
+function todoItems() {
+  if (!C.home) return [];
+  const T = C.home.todo;
+  return [
+    ...(T.tickets || []).map(x => ({ type: "ticket", x, w: 2, t: `Support · ${x.subject}`, s: `${x.store || x.network || ""} · ${x.created_by_email || ""} · ${since(x.created_at)}` })),
+    ...T.accounts.map(x => ({ type: "account", x, w: 0, t: `${x.store} · ${CH(x.channel)} à reconnecter`, s: `${x.network || "Indépendant"}${x.last_error ? " · " + x.last_error : ""}` })),
+    ...T.failures.map(x => ({ type: "failure", x, w: 0, t: `Échec ${CH(x.channel)} · « ${x.promo} »`, s: `${x.store} · ${x.network || "Indépendant"} · ${day(x.created_at)}${x.error_message ? " · " + x.error_message : ""}` })),
+    ...T.invites.map(x => ({ type: "invite", x, w: 1, t: x.activated ? `${x.store} : compte activé, aucun réseau connecté` : `${x.store} n'a pas activé son compte`, s: `Invité le ${day(x.invited_at)} · ${x.contact_email || "sans email"} · ${x.network || ""}` })),
+    ...T.idle.map(x => ({ type: "idle", x, w: 1, t: `${x.network} ne se connecte plus`, s: `Dernière connexion de l'équipe : ${since(x.last_seen)}` })),
+  ];
+}
+const mailto = (to, subject, body) => `mailto:${encodeURIComponent(to || "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+const SIGN = "\n\nL'équipe Vitriin\nsupport@vitriin.co";
+const RECONNECT = (ch) => `Bonjour,\n\nVotre compte ${CH(ch)} n'est plus relié à Vitriin : vos promotions ne peuvent plus y être publiées.\n\nPour le reconnecter (1 minute) :\n1. Ouvrez l'app Vitriin (app.vitriin.co/magasin).\n2. Allez dans Réglages > Comptes connectés.\n3. Touchez « Reconnecter » à côté de ${CH(ch)} et validez avec votre compte Facebook.\n\nSi votre mot de passe Facebook a changé ou si vous n'êtes plus administrateur de la Page, c'est la cause la plus fréquente.` + SIGN;
+// Ce qu'il faut faire, élément par élément.
+function todoGuide(i) {
+  const x = i.x, to = x.owner || x.contact_email, fiche = x.network_id ? `<button class="btn-s" data-goto-net="${x.network_id}">Voir la fiche ${esc(x.network || "client")}</button>` : "";
+  const reset = to ? `<button class="btn-s" data-reset="${esc(to)}" data-to="magasin">Renvoyer l'accès à ${esc(to)}</button>` : "";
+  const mail = (subject, body) => to ? `<a class="btn-p" href="${mailto(to, subject, body)}">Écrire au gérant (${esc(to)})</a><button class="btn-s" data-copy="${esc(body)}">Copier le message</button>` : `<p class="sub">Aucun email connu pour ce magasin : ajoutez-le dans la fiche du magasin (Espace Centrale).</p>`;
+  if (i.type === "ticket") return { h: x.subject, why: `Demande de ${esc(x.created_by_email || "")} (${esc(x.store || x.network || "")}), ${since(x.created_at)}.`, steps: ["Lire la demande et le contexte joint (état des comptes au moment de la demande).", "Répondre depuis le ticket : le client voit la réponse dans son app."], acts: `<button class="btn-p" data-open-ticket="${x.id}">Ouvrir le ticket</button>` };
+  if (i.type === "account" || (i.type === "failure" && x.account_issue)) return {
+    h: `${x.store} : ${CH(x.channel)} à reconnecter`,
+    why: `Meta a refusé l'accès au compte ${CH(x.channel)} de ce magasin${x.last_error || x.error_message ? ` (« ${esc(x.last_error || x.error_message)} »)` : ""}. Causes habituelles : mot de passe Facebook changé, droits d'administration de la Page perdus, ou autorisation Vitriin retirée. Tant qu'il n'est pas reconnecté, ses promos ne partent pas sur ${CH(x.channel)}.`,
+    steps: ["Prévenir le gérant avec le mode d'emploi ci-dessous.", "Il reconnecte depuis l'app : Réglages > Comptes connectés > Reconnecter.", "Les promos en échec se republient ensuite depuis Stats > À résoudre."],
+    acts: mail(`Vitriin : reconnectez votre compte ${CH(x.channel)}`, RECONNECT(x.channel)) + reset + fiche };
+  if (i.type === "failure") return {
+    h: `Publication refusée par ${CH(x.channel)}`,
+    why: `« ${esc(x.promo)} » n'a pas pu être publiée sur ${CH(x.channel)} pour ${esc(x.store)}${x.error_message ? ` : « ${esc(x.error_message)} »` : ""}. Le compte est bien connecté : c'est le contenu qui a été refusé.`,
+    steps: ["Vérifier le visuel : JPEG, format entre 4:5 (portrait) et 1,91:1 (paysage), moins de 8 Mo.", "Vérifier le texte : 2 200 caractères maximum et 30 hashtags au plus sur Instagram.", "Corriger la promo (Espace Centrale, ou le magasin s'il l'a personnalisée), puis republier depuis l'app : Stats > À résoudre > Republier."],
+    acts: mail(`Vitriin : votre promo « ${x.promo} » n'a pas été publiée`, `Bonjour,\n\nLa promo « ${x.promo} » n'a pas pu être publiée sur ${CH(x.channel)}${x.error_message ? ` (motif : ${x.error_message})` : ""}.\n\nDans l'app Vitriin, ouvrez Stats > À résoudre puis touchez « Republier ». Si le message revient, répondez-nous et nous regardons ensemble.` + SIGN) + fiche };
+  if (i.type === "invite") return x.activated ? {
+    h: `${x.store} n'a connecté aucun réseau`,
+    why: `Le gérant a activé son compte mais n'a relié ni Facebook ni Instagram : les promos de la centrale ne peuvent pas être publiées pour ce magasin.`,
+    steps: ["Envoyer le mode d'emploi de connexion.", "Proposer un appel de 5 minutes si besoin : la connexion se fait avec le compte Facebook administrateur de la Page du magasin."],
+    acts: mail("Vitriin : connectez votre Page Facebook et Instagram", `Bonjour,\n\nVotre espace Vitriin est prêt, il ne manque que la connexion à vos réseaux :\n1. Ouvrez l'app Vitriin (app.vitriin.co/magasin).\n2. Réglages > Comptes connectés > Connecter Facebook.\n3. Choisissez la Page de votre magasin (et son compte Instagram).\n\nC'est tout : les promos de votre centrale seront publiées automatiquement sur vos réseaux.` + SIGN) + reset + fiche } : {
+    h: `${x.store} n'a pas activé son compte`,
+    why: `Invitation envoyée le ${day(x.invited_at)} à ${esc(x.contact_email || "?")}, jamais ouverte. L'email a pu arriver en indésirables, ou l'adresse n'est pas la bonne.`,
+    steps: ["Vérifier l'adresse avec la centrale.", "Renvoyer l'invitation.", "Demander au gérant de regarder dans ses courriers indésirables."],
+    acts: (x.contact_email && x.network_id ? `<button class="btn-p" data-reinvite="${x.store_id}" data-net-id="${x.network_id}">Renvoyer l'invitation</button>` : "") + fiche };
+  if (i.type === "idle") return {
+    h: `${x.network} ne se connecte plus`,
+    why: `Personne de l'équipe centrale ne s'est connecté depuis ${since(x.last_seen).replace("il y a ", "")}. Risque de désengagement.`,
+    steps: ["Prendre des nouvelles, proposer un point de 15 minutes.", "Vérifier dans la fiche client que les magasins publient bien."],
+    acts: `<a class="btn-p" href="${mailto((x.emails || []).join(","), "Vitriin : un point sur vos campagnes ?", "Bonjour,\n\nJe prends des nouvelles de vos campagnes sur Vitriin. Avez-vous 15 minutes cette semaine pour faire le point (prochaines promos, magasins à relancer, nouveautés) ?" + SIGN)}">Écrire à l'équipe centrale</a>` + `<button class="btn-s" data-goto-net="${x.network_id}">Voir la fiche ${esc(x.network)}</button>` };
+}
+function openTodo(i) {
+  const g = todoGuide(i);
+  const el = document.createElement("div"); el.className = "ov"; el.id = "todo-ov";
+  el.innerHTML = `<div class="modal"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;align-items:flex-start"><h3>${esc(g.h)}</h3><button class="btn-s sm" data-x>Fermer</button></div>
+    <div class="why">${g.why}</div><b style="font-size:13.5px">Pour résoudre</b><ol>${g.steps.map(t => `<li>${t}</li>`).join("")}</ol>
+    <div class="acts">${g.acts}<button class="btn-s" data-read-one>Marquer comme lu</button></div></div>`;
+  document.body.appendChild(el);
+  const close = () => el.remove();
+  el.onclick = (e) => { if (e.target === el || e.target.closest("[data-x]")) close(); };
+  el.querySelectorAll("[data-copy]").forEach(b => b.onclick = () => navigator.clipboard.writeText(b.dataset.copy).then(() => toast("Message copié."), () => toast("Copie impossible.")));
+  el.querySelectorAll("[data-goto-net]").forEach(b => b.onclick = () => { close(); UI.net = b.dataset.gotoNet; show("net"); });
+  el.querySelectorAll("[data-open-ticket]").forEach(b => b.onclick = () => { close(); UI.ticket = b.dataset.openTicket; show("ticket"); });
+  el.querySelectorAll("[data-reinvite]").forEach(b => b.onclick = () => act(b, () => invite([b.dataset.reinvite], b.dataset.netId)));
+  bindReset(el);
+  el.querySelector("[data-read-one]").onclick = () => { close(); markRead([i.x.key]); };
+}
+async function markRead(keys) {
+  try { await rpc("manager_dismiss", { p_keys: keys }); }
+  catch (e) { return toast(errText(e)); }
+  await show("home");
+  toastUndo(keys.length > 1 ? `${keys.length} éléments marqués comme lus.` : "Marqué comme lu.", async () => { await rpc("manager_dismiss", { p_keys: keys, p_undo: true }); show("home"); });
+}
+function toastUndo(text, undo) {
+  const el = $("toast"); el.innerHTML = `${esc(text)} <button style="border:none;background:none;color:inherit;font-weight:700;text-decoration:underline;margin-left:8px" id="undo">Annuler</button>`;
+  el.classList.remove("hidden"); clearTimeout(tt); tt = setTimeout(() => el.classList.add("hidden"), 6000);
+  $("undo").onclick = () => { el.classList.add("hidden"); undo(); };
+}
+function bindReset(root) {
+  root.querySelectorAll("[data-reset]").forEach(b => b.onclick = () => {
+    if (!confirm(`Envoyer à ${b.dataset.reset} un email pour choisir un nouveau mot de passe ?`)) return;
+    act(b, async () => {
+      const { error } = await sb.auth.resetPasswordForEmail(b.dataset.reset, { redirectTo: `${location.origin}/${b.dataset.to}/?bienvenue=1` });
+      if (error) throw error; return "Email envoyé à " + b.dataset.reset + ".";
+    });
+  });
+}
+
+/* ---------- Support ---------- */
+const TK_ST = { new: ["Nouveau", "p"], open: ["En cours", "warn"], waiting: ["En attente du client", "grey"], resolved: ["Résolu", ""] };
+const TK_TOPIC = { social: "Connexion Facebook / Instagram", publication: "Publication", promo: "Promo", account: "Compte et accès", billing: "Facturation", other: "Autre" };
+const TKF = [["active", "À traiter"], ["new", "Nouveaux"], ["waiting", "En attente du client"], ["resolved", "Résolus"], ["all", "Tous"]];
+function vSupport() {
+  const L = C.tk;
+  return `<div class="bar"><div><h2>Support</h2><p class="sub">Demandes envoyées depuis l'app magasin et l'Espace Centrale.</p></div>
+    <div class="chips">${TKF.map(([k, l]) => `<button class="chip ${(UI.tkf || "active") === k ? "on" : ""}" data-tkf="${k}">${l}</button>`).join("")}</div></div>
+  ${L.length ? `<div class="tw"><table><tr><th>Demande</th><th>De</th><th>Statut</th><th>Mise à jour</th></tr>
+    ${L.map(t => `<tr class="click" data-ticket="${t.id}"><td>${t.unread ? '<span class="unread"></span>' : ""}<b>${esc(t.subject)}</b>${t.priority === "high" ? ' <span class="pill err">Urgent</span>' : ""}<small>${TK_TOPIC[t.topic] || ""} · ${t.messages} message${t.messages > 1 ? "s" : ""}</small></td>
+      <td>${esc(t.store || t.network || "")}<small>${esc(t.created_by_email || "")} · ${t.source === "centrale" ? "Centrale" : "Magasin"}</small></td>
+      <td><span class="pill ${TK_ST[t.status][1]}">${TK_ST[t.status][0]}</span></td><td>${since(t.updated_at)}</td></tr>`).join("")}</table></div>`
+    : `<div class="help">Aucune demande dans cette liste.</div>`}`;
+}
+function ctxHtml(c) {
+  if (!c) return "";
+  const ch = Object.entries(c.channels || {}).map(([k, v]) => `<li><span>${CH(k)} · ${esc(v.name || "")}</span><b style="color:${v.status === "active" ? "var(--ok)" : "var(--err)"}">${v.status === "active" ? "Connecté" : v.status === "off" ? "Désactivé" : "À reconnecter"}</b></li>`).join("") || "<li><span>Aucun réseau connecté</span></li>";
+  return `<ul class="list">${c.store ? `<li><span>Magasin</span><b>${esc(c.store.name)} · ${esc(c.store.city || "")}</b></li>` : ""}${c.network ? `<li><span>Centrale</span><b>${esc(c.network)}</b></li>` : ""}${ch}
+    ${c.lastFailure ? `<li><span>Dernier échec : « ${esc(c.lastFailure.promo)} » sur ${CH(c.lastFailure.channel)}<br><small style="color:var(--muted)">${esc(c.lastFailure.error || "")} · ${day(c.lastFailure.at)}</small></span></li>` : ""}</ul>`;
+}
+function vTicket() {
+  const D = C.ticket, t = D.ticket;
+  return `<button class="back" data-tab="support">← Support</button>
+  <div class="bar"><div><h2>${esc(t.subject)}</h2><p class="sub">${TK_TOPIC[t.topic] || ""} · ${esc(t.created_by_email || "")} · ${t.source === "centrale" ? "Centrale" : "Magasin"} ${esc(t.store || t.network || "")} · ouvert ${since(t.created_at)}</p></div>
+    <div class="row"><select class="in" id="tk-st">${Object.entries(TK_ST).map(([k, [l]]) => `<option value="${k}" ${t.status === k ? "selected" : ""}>${l}</option>`).join("")}</select>
+      <button class="btn-s sm" id="tk-prio">${t.priority === "high" ? "Retirer « urgent »" : "Marquer urgent"}</button></div></div>
+  <div class="two">
+    <div class="card"><h3>Conversation</h3>
+      ${D.messages.map(m => `<div class="msg ${m.internal ? "internal" : m.kind}"><small>${m.internal ? "Note interne · " : ""}${m.kind === "client" ? esc(t.created_by_email || "Client") : esc(m.author || "Vitriin")} · ${day(m.at)} ${new Date(m.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(m.body)}</div>`).join("")}
+      <textarea class="in" id="tk-body" style="margin-top:14px" placeholder="Votre réponse…"></textarea>
+      <div class="row" style="justify-content:space-between;margin-top:10px"><label class="ck"><input type="checkbox" id="tk-int"> Note interne (invisible du client)</label>
+        <div class="row"><button class="btn-s" id="tk-send">Envoyer</button><button class="btn-p" id="tk-solve">Envoyer et résoudre</button></div></div></div>
+    <div><div class="card"><h3>Situation au moment de la demande</h3>${ctxHtml(t.context)}</div>
+      <div class="card" style="margin-top:14px"><h3>Situation actuelle</h3>${ctxHtml(D.now)}${t.network_id ? `<button class="btn-s sm" style="margin-top:10px" data-goto-net="${t.network_id}">Voir la fiche client</button>` : ""}</div>
+      ${D.others.length ? `<div class="card" style="margin-top:14px"><h3>Autres demandes</h3><ul class="list">${D.others.map(o => `<li class="click" data-ticket="${o.id}" style="cursor:pointer"><span>${esc(o.subject)}</span><span class="pill ${TK_ST[o.status][1]}">${TK_ST[o.status][0]}</span></li>`).join("")}</ul></div>` : ""}</div>
+  </div>`;
+}
+
+/* ---------- Intégration d'une centrale ---------- */
+function onbHtml(steps) {
+  const done = steps.filter(s => s.done).length, pct = Math.round(done / steps.length * 100);
+  return `<div class="card" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Intégration</h3><b>${done} / ${steps.length} · ${pct} %</b></div>
+    <div class="prog"><i style="width:${pct}%"></i></div>
+    ${steps.map(s => `<div class="step"><span class="ok ${s.done ? "y" : ""}">${s.done ? "✓" : ""}</span><span>${esc(s.l)}${s.manual ? "" : ' <small style="margin:0">· automatique</small>'}</span>
+      ${s.manual ? `<small><label class="ck" style="margin:0"><input type="checkbox" data-onb="${s.k}" ${s.done ? "checked" : ""}> fait</label></small>` : `<small>${esc(s.info || "")}</small>`}</div>`).join("")}</div>`;
 }
 
 /* ---------- Clients ---------- */
 function vClients() {
   const all = C.ov.networks.filter(n => UI.demo || !n.is_demo);
   return `<div class="bar"><div><h2>Clients</h2><p class="sub">${all.filter(n => !n.is_demo).length} centrale(s) cliente(s) · ${nf(C.ov.independent_stores)} magasin(s) indépendant(s).</p></div></div>
-  ${all.length ? `<div class="tw"><table><tr><th>Centrale</th><th class="r">Magasins</th><th class="r">Connectés</th><th class="r">Promos</th><th class="r">Publications</th><th>Équipe</th><th>Depuis</th></tr>
-    ${all.map(n => `<tr class="click" data-net="${n.id}"><td><div class="row" style="flex-wrap:nowrap">${logo(n)}<div><b>${esc(n.name)}</b>${n.is_demo ? `<small>Démo</small>` : ""}</div></div></td><td class="r">${nf(n.stores)}</td><td class="r">${nf(n.connected)}<small>${n.stores ? Math.round(n.connected / n.stores * 100) : 0} %</small></td><td class="r">${nf(n.promos)}</td><td class="r">${nf(n.published)}</td><td>${n.members.map(esc).join("<br>") || "—"}</td><td>${day(n.created_at)}</td></tr>`).join("")}
+  ${all.length ? `<div class="tw"><table><tr><th>Centrale</th><th>Intégration</th><th class="r">Magasins</th><th class="r">Connectés</th><th class="r">Promos</th><th class="r">Publications</th><th>Équipe</th><th>Depuis</th></tr>
+    ${all.map(n => `<tr class="click" data-net="${n.id}"><td><div class="row" style="flex-wrap:nowrap">${logo(n)}<div><b>${esc(n.name)}</b>${n.is_demo ? `<small>Démo</small>` : ""}</div></div></td><td style="min-width:120px">${(() => { const o = C.onb?.[n.id]; if (!o) return "—"; const p = Math.round(o.done / o.total * 100); return `<div class="prog" style="margin:0 0 3px"><i style="width:${p}%"></i></div><small>${o.done} / ${o.total} étapes</small>`; })()}</td><td class="r">${nf(n.stores)}</td><td class="r">${nf(n.connected)}<small>${n.stores ? Math.round(n.connected / n.stores * 100) : 0} %</small></td><td class="r">${nf(n.promos)}</td><td class="r">${nf(n.published)}</td><td>${n.members.map(esc).join("<br>") || "—"}</td><td>${day(n.created_at)}</td></tr>`).join("")}
   </table></div>` : `<div class="help">Aucune centrale cliente pour l'instant. Cochez « Inclure les démos » pour voir les démos.</div>`}`;
 }
 function vNet() {
@@ -248,6 +399,7 @@ function vNet() {
       <p class="sub" style="margin-top:10px">Contact : ${esc(n.support_email || "—")} · ${esc(n.phone || "—")}</p></div>
     <div class="card"><h3>Promos de la centrale</h3>${P.length ? `<ul class="list">${P.slice(0, 12).map(p => `<li><span><b>${esc(p.title)}</b>${p.is_mandatory ? ' <span class="pill p">Obligatoire</span>' : ""}<br><small style="color:var(--muted)">${day(p.starts_at)} → ${day(p.ends_at)} · ${p.active}/${p.sent} activées · ${p.relayed} relayées</small></span><b>${cnum(p.views)} vues</b></li>`).join("")}</ul>` : `<p class="empty">Aucune promo envoyée.</p>`}</div>
   </div>
+  ${onbHtml(C.netOnb)}
   <h3 style="margin-top:18px">Magasins</h3>
   <div class="tw"><table><tr><th>Magasin</th><th>Compte</th><th>Réseaux</th><th class="r">Publications 30 j</th><th class="r">À valider</th><th>Dernière connexion</th><th></th></tr>
     ${S.map(s => `<tr><td><b>${esc(s.name)}</b><small>${esc(s.postal_code || "")} ${esc(s.city || "")}</small></td>
@@ -342,7 +494,7 @@ function vSite() {
     <pre id="snip">${esc(SNIPPET)}</pre><button class="btn-s" id="copy-snip">Copier le code</button></div>`;
 }
 
-const VIEWS = { home: vHome, clients: vClients, net: vNet, stores: vStores, demos: vDemos, health: vHealth, site: vSite };
+const VIEWS = { home: vHome, support: vSupport, ticket: vTicket, clients: vClients, net: vNet, stores: vStores, demos: vDemos, health: vHealth, site: vSite };
 
 /* ---------- Actions ---------- */
 async function act(btn, fn, okMsg) {
@@ -366,13 +518,26 @@ function bind() {
   if ($("q")) { $("q").oninput = (e) => { UI.q = e.target.value; const pos = e.target.selectionStart; $("view").innerHTML = vStores(); bind(); $("q").focus(); $("q").setSelectionRange(pos, pos); }; }
   if ($("sf")) $("sf").onchange = (e) => { UI.sf = e.target.value; $("view").innerHTML = vStores(); bind(); };
   if ($("copy-snip")) $("copy-snip").onclick = () => navigator.clipboard.writeText(SNIPPET).then(() => toast("Code copié."), () => toast("Copie impossible : sélectionnez le texte."));
-  v.querySelectorAll("[data-reset]").forEach(b => b.onclick = () => {
-    if (!confirm(`Envoyer à ${b.dataset.reset} un email pour choisir un nouveau mot de passe ?`)) return;
-    act(b, async () => {
-      const { error } = await sb.auth.resetPasswordForEmail(b.dataset.reset, { redirectTo: `${location.origin}/${b.dataset.to}/?bienvenue=1` });
-      if (error) throw error; return "Email envoyé à " + b.dataset.reset + ".";
-    });
-  });
+  bindReset(v);
+  // À traiter
+  const items = todoItems();
+  v.querySelectorAll("[data-todo]").forEach(r => r.onclick = (e) => { if (!e.target.closest("[data-read]")) openTodo(items[+r.dataset.todo]); });
+  v.querySelectorAll("[data-read]").forEach(b => b.onclick = (e) => { e.stopPropagation(); markRead([items[+b.dataset.read].x.key]); });
+  if ($("read-all")) $("read-all").onclick = () => { if (confirm(`Marquer les ${items.length} éléments comme lus ?`)) markRead(items.map(i => i.x.key)); };
+  // Support
+  v.querySelectorAll("[data-tkf]").forEach(b => b.onclick = () => { UI.tkf = b.dataset.tkf; show("support"); });
+  v.querySelectorAll("[data-ticket]").forEach(r => r.onclick = () => { UI.ticket = r.dataset.ticket; show("ticket"); });
+  v.querySelectorAll("[data-goto-net]").forEach(b => b.onclick = () => { UI.net = b.dataset.gotoNet; show("net"); });
+  if ($("tk-st")) {
+    const id = C.ticket.ticket.id, reload = async () => { await need("ticket"); C.home = await rpc("manager_dashboard", { p_demo: UI.demo }).catch(() => C.home); frame(vTicket()); bind(); };
+    $("tk-st").onchange = (e) => act(null, async () => { await rpc("manager_ticket_set", { p_id: id, p_status: e.target.value }); await reload(); return "Statut mis à jour."; });
+    $("tk-prio").onclick = () => act($("tk-prio"), async () => { await rpc("manager_ticket_set", { p_id: id, p_priority: C.ticket.ticket.priority === "high" ? "normal" : "high" }); await reload(); return "Priorité mise à jour."; });
+    const send = (solve) => { const body = $("tk-body").value.trim(), internal = $("tk-int").checked; if (!body && !solve) return toast("Écrivez une réponse.");
+      act(null, async () => { await rpc("manager_ticket_reply", { p_id: id, p_body: body, p_internal: internal, p_status: solve ? "resolved" : null }); await reload(); return internal ? "Note ajoutée." : solve ? "Réponse envoyée, ticket résolu." : "Réponse envoyée au client."; }); };
+    $("tk-send").onclick = () => send(false); $("tk-solve").onclick = () => send(true);
+  }
+  // Intégration
+  v.querySelectorAll("[data-onb]").forEach(c => c.onchange = () => act(null, async () => { C.netOnb = await rpc("manager_onboarding_toggle", { p_net: UI.net, p_step: c.dataset.onb, p_done: c.checked }); $("view").innerHTML = vNet(); bind(); return "Étape mise à jour."; }));
   v.querySelectorAll("[data-inv]").forEach(b => b.onclick = () => act(b, async () => { const m = await invite([b.dataset.inv], C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }));
   if ($("inv-all")) $("inv-all").onclick = () => { const ids = C.net.stores.filter(s => !s.activated && s.contact_email).map(s => s.id); if (!confirm(`Envoyer l'invitation à ${ids.length} gérant(s) ?`)) return; act($("inv-all"), async () => { const m = await invite(ids.slice(0, 200), C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }); };
   v.querySelectorAll("[data-use]").forEach(b => b.onclick = () => act(b, async () => { await rpc("manager_activate_demo", { p_network_id: b.dataset.use }); await need("demos"); $("view").innerHTML = vDemos(); bind(); return "Démo activée. Rechargez la centrale et l'app magasin si elles sont ouvertes."; }));
