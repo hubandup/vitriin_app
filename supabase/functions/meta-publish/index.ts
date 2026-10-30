@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
   // --- L'activation --------------------------------------------------------
   const { data: activation, error: activationError } = await service
     .from("store_promotions")
-    .select("id, store_id, promotion_id, status, overrides")
+    .select("id, store_id, promotion_id, status, overrides, suspended, hidden")
     .eq("id", storePromotionId)
     .maybeSingle();
 
@@ -131,6 +131,11 @@ Deno.serve(async (req) => {
   // On ne publie pas une activation que le PDV n'a pas acceptée. Le verrou
   // is_mandatory du schéma garde tout son sens : une promo obligatoire naît
   // `active`, une promo optionnelle attend l'accord du commerçant.
+  // Suspendue ou supprimée par le magasin : on ne publie pas.
+  if (activation.suspended || activation.hidden) {
+    return fail(req, 409, "Cette promotion est suspendue ou supprimée sur ce point de vente.");
+  }
+
   if (activation.status !== "active") {
     return fail(
       req,
@@ -175,6 +180,8 @@ Deno.serve(async (req) => {
     .select("id, store_id, channel, external_account_id, parent_external_id, display_name")
     .eq("store_id", activation.store_id)
     .eq("status", "active")
+    // Le magasin peut couper un réseau dans ses Réglages sans le déconnecter.
+    .eq("enabled", true)
     .in("channel", requested);
 
   if (accountsError) {

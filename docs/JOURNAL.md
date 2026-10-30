@@ -20,6 +20,15 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-020 · Publication Meta : personnalisation magasin, réseaux coupés, promos suspendues
+- **Quoi** : la fonction `meta-publish` (version 5 déployée) publie le titre,
+  le texte et la photo personnalisés par le magasin ; elle ignore un compte
+  Facebook ou Instagram désactivé dans les Réglages (`enabled = false`) ;
+  elle refuse de publier une promo suspendue ou supprimée par le magasin.
+- **Fichier** : `supabase/functions/meta-publish/index.ts`.
+- **Retour arrière** : redéployer la version précédente du fichier
+  (`git show <commit>~1:supabase/functions/meta-publish/index.ts`).
+
 ### MOD-019 · Stats : toutes les statistiques d'une promo
 - **Quoi** : dans Stats, toucher une ligne d'« Activité récente » (ou de
   « Statut par promo ») ouvre le détail de la promo : statut et dates,
