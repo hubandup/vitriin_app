@@ -20,6 +20,15 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-027 · Manager : navigation en barre latérale
+- **Quoi** : les onglets du haut deviennent une barre latérale, comme dans
+  l'Espace Centrale, regroupée en Pilotage (Accueil, Clients, Magasins),
+  Commercial (Démos, Site web) et Technique (Santé). En bas : « Inclure les
+  démos », compte connecté, déconnexion. Sur mobile, la barre devient un
+  menu horizontal en haut.
+- **Fichier** : `web/espace-magasin/public/manager/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-027.
+
 ### MOD-026 · Manager V2 : poste de pilotage de Vitriin
 - **Quoi** : le Manager passe en onglets.
   - **Accueil** : centrales, magasins, part connectée, publications 30 j (et

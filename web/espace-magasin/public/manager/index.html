@@ -16,15 +16,32 @@
 body{margin:0;font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
 button{font:inherit;cursor:pointer;color:inherit}
 a{color:var(--p)}
-.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px}.brand img{width:36px;height:36px;border-radius:10px}
-.brand b{font-size:18px}.brand span{display:block;font-size:12px;color:var(--muted)}
-nav{display:flex;gap:4px;overflow-x:auto;margin:18px 0 6px;border-bottom:1px solid var(--line);scrollbar-width:none}
-nav button{border:none;background:none;padding:10px 12px;font-weight:700;color:var(--muted);border-bottom:2.5px solid transparent;white-space:nowrap}
-nav button.on{color:var(--p);border-bottom-color:var(--p)}
-nav em{font-style:normal;background:var(--err);color:#fff;font-size:11px;border-radius:9px;padding:1px 6px;margin-left:5px}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:16px 0 14px}
+.shell{display:flex;min-height:100vh}
+.side{flex:none;width:236px;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:11px;padding:0 6px}.brand img{width:38px;height:38px;border-radius:10px;flex:none}
+.brand b{display:block;font-size:15.5px;letter-spacing:-.02em}.brand span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+.sect{margin:20px 0 6px;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);padding:0 10px}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav button{display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;border-radius:11px;text-align:left;font-weight:600;font-size:14px;background:transparent;color:var(--ink)}
+.nav button:hover{background:var(--bg)}
+.nav button.on{background:var(--t-p);color:var(--v)}
+.nav svg{flex:none;opacity:.85}
+.nav em{font-style:normal;background:var(--err);color:#fff;font-size:11px;font-weight:700;border-radius:9px;padding:1px 7px;margin-left:auto}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:12px;padding:0 6px}
+.side-foot .me{font-size:12.5px;color:var(--muted);word-break:break-all}
+.side-foot .me button{border:none;background:none;padding:0;color:var(--p);font-weight:700;font-size:12.5px;display:block;margin-top:2px}
+.main{flex:1;min-width:0}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 24px 60px}
+@media (max-width:860px){
+  .shell{flex-direction:column}
+  .side{position:static;width:auto;height:auto;border-right:none;border-bottom:1px solid var(--line);padding:14px 14px 0}
+  .sect,.side-foot .mail{display:none}
+  .navs{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;margin-top:10px}.navs .nav{display:contents}
+  .nav button{white-space:nowrap;padding:9px 11px}
+  .side-foot{flex-direction:row;align-items:center;justify-content:space-between;padding:8px 2px 10px}
+  .wrap{padding:16px 16px 60px}
+}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:4px 0 16px}
 h2{font-size:18px;margin:0}h3{font-size:15px;margin:0 0 10px}
 .sub{color:var(--muted);font-size:13px;margin:4px 0 0;line-height:1.45}
 .ck{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--muted)}
@@ -100,7 +117,15 @@ const ls = { get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?
 let tt; const toast = (t) => { const el = $("toast"); el.textContent = t; el.classList.remove("hidden"); clearTimeout(tt); tt = setTimeout(() => el.classList.add("hidden"), 3800); };
 const rpc = async (n, a) => { const { data, error } = await sb.rpc(n, a); if (error) throw error; return data; };
 
-const TABS = [["home", "Accueil"], ["clients", "Clients"], ["stores", "Magasins"], ["demos", "Démos"], ["health", "Santé"], ["site", "Site web"]];
+const svg = (p) => `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const NAV = [
+  ["PILOTAGE", [["home", "Accueil", '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'],
+    ["clients", "Clients", '<path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/>'],
+    ["stores", "Magasins", '<path d="M3 9 4.6 4.5h14.8L21 9"/><path d="M3.4 9h17.2v1.6a2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0V9Z"/><path d="M5 11.4V20h14v-8.6"/>']]],
+  ["COMMERCIAL", [["demos", "Démos", '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>'],
+    ["site", "Site web", '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>']]],
+  ["TECHNIQUE", [["health", "Santé", '<path d="M3 12h4l3-8 4 16 3-8h4"/>']]],
+];
 const UI = { tab: ls.get("m-tab", "home"), demo: ls.get("m-demo", true), net: null, q: "", sf: "all" };
 const C = {}; // cache des réponses serveur, par onglet
 const MILESTONES = [["Validation Meta (App Review)", "2026-11-30"], ["Bêta Brisach prête", "2026-12-08"]];
@@ -125,6 +150,7 @@ async function boot() {
   if (!session) return showLogin();
   const ok = await rpc("is_platform_admin").catch(() => false);
   if (!ok) { await sb.auth.signOut(); return showLogin("Ce compte n'a pas accès au Manager."); }
+  UI.email = session.user.email;
   show();
 }
 
@@ -146,11 +172,12 @@ async function show(tab = UI.tab) {
 }
 function frame(inner) {
   const todo = C.home ? C.home.todo.accounts.length + C.home.todo.failures.length + C.home.todo.invites.length + C.home.todo.idle.length : 0;
-  $("app").innerHTML = `<div class="wrap">
-    <header><div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Manager</b><span>Poste de pilotage</span></div></div>
-      <div class="row"><label class="ck"><input type="checkbox" id="demo-ck" ${UI.demo ? "checked" : ""}> Inclure les démos dans les chiffres</label><button class="btn-s sm" id="out">Se déconnecter</button></div></header>
-    <nav>${TABS.map(([k, l]) => `<button class="${(UI.tab === k || (UI.tab === "net" && k === "clients")) ? "on" : ""}" data-tab="${k}">${l}${k === "home" && todo ? `<em>${todo}</em>` : ""}</button>`).join("")}</nav>
-    <div id="view">${inner}</div></div>`;
+  $("app").innerHTML = `<div class="shell">
+    <aside class="side"><div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Manager</b><span>Poste de pilotage</span></div></div>
+      <div class="navs">${NAV.map(([sect, items]) => `<div class="sect">${sect}</div><nav class="nav">${items.map(([k, l, ic]) => `<button class="${(UI.tab === k || (UI.tab === "net" && k === "clients")) ? "on" : ""}" data-tab="${k}">${svg(ic)}<span>${l}</span>${k === "home" && todo ? `<em>${todo}</em>` : ""}</button>`).join("")}</nav>`).join("")}</div>
+      <div class="side-foot"><label class="ck"><input type="checkbox" id="demo-ck" ${UI.demo ? "checked" : ""}> Inclure les démos</label>
+        <div class="me"><span class="mail">${esc(UI.email || "")}</span><button id="out">Se déconnecter</button></div></div></aside>
+    <main class="main"><div class="wrap"><div id="view">${inner}</div></div></main></div>`;
   $("out").onclick = async () => { await sb.auth.signOut(); showLogin(); };
   $("demo-ck").onchange = (e) => { UI.demo = e.target.checked; ls.set("m-demo", UI.demo); Object.keys(C).forEach(k => delete C[k]); show(UI.tab); };
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => show(b.dataset.tab));
