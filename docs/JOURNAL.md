@@ -20,6 +20,19 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-032 · vitriin.fr : hero avec téléphone et maquettes de publications (non publié)
+- **Quoi** : hero en deux colonnes avec un iPhone dessiné en CSS et 6 écrans
+  qui défilent (légendes synchronisées). 3e écran : maquette de post Instagram
+  en code. Étape « 02 · Le magasin » : même promo publiée par deux magasins
+  (Instagram Lyon, Facebook Nantes), sans logos officiels. Pastilles flottantes
+  masquées sur l'écran Instagram.
+- **Où** : projet Lovable « Vitriin » (c4816cab…) : `src/components/site/HeroPhone.tsx`,
+  `src/components/site/SocialMockups.tsx`, `src/routes/index.tsx`, `src/styles.css`.
+  Commits Lovable cac06f7, 04f0342, 6c445f8.
+- **Statut** : aperçu seulement, publication après validation de Charles.
+  Les captures de l'app (écrans 1, 2, 4, 5, 6) sont à remplacer par les UI actuelles.
+- **Retour arrière** : restaurer une version antérieure dans l'historique Lovable.
+
 ### MOD-031 · Manager : démos au nom d'un prospect
 - **Quoi** : Manager > Démos > « Démos au nom d'un prospect ». On saisit le
   nom de l'enseigne, le secteur et (facultatif) son logo ; le Manager génère
