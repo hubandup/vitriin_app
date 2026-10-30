@@ -333,12 +333,10 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .reel .prog i.on{background:#fff}
 .reel .rh{position:absolute;top:calc(var(--sat) + 22px);left:14px;right:14px;display:flex;align-items:center;gap:10px;color:#fff}
 .glass{background:rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.reel .back{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;flex:none}
 .reel .rav{width:40px;height:40px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;overflow:hidden}
 .reel .rh b{display:block;font-size:15.5px}
 .reel .rh span{font-size:12.5px;opacity:.75}
 .reel .open{margin-left:auto;font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:999px;display:flex;align-items:center;gap:5px}
-.pillback{position:absolute;top:calc(var(--sat) + 74px);left:50%;transform:translateX(-50%);background:#fff;color:var(--ink);font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:999px;display:flex;align-items:center;gap:7px;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.2);z-index:2}
 .reel .side{position:absolute;right:12px;bottom:calc(var(--sab) + 140px);display:flex;flex-direction:column;gap:16px;align-items:center}
 .reel .side button{display:flex;flex-direction:column;align-items:center;gap:5px;color:#fff;font-size:12px;font-weight:700}
 .reel .side i{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center}
@@ -1212,8 +1210,7 @@ function clients(startId) {
   layer.innerHTML = `<div class="reels" id="reels">${list.map((p, k) => { const pr = pricing(p); return `<section class="reel">
     <img onerror="this.style.visibility='hidden'" src="${esc(p.img)}" alt=""><div class="shade"></div>
     <div class="prog">${list.map((_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("")}</div>
-    <div class="rh"><button class="back glass" data-close>${I.back}</button><button class="rav" data-close aria-label="Revenir à l'espace magasin">${avatar()}</button><div><b>${esc(STORE.name)}</b><span>${esc(STORE.city)} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
-    <button class="pillback" data-close>${I.back.replace('width="20" height="20"', 'width="15" height="15"')}Côté clients · Revenir au magasin</button>
+    <div class="rh"><button class="rav" data-close aria-label="Revenir à l'espace magasin">${avatar()}</button><div><b>${esc(STORE.name)}</b><span>${esc(STORE.city)} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
     <div class="side"><button data-fav="${p.id}"><i class="glass">${I.heart(p.liked)}</i><span id="fav-${p.id}">${(p.fav || 0) + (p.liked ? 1 : 0)}</span></button><button data-tip="Itinéraire vers ${esc(STORE.address)}"><i class="glass">${I.pin}</i>Itinéraire</button><button data-tip="Lien de la promo copié"><i class="glass">${I.share}</i>Partager</button><button data-savep="${p.id}"><i class="glass">${I.save(p.saved)}</i>${p.saved ? "Enregistré" : "Enregistrer"}</button></div>
     <div class="info"><small>${esc(STORE.name)} · Jusqu'au ${fmtShort(p.end)}</small><h3>${esc(p.title)}</h3><p>${esc(p.sub || `Valable du ${fmtShort(p.start)} au ${fmtShort(p.end)}`)}</p>
       <div class="pr">${pr.price != null ? `<b>${eur(pr.price)}</b>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}` : ""}<em>${esc(pr.badge)}</em></div></div>
@@ -1241,9 +1238,19 @@ function clientId() {
   try { let id = localStorage.getItem("vitriin-client"); if (!id) { id = newId(); localStorage.setItem("vitriin-client", id); } return id; }
   catch { return newId(); }
 }
-function countReveal(p) {
-  Promise.resolve(sb.rpc("record_code_reveal", { p_store_promotion_id: p.spId, p_client_id: clientId() }))
-    .then(() => loadData()).catch(() => {});
+// Code révélé : on demande la position (une fois, le client peut refuser) pour
+// rattacher l'utilisation au magasin le plus proche. La position n'est pas
+// conservée : le serveur ne garde que le magasin trouvé.
+const herePos = () => new Promise((ok) => {
+  if (!navigator.geolocation) return ok(null);
+  navigator.geolocation.getCurrentPosition((x) => ok(x.coords), () => ok(null), { enableHighAccuracy: false, timeout: 6000, maximumAge: 600000 });
+});
+async function countReveal(p) {
+  try {
+    const c = await herePos();
+    await sb.rpc("record_code_reveal_at", { p_store_promotion_id: p.spId, p_client_id: clientId(), p_lat: c ? c.latitude : null, p_lng: c ? c.longitude : null });
+    await loadData();
+  } catch {}
 }
 function codeBox(p) {
   const el = document.createElement("div"); el.className = "codebox";

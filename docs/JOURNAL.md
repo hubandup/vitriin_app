@@ -20,6 +20,25 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-017 · Codes utilisés rattachés au magasin où se trouve le client ; vue clients épurée
+- **Géolocalisation** : quand le client révèle le code, l'app lui demande sa
+  position (il peut refuser). Le serveur rattache l'utilisation au magasin du
+  réseau le plus proche, à 10 km au plus ; sinon (refus, trop loin), au
+  magasin qui a publié la promo. **Les coordonnées ne sont jamais
+  enregistrées** : seuls le magasin trouvé (`store_id`), le magasin d'origine
+  (`origin_store_id`) et `located` sont gardés.
+- **Base** : migration `20261030081943_code_reveals_geoloc` : colonnes
+  `origin_store_id`, `located` ; RPC `record_code_reveal_at(…, lat, lng)` ;
+  l'ancienne `record_code_reveal` passe par la nouvelle (sans position).
+  Testé : un client près de Paris Rivoli est compté pour Paris Rivoli, un
+  client loin ou sans position pour le magasin d'origine.
+- **Vue clients** : flèche retour et bouton « Côté clients · Revenir au
+  magasin » retirés ; le logo du magasin fait l'aller-retour.
+- **À prévoir** : mention de la géolocalisation dans la politique de
+  confidentialité de la vitrine.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-017.
+
 ### MOD-016 · Drive to store : « Codes utilisés »
 - **Quoi** : quand un client touche « Utiliser cette promotion » et révèle le
   code-barre, l'événement est enregistré. Affiché : Stats › 4e tuile « Codes
