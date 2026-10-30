@@ -604,7 +604,12 @@ async function boot() {
   catch (e) { return showLogin(errText(e)); }
   $("#nav").classList.remove("hidden");
   render(); introOnce();
+  // Lien « Voir la conversation » des emails du support.
+  const tk = new URLSearchParams(location.search).get("support");
+  if (tk && /^[0-9a-f-]{36}$/i.test(tk)) { history.replaceState(null, "", location.pathname); sheetTicket(tk); }
 }
+// Email du support (Brevo), envoyé côté serveur ; un échec n'empêche pas le message d'être enregistré.
+const notifySupport = (id) => sb.functions.invoke("support-notify", { body: { ticket_id: id } }).catch(() => {});
 
 let S = { ig: "none", fb: "none", notifNet: prefs.notifNet, notifFail: prefs.notifFail, promos: [] };
 const save = () => {
@@ -903,6 +908,7 @@ function sheetSupportNew() {
     $("#tk-send").disabled = true;
     const { data, error } = await sb.rpc("support_create", { p_subject: subj, p_body: body, p_topic: topic, p_store_id: STORE.id, p_network_id: null, p_client: { ua: navigator.userAgent, app: "magasin" } });
     if (error) { $("#tk-send").disabled = false; return toast(errText(error)); }
+    notifySupport(data);
     toast("Demande envoyée. Nous vous répondons ici sous 24 h (jours ouvrés).");
     sheetTicket(data);
   };
@@ -925,7 +931,7 @@ async function sheetTicket(id) {
     $("#tk-go").disabled = true;
     const { error: e2 } = await sb.rpc("support_reply", { p_id: id, p_body: body });
     if (e2) { $("#tk-go").disabled = false; return toast(errText(e2)); }
-    sheetTicket(id);
+    notifySupport(id); sheetTicket(id);
   };
   // Nouveaux messages : vérification toutes les 4 s tant que la conversation est ouverte.
   clearInterval(tkPoll); let seen = data.messages.length, st = t.status;

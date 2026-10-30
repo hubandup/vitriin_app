@@ -172,8 +172,13 @@ async function boot() {
   const ok = await rpc("is_platform_admin").catch(() => false);
   if (!ok) { await sb.auth.signOut(); return showLogin("Ce compte n'a pas accès au Manager."); }
   UI.email = session.user.email;
+  // Lien « Ouvrir dans le Manager » des emails du support.
+  const tk = new URLSearchParams(location.search).get("ticket");
+  if (tk && /^[0-9a-f-]{36}$/i.test(tk)) { UI.ticket = tk; history.replaceState(null, "", location.pathname); return show("ticket"); }
   show();
 }
+// Email du support (Brevo), envoyé côté serveur ; un échec n'empêche pas le message d'être enregistré.
+const notifySupport = (id) => sb.functions.invoke("support-notify", { body: { ticket_id: id } }).catch(() => {});
 
 /* ---------- Chargement par onglet ---------- */
 async function need(tab) {
@@ -607,7 +612,7 @@ function bind() {
     $("tk-st").onchange = (e) => act(null, async () => { await rpc("manager_ticket_set", { p_id: id, p_status: e.target.value }); await reload(); return "Statut mis à jour."; });
     $("tk-prio").onclick = () => act($("tk-prio"), async () => { await rpc("manager_ticket_set", { p_id: id, p_priority: C.ticket.ticket.priority === "high" ? "normal" : "high" }); await reload(); return "Priorité mise à jour."; });
     const send = (solve) => { const body = $("tk-body").value.trim(), internal = $("tk-int").checked; if (!body && !solve) return toast("Écrivez une réponse.");
-      act(null, async () => { await rpc("manager_ticket_reply", { p_id: id, p_body: body, p_internal: internal, p_status: solve ? "resolved" : null }); await reload(); return internal ? "Note ajoutée." : solve ? "Réponse envoyée, ticket résolu." : "Réponse envoyée au client."; }); };
+      act(null, async () => { await rpc("manager_ticket_reply", { p_id: id, p_body: body, p_internal: internal, p_status: solve ? "resolved" : null }); if (body && !internal) notifySupport(id); await reload(); return internal ? "Note ajoutée." : solve ? "Réponse envoyée, ticket résolu." : "Réponse envoyée au client."; }); };
     $("tk-send").onclick = () => send(false); $("tk-solve").onclick = () => send(true);
   }
   v.querySelectorAll("[data-ntab]").forEach(b => b.onclick = () => { UI.ntab = b.dataset.ntab; $("view").innerHTML = vNet(); bind(); });

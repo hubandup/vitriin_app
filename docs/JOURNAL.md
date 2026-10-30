@@ -20,6 +20,18 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-047 · Emails du support via Brevo
+- **Quoi** : nouvelle demande ou message client → email à l'équipe (SUPPORT_INBOX, hello@vitriin.co par défaut),
+  « répondre » va au client, bouton vers le ticket dans le Manager (`/manager/?ticket=<id>`). Réponse de l'équipe →
+  email au client avec le message et un bouton vers la conversation (`/magasin/?support=<id>` ou `/centrale/?support=<id>`).
+  Notes internes et changements de statut seuls : pas d'email.
+- **Sécurité** : fonction `support-notify` (JWT requis) ; l'appelant ne peut faire partir que SES messages, non internes,
+  pas encore notifiés (`support_messages.notified_at`, réservé avant l'envoi : pas de doublon). Clé Brevo en secret
+  Supabase uniquement (`BREVO_API_KEY`) ; sans clé, la fonction ne fait rien. Contenu échappé (pas d'injection HTML).
+- **Où** : `supabase/functions/support-notify/`, migration `20261031000000_support_notified.sql`,
+  appels dans `magasin`, `centrale`, `manager` (`notifySupport`, liens profonds).
+- **Retour arrière** : supprimer le secret `BREVO_API_KEY` (plus aucun envoi) ; `git revert`.
+
 ### MOD-046 · Alertes de sécurité par email
 - **Quoi** : deux emails automatiques Supabase, en français et à la charte : « mot de passe modifié » et
   « adresse email modifiée » (envoyé à l'ancienne adresse, avec contact hello@vitriin.co si ce n'est pas

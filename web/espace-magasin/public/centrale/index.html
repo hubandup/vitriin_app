@@ -1520,7 +1520,7 @@ function helpNew() {
     $("hp-send").disabled = true;
     const { data, error } = await sb.rpc("support_create", { p_subject: subj, p_body: body, p_topic: topic, p_store_id: null, p_network_id: S.net.id, p_client: { ua: navigator.userAgent, app: "centrale" } });
     if (error) { $("hp-send").disabled = false; return toast(errText(error)); }
-    toast("Demande envoyée à l'équipe Vitriin."); helpThread(data);
+    notifySupport(data); toast("Demande envoyée à l'équipe Vitriin."); helpThread(data);
   };
 }
 const hpMsgs = (list) => list.map(m => `<div class="tk-msg ${m.kind}"><small>${m.kind === "staff" ? "Équipe Vitriin" : "Vous"} · ${dshort(m.at)} ${new Date(m.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(m.body)}</div>`).join("");
@@ -1540,7 +1540,7 @@ async function helpThread(id) {
     $("hp-go").disabled = true;
     const { error: e2 } = await sb.rpc("support_reply", { p_id: id, p_body: body });
     if (e2) { $("hp-go").disabled = false; return toast(errText(e2)); }
-    helpThread(id);
+    notifySupport(id); helpThread(id);
   };
   // Nouveaux messages : vérification toutes les 4 s tant que la fenêtre est ouverte.
   clearInterval(hpPoll); let seen = data.messages.length, st = t.status;
@@ -1983,7 +1983,12 @@ async function boot() {
   if (qs.has("bienvenue")) { S.view = "settings"; S.stab = "users"; history.replaceState(null, "", location.pathname); setTimeout(() => toast("Bienvenue ! Choisissez votre mot de passe et complétez votre profil."), 300); }
   if (S.view === "settings" && S.stab === "users") loadMembers();
   show("v-new", false); show("v-app"); render(); helpBadge();
+  // Lien « Voir la conversation » des emails du support.
+  const tk = qs.get("support");
+  if (tk && /^[0-9a-f-]{36}$/i.test(tk)) { history.replaceState(null, "", location.pathname); helpThread(tk); }
 }
+// Email du support (Brevo), envoyé côté serveur ; un échec n'empêche pas le message d'être enregistré.
+const notifySupport = (id) => sb.functions.invoke("support-notify", { body: { ticket_id: id } }).catch(() => {});
 boot();
 
 // Suivi en direct : ce que font les magasins (activer, refuser, publier)
