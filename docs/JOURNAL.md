@@ -20,6 +20,15 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-037 · Vitrine : cartes alignées, adresse sans doublon ; lien vitrine dans les posts Facebook
+- **Vitrine** : images des cartes contraintes au carré (les cartes avaient des hauteurs différentes),
+  ville non répétée quand l'adresse la contient déjà. Vérifié en ligne : magasin, promo, code Code 128.
+- **meta-publish** : sur Facebook, la légende se termine par « En profiter en magasin : https://app.vitriin.co/v/p/<id> »
+  (`PUBLIC_VITRINE_URL` pour changer de domaine). Instagram inchangé (liens non cliquables).
+  **Code commité, fonction pas encore redéployée** : à déployer avec la prochaine mise à jour de meta-publish
+  (les publications Meta réelles attendent l'App Review).
+- **Retour arrière** : `git revert` du commit.
+
 ### SEC-001 · Coordonnées des gérants lisibles publiquement (corrigé)
 - **Problème** : la règle `stores_select_public` (lecture de tous les magasins par tous, y compris
   sans connexion) exposait `contact_email`, `contact_phone`, noms des gérants. Les promos actives

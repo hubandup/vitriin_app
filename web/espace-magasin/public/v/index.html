@@ -49,8 +49,8 @@ h2{font-size:20px;margin:26px 0 12px}
 .search:focus-within{border-color:var(--p)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .card{background:#fff;border-radius:20px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(0,0,0,.04);border:1px solid var(--line)}
-.card .ph{position:relative;aspect-ratio:1;background:var(--rose)}
-.card .ph img{width:100%;height:100%;object-fit:cover}
+.card .ph{position:relative;aspect-ratio:1;background:var(--rose);overflow:hidden}
+.card .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .badge{position:absolute;left:10px;top:10px;background:var(--p);color:#fff;font-weight:800;font-size:14px;padding:5px 10px;border-radius:10px}
 .card .bd{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
 .card b{font-size:16px;line-height:1.25}
@@ -75,7 +75,7 @@ h2{font-size:20px;margin:26px 0 12px}
 .promo{display:grid;gap:18px;grid-template-columns:1fr}
 @media (min-width:800px){.promo{grid-template-columns:1.05fr 1fr;align-items:start}}
 .promo .ph{border-radius:24px;overflow:hidden;background:var(--rose);aspect-ratio:1;position:relative}
-.promo .ph img{width:100%;height:100%;object-fit:cover}
+.promo .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .promo .ph .badge{font-size:17px;padding:7px 12px;left:14px;top:14px}
 .panel{background:#fff;border-radius:22px;padding:20px;border:1px solid var(--line)}
 .panel h1{font-size:26px}
@@ -165,6 +165,7 @@ function pricing(p) {
   return { price: null, old: null, badge: p.mechanic || "Promo" };
 }
 const avatar = (s) => s.logo_url || s.network_logo ? `<img src="${esc(s.logo_url || s.network_logo)}" alt="">` : esc((s.name || "?").trim()[0].toUpperCase());
+const addr = (s) => { const a = (s.address || "").trim(), c = (s.city || "").trim(); return a && c && a.toLowerCase().includes(c.toLowerCase()) ? a : [a, c].filter(Boolean).join(", "); };
 const mapsUrl = (s) => s.lat != null ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([s.name, s.address, s.city].filter(Boolean).join(" "))}`;
 
 function promoCard({ promo: p, store: s, d }) {
@@ -176,7 +177,7 @@ function promoCard({ promo: p, store: s, d }) {
       <small>${esc(s.name)}${d != null ? ` · ${km(d)}` : ""}</small><small>Jusqu'au ${day(p.ends_at)}</small></div></a>`;
 }
 function storeRow(s) {
-  return `<a class="srow" href="/v/m/${esc(s.slug)}" data-link><span class="av">${avatar(s)}</span><div><b>${esc(s.name)}</b><span>${esc([s.address, s.city].filter(Boolean).join(", ") || s.city || "")}</span></div>
+  return `<a class="srow" href="/v/m/${esc(s.slug)}" data-link><span class="av">${avatar(s)}</span><div><b>${esc(s.name)}</b><span>${esc(addr(s))}</span></div>
     ${s.live ? `<span class="chip">${s.live} promo${s.live > 1 ? "s" : ""}</span>` : ""}${s.demo ? ` <span class="chip demo">Démo</span>` : ""}</a>`;
 }
 function dist(a, s) {
@@ -298,7 +299,7 @@ async function pageStore(slug) {
   const draw = () => {
     const on = isFollowing(s.id);
     app().innerHTML = `<div class="shead"><span class="av">${avatar(s)}</span><div style="flex:1;min-width:0"><h1>${esc(s.name)}</h1>
-      <p class="sub">${esc([s.address, s.city].filter(Boolean).join(", "))}</p>${s.demo ? `<span class="chip demo">Magasin de démonstration</span>` : ""}
+      <p class="sub">${esc(addr(s))}</p>${s.demo ? `<span class="chip demo">Magasin de démonstration</span>` : ""}
       <div class="acts"><button class="pill ${on ? "ghost" : "brand"}" id="fl">${on ? "Suivi ✓" : "Suivre ce magasin"}</button>
         <a class="pill ghost" href="${mapsUrl(s)}" target="_blank" rel="noopener">Itinéraire</a>${s.website ? `<a class="pill ghost" href="${esc(s.website)}" target="_blank" rel="noopener">Site web</a>` : ""}
         <button class="pill ghost" id="sh">Partager</button></div></div></div>
@@ -318,7 +319,7 @@ async function pagePromo(id) {
   const draw = () => {
     const saved = isSaved(p.id);
     app().innerHTML = `<div class="promo"><div class="ph">${p.img ? `<img src="${esc(p.img)}" alt="${esc(p.title)}">` : ""}<span class="badge">${esc(pr.badge)}</span></div>
-      <div class="panel"><a class="srow" href="/v/m/${esc(s.slug)}" data-link style="border:none;padding:0 0 12px"><span class="av">${avatar(s)}</span><div><b>${esc(s.name)}</b><span>${esc([s.address, s.city].filter(Boolean).join(", "))}</span></div></a>
+      <div class="panel"><a class="srow" href="/v/m/${esc(s.slug)}" data-link style="border:none;padding:0 0 12px"><span class="av">${avatar(s)}</span><div><b>${esc(s.name)}</b><span>${esc(addr(s))}</span></div></a>
         <h1>${esc(p.title)}</h1>
         ${pr.price != null ? `<div class="price"><strong>${eur(pr.price)}</strong>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}</div>` : ""}
         ${p.text ? `<p>${esc(p.text)}</p>` : ""}${p.sub ? `<p class="note">${esc(p.sub)}</p>` : ""}

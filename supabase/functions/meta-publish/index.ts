@@ -208,7 +208,11 @@ Deno.serve(async (req) => {
       publishToAccount(service, {
         account,
         storePromotionId,
-        caption,
+        // Facebook rend les liens cliquables : on ajoute la page de la promo
+        // sur la vitrine Vitriin (code en caisse, itinéraire). Pas sur Instagram.
+        caption: account.channel === "facebook"
+          ? `${caption}\n\nEn profiter en magasin : ${VITRINE_URL}/p/${storePromotionId}`
+          : caption,
         mediaUrl,
       })
     ),
@@ -492,6 +496,9 @@ async function waitForContainer(
 // -----------------------------------------------------------------------------
 // Légende
 // -----------------------------------------------------------------------------
+
+// Vitrine publique (page de la promo côté client).
+const VITRINE_URL = (Deno.env.get("PUBLIC_VITRINE_URL") ?? "https://app.vitriin.co/v").replace(/\/$/, "");
 
 function buildCaption(
   promotion: {
