@@ -53,31 +53,22 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .av img,.rav img{width:100%;height:100%;object-fit:contain;background:#fff;display:block}
 .head .sp b{display:block;font-size:19px;font-weight:700;letter-spacing:-.01em}
 .head .sp span{display:block;font-size:13.5px;color:var(--muted);margin-top:2px}
-.client-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--rose);color:var(--p);font-weight:700;font-size:15px;padding:13px;border-radius:14px}
-
-/* ---- Cartes d'alerte ---- */
-.hero{margin-top:12px;width:100%;display:flex;align-items:center;gap:14px;background:var(--grad);color:#fff;border-radius:20px;padding:16px;text-align:left;box-shadow:0 10px 26px rgba(229,8,126,.28)}
-.hero .ic{width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex:none}
-.hero b{display:block;font-size:16.5px;line-height:1.25}
-.hero span{display:block;font-size:13.5px;opacity:.9;margin-top:3px}
-.due{margin-top:12px;width:100%;display:flex;align-items:center;gap:14px;background:var(--sand);border:1.5px solid var(--sandline);border-radius:18px;padding:14px 16px;text-align:left}
-.due .ic{width:40px;height:40px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex:none;color:#6b5a3e}
-.due b{display:block;font-size:15px;line-height:1.3}
-.due span{display:block;font-size:13px;color:var(--muted);margin-top:3px;line-height:1.35}
-.warn{margin-top:12px;display:flex;align-items:center;gap:12px;background:var(--redbg);border-radius:18px;padding:12px 12px 12px 14px}
-.warn .igi{width:34px;height:34px;border-radius:10px;background:var(--ig);display:flex;align-items:center;justify-content:center;flex:none}
-.warn p{margin:0;font-size:14px;color:#8a2a22;line-height:1.35;flex:1}
+.logo-sw{position:relative;border:none;padding:0;width:52px;height:52px;flex:none;background:none}
+.logo-sw .eyeb{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:50%;background:#fff;color:var(--p);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.logo-sw .eyeb svg{width:13px;height:13px}
+.sec .cnt{background:var(--p);color:#fff;font-size:12.5px;font-weight:700;min-width:22px;height:22px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+.todo-box{border:1px solid var(--line);border-radius:18px;padding:2px 14px;background:#fff}
+.todo-row{width:100%;display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);text-align:left}
+.todo-row:last-child{border-bottom:none}
+.todo-row .ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none}
+.todo-row .ic svg{width:19px;height:19px}
+.todo-row b{display:block;font-size:15px;line-height:1.3}
+.todo-row .sp>span{display:block;font-size:13px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.todo-row .sp{min-width:0}
+.all-ok{display:flex;align-items:center;gap:10px;padding:14px 0;color:var(--teal);font-weight:700;font-size:15px}
+.week{width:100%;margin-top:22px;display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:16px;padding:14px 16px;text-align:left}
+.week b{display:block;font-size:15px}.week .sp>span{display:block;font-size:13.5px;color:var(--muted);margin-top:2px}
 .btn-red{background:var(--red);color:#fff;font-weight:700;font-size:13.5px;padding:10px 15px;border-radius:999px;white-space:nowrap;flex:none}
-.ok-note{margin-top:12px;display:flex;align-items:center;gap:10px;background:var(--mint);border-radius:16px;padding:12px 14px;font-size:14px;color:#2f6e52;font-weight:600}
-
-/* ---- KPI ---- */
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}
-.kpi{border-radius:18px;padding:14px 12px;min-height:96px}
-.kpi .num{font-size:30px;line-height:1}
-.kpi span{display:block;font-size:13px;color:var(--muted);margin-top:8px;line-height:1.3}
-.k1{background:var(--rose)}.k1 .num{color:var(--p)}
-.k2{background:var(--mint)}.k2 .num{color:var(--teal)}
-.k3{background:var(--redbg)}.k3 .num{color:var(--red)}
 
 /* ---- Sections ---- */
 .sec{display:flex;align-items:center;justify-content:space-between;margin:26px 0 12px}
@@ -85,11 +76,9 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .link{color:var(--p);font-weight:700;font-size:15px;display:flex;align-items:center;gap:3px}
 .carousel{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:0 16px 4px;scroll-snap-type:x mandatory;scrollbar-width:none}
 .carousel::-webkit-scrollbar{display:none}
-.pc{flex:none;width:68%;max-width:240px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;scroll-snap-align:start;text-align:left}
-.pc .im{position:relative;height:138px;background:var(--bg)}
-.pc .im img{width:100%;height:100%;object-fit:cover}
-.pc .body{padding:11px 12px 13px}
-.pc b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.carousel .slide{flex:none;width:84%;scroll-snap-align:start}
+.carousel .big{margin-bottom:0}
+.rav{border:none;padding:0;cursor:pointer}
 .price{display:flex;align-items:baseline;gap:7px;margin-top:5px;flex-wrap:wrap}
 .price .num{font-size:21px;color:var(--p)}
 .price s{font-size:13px;color:var(--faint)}
@@ -631,47 +620,32 @@ const nf = (n) => new Intl.NumberFormat("fr-FR").format(n).replace(/ /g, " ");
 
 /* ===================== Fragments ===================== */
 const tagSrc = (p) => p.src === "net" ? '<span class="st t-net">Centrale</span>' : '<span class="st t-own">Créée par vous</span>';
-function statusPill(p) {
-  if (p.status !== "draft" && Date.now() > new Date(p.end).getTime()) return '<span class="st s-draft">Terminée</span>';
-  if (p.suspended) return '<span class="st s-susp">Suspendue</span>';
-  if (p.status === "published") return '<span class="st s-pub">Publiée</span>';
-  if (p.status === "scheduled") return '<span class="st s-sch">Programmée</span>';
-  if (p.status === "active") return '<span class="st s-act">Activée</span>';
-  if (p.status === "declined") return '<span class="st s-dec">Refusée</span>';
-  if (p.status === "draft") return '<span class="st s-draft">Brouillon</span>';
-  return '<span class="st s-rec">Reçue</span>';
-}
-function priceLine(p, big) {
-  const pr = pricing(p);
-  if (pr.price == null) return `<div class="price"><span class="num" style="font-size:${big ? 24 : 21}px">${esc(pr.badge)}</span></div>`;
-  return `<div class="price"><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}${big ? `<span class="badge">${esc(pr.badge)}</span>` : ""}</div>`;
-}
-// Logos Facebook / Instagram : en couleur si la promo y est publiée, grisés sinon (× rouge si échec).
 const chanIcons = (p, big) => `<div class="chans">${["fb", "ig"].map(c => { const s = p.ch?.[c]; const name = c === "fb" ? "Facebook" : "Instagram";
   return `<span class="ch ${c} ${s === "ok" ? "" : "off"} ${s === "ko" ? "ko" : ""}" ${big ? 'style="width:36px;height:36px"' : ""} title="${name} : ${s === "ok" ? "publiée" : s === "ko" ? "échec" : "non publiée"}" aria-label="${name} : ${s === "ok" ? "publiée" : s === "ko" ? "échec" : "non publiée"}">${c === "fb" ? I.fbs : I.igs}</span>`; }).join("")}</div>`;
 const imgOr = (src, cls = "") => src ? `<img onerror="this.style.visibility='hidden'" src="${esc(src)}" alt="" class="${cls}" loading="lazy">` : `<div class="ph ${cls}"></div>`;
 
 /* ===================== Écrans ===================== */
+// Accueil : 1. À faire maintenant · 2. En ce moment · 3. Résumé de la semaine.
+// Le logo du magasin bascule vers la vue côté clients (et inversement).
 function viewHome() {
   const pend = pendingNet(), due = mandatoryDue();
-  const carousel = S.promos.filter(p => p.status === "published" || p.status === "scheduled").sort((a, b) => (b.pubAt || 0) - (a.pubAt || 0));
+  const toPub = S.promos.filter(p => p.status === "active" && !p.mandatory && !p.suspended && !isOver(p));
+  const live = S.promos.filter(p => catOf(p) === "live").sort((a, b) => a.end - b.end);
+  const t = totals(), sum = (i) => t.fb[i] + t.ig[i];
+  const row = (go, ic, color, title, sub, bg) => `<button class="todo-row" ${go}><span class="ic" style="background:${bg || color + "1f"};color:${color}">${ic}</span><span class="sp"><b>${title}</b>${sub ? `<span>${sub}</span>` : ""}</span><span class="chev">${I.chev}</span></button>`;
+  const rows = [
+    pend.length && row('data-go="promos:todo"', I.net, "#e5087e", `${pend.length} promo${pend.length > 1 ? "s" : ""} de la centrale à valider`, pend.map(p => esc(p.title)).join(" · ")),
+    ...due.map(p => row('data-go="promos:todo"', I.clock, "#2D2D2D", `${esc(p.title)} : à publier avant le ${fmtLong(p.deadline)}`, "Promo obligatoire de la centrale")),
+    toPub.length && row('data-go="promos:todo"', I.send, "#951b81", `${toPub.length} promo${toPub.length > 1 ? "s" : ""} activée${toPub.length > 1 ? "s" : ""} à publier`, toPub.map(p => esc(p.title)).join(" · ")),
+    S.ig === "broken" && row('data-act="reconnect"', I.igs, "#fff", "Instagram à reconnecter", "Vos publications Instagram échouent", "var(--ig)"),
+  ].filter(Boolean);
   return `<div class="screen">
-    <div class="head"><span class="av">${avatar()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>Centrale ${esc(STORE.net)} · ${esc(STORE.city)}</span></div></div>
-    <button class="client-btn" data-act="clients">${I.eye}Voir côté clients</button>
-    ${pend.length ? `<button class="hero" data-go="promos:net"><span class="ic">${I.net}</span><span class="sp"><b>${pend.length} nouvelle${pend.length > 1 ? "s" : ""} promo${pend.length > 1 ? "s" : ""} de la centrale à valider</b><span>${pend.map(p => esc(p.title)).join(" · ")}</span></span><span class="chev">${I.chev}</span></button>` : ""}
-    ${due.map(p => `<button class="due" data-go="promos:net"><span class="ic">${I.clock}</span><span class="sp"><b>${esc(p.title)} : à publier avant le ${fmtLong(p.deadline)}</b><span>Promo obligatoire de la centrale · publiez-la ou programmez-la</span></span><span class="chev">${I.chev}</span></button>`).join("")}
-    ${S.ig === "broken" ? `<div class="warn"><span class="igi">${I.ig}</span><p>Instagram est déconnecté : vos publications échouent.</p><button class="btn-red" data-act="reconnect">Reconnecter</button></div>` : ""}
-    <div class="kpis">
-      <div class="kpi k1"><div class="num">${activeCount()}</div><span>promos actives</span></div>
-      <div class="kpi k2"><div class="num">${pubCount()}</div><span>publications réussies</span></div>
-      <div class="kpi k3"><div class="num">${failCount()}</div><span>publication${failCount() > 1 ? "s" : ""} en échec</span></div>
-    </div>
-    <div class="sec"><h2>Mes promotions</h2><button class="link" data-go="promos:own">Tout voir ${I.chev}</button></div>
-    <div class="carousel">${carousel.map(p => { const pr = pricing(p); return `<button class="pc" data-open="${p.id}">
-      <div class="im">${imgOr(p.img)}<span class="tag ${p.src === "net" ? "t-net" : "t-own"}">${p.src === "net" ? "Centrale" : "Créée par vous"}</span>${pr.badge ? `<span class="disc">${esc(pr.badge)}</span>` : ""}</div>
-      <div class="body"><b>${esc(p.title)}</b>${priceLine(p)}<div style="margin-top:7px">${statusPill(p)}<span class="meta">${p.status === "scheduled" ? fmtDay(p.schedAt) : "au " + fmtShort(p.end)}</span></div></div></button>`; }).join("")}</div>
-    <div class="sec" style="margin-top:28px"><h2>Activité récente</h2></div>
-    <div>${activity()}</div>
+    <div class="head"><button class="logo-sw" data-act="clients" aria-label="Voir côté clients"><span class="av" style="width:52px;height:52px">${avatar()}</span><i class="eyeb">${I.eye}</i></button><div class="sp"><b>${esc(STORE.name)}</b><span>${STORE.hasNet ? `Centrale ${esc(STORE.net)} · ` : ""}${esc(STORE.city)}</span></div></div>
+    <div class="sec"><h2>À faire maintenant</h2>${rows.length ? `<span class="cnt">${rows.length}</span>` : ""}</div>
+    <div class="todo-box">${rows.join("") || `<div class="all-ok">${I.check}<span>Rien à faire : tout est à jour.</span></div>`}</div>
+    <div class="sec"><h2>En ce moment</h2><button class="link" data-go="promos:live">Tout voir ${I.chev}</button></div>
+    ${live.length ? `<div class="carousel">${live.map(p => `<div class="slide">${cardBig(p)}</div>`).join("")}</div>` : `<div class="empty" style="padding:18px 10px">Aucune promo en ligne pour l'instant.</div>`}
+    <button class="week" data-go="stats"><span class="sp"><b>7 derniers jours</b><span>${nf(sum(1))} vues · ${nf(sum(2))} interactions · ${pubCount()} publication${pubCount() > 1 ? "s" : ""}</span></span><span class="chev">${I.chev}</span></button>
   </div>`;
 }
 function activity() {
@@ -785,6 +759,8 @@ function viewStats() {
     <div class="eng"><span>Taux d'engagement</span><span class="num">${eng} %</span></div>
     <div class="legend"><span class="f">Facebook</span><span class="i">Instagram</span><span>· source : Meta</span></div>
     ${fails.length ? `<div class="sec" style="margin-bottom:0"><h2 style="font-size:17px;color:var(--red)">À résoudre</h2></div>${fails.map(p => `<div class="resolve"><p class="sp"><b>« ${esc(p.title)} »</b>Échec Instagram : reconnecter le compte</p>${S.ig === "broken" ? '<button class="btn-red" data-act="reconnect">Reconnecter</button>' : `<button class="btn-red" data-retry="${p.id}">Republier</button>`}</div>`).join("")}` : ""}
+    <div class="sec"><h2 style="font-size:17px">Activité récente</h2></div>
+    <div>${activity()}</div>
     <div class="sec"><h2 style="font-size:17px">Statut par promo</h2></div>
     ${pubs.map(p => { const s = (i) => (p.stats?.fb?.[i] || 0) + (p.stats?.ig?.[i] || 0); return `<div class="sp-row"><img onerror="this.style.visibility='hidden'" src="${esc(p.img)}" alt="" loading="lazy"><div class="sp"><div class="row" style="gap:8px"><b class="sp" style="font-size:15px">${esc(p.title)}</b>${tagSrc(p)}</div><div style="margin-top:6px">${chanIcons(p)}</div>${p.stats ? `<div class="mini"><div><b>${nf(s(0))}</b>portée</div><div><b>${nf(s(1))}</b>vues</div><div><b>${nf(s(2))}</b>interactions</div><div><b>${nf(s(3))}</b>commentaires</div></div>` : '<div class="small">Statistiques disponibles dans quelques heures.</div>'}</div></div>`; }).join("")}
   </div>`;
@@ -1229,7 +1205,7 @@ function clients(startId) {
   layer.innerHTML = `<div class="reels" id="reels">${list.map((p, k) => { const pr = pricing(p); return `<section class="reel">
     <img onerror="this.style.visibility='hidden'" src="${esc(p.img)}" alt=""><div class="shade"></div>
     <div class="prog">${list.map((_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("")}</div>
-    <div class="rh"><button class="back glass" data-close>${I.back}</button><span class="rav">${avatar()}</span><div><b>${esc(STORE.name)}</b><span>${esc(STORE.city)} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
+    <div class="rh"><button class="back glass" data-close>${I.back}</button><button class="rav" data-close aria-label="Revenir à l'espace magasin">${avatar()}</button><div><b>${esc(STORE.name)}</b><span>${esc(STORE.city)} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
     <button class="pillback" data-close>${I.back.replace('width="20" height="20"', 'width="15" height="15"')}Côté clients · Revenir au magasin</button>
     <div class="side"><button data-fav="${p.id}"><i class="glass">${I.heart(p.liked)}</i><span id="fav-${p.id}">${(p.fav || 0) + (p.liked ? 1 : 0)}</span></button><button data-tip="Itinéraire vers ${esc(STORE.address)}"><i class="glass">${I.pin}</i>Itinéraire</button><button data-tip="Lien de la promo copié"><i class="glass">${I.share}</i>Partager</button><button data-savep="${p.id}"><i class="glass">${I.save(p.saved)}</i>${p.saved ? "Enregistré" : "Enregistrer"}</button></div>
     <div class="info"><small>${esc(STORE.name)} · Jusqu'au ${fmtShort(p.end)}</small><h3>${esc(p.title)}</h3><p>${esc(p.sub || `Valable du ${fmtShort(p.start)} au ${fmtShort(p.end)}`)}</p>

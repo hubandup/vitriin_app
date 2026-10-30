@@ -20,6 +20,24 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-014 · App magasin : accueil simplifié, logo = bascule côté clients
+- **Accueil en trois blocs** (décidé avec Charles à l'oral) :
+  1. « À faire maintenant » : une seule carte qui regroupe promos de la
+     centrale à valider, obligatoires à publier, promos activées à publier,
+     Instagram à reconnecter (sinon « Rien à faire : tout est à jour ») ;
+  2. « En ce moment » : promos en ligne en grandes cartes (avec logos réseaux),
+     défilement horizontal, lien vers Promos › En cours ;
+  3. résumé des 7 derniers jours en une ligne (vues, interactions,
+     publications), lien vers Stats.
+- **Retirés de l'accueil** : bouton « Voir côté clients », bandeaux séparés,
+  les trois compteurs, l'ancien carrousel. « Activité récente » passe dans Stats.
+- **Logo du magasin** : le toucher ouvre la vue côté clients ; dans la vue
+  clients, toucher le logo ramène à l'espace magasin.
+- **Code retiré** : `statusPill`, `priceLine`, CSS `.hero`, `.due`, `.warn`,
+  `.kpis`, `.pc`, `.client-btn`.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-014.
+
 ### BUG-005 · Page promo qui bouge de côté sur iPhone — corrigé
 - **Cause** : sur Safari iOS, les deux champs de date et la ligne de
   statistiques débordaient légèrement de l'écran ; la page pouvait alors
