@@ -877,7 +877,7 @@ const TK_TOPICS = [["social", "Connexion Facebook / Instagram"], ["publication",
 const TK_ST = { new: "Envoyée", open: "En cours", waiting: "Réponse reçue", resolved: "Résolue" };
 async function sheetSupport() {
   const r = await sb.rpc("support_mine"); S.tickets = (!r.error && r.data) || S.tickets || [];
-  sheet(`<div class="grab"></div><h2>Support Vitriin</h2><p class="small" style="font-size:14px;margin-top:4px">Décrivez votre souci : l'équipe Vitriin voit directement l'état de vos comptes et vous répond ici.</p>
+  sheet(`<div class="grab"></div><h2>Support Vitriin</h2><p class="small" style="font-size:14px;margin-top:4px">Décrivez votre souci : l'équipe Vitriin voit directement l'état de vos comptes et vous répond ici <b>sous 24 h</b> (jours ouvrés).</p>
     <button class="big-btn" id="tk-new" style="margin-top:14px">Nouvelle demande</button>
     ${S.tickets.length ? `<div class="lbl" style="margin-top:18px">MES DEMANDES</div><div class="box">${S.tickets.map(t => `<button class="li" data-tk="${t.id}" style="width:100%;text-align:left;border:none;background:none;font:inherit;color:inherit"><span class="sp"><b style="font-size:15px">${esc(t.subject)}</b><span style="font-size:13px;color:var(--muted);display:block">${TK_ST[t.status] || ""} · ${fmtDay(new Date(t.updated_at).getTime())}</span></span>${t.unread ? '<span class="tk-new">Nouvelle réponse</span>' : ""}<span class="chev">${I.chev}</span></button>`).join("")}</div>` : ""}
     <button class="txt-btn" data-close>Fermer</button>`);
@@ -890,7 +890,7 @@ function sheetSupportNew() {
     <div class="fl">DE QUOI S'AGIT-IL ?</div><div class="tk-topics">${TK_TOPICS.map(([k, l]) => `<button class="tk-chip ${k === topic ? "on" : ""}" data-topic="${k}">${l}</button>`).join("")}</div>
     <div class="fl">EN QUELQUES MOTS</div><input class="in" id="tk-subj" maxlength="140" placeholder="Ex : Instagram ne publie plus mes promos">
     <div class="fl">VOTRE MESSAGE</div><textarea class="in" id="tk-body" rows="5" maxlength="5000" placeholder="Que s'est-il passé ? Depuis quand ?"></textarea>
-    <p class="small" style="margin-top:8px">L'état de vos comptes Facebook et Instagram est joint automatiquement à votre demande.</p>
+    <p class="small" style="margin-top:8px">L'état de vos comptes Facebook et Instagram est joint automatiquement à votre demande. Réponse sous 24 h (jours ouvrés).</p>
     <button class="big-btn" id="tk-send">Envoyer</button><button class="txt-btn" id="tk-back">Retour</button>`);
   $$("[data-topic]").forEach(b => b.onclick = () => { topic = b.dataset.topic; $$("[data-topic]").forEach(x => x.classList.toggle("on", x === b)); });
   $("#tk-back").onclick = sheetSupport;
@@ -900,18 +900,22 @@ function sheetSupportNew() {
     $("#tk-send").disabled = true;
     const { data, error } = await sb.rpc("support_create", { p_subject: subj, p_body: body, p_topic: topic, p_store_id: STORE.id, p_network_id: null, p_client: { ua: navigator.userAgent, app: "magasin" } });
     if (error) { $("#tk-send").disabled = false; return toast(errText(error)); }
-    toast("Demande envoyée. Nous vous répondons ici, en général dans la journée.");
+    toast("Demande envoyée. Nous vous répondons ici sous 24 h (jours ouvrés).");
     sheetTicket(data);
   };
 }
+const tkMsgs = (list) => list.map(m => `<div class="tmsg ${m.kind}"><small>${m.kind === "staff" ? "Équipe Vitriin" : "Vous"} · ${fmtDay(new Date(m.at).getTime())} ${new Date(m.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(m.body)}</div>`).join("");
+const tkWait = (t, list) => t.status !== "resolved" && list.length && list[list.length - 1].kind === "client" ? `<p class="small" style="margin-top:10px">Message bien reçu : l'équipe Vitriin vous répond ici sous 24 h (jours ouvrés). Cette page se met à jour toute seule.</p>` : "";
+let tkPoll = null;
 async function sheetTicket(id) {
   const { data, error } = await sb.rpc("support_thread", { p_id: id });
   if (error) return toast(errText(error));
   const t = data.ticket;
-  sheet(`<div class="grab"></div><h2>${esc(t.subject)}</h2><p class="small" style="font-size:13.5px;margin-top:4px">${TK_ST[t.status] || ""}</p>
-    <div class="tk-thread">${data.messages.map(m => `<div class="tmsg ${m.kind}"><small>${m.kind === "staff" ? "Équipe Vitriin" : "Vous"} · ${fmtDay(new Date(m.at).getTime())} ${new Date(m.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(m.body)}</div>`).join("")}</div>
+  sheet(`<div class="grab"></div><h2>${esc(t.subject)}</h2><p class="small" id="tk-stat" style="font-size:13.5px;margin-top:4px">${TK_ST[t.status] || ""}</p>
+    <div class="tk-thread" id="tk-thr">${tkMsgs(data.messages)}</div><div id="tk-wait">${tkWait(t, data.messages)}</div>
     <textarea class="in" id="tk-rep" rows="3" maxlength="5000" placeholder="${t.status === "resolved" ? "Le souci revient ? Écrivez-nous ici." : "Votre réponse…"}" style="margin-top:12px"></textarea>
     <button class="big-btn" id="tk-go">Envoyer</button><button class="txt-btn" id="tk-back">Mes demandes</button>`);
+  $("#tk-thr").lastElementChild?.scrollIntoView({ block: "nearest" });
   $("#tk-back").onclick = sheetSupport;
   $("#tk-go").onclick = async () => {
     const body = $("#tk-rep").value.trim(); if (!body) return toast("Écrivez votre message.");
@@ -920,6 +924,19 @@ async function sheetTicket(id) {
     if (e2) { $("#tk-go").disabled = false; return toast(errText(e2)); }
     sheetTicket(id);
   };
+  // Nouveaux messages : vérification toutes les 4 s tant que la conversation est ouverte.
+  clearInterval(tkPoll); let seen = data.messages.length, st = t.status;
+  tkPoll = setInterval(async () => {
+    if (!$("#tk-thr")) return clearInterval(tkPoll);
+    if (document.visibilityState !== "visible") return;
+    const r = await sb.rpc("support_thread", { p_id: id }); if (r.error || !$("#tk-thr")) return;
+    if (r.data.messages.length !== seen || r.data.ticket.status !== st) {
+      seen = r.data.messages.length; st = r.data.ticket.status;
+      $("#tk-thr").innerHTML = tkMsgs(r.data.messages); $("#tk-stat").textContent = TK_ST[st] || "";
+      $("#tk-wait").innerHTML = tkWait(r.data.ticket, r.data.messages);
+      $("#tk-thr").lastElementChild?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, 4000);
   const r = await sb.rpc("support_mine"); if (!r.error) S.tickets = r.data;
 }
 // Activer / désactiver un compte : désactivé = connecté, mais on n'y publie plus.

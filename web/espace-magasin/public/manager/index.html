@@ -347,6 +347,7 @@ function ctxHtml(c) {
   return `<ul class="list">${c.store ? `<li><span>Magasin</span><b>${esc(c.store.name)} · ${esc(c.store.city || "")}</b></li>` : ""}${c.network ? `<li><span>Centrale</span><b>${esc(c.network)}</b></li>` : ""}${ch}
     ${c.lastFailure ? `<li><span>Dernier échec : « ${esc(c.lastFailure.promo)} » sur ${CH(c.lastFailure.channel)}<br><small style="color:var(--muted)">${esc(c.lastFailure.error || "")} · ${day(c.lastFailure.at)}</small></span></li>` : ""}</ul>`;
 }
+const tkMsgs = (list, t) => list.map(m => `<div class="msg ${m.internal ? "internal" : m.kind}"><small>${m.internal ? "Note interne · " : ""}${m.kind === "client" ? esc(t.created_by_email || "Client") : esc(m.author || "Vitriin")} · ${day(m.at)} ${new Date(m.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(m.body)}</div>`).join("");
 function vTicket() {
   const D = C.ticket, t = D.ticket;
   return `<button class="back" data-tab="support">← Support</button>
@@ -355,7 +356,7 @@ function vTicket() {
       <button class="btn-s sm" id="tk-prio">${t.priority === "high" ? "Retirer « urgent »" : "Marquer urgent"}</button></div></div>
   <div class="two">
     <div class="card"><h3>Conversation</h3>
-      ${D.messages.map(m => `<div class="msg ${m.internal ? "internal" : m.kind}"><small>${m.internal ? "Note interne · " : ""}${m.kind === "client" ? esc(t.created_by_email || "Client") : esc(m.author || "Vitriin")} · ${day(m.at)} ${new Date(m.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(m.body)}</div>`).join("")}
+      <div id="tk-msgs">${tkMsgs(D.messages, t)}</div>
       <textarea class="in" id="tk-body" style="margin-top:14px" placeholder="Votre réponse…"></textarea>
       <div class="row" style="justify-content:space-between;margin-top:10px"><label class="ck"><input type="checkbox" id="tk-int"> Note interne (invisible du client)</label>
         <div class="row"><button class="btn-s" id="tk-send">Envoyer</button><button class="btn-p" id="tk-solve">Envoyer et résoudre</button></div></div></div>
@@ -547,6 +548,27 @@ function bind() {
     act(b, async () => { await rpc("manager_build_demo", { p_sector: b.dataset.build }); await need("demos"); $("view").innerHTML = vDemos(); bind(); return "Démo prête."; });
   });
 }
+// Mises à jour automatiques : conversation ouverte toutes les 4 s, compteur Support toutes les 20 s.
+setInterval(async () => {
+  if (UI.tab !== "ticket" || !C.ticket || !$("tk-msgs") || document.visibilityState !== "visible") return;
+  try {
+    const D = await rpc("manager_ticket", { p_id: UI.ticket });
+    if (D.messages.length !== C.ticket.messages.length || D.ticket.status !== C.ticket.ticket.status) {
+      C.ticket = D; $("tk-msgs").innerHTML = tkMsgs(D.messages, D.ticket); $("tk-st").value = D.ticket.status;
+      $("tk-msgs").lastElementChild?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  } catch {}
+}, 4000);
+setInterval(async () => {
+  if (!UI.email || document.visibilityState !== "visible") return;
+  try {
+    const L = await rpc("manager_tickets", { p_status: "active" }), n = L.filter(t => t.unread).length;
+    if (C.home) C.home.ticketsUnread = n;
+    const b = document.querySelector('.nav [data-tab="support"]'); if (!b) return;
+    let em = b.querySelector("em"); if (!n) { em?.remove(); } else { if (!em) { em = document.createElement("em"); b.appendChild(em); } if (em.textContent !== String(n)) { em.textContent = n; toast(`Support : ${n} demande${n > 1 ? "s" : ""} en attente de réponse.`); } }
+    if (UI.tab === "support" && JSON.stringify(L.map(t => [t.id, t.updated_at, t.unread])) !== JSON.stringify((C.tk || []).map(t => [t.id, t.updated_at, t.unread])) && (UI.tkf || "active") === "active") { C.tk = L; $("view").innerHTML = vSupport(); bind(); }
+  } catch {}
+}, 20000);
 boot().catch(e => showLogin(errText(e)));
 </script>
 </body>

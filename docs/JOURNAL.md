@@ -20,6 +20,22 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-030 · Support : messages en direct et délai de réponse affiché
+- **Quoi** : une conversation ouverte se met à jour toute seule toutes les
+  4 secondes (app magasin, Espace Centrale, Manager), sans perdre le message
+  en cours de saisie. Le compteur « Support » du Manager se met à jour
+  toutes les 20 s (avec une notification), le badge de l'Espace Centrale
+  toutes les 30 s, celui de l'app magasin avec le rafraîchissement habituel
+  (15 s). Vérification suspendue quand l'onglet n'est pas visible.
+- **Délai** : « réponse sous 24 h (jours ouvrés) » affiché à l'ouverture du
+  support, dans le formulaire, après l'envoi, et sous la conversation tant
+  que la dernière réponse vient du client.
+- **Choix technique** : vérification périodique plutôt que Supabase
+  Realtime, qui demanderait d'ouvrir les tables de support en lecture
+  directe (elles restent fermées, accès par fonctions uniquement).
+- **Fichiers** : `magasin/index.html`, `centrale/index.html`, `manager/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-030.
+
 ### MOD-029 · Manager : « À traiter » actionnable, support (tickets), checklist d'intégration
 - **À traiter** : chaque élément se marque comme lu (« Lu ✓ », ou « Tout
   marquer comme lu », avec « Annuler » quelques secondes). Un élément lu

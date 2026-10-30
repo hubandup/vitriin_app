@@ -1495,7 +1495,7 @@ const TK_ST = { new: "Envoyée", open: "En cours", waiting: "Réponse reçue", r
 function helpModal(inner) {
   $("m-help")?.remove();
   const ov = document.createElement("div"); ov.className = "ov"; ov.id = "m-help";
-  ov.innerHTML = `<div class="modal sm"><div class="mh"><div><h2>Support Vitriin</h2><p>L'équipe Vitriin vous répond ici, en général dans la journée.</p></div><button class="x" data-hx aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="mb">${inner}</div></div>`;
+  ov.innerHTML = `<div class="modal sm"><div class="mh"><div><h2>Support Vitriin</h2><p>L'équipe Vitriin vous répond ici sous 24 h (jours ouvrés).</p></div><button class="x" data-hx aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="mb">${inner}</div></div>`;
   ov.onclick = (e) => { if (e.target === ov || e.target.closest("[data-hx]")) ov.remove(); };
   document.body.appendChild(ov); return ov;
 }
@@ -1523,12 +1523,15 @@ function helpNew() {
     toast("Demande envoyée à l'équipe Vitriin."); helpThread(data);
   };
 }
+const hpMsgs = (list) => list.map(m => `<div class="tk-msg ${m.kind}"><small>${m.kind === "staff" ? "Équipe Vitriin" : "Vous"} · ${dshort(m.at)} ${new Date(m.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(m.body)}</div>`).join("");
+const hpWait = (t, list) => t.status !== "resolved" && list.length && list[list.length - 1].kind === "client" ? `<div class="hint">Message bien reçu : réponse sous 24 h (jours ouvrés). Cette fenêtre se met à jour toute seule.</div>` : "";
+let hpPoll = null;
 async function helpThread(id) {
   const { data, error } = await sb.rpc("support_thread", { p_id: id });
   if (error) return toast(errText(error));
   const t = data.ticket;
-  helpModal(`<b style="font-size:15px">${esc(t.subject)}</b><div class="hint" style="margin-top:2px">${TK_STxt(t.status)}</div>
-    ${data.messages.map(m => `<div class="tk-msg ${m.kind}"><small>${m.kind === "staff" ? "Équipe Vitriin" : "Vous"} · ${dshort(m.at)} ${new Date(m.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(m.body)}</div>`).join("")}
+  helpModal(`<b style="font-size:15px">${esc(t.subject)}</b><div class="hint" id="hp-stat" style="margin-top:2px">${TK_STxt(t.status)}</div>
+    <div id="hp-thr">${hpMsgs(data.messages)}</div><div id="hp-wait">${hpWait(t, data.messages)}</div>
     <textarea class="in" id="hp-rep" style="min-height:90px;margin-top:14px" maxlength="5000" placeholder="Votre réponse…"></textarea>
     <div class="copy" style="justify-content:flex-end"><button class="btn-s" id="hp-back">Mes demandes</button><button class="btn-p" id="hp-go">Envoyer</button></div>`);
   $("hp-back").onclick = helpList;
@@ -1539,10 +1542,23 @@ async function helpThread(id) {
     if (e2) { $("hp-go").disabled = false; return toast(errText(e2)); }
     helpThread(id);
   };
+  // Nouveaux messages : vérification toutes les 4 s tant que la fenêtre est ouverte.
+  clearInterval(hpPoll); let seen = data.messages.length, st = t.status;
+  hpPoll = setInterval(async () => {
+    if (!$("hp-thr")) return clearInterval(hpPoll);
+    if (document.visibilityState !== "visible") return;
+    const r = await sb.rpc("support_thread", { p_id: id }); if (r.error || !$("hp-thr")) return;
+    if (r.data.messages.length !== seen || r.data.ticket.status !== st) {
+      seen = r.data.messages.length; st = r.data.ticket.status;
+      $("hp-thr").innerHTML = hpMsgs(r.data.messages); $("hp-stat").textContent = TK_STxt(st);
+      $("hp-wait").innerHTML = hpWait(r.data.ticket, r.data.messages);
+    }
+  }, 4000);
 }
 const TK_STxt = (s) => TK_ST[s] || "";
 $("help-go").onclick = helpList;
 async function helpBadge() { try { const { data } = await sb.rpc("support_mine"); $("help-new").classList.toggle("hidden", !(data || []).some(t => t.unread)); } catch {} }
+setInterval(() => { if (document.visibilityState === "visible" && S.net) helpBadge(); }, 30000);
 
 /* ---------- Invitation ---------- */
 function inviteLink() { return `${location.origin}/?rejoindre=${encodeURIComponent(S.net.join_code)}`; }
