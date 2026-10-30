@@ -20,6 +20,14 @@ Repères :
 
 ## 2026-10-30
 
+### BUG-007 · Logo des emails non affiché (corrigé)
+- **Problème** : le logo hébergé sur app.vitriin.co ne s'affichait pas dans l'aperçu des emails.
+- **Correction** : logo déposé dans un bucket public Supabase `email-assets`
+  (https://zjugauidrijghesgsmap.supabase.co/storage/v1/object/public/email-assets/logo-vitriin-blanc.png),
+  même domaine que l'expéditeur des emails d'auth ; modèles mis à jour. Migration `20261030235500_email_assets_bucket`
+  (lecture publique, écriture équipe Vitriin). La copie sur app.vitriin.co reste en secours.
+- **Retour arrière** : `git revert` ; supprimer le bucket `email-assets`.
+
 ### MOD-043 · Emails d'authentification : logo Vitriin blanc dans le bandeau
 - **Quoi** : `public/email/logo-vitriin-blanc.png` (logo officiel du projet passé en blanc, PNG car Gmail
   n'affiche pas le SVG), servi sur https://app.vitriin.co/email/logo-vitriin-blanc.png, utilisé dans les
