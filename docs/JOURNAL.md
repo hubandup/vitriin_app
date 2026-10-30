@@ -20,6 +20,30 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-012 · Promos par catégories qu'on balaye, logos réseaux, page promo
+- **Page Promos** : cinq catégories qu'on fait défiler en balayant (ou en
+  touchant l'onglet) : À traiter (magenta) · En cours (vert) · À venir
+  (violet) · Suspendues (bleu) · Supprimées (gris). Les promos terminées et
+  refusées sont rangées dans « Supprimées ». Cartes façon piste A, statut
+  dans la couleur de sa catégorie, boutons Activer / Publier sur les cartes
+  « À traiter ». Les onglets « De la centrale / Mes promos » disparaissent :
+  la carte indique « Centrale » ou « Ma promo ».
+- **Glisser sur une carte retiré** : le balayage horizontal sert désormais à
+  changer de catégorie ; Suspendre / Reprendre / Supprimer passent sur la
+  page de la promo (avec confirmation).
+- **Logos réseaux partout** : Facebook et Instagram toujours affichés, en
+  couleur si la promo y est publiée, grisés sinon (× rouge si échec).
+- **Page d'une promo** : photo (toucher = menu : prendre une photo, galerie,
+  médiathèque de la centrale), statut, logos, statistiques (portée, vues,
+  interactions, commentaires), champs titre / texte (+ dates pour une promo
+  du magasin), modifiables si autorisé ; « Suspendre » ou « Supprimer » selon
+  le statut, et « Valider » (enregistre ; accepte aussi une promo reçue).
+- **Suppression** : désormais douce pour toutes les promos (la promo passe
+  dans « Supprimées », `store_promotions.hidden`), plus de suppression
+  définitive depuis l'app.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-012.
+
 ### MOD-011 · App magasin : nouvelles cartes promo et fiche promo
 - **Choix de Charles** : « À traiter » en tête façon piste B, puis grandes
   cartes façon piste A (maquettes sur la planche « Vitriin · Cartes promo »).

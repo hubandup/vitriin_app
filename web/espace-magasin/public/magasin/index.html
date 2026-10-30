@@ -132,23 +132,33 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .card{position:relative;background:#fff;cursor:pointer}
 .sec-h{display:flex;align-items:baseline;justify-content:space-between;margin:20px 0 10px}
 .sec-h h2{font-size:17px;margin:0}.sec-h span{font-size:13px;color:var(--muted)}
-.tcard{display:flex;gap:12px;border-radius:18px;padding:10px;background:#fdf0f6;margin-bottom:10px}
-.tcard.mand{background:#f4f1ec}
-.tcard>img,.tcard>.ph{width:104px;height:104px;border-radius:13px;object-fit:cover;flex:none;background:var(--bg)}
-.tcard .tx{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:6px}
-.tcard .k{font-size:12px;font-weight:700;color:#b5005f}.tcard.mand .k{color:var(--ink)}
-.tcard h3{font-size:16px;margin:2px 0 0;line-height:1.2}
-.tcard .d{font-size:13px;color:var(--muted);margin-top:2px}
-.tcard .go{align-self:flex-start;min-height:40px;padding:0 18px;border-radius:12px;font-weight:700;font-size:14px;color:#fff;background:var(--grad)}
-.tcard.mand .go{background:var(--ink)}
 .big{border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:12px}
 .big .im{position:relative;height:190px;background:var(--bg)}
 .big .im img{width:100%;height:100%;object-fit:cover;display:block}
 .big .bd{padding:12px 16px 14px}
 .big h3{font-size:17px;margin:0;letter-spacing:-.01em}
 .big .d{font-size:14px;color:var(--muted);margin-top:3px}
-.chip{position:absolute;top:12px;left:12px;background:#fff;color:var(--ink);font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;display:flex;align-items:center;gap:6px}
-.chip i{width:8px;height:8px;border-radius:50%;display:block}
+.chip{position:absolute;top:12px;left:12px;background:var(--cc);color:#fff;font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px}
+
+.big .btns{margin-top:12px}
+.big .btns button{padding:11px 8px;font-size:14.5px;border-radius:12px}
+.cats{display:flex;gap:8px;overflow-x:auto;margin:14px -16px 4px;padding:0 16px 4px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cats button{flex:none;display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:14px;color:var(--ink)}
+.cats button::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--cc)}
+.cats button em{font-style:normal;font-size:12px;color:var(--muted)}
+.cats button.on{background:var(--cc);border-color:var(--cc);color:#fff}
+.cats button.on::before{background:#fff}.cats button.on em{color:#fff;opacity:.85}
+.pager{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;scrollbar-width:none;-webkit-overflow-scrolling:touch;align-items:flex-start}
+.pager::-webkit-scrollbar{display:none}
+.pg{flex:0 0 100%;scroll-snap-align:start;padding:12px 16px 0;box-sizing:border-box;min-height:50vh}
+.fiche .stchip{background:var(--cc);color:#fff;font-weight:700;font-size:13px;padding:6px 12px;border-radius:999px}
+.fiche .fhero .photo{position:absolute;inset:0;width:100%;background:transparent}
+.fiche .ph-hint{position:absolute;left:14px;bottom:14px;background:rgba(45,45,45,.7);color:#fff;font-size:13px;font-weight:700;padding:7px 11px;border-radius:999px;display:flex;align-items:center;gap:6px;pointer-events:none}
+.fiche .ph-hint svg{width:16px;height:16px}
+.kpis4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.kpis4 div{background:var(--bg);border-radius:12px;padding:10px 6px;text-align:center}
+.kpis4 b{display:block;font-size:17px}.kpis4 span{font-size:11.5px;color:var(--muted)}
 .offer{position:absolute;left:12px;bottom:12px;background:var(--p);color:#fff;font-weight:700;font-size:19px;padding:5px 11px;border-radius:12px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .big .eye{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;background:#fff;color:var(--p);display:flex;align-items:center;justify-content:center}
 .big .eye svg{width:19px;height:19px}
@@ -170,15 +180,6 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .fiche .acts button{flex:1;min-height:50px;border-radius:15px;font-weight:700;font-size:15px}
 .fiche .links{display:flex;justify-content:center;gap:22px;margin-top:8px}
 .fiche .links button{font-weight:700;font-size:14px;padding:8px}
-.swipe{position:relative;margin-bottom:12px;border-radius:20px;overflow:hidden}
-.swipe .tcard,.swipe .big{margin-bottom:0}
-.swipe .card{margin-bottom:0;transition:transform .2s ease;touch-action:pan-y;-webkit-user-select:none;user-select:none}
-.swipe img{-webkit-user-drag:none;pointer-events:none}
-.swipe.drag .card{transition:none}
-.st.s-susp{background:#e6eefb;color:var(--blue)}
-.sw-btn{position:absolute;top:0;bottom:0;width:96px;color:#fff;font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.sw-r{right:0}.sw-l{left:0}
-.b-red{background:var(--red)}.b-blue{background:var(--blue)}.b-teal{background:var(--teal)}
 .tags{display:flex;gap:5px;flex-wrap:wrap}
 .badge{background:var(--p);color:#fff;font-family:'Racing Sans One',sans-serif;font-size:13px;padding:2px 8px;border-radius:7px}
 .small{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.35}
@@ -494,7 +495,7 @@ function mapRow(row, accounts) {
   return {
     id: row.id, spId: row.id, promoId: pr.id, src: pr.created_by_network_id ? "net" : "own",
     // Personnalisation du magasin (si la centrale l'autorise) par-dessus la version centrale.
-    suspended: !!row.suspended, ov: row.overrides || {}, base: { title: pr.title, text: pr.description || "", img: pr.media_url },
+    suspended: !!row.suspended, hidden: !!row.hidden, ov: row.overrides || {}, base: { title: pr.title, text: pr.description || "", img: pr.media_url },
     kind: pr.promo_type ? "promo" : "post", title: row.overrides?.title || pr.title, img: row.overrides?.media_url || pr.media_url,
     media: row.overrides?.media_url ? [row.overrides.media_url] : Array.isArray(det.media) && det.media.length ? det.media : (pr.media_url ? [pr.media_url] : []),
     formats: Array.isArray(det.formats) ? det.formats : [], mech: pr.mechanic, text: row.overrides?.text || pr.description || "",
@@ -518,7 +519,7 @@ async function loadData() {
   const [net, acc, rows] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status").eq("store_id", st.id),
-    sb.from("store_promotions").select("id, status, overrides, suspended, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).eq("hidden", false).order("created_at", { ascending: false }),
+    sb.from("store_promotions").select("id, status, overrides, suspended, hidden, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
   const n = net.data?.[0];
@@ -532,7 +533,8 @@ async function loadData() {
   });
   S.fb = fb ? (fb.status === "active" ? "ok" : "broken") : "none";
   S.ig = ig ? (ig.status === "active" ? "ok" : "broken") : "none";
-  S.promos = rows.data.filter(r => r.promotions).map(r => mapRow(r, acc.data));
+  const all = rows.data.filter(r => r.promotions).map(r => mapRow(r, acc.data));
+  S.promos = all.filter(p => !p.hidden); S.trash = all.filter(p => p.hidden); // corbeille : onglet « Supprimées »
 }
 
 // Recharge puis réaffiche, sans casser une feuille ouverte.
@@ -578,7 +580,7 @@ const save = () => {
   S.promos.forEach(p => { if (p.liked) prefs.liked[p.id] = 1; else delete prefs.liked[p.id]; if (p.saved) prefs.saved[p.id] = 1; else delete prefs.saved[p.id]; });
   store.set(PREFS_KEY, prefs);
 };
-const UI = { tab: "home", promoTab: "net" };
+const UI = { tab: "home", cat: "todo" };
 async function setAutoAccept(on) {
   STORE.autoAccept = on; render(true);
   const { data, error } = await sb.from("stores").update({ auto_accept: on }).eq("id", STORE.id).select("id");
@@ -636,7 +638,9 @@ function priceLine(p, big) {
   if (pr.price == null) return `<div class="price"><span class="num" style="font-size:${big ? 24 : 21}px">${esc(pr.badge)}</span></div>`;
   return `<div class="price"><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}${big ? `<span class="badge">${esc(pr.badge)}</span>` : ""}</div>`;
 }
-const chanIcons = (p) => `<div class="chans">${["fb", "ig"].map(c => { const s = p.ch?.[c]; if (!s) return ""; const cls = c === "fb" ? "fb" : "ig"; return `<span class="ch ${cls} ${s === "ko" ? "off ko" : ""}">${c === "fb" ? I.fbs : I.igs}</span>`; }).join("")}</div>`;
+// Logos Facebook / Instagram : en couleur si la promo y est publiée, grisés sinon (× rouge si échec).
+const chanIcons = (p, big) => `<div class="chans">${["fb", "ig"].map(c => { const s = p.ch?.[c]; const name = c === "fb" ? "Facebook" : "Instagram";
+  return `<span class="ch ${c} ${s === "ok" ? "" : "off"} ${s === "ko" ? "ko" : ""}" ${big ? 'style="width:36px;height:36px"' : ""} title="${name} : ${s === "ok" ? "publiée" : s === "ko" ? "échec" : "non publiée"}" aria-label="${name} : ${s === "ok" ? "publiée" : s === "ko" ? "échec" : "non publiée"}">${c === "fb" ? I.fbs : I.igs}</span>`; }).join("")}</div>`;
 const imgOr = (src, cls = "") => src ? `<img onerror="this.style.visibility='hidden'" src="${esc(src)}" alt="" class="${cls}" loading="lazy">` : `<div class="ph ${cls}"></div>`;
 
 /* ===================== Écrans ===================== */
@@ -679,24 +683,43 @@ function activity() {
   }).join("") || '<div class="empty">Aucune activité pour l\'instant.</div>';
 }
 
+// Catégories de la page Promos, chacune avec sa couleur.
+const CATS = [
+  { k: "todo", l: "À traiter", c: "#e5087e" }, { k: "live", l: "En cours", c: "#0c9875" }, { k: "soon", l: "À venir", c: "#951b81" },
+  { k: "susp", l: "Suspendues", c: "#2f6fdb" }, { k: "del", l: "Supprimées", c: "#8a847c" },
+];
+const catColor = (k) => CATS.find(c => c.k === k).c;
+function catOf(p) {
+  if (p.hidden || isOver(p) || p.status === "declined") return "del";
+  if (p.suspended) return "susp";
+  if (p.status === "scheduled" || (p.status === "published" && p.start > Date.now())) return "soon";
+  if (p.status === "published") return "live";
+  return "todo"; // reçue, activée pas encore publiée, brouillon
+}
 function viewPromos() {
-  const own = S.promos.filter(p => p.src === "own");
-  const pend = pendingNet().length;
-  const list = S.promos.filter(p => p.src === (UI.promoTab === "net" ? "net" : "own"));
-  // En tête : ce qui attend une action (piste B). Ensuite : grandes cartes (piste A).
-  const todo = list.filter(isTodo).sort((a, b) => (b.mandatory - a.mandatory) || (a.deadline - b.deadline));
-  const rest = list.filter(p => !isTodo(p));
-  const live = rest.filter(p => !p.suspended && !isOver(p)).sort((a, b) => a.start - b.start);
-  const off = rest.filter(p => p.suspended || isOver(p)).sort((a, b) => b.end - a.end);
-  const sec = (t, n) => `<div class="sec-h"><h2>${t}</h2><span>${n} promo${n > 1 ? "s" : ""}</span></div>`;
+  const all = [...S.promos, ...(S.trash || [])];
+  const by = Object.fromEntries(CATS.map(c => [c.k, []]));
+  all.forEach(p => by[catOf(p)].push(p));
+  by.todo.sort((a, b) => (b.mandatory - a.mandatory) || (a.deadline - b.deadline));
+  by.live.sort((a, b) => a.end - b.end); by.soon.sort((a, b) => a.start - b.start);
+  by.susp.sort((a, b) => a.end - b.end); by.del.sort((a, b) => b.end - a.end);
+  const i = Math.max(0, CATS.findIndex(c => c.k === UI.cat));
   return `<div class="screen">
     <h1 class="title">Promos</h1>
-    <div class="seg"><button class="${UI.promoTab === "net" ? "on" : ""}" data-ptab="net">De la centrale ${pend ? `<span class="c">${pend}</span>` : ""}</button><button class="${UI.promoTab === "own" ? "on" : ""}" data-ptab="own">Mes promos · ${own.length}</button></div>
-    ${todo.length ? sec("À traiter", todo.length) + todo.map(p => swipeWrap(p, cardTodo(p))).join("") : ""}
-    ${live.length ? sec("En cours et à venir", live.length) + live.map(p => swipeWrap(p, cardBig(p))).join("") : ""}
-    ${off.length ? sec("Suspendues et terminées", off.length) + off.map(p => swipeWrap(p, cardBig(p))).join("") : ""}
-    ${list.length ? "" : '<div class="empty">Rien pour l\'instant.</div>'}
+    <div class="cats" id="cats">${CATS.map((c, k) => `<button class="${k === i ? "on" : ""}" data-cat="${c.k}" style="--cc:${c.c}">${c.l}<em>${by[c.k].length}</em></button>`).join("")}</div>
+    <div class="pager" id="pager">${CATS.map(c => `<section class="pg" data-pg="${c.k}" aria-label="${c.l}">${by[c.k].map(cardBig).join("") || `<div class="empty">Aucune promo ${c.l.toLowerCase()}.</div>`}</section>`).join("")}</div>
   </div>`;
+}
+// Balayage entre catégories : défilement horizontal natif, une page par catégorie.
+function bindPager() {
+  const pg = $("#pager"); if (!pg) return;
+  const i = Math.max(0, CATS.findIndex(c => c.k === UI.cat));
+  pg.scrollLeft = i * pg.clientWidth;
+  let t; pg.onscroll = () => { clearTimeout(t); t = setTimeout(() => {
+    const k = CATS[Math.round(pg.scrollLeft / pg.clientWidth)]?.k; if (!k || k === UI.cat) return;
+    UI.cat = k; $$("#cats button").forEach(b => b.classList.toggle("on", b.dataset.cat === k));
+    $(`#cats [data-cat="${k}"]`)?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, 90); };
 }
 // Formats choisis par la centrale (« instagram:carousel »…) et nombre de photos.
 const FMT_L = { feed: "Feed", photo: "Photo", carousel: "Carrousel", reels: "Reels", stories: "Stories", news: "Nouveautés", offer: "Offre", product: "Produit", video: "Vidéo", pin: "Épingle", rich: "Épingle enrichie" };
@@ -706,57 +729,35 @@ function fmtLine(p) {
   const photos = p.media.length > 1 ? `${p.media.length} photos` : "";
   return f.length || photos ? `<div class="small">${esc([photos, f.join(" · ")].filter(Boolean).join(" · "))}</div>` : "";
 }
-// Règle unique, promo de la centrale ou du magasin :
-// - en cours ou à venir → glisser à gauche = « Suspendre » (bleu) ;
-// - suspendue → glisser à gauche = « Supprimer » (rouge), à droite = « Reprendre » ;
-// - terminée (ou brouillon) → glisser à gauche = « Supprimer ».
-// Pour une promo de la centrale, suspendre suppose son accord et jamais une
-// obligatoire (vérifié aussi en base).
 const isOver = (p) => Date.now() > new Date(p.end).getTime();
-function swipeAction(p) {
-  if (p.status === "draft" || isOver(p)) return { left: "del" };
-  if (p.suspended) return { left: "del", right: "resume" };
-  if (p.src === "own" || (STORE.canDelete && !p.mandatory)) return { left: "susp" };
-  return {};
-}
-// Un seul statut par promo, avec sa couleur.
+// Suspendre : promo en cours ou à venir ; pour la centrale, avec son accord et jamais une obligatoire.
+const canSuspend = (p) => !p.hidden && !isOver(p) && !p.suspended && p.status !== "declined" && (p.src === "own" || (STORE.canDelete && !p.mandatory));
+// Supprimer : promo suspendue, terminée, refusée ou brouillon.
+const canDelete = (p) => !p.hidden && (p.suspended || isOver(p) || p.status === "declined" || p.status === "draft");
+// Statut affiché : libellé précis, couleur de sa catégorie.
 function promoState(p) {
-  if (p.status === "draft") return { l: "Brouillon", c: "#8a847c" };
-  if (isOver(p)) return { l: "Terminée", c: "#8a847c" };
-  if (p.suspended) return { l: "Suspendue", c: "var(--blue)" };
-  if (p.status === "published") return p.ch.ig === "ko" || p.ch.fb === "ko" ? { l: "Échec d'une publication", c: "var(--red)" } : { l: "En ligne", c: "var(--teal)" };
-  if (p.status === "scheduled") return { l: `Programmée · ${fmtShort(new Date(p.schedAt))}`, c: "var(--v)" };
-  if (p.status === "declined") return { l: "Refusée", c: "#8a847c" };
-  if (p.mandatory) return { l: `Obligatoire · avant le ${fmtShort(p.deadline)}`, c: "var(--ink)" };
-  if (p.status === "received") return { l: "À valider", c: "#c47a00" };
-  return { l: "À publier", c: "var(--p)" };
+  const k = catOf(p), c = catColor(k);
+  if (k === "del") return { l: p.hidden ? "Supprimée" : p.status === "declined" ? "Refusée" : "Terminée", c };
+  if (k === "susp") return { l: "Suspendue", c };
+  if (k === "soon") return { l: p.status === "scheduled" ? `Programmée · ${fmtShort(new Date(p.schedAt))}` : `Publiée · dès le ${fmtShort(p.start)}`, c };
+  if (k === "live") return { l: p.ch.ig === "ko" || p.ch.fb === "ko" ? "En ligne · un échec" : "En ligne", c };
+  if (p.status === "draft") return { l: "Brouillon", c };
+  if (p.mandatory) return { l: `Obligatoire · avant le ${fmtShort(p.deadline)}`, c };
+  return { l: p.status === "received" ? "À valider" : "À publier", c };
 }
-const isTodo = (p) => !isOver(p) && !p.suspended && p.status !== "draft" && (p.status === "received" || p.status === "active");
 const offerTxt = (p) => { const pr = pricing(p); return pr.badge || ""; };
 const dateTxt = (p) => p.start > Date.now() ? `Dès le ${fmtShort(p.start)}` : isOver(p) ? `Terminée le ${fmtShort(p.end)}` : `Jusqu'au ${fmtShort(p.end)}`;
-// « À traiter » : visuel moyen, une seule action.
-function cardTodo(p) {
-  const st = promoState(p);
-  const go = p.status === "received" && !p.mandatory ? `<button class="go" data-activate="${p.id}">Activer</button>` : `<button class="go" data-pub="${p.id}">Publier</button>`;
-  return `<div class="card tcard ${p.mandatory ? "mand" : ""}" data-card="${p.id}">${imgOr(p.img)}
-    <div class="tx"><div><div class="k">${esc(st.l)}</div><h3>${esc(p.title)}</h3><div class="d">${esc([offerTxt(p), dateTxt(p)].filter(Boolean).join(" · "))}</div></div>${go}</div></div>`;
-}
-// Grande carte : le visuel d'abord, l'offre dessus, deux lignes de texte.
+// Carte promo (piste A) : grand visuel, statut en couleur, offre, titre, source + date, logos réseaux.
 function cardBig(p) {
-  const st = promoState(p), off = offerTxt(p);
-  const eye = p.status === "published" && p.img && p.kind !== "post" && !isOver(p) && !p.suspended ? `<button class="eye" data-act="clients" data-id="${p.id}" aria-label="Voir côté clients">${I.eye}</button>` : "";
-  return `<div class="card big" data-card="${p.id}"><div class="im">${p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}
-    <span class="chip"><i style="background:${st.c}"></i>${esc(st.l)}</span>${off ? `<span class="offer">${esc(off)}</span>` : ""}${eye}</div>
-    <div class="bd"><h3>${esc(p.title)}</h3><div class="d">${esc(dateTxt(p))}</div></div></div>`;
-}
-// Glisser : mêmes règles quelle que soit la forme de la carte.
-function swipeWrap(p, card) {
-  const act = swipeAction(p);
-  if (!act.left && !act.right) return card;
-  const L = act.left === "del" ? `<button class="sw-btn sw-r b-red" data-del="${p.id}">${I.trash}Supprimer</button>`
-    : act.left === "susp" ? `<button class="sw-btn sw-r b-blue" data-susp="${p.id}">${I.pause}Suspendre</button>` : "";
-  const R = act.right === "resume" ? `<button class="sw-btn sw-l b-teal" data-resume="${p.id}">${I.play}Reprendre</button>` : "";
-  return `<div class="swipe" data-sw="${p.id}" data-dir="${act.left ? "l" : ""}${act.right ? "r" : ""}">${R}${L}${card}</div>`;
+  const st = promoState(p), off = offerTxt(p), k = catOf(p);
+  const eye = k === "live" && p.img && p.kind !== "post" ? `<button class="eye" data-act="clients" data-id="${p.id}" aria-label="Voir côté clients">${I.eye}</button>` : "";
+  let acts = "";
+  if (k === "todo" && p.status !== "draft") acts = p.status === "received" && !p.mandatory
+    ? `<div class="btns"><button class="b-ghost" data-decline="${p.id}">Refuser</button><button class="b-grad" data-activate="${p.id}">Activer</button></div>`
+    : `<div class="btns"><button class="b-ghost" data-sched="${p.id}">Programmer</button><button class="b-grad" data-pub="${p.id}">Publier</button></div>`;
+  return `<div class="card big" data-card="${p.id}" style="--cc:${st.c}"><div class="im">${p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}
+    <span class="chip">${esc(st.l)}</span>${off ? `<span class="offer">${esc(off)}</span>` : ""}${eye}</div>
+    <div class="bd"><div class="row" style="gap:10px;align-items:flex-start"><div class="sp"><h3>${esc(p.title)}</h3><div class="d">${p.src === "net" ? "Centrale" : "Ma promo"} · ${esc(dateTxt(p))}</div></div>${chanIcons(p)}</div>${acts}</div></div>`;
 }
 
 function viewStats() {
@@ -816,23 +817,22 @@ function viewSettings() {
 function render(keepScroll) {
   const y = window.scrollY;
   $("#view").innerHTML = ({ home: viewHome, promos: viewPromos, stats: viewStats, settings: viewSettings })[UI.tab]();
+  if (UI.tab === "promos") bindPager();
   $$("#nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === UI.tab));
   const n = pendingNet().length;
   $("#nav-bd").textContent = n; $("#nav-bd").classList.toggle("hidden", !n);
   $("#fab").classList.toggle("hidden", !["home", "promos"].includes(UI.tab));
   window.scrollTo(0, keepScroll ? y : 0);
 }
-function go(tab, sub) { UI.tab = tab; if (sub) UI.promoTab = sub; render(); }
+function go(tab, sub) { UI.tab = tab; if (sub) UI.cat = { net: "todo", own: "live" }[sub] || sub; render(); }
 $$("#nav button").forEach(b => b.onclick = () => go(b.dataset.tab));
 $("#fab").onclick = () => sheetChoose();
 
 document.addEventListener("click", (e) => {
-  if (swiped) { swiped = false; return; }
-  const t = e.target.closest("[data-go],[data-act],[data-ptab],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-del],[data-susp],[data-resume],[data-card]");
+  const t = e.target.closest("[data-go],[data-act],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-cat],[data-card]");
   if (!t || t.closest("#layer")) return;
   const ds = t.dataset;
   if (ds.go) { const [a, b] = ds.go.split(":"); go(a, b); }
-  else if (ds.ptab) { UI.promoTab = ds.ptab; render(); }
   else if (ds.activate) setStatus(find(ds.activate), "active", (p) => `« ${p.title} » activée. Publiez-la ou programmez-la.`);
   else if (ds.decline) setStatus(find(ds.decline), "declined", (p) => `« ${p.title} » refusée. Votre centrale est informée.`);
   else if (ds.pub) publish(find(ds.pub));
@@ -843,72 +843,25 @@ document.addEventListener("click", (e) => {
   else if (ds.open) clients(ds.open);
   else if (ds.edit) createForm("promo", find(ds.edit));
   else if (ds.act === "clients") clients(ds.id);
-  else if (ds.del) askDelete(find(ds.del));
-  else if (ds.susp) askSuspend(find(ds.susp));
-  else if (ds.resume) askResume(find(ds.resume));
-  else if (ds.card) { if (closeSwipes()) return; openPromo(find(ds.card)); }
+  else if (ds.cat) { UI.cat = ds.cat; const pg = $("#pager"), k = CATS.findIndex(c => c.k === ds.cat); pg && pg.scrollTo({ left: k * pg.clientWidth, behavior: "smooth" }); $$("#cats button").forEach(b => b.classList.toggle("on", b.dataset.cat === ds.cat)); }
+  else if (ds.card) openPromo(find(ds.card));
   else if (ds.act === "reconnect") reconnect();
   else if (ds.act === "disconnect") toast("Gardez Instagram connecté pour que vos promos y paraissent.");
   else if (ds.act === "logout") sb.auth.signOut().then(() => location.reload());
 });
-const find = (id) => S.promos.find(p => p.id === id);
+const find = (id) => S.promos.find(p => p.id === id) || (S.trash || []).find(p => p.id === id);
 
-/* ===================== Glisser pour supprimer ===================== */
-let swiped = false, drag = null;
-const SW = 96;
-function swSet(w, x) { w.querySelector(".card").style.transform = x ? `translateX(${x}px)` : ""; w.dataset.pos = x; }
-function closeSwipes(except) {
-  let had = false;
-  $$(".swipe.open").forEach(w => { if (w !== except) { w.classList.remove("open"); swSet(w, 0); had = true; } });
-  return had;
-}
-// Événements tactiles (iPhone, Android) et souris (ordinateur), gérés à part :
-// plus fiable sur Safari iOS que les « pointer events ».
-function swStart(target, x, y) {
-  const w = target.closest(".swipe"); if (!w || target.closest(".sw-btn")) return;
-  drag = { w, x, y, dx: 0, base: +(w.dataset.pos || 0), on: false, dead: false, dir: w.dataset.dir || "" };
-}
-function swMove(x, y, ev) {
-  if (!drag || drag.dead) return;
-  const dx = x - drag.x, dy = y - drag.y;
-  if (!drag.on) {
-    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-    if (Math.abs(dy) >= Math.abs(dx)) { drag.dead = true; return; } // défilement vertical
-    drag.on = true; drag.w.classList.add("drag"); closeSwipes(drag.w);
-  }
-  if (ev && ev.cancelable) ev.preventDefault();
-  drag.dx = dx;
-  const min = drag.dir.includes("l") ? -SW - 14 : 0, max = drag.dir.includes("r") ? SW + 14 : 0;
-  swSet(drag.w, Math.max(min, Math.min(max, drag.base + dx)));
-}
-function swEnd() {
-  if (!drag) return;
-  const { w, on, base, dx, dir } = drag; drag = null;
-  if (!on) return;
-  swiped = true; setTimeout(() => swiped = false, 350);
-  w.classList.remove("drag");
-  const v = base + dx, to = v < -48 && dir.includes("l") ? -SW : v > 48 && dir.includes("r") ? SW : 0;
-  w.classList.toggle("open", !!to); swSet(w, to);
-}
-document.addEventListener("touchstart", (e) => { const t = e.touches[0]; swStart(e.target, t.clientX, t.clientY); }, { passive: true });
-document.addEventListener("touchmove", (e) => { const t = e.touches[0]; swMove(t.clientX, t.clientY, e); }, { passive: false });
-document.addEventListener("touchend", swEnd);
-document.addEventListener("touchcancel", swEnd);
-document.addEventListener("mousedown", (e) => { if (e.button === 0) swStart(e.target, e.clientX, e.clientY); });
-document.addEventListener("mousemove", (e) => { if (drag) swMove(e.clientX, e.clientY, e); });
-document.addEventListener("mouseup", swEnd);
 function askDelete(p) {
   if (!p) return;
   sheet(`<div class="grab"></div><h2>Supprimer « ${esc(p.title)} » ?</h2>
-    <p class="small" style="font-size:14px;margin-top:6px">${p.src === "own" ? "La promo disparaît de votre app et de votre vitrine. Les publications déjà faites sur Facebook et Instagram restent en ligne." : `${isOver(p) ? "Cette promo est terminée" : "Cette promo est suspendue"} : elle disparaît de votre liste. Votre centrale le voit dans son suivi.`}</p>
-    <button class="big-btn" id="d-go" style="background:var(--red)">${I.trash}Supprimer</button><button class="txt-btn" data-close>Annuler</button>`);
+    <p class="small" style="font-size:14px;margin-top:6px">La promo disparaît de votre vitrine et passe dans « Supprimées ».${p.src === "net" ? " Votre centrale le voit dans son suivi." : " Les publications déjà faites sur Facebook et Instagram restent en ligne."}</p>
+    <button class="big-btn" id="d-go" style="background:var(--red)">${I.trash}Supprimer</button><button class="txt-btn" data-close>Annuler</button>`, true);
   $("#d-go").onclick = async () => {
     $("#d-go").disabled = true;
-    const { error } = p.src === "own"
-      ? await sb.from("promotions").delete().eq("id", p.promoId)
-      : await sb.from("store_promotions").update({ hidden: true }).eq("id", p.spId);
-    if (error) { closeLayer(); return toast(errText(error)); }
-    S.promos = S.promos.filter(x => x.id !== p.id); closeLayer(); render(true); toast("Promo supprimée."); refresh();
+    const { error } = await sb.from("store_promotions").update({ hidden: true }).eq("id", p.spId);
+    closeLayer();
+    if (error) return toast(errText(error));
+    p.hidden = true; S.promos = S.promos.filter(x => x.id !== p.id); (S.trash ||= []).push(p); render(true); toast("Promo supprimée."); refresh();
   };
 }
 
@@ -916,14 +869,14 @@ function askSuspend(p) {
   if (!p) return;
   sheet(`<div class="grab"></div><h2>Suspendre « ${esc(p.title)} » ?</h2>
     <p class="small" style="font-size:14px;margin-top:6px">La promo est retirée de votre vitrine et vous ne la publiez plus. Vous pourrez la reprendre à tout moment tant qu'elle court${p.src === "net" ? ". Votre centrale le voit dans son suivi." : "."}</p>
-    <button class="big-btn" id="s-go" style="background:var(--blue)">${I.pause}Suspendre</button><button class="txt-btn" data-close>Annuler</button>`);
+    <button class="big-btn" id="s-go" style="background:var(--blue)">${I.pause}Suspendre</button><button class="txt-btn" data-close>Annuler</button>`, true);
   $("#s-go").onclick = () => { $("#s-go").disabled = true; setSuspended(p, true); };
 }
 function askResume(p) {
   if (!p) return;
   sheet(`<div class="grab"></div><h2>Reprendre « ${esc(p.title)} » ?</h2>
     <p class="small" style="font-size:14px;margin-top:6px">La promo revient dans votre vitrine et vous pouvez de nouveau la publier.</p>
-    <button class="big-btn" id="r-go" style="background:var(--teal)">${I.play}Reprendre</button><button class="txt-btn" data-close>Annuler</button>`);
+    <button class="big-btn" id="r-go" style="background:var(--teal)">${I.play}Reprendre</button><button class="txt-btn" data-close>Annuler</button>`, true);
   $("#r-go").onclick = () => { $("#r-go").disabled = true; setSuspended(p, false); };
 }
 async function setSuspended(p, on) {
@@ -934,113 +887,91 @@ async function setSuspended(p, on) {
   p.suspended = on; render(true); toast(on ? "Promo suspendue." : "Promo reprise."); refresh();
 }
 
-/* ===================== Ouvrir une promo ===================== */
+/* ===================== Page d'une promo ===================== */
+// Statut, réseaux (logos), statistiques, champs modifiables (si permis),
+// puis Suspendre / Supprimer et « Valider ». Toucher la photo ouvre le menu photo.
 function openPromo(p) {
   if (!p) return;
-  sheetPromo(p);
-}
-// Modifier : promo du magasin → formulaire ; promo de la centrale → personnalisation (ou lecture seule).
-const editPromo = (p) => p.src === "own" ? createForm(p.kind, p) : sheetNet(p);
-const canModify = (p) => p.src === "own" || STORE.canEdit;
-
-/* ===================== Fiche promo (tout le détail ici) ===================== */
-function sheetPromo(p) {
-  const st = promoState(p), pr = pricing(p), act = swipeAction(p);
-  const chLine = (c) => {
-    const name = c === "fb" ? "Facebook" : "Instagram", ok = (c === "fb" ? S.fb : S.ig) === "ok";
-    const s = p.ch[c], at = p.chAt?.[c], v = p.stats?.[c]?.[1];
-    const sub = s === "ok" ? `Publiée le ${fmtShort(new Date(at))}${v ? ` · ${nf(v)} vues` : ""}` : s === "ko" ? "Échec de publication" : ok ? "Pas encore publiée" : (c === "ig" ? "Compte à reconnecter" : "Page à connecter");
-    const right = s === "ok" ? `<span style="color:var(--teal)">${I.check}</span>` : !ok && c === "ig" && S.ig === "broken" ? '<button class="btn-red" style="padding:8px 12px" data-fx="reco">Reconnecter</button>' : "";
-    return `<div class="li"><span class="ch ${c}" style="width:30px;height:30px">${c === "fb" ? I.fbs : I.igs}</span><div class="sp"><b style="font-size:14.5px">${name}</b><div style="font-size:12.5px;color:${s === "ko" || (!ok && !s) ? "var(--red)" : "var(--muted)"}">${sub}</div></div>${right}</div>`;
-  };
-  const details = [
-    p.code && `<div>Code caisse : <b>${esc(p.code)}</b></div>`, p.ean && `<div>EAN caisse : <b>${esc(p.ean)}</b></div>`,
-    fmtLine(p), p.sub && `<div>${esc(p.sub)}</div>`, p.text && `<p style="white-space:pre-wrap;margin:8px 0 0;color:var(--ink)">${esc(p.text)}</p>`,
-  ].filter(Boolean).join("");
-  // Une action principale selon l'état, le reste en liens.
-  let main = "";
-  if (!isOver(p) && !p.suspended && p.status !== "draft") {
-    if (p.status === "received" && !p.mandatory) main = `<button class="b-ghost" data-fx="decline">Refuser</button><button class="b-grad" data-fx="activate">Activer</button>`;
-    else if (p.status === "received" || p.status === "active") main = `<button class="b-ghost" data-fx="sched">Programmer</button><button class="b-grad" data-fx="pub">Publier</button>`;
-    else if (p.status === "scheduled") main = `<button class="b-grad" data-fx="pub">Publier maintenant</button>`;
-    else if (p.status === "declined") main = `<button class="b-grad" data-fx="activate">L'activer</button>`;
-  }
-  if (!main && canModify(p) && !isOver(p)) main = `<button class="b-grad" data-fx="edit">Modifier</button>`;
-  const links = [
-    main.includes('data-fx="edit"') || !canModify(p) || isOver(p) ? "" : `<button data-fx="edit" style="color:var(--ink)">Modifier</button>`,
-    act.right === "resume" ? `<button data-fx="resume" style="color:var(--teal)">Reprendre</button>` : "",
-    act.left === "susp" ? `<button data-fx="susp" style="color:var(--blue)">Suspendre</button>` : act.left === "del" ? `<button data-fx="del" style="color:var(--red)">Supprimer</button>` : "",
-  ].filter(Boolean).join("");
-  const seeable = p.status === "published" && p.img && p.kind !== "post" && !isOver(p) && !p.suspended;
+  const k = catOf(p), st = promoState(p), pr = pricing(p);
+  const editable = !p.hidden && !isOver(p) && (p.src === "own" || STORE.canEdit);
+  const F = { title: p.title, text: p.src === "own" ? (p.text || "") : p.text, img: p.img, start: p.start, end: p.end };
+  const sum = (i) => (p.stats?.fb?.[i] || 0) + (p.stats?.ig?.[i] || 0);
   const layer = $("#layer");
-  layer.innerHTML = `<div class="full fiche">
-    <div class="fhero">${p.img ? `<img src="${esc(p.img)}" alt="" onerror="this.style.visibility='hidden'">` : ""}
-      <button class="fx" data-fx="close" aria-label="Fermer">${I.x}</button>${seeable ? `<button class="cl" data-fx="clients">${I.eye}Côté clients</button>` : ""}</div>
-    <div class="scroll">
-      <div class="row" style="gap:6px;justify-content:flex-start">${tagSrc(p)}<span class="st" style="background:#f4f2ef;color:var(--ink);display:inline-flex;align-items:center;gap:5px"><i style="width:7px;height:7px;border-radius:50%;background:${st.c};display:block"></i>${esc(st.l)}</span></div>
-      <h1>${esc(p.title)}</h1>
-      ${pr.price != null ? `<div class="pr"><b>${eur(pr.price)}</b>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}${pr.badge ? `<span class="badge">${esc(pr.badge)}</span>` : ""}</div>` : pr.badge ? `<div class="pr"><b>${esc(pr.badge)}</b></div>` : ""}
-      <div class="small" style="font-size:14px">Du ${fmtShort(p.start)} au ${fmtShort(p.end)}</div>
-      ${p.kind === "post" && p.status === "draft" ? "" : `<div class="box">${chLine("fb")}${chLine("ig")}</div>`}
-      ${details ? `<details><summary>Détails : codes, formats, texte</summary><div class="small" style="font-size:13.5px;color:var(--ink);line-height:1.5;margin-top:8px">${details}</div></details>` : ""}
-    </div>
-    ${main || links ? `<div class="actions">${main ? `<div class="acts">${main}</div>` : ""}${links ? `<div class="links">${links}</div>` : ""}</div>` : ""}
-  </div>`;
-  document.body.style.overflow = "hidden";
-  $$("[data-fx]", layer).forEach(b => b.onclick = () => {
-    const f = b.dataset.fx;
-    if (f === "close") return closeLayer();
-    closeLayer();
-    ({ activate: () => setStatus(p, "active", (q) => `« ${q.title} » activée. Publiez-la ou programmez-la.`),
-       decline: () => setStatus(p, "declined", (q) => `« ${q.title} » refusée. Votre centrale est informée.`),
-       pub: () => publish(p), sched: () => sheetSchedule(p), edit: () => editPromo(p), clients: () => clients(p.id),
-       resume: () => askResume(p), susp: () => askSuspend(p), del: () => askDelete(p), reco: () => reconnect() })[f]?.();
-  });
-}
-// Promo de la centrale : personnalisable (titre, texte, visuel) si la centrale
-// l'autorise ; sinon affichée en lecture seule, grisée.
-function sheetNet(p) {
-  const can = STORE.canEdit, F = { title: p.title, text: p.text, img: p.img };
-  const pr = pricing(p), dis = can ? "" : "disabled";
   const draw = () => {
-    sheet(`<div class="grab"></div><h2>${can ? "Personnaliser la promo" : "Promo de la centrale"}</h2>
-      ${can ? "" : `<p class="hint" style="color:var(--muted)">Votre centrale ${esc(STORE.net)} ne permet pas de modifier ses promos.</p>`}
-      <div class="${can ? "" : "ro-box"}">
-      <div class="preview-img" style="margin-top:12px"><img onerror="this.style.visibility='hidden'" src="${esc(F.img || "")}" alt="">${can ? '<button id="n-img">Changer</button>' : ""}</div>
-      <div class="fl">TITRE</div><input class="in" id="n-title" maxlength="90" value="${esc(F.title)}" ${dis}>
-      <div class="fl">TEXTE DU POST</div><textarea class="in" id="n-text" rows="5" maxlength="1500" ${dis}>${esc(F.text)}</textarea>
-      <div class="fl">FIXÉ PAR LA CENTRALE</div>
-      <div class="ro-line">${[pr.badge, `Du ${fmtShort(p.start)} au ${fmtShort(p.end)}`, p.code && `Code ${esc(p.code)}`, p.ean && `EAN ${esc(p.ean)}`, p.mandatory && "Obligatoire"].filter(Boolean).map(esc).join(" · ")}</div>
+    const fixed = [pr.price != null ? `${eur(pr.price)}${pr.old ? ` au lieu de ${eur(pr.old)}` : ""}` : pr.badge, p.code && `Code ${p.code}`, p.ean && `EAN ${p.ean}`, p.src === "net" && `Du ${fmtShort(p.start)} au ${fmtShort(p.end)}`].filter(Boolean);
+    layer.innerHTML = `<div class="full fiche" style="--cc:${st.c}">
+      <div class="fhero">${F.img ? `<img src="${esc(F.img)}" alt="" onerror="this.style.visibility='hidden'">` : ""}
+        ${editable ? `<button class="photo" data-fx="photo" aria-label="Modifier la photo"></button><span class="ph-hint">${I.cam}Modifier la photo</span>` : ""}
+        <button class="fx" data-fx="close" aria-label="Fermer">${I.x}</button>
+        ${k === "live" && p.img && p.kind !== "post" ? `<button class="cl" data-fx="clients">${I.eye}Côté clients</button>` : ""}</div>
+      <div class="scroll">
+        <div class="row" style="justify-content:space-between;align-items:center;gap:10px">
+          <span class="stchip">${esc(st.l)}</span>${chanIcons(p, true)}</div>
+        <div class="kpis4">${[["Portée", 0], ["Vues", 1], ["Interactions", 2], ["Commentaires", 3]].map(([l, i]) => `<div><b>${p.stats ? nf(sum(i)) : "—"}</b><span>${l}</span></div>`).join("")}</div>
+        ${editable ? "" : `<p class="hint" style="color:var(--muted);margin-top:14px">${p.hidden || isOver(p) ? "Cette promo n'est plus modifiable." : `Votre centrale ${esc(STORE.net)} ne permet pas de modifier ses promos.`}</p>`}
+        <div class="${editable ? "" : "ro-box"}">
+          <div class="fl">TITRE</div><input class="in" id="pf-title" maxlength="90" value="${esc(F.title)}" ${editable ? "" : "disabled"}>
+          <div class="fl">TEXTE DU POST</div><textarea class="in" id="pf-text" rows="4" maxlength="1500" ${editable ? "" : "disabled"}>${esc(F.text)}</textarea>
+          ${p.src === "own" ? `<div class="fl">PÉRIODE</div><div class="two"><input class="in" type="date" id="pf-start" value="${iso(F.start)}" ${editable ? "" : "disabled"}><input class="in" type="date" id="pf-end" value="${iso(F.end)}" ${editable ? "" : "disabled"}></div>` : ""}
+          ${fixed.length ? `<div class="fl">${p.src === "net" ? "FIXÉ PAR LA CENTRALE" : "OFFRE"}</div><div class="ro-line">${fixed.map(esc).join(" · ")}</div>` : ""}
+          ${p.src === "own" && p.kind !== "post" && editable ? `<button class="txt-btn" data-fx="offer" style="color:var(--p);font-weight:700;text-align:left;padding-left:0">Modifier l'offre, le type ou les codes</button>` : ""}
+        </div>
       </div>
-      ${can ? `<button class="big-btn" id="n-save">Enregistrer</button>${Object.keys(p.ov || {}).length ? '<button class="txt-btn" id="n-reset">Revenir à la version de la centrale</button>' : ""}` : ""}
-      ${swipeAction(p).right === "resume" ? `<button class="txt-btn" id="n-resume" style="color:var(--teal);font-weight:700">Reprendre la promo</button>` : ""}
-      ${swipeAction(p).left === "susp" ? `<button class="txt-btn" id="n-susp" style="color:var(--blue);font-weight:700">Suspendre la promo</button>` : swipeAction(p).left === "del" ? `<button class="txt-btn" id="n-del" style="color:var(--red);font-weight:700">Supprimer la promo</button>` : ""}
-      <button class="txt-btn" data-close>${can ? "Annuler" : "Fermer"}</button>`);
-    // Mêmes actions que le glisser, pour qui ne le découvre pas.
-    $("#n-resume") && ($("#n-resume").onclick = () => askResume(p));
-    $("#n-susp") && ($("#n-susp").onclick = () => askSuspend(p));
-    $("#n-del") && ($("#n-del").onclick = () => askDelete(p));
-    if (!can) return;
-    $("#n-title").oninput = (e) => F.title = e.target.value;
-    $("#n-text").oninput = (e) => F.text = e.target.value;
-    $("#n-img").onclick = () => pickMedia("file", (src) => { F.img = src; draw(); });
-    const saveOv = async (ov) => {
-      const { error } = await sb.from("store_promotions").update({ overrides: ov }).eq("id", p.spId);
-      if (error) return toast(errText(error));
-      closeLayer(); await refresh(); toast(Object.keys(ov).length ? "Promo personnalisée." : "Version de la centrale rétablie.");
-    };
-    $("#n-save").onclick = async () => {
-      $("#n-save").disabled = true;
-      try {
-        const ov = {};
-        if (F.title.trim() && F.title.trim() !== p.base.title) ov.title = F.title.trim();
-        if (F.text.trim() !== (p.base.text || "").trim()) ov.text = F.text.trim();
+      <div class="actions"><div class="acts">
+        ${canSuspend(p) ? `<button class="b-ghost" data-fx="susp" style="color:var(--blue)">Suspendre</button>` : canDelete(p) ? `<button class="b-ghost" data-fx="del" style="color:var(--red)">Supprimer</button>` : ""}
+        <button class="b-grad" data-fx="ok">${p.status === "received" && !p.hidden && !isOver(p) ? "Valider la promo" : "Valider"}</button></div>
+        ${p.suspended && !isOver(p) ? `<div class="links"><button data-fx="resume" style="color:var(--teal)">Reprendre la promo</button></div>` : ""}
+      </div></div>`;
+    document.body.style.overflow = "hidden";
+    const v = (id) => $("#" + id, layer);
+    v("pf-title").oninput = (e) => F.title = e.target.value;
+    v("pf-text").oninput = (e) => F.text = e.target.value;
+    v("pf-start") && (v("pf-start").onchange = (e) => F.start = new Date(e.target.value + "T00:00"));
+    v("pf-end") && (v("pf-end").onchange = (e) => F.end = new Date(e.target.value + "T00:00"));
+    $$("[data-fx]", layer).forEach(b => b.onclick = () => fx[b.dataset.fx]?.());
+  };
+  // Menu photo : appareil, galerie ou médiathèque de la centrale.
+  const photoMenu = () => {
+    sheet(`<div class="grab"></div><h2>Photo de la promo</h2>
+      <button class="choice" data-ph="cam"><span class="ic" style="background:var(--rose);color:var(--p)">${I.cam}</span><span class="sp"><b>Prendre une photo</b></span></button>
+      <button class="choice" data-ph="file"><span class="ic" style="background:#eaf1fd;color:#2f5fae">${I.img}</span><span class="sp"><b>Choisir dans la galerie</b></span></button>
+      ${STORE.hasNet ? `<button class="choice" data-ph="lib"><span class="ic" style="background:#f6e6f4;color:var(--v)">${I.net}</span><span class="sp"><b>Médiathèque de la centrale</b></span></button>` : ""}
+      <button class="txt-btn" data-close>Annuler</button>`, true);
+    $$("[data-ph]").forEach(b => b.onclick = () => { closeSheetOnly(); pickMedia(b.dataset.ph, (src) => { F.img = src; draw(); }); });
+  };
+  const save = async () => {
+    const btn = $('[data-fx="ok"]', layer); btn.disabled = true;
+    try {
+      if (editable) {
         const img = await ensureUploaded(F.img);
-        if (img && img !== p.base.img) ov.media_url = img;
-        await saveOv(ov);
-      } catch (e) { toast(errText(e)); $("#n-save").disabled = false; }
-    };
-    $("#n-reset") && ($("#n-reset").onclick = () => saveOv({}));
+        if (p.src === "own") {
+          const start = new Date(F.start); start.setHours(0, 0, 0, 0); const end = new Date(F.end); end.setHours(23, 59, 0, 0);
+          if (!F.title.trim()) throw new Error("Donnez un titre à la promo.");
+          if (end <= start) throw new Error("La fin doit suivre le début.");
+          const ch = {};
+          if (F.title.trim() !== p.title) ch.title = F.title.trim();
+          if ((F.text || "") !== (p.text || "")) ch.description = F.text.trim() || null;
+          if (img !== p.img) ch.media_url = img;
+          if (start.getTime() !== new Date(p.start).setHours(0, 0, 0, 0)) ch.starts_at = start.toISOString();
+          if (end.getTime() !== new Date(p.end).setHours(23, 59, 0, 0)) ch.ends_at = end.toISOString();
+          if (Object.keys(ch).length) { const { error } = await sb.from("promotions").update(ch).eq("id", p.promoId); if (error) throw error; }
+        } else {
+          const ov = {};
+          if (F.title.trim() && F.title.trim() !== p.base.title) ov.title = F.title.trim();
+          if ((F.text || "").trim() !== (p.base.text || "").trim()) ov.text = (F.text || "").trim();
+          if (img && img !== p.base.img) ov.media_url = img;
+          if (JSON.stringify(ov) !== JSON.stringify(p.ov || {})) { const { error } = await sb.from("store_promotions").update({ overrides: ov }).eq("id", p.spId); if (error) throw error; }
+        }
+      }
+      // « Valider » sur une promo reçue : elle est aussi acceptée.
+      if (p.status === "received" && !p.hidden && !isOver(p)) { const { error } = await sb.from("store_promotions").update({ status: "active" }).eq("id", p.spId); if (error) throw error; }
+      closeLayer(); await loadData(); render(true); toast("Enregistré.");
+    } catch (e) { toast(errText(e)); btn.disabled = false; }
+  };
+  const fx = {
+    close: closeLayer, photo: photoMenu, ok: save, clients: () => { closeLayer(); clients(p.id); },
+    susp: () => askSuspend(p), del: () => askDelete(p), resume: () => askResume(p),
+    offer: () => { closeLayer(); createForm(p.kind, p); },
   };
   draw();
 }
@@ -1232,7 +1163,7 @@ function createForm(kind, draft) {
       }
       closeLayer();
       if (editLive) { await loadData(); render(true); return toast("Modifications enregistrées."); }
-      if (asDraft) { await loadData(); UI.tab = "promos"; UI.promoTab = "own"; render(); return toast("Brouillon enregistré."); }
+      if (asDraft) { await loadData(); UI.tab = "promos"; UI.cat = "todo"; render(); return toast("Brouillon enregistré."); }
       publish({ spId, title, _chans: ["fb", "ig"].filter(c => F[c]) });
     } catch (e) { toast(errText(e)); if (btn) btn.disabled = false; }
   };
