@@ -219,6 +219,14 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .resolve p{margin:0;font-size:13.5px;color:var(--red);font-weight:600;line-height:1.35}
 .resolve b{display:block;color:var(--ink);font-size:14.5px;margin-bottom:2px}
 .sp-row{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.tap{cursor:pointer}.tap:active{background:var(--bg)}
+.st-tab{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}
+.st-tab th{padding:6px 4px;width:30%}.st-tab th:first-child{width:40%}
+.st-tab td{padding:10px 4px;border-top:1px solid var(--line);text-align:center;font-weight:700}
+.st-tab td:first-child{text-align:left;font-weight:500;color:var(--muted)}
+.st-tab td.sm{font-size:12px;font-weight:500;color:var(--muted)}
+.st-line{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-top:1px solid var(--line);font-size:14.5px}
+.st-line b{font-size:17px}.st-line small{font-size:12px;color:var(--muted);font-weight:500}
 .sp-row:last-child{border-bottom:none}
 .sp-row>img{width:46px;height:46px;border-radius:11px;object-fit:cover;flex:none}
 .mini{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
@@ -529,6 +537,7 @@ async function loadData() {
   const reveals = (!rev.error && rev.data) || [];
   S.codes7 = reveals.filter(r => Date.now() - new Date(r.revealed_at) < 7 * DAY).length;
   S.codesBy = reveals.reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
+  S.codes7By = reveals.filter(r => Date.now() - new Date(r.revealed_at) < 7 * DAY).reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
   const n = net.data?.[0];
   const fb = acc.data.find(a => a.channel === "facebook"), ig = acc.data.find(a => a.channel === "instagram");
   Object.assign(STORE, {
@@ -673,7 +682,7 @@ function activity() {
     if (kind === "pub") lines = `<div class="row" style="gap:8px;margin-top:7px">${chanIcons(p)}<span class="sp"></span>${p.ch.ig === "ko" && S.ig === "broken" ? '<button class="btn-red" style="padding:7px 12px" data-act="reconnect">Reconnecter</button>' : ""}</div>`;
     else if (kind === "sch") lines = `<div class="ln">Programmée le ${fmtDay(p.schedAt)} à ${p.schedTime} · Facebook${S.ig === "ok" ? " et Instagram" : ""}</div>`;
     else lines = `<div class="ln">Reçue de la centrale · ${p.status === "declined" ? "refusée" : p.status === "active" ? "activée, à publier" : p.mandatory ? `obligatoire, à publier avant le ${fmtLong(p.deadline)}` : "à valider"}</div>`;
-    return `<div class="act">${p.img ? `<img class="th" src="${esc(p.img)}" alt="" loading="lazy">` : '<div class="th"></div>'}<div class="sp"><div class="row" style="gap:8px;align-items:flex-start"><b class="sp">« ${esc(p.title)} »</b>${tagSrc(p)}<span class="when">${ago(t)}</span></div>${lines}</div></div>`;
+    return `<div class="act tap" data-stat="${p.id}">${p.img ? `<img class="th" src="${esc(p.img)}" alt="" loading="lazy">` : '<div class="th"></div>'}<div class="sp"><div class="row" style="gap:8px;align-items:flex-start"><b class="sp">« ${esc(p.title)} »</b>${tagSrc(p)}<span class="when">${ago(t)}</span></div>${lines}</div></div>`;
   }).join("") || '<div class="empty">Aucune activité pour l\'instant.</div>';
 }
 
@@ -777,7 +786,7 @@ function viewStats() {
     <div class="sec"><h2 style="font-size:17px">Activité récente</h2></div>
     <div>${activity()}</div>
     <div class="sec"><h2 style="font-size:17px">Statut par promo</h2></div>
-    ${pubs.map(p => { const s = (i) => (p.stats?.fb?.[i] || 0) + (p.stats?.ig?.[i] || 0); return `<div class="sp-row"><img onerror="this.style.visibility='hidden'" src="${esc(p.img)}" alt="" loading="lazy"><div class="sp"><div class="row" style="gap:8px"><b class="sp" style="font-size:15px">${esc(p.title)}</b>${tagSrc(p)}</div><div style="margin-top:6px">${chanIcons(p)}</div>${p.stats ? `<div class="mini"><div><b>${nf(s(0))}</b>portée</div><div><b>${nf(s(1))}</b>vues</div><div><b>${nf(s(2))}</b>interactions</div><div><b>${nf(s(3))}</b>commentaires</div></div>` : '<div class="small">Statistiques disponibles dans quelques heures.</div>'}</div></div>`; }).join("")}
+    ${pubs.map(p => { const s = (i) => (p.stats?.fb?.[i] || 0) + (p.stats?.ig?.[i] || 0); return `<div class="sp-row tap" data-stat="${p.id}"><img onerror="this.style.visibility='hidden'" src="${esc(p.img)}" alt="" loading="lazy"><div class="sp"><div class="row" style="gap:8px"><b class="sp" style="font-size:15px">${esc(p.title)}</b>${tagSrc(p)}</div><div style="margin-top:6px">${chanIcons(p)}</div>${p.stats ? `<div class="mini"><div><b>${nf(s(0))}</b>portée</div><div><b>${nf(s(1))}</b>vues</div><div><b>${nf(s(2))}</b>interactions</div><div><b>${nf(s(3))}</b>commentaires</div></div>` : '<div class="small">Statistiques disponibles dans quelques heures.</div>'}</div></div>`; }).join("")}
   </div>`;
 }
 
@@ -877,6 +886,28 @@ async function toggleChannel(key) {
   toast(on ? `${key === "fb" ? "Facebook" : "Instagram"} réactivé.` : `${key === "fb" ? "Facebook" : "Instagram"} désactivé : vos promos n'y seront plus publiées.`);
 }
 
+// Toutes les statistiques d'une promo : par réseau, engagement, codes utilisés.
+function statsPromo(p) {
+  if (!p) return;
+  const st = promoState(p), M = [["Portée", 0], ["Vues", 1], ["Interactions", 2], ["Commentaires", 3]];
+  const v = (c, i) => p.stats?.[c]?.[i] || 0, tot = (i) => v("fb", i) + v("ig", i);
+  const eng = tot(0) ? (tot(2) / tot(0) * 100).toFixed(1).replace(".", ",") + " %" : "—";
+  const cell = (c, i) => p.ch?.[c] === "ok" ? nf(v(c, i)) : "—";
+  const pubAt = (c) => p.ch?.[c] === "ok" && p.chAt?.[c] ? `Publiée le ${fmtShort(new Date(p.chAt[c]))}` : p.ch?.[c] === "ko" ? "Échec de publication" : "Non publiée";
+  sheet(`<div class="grab"></div>
+    <div class="row" style="gap:12px;align-items:center;justify-content:flex-start">${p.img ? `<img src="${esc(p.img)}" alt="" style="width:58px;height:58px;border-radius:13px;object-fit:cover;flex:none">` : ""}
+      <div class="sp" style="min-width:0"><h2 style="margin:0;font-size:18px">${esc(p.title)}</h2><div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="pill" style="background:${st.c};color:#fff">${esc(st.l)}</span><span class="small" style="margin:0">Du ${fmtShort(p.start)} au ${fmtShort(p.end)}</span></div></div></div>
+    <div class="kpis4" style="margin-top:16px">${M.slice(0, 3).map(([l, i]) => `<div><b>${p.stats ? nf(tot(i)) : "—"}</b><span>${l}</span></div>`).join("")}<div><b style="color:var(--v)">${nf((S.codesBy || {})[p.spId] || 0)}</b><span>Codes</span></div></div>
+    <table class="st-tab"><thead><tr><th></th><th><span class="ch fb" style="width:24px;height:24px;margin:auto">${I.fbs}</span></th><th><span class="ch ig" style="width:24px;height:24px;margin:auto;border-radius:7px">${I.igs}</span></th></tr></thead>
+      <tbody>${M.map(([l, i]) => `<tr><td>${l}</td><td>${cell("fb", i)}</td><td>${cell("ig", i)}</td></tr>`).join("")}
+      <tr><td>Publication</td><td class="sm">${pubAt("fb")}</td><td class="sm">${pubAt("ig")}</td></tr></tbody></table>
+    <div class="st-line"><span>Taux d'engagement</span><b>${eng}</b></div>
+    <div class="st-line"><span>Codes utilisés en magasin</span><b style="color:var(--v)">${nf((S.codesBy || {})[p.spId] || 0)}<small> · ${nf((S.codes7By || {})[p.spId] || 0)} sur 7 j</small></b></div>
+    ${p.stats ? "" : `<p class="small" style="margin-top:10px">Les statistiques arrivent quelques heures après la publication.</p>`}
+    <button class="big-btn" id="sp-open">Ouvrir la promo</button><button class="txt-btn" data-close>Fermer</button>`);
+  $("#sp-open").onclick = () => { closeLayer(); openPromo(p); };
+}
+
 /* ===================== Rendu ===================== */
 function render(keepScroll) {
   const y = window.scrollY;
@@ -893,7 +924,7 @@ $$("#nav button").forEach(b => b.onclick = () => go(b.dataset.tab));
 $("#fab").onclick = () => sheetChoose();
 
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-act],[data-chan-t],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-cat],[data-card]");
+  const t = e.target.closest("[data-go],[data-act],[data-chan-t],[data-stat],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-cat],[data-card]");
   if (!t || t.closest("#layer")) return;
   const ds = t.dataset;
   if (ds.go) { const [a, b] = ds.go.split(":"); go(a, b); }
@@ -909,6 +940,7 @@ document.addEventListener("click", (e) => {
   else if (ds.act === "clients") clients(ds.id);
   else if (ds.cat) { UI.cat = ds.cat; const pg = $("#pager"), k = CATS.findIndex(c => c.k === ds.cat); pg && pg.scrollTo({ left: k * pg.clientWidth, behavior: "smooth" }); $$("#cats button").forEach(b => b.classList.toggle("on", b.dataset.cat === ds.cat)); }
   else if (ds.card) openPromo(find(ds.card));
+  else if (ds.stat) statsPromo(find(ds.stat));
   else if (ds.act === "reconnect") reconnect();
   else if (ds.act === "store-edit") sheetStore();
   else if (ds.chanT) toggleChannel(ds.chanT);

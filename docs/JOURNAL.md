@@ -20,6 +20,16 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-019 · Stats : toutes les statistiques d'une promo
+- **Quoi** : dans Stats, toucher une ligne d'« Activité récente » (ou de
+  « Statut par promo ») ouvre le détail de la promo : statut et dates,
+  portée / vues / interactions / codes utilisés, tableau Facebook /
+  Instagram (portée, vues, interactions, commentaires, date de publication
+  ou échec), taux d'engagement, codes utilisés en magasin (total et 7 jours),
+  bouton « Ouvrir la promo ».
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-019.
+
 ### MOD-018 · App magasin : Réglages réorganisés
 - **Ordre** : 1. fiche du magasin (nom, adresse, contact principal, téléphone,
   email, site web ; bouton « Compléter / Modifier les informations ») ·
