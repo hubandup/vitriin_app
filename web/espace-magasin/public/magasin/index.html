@@ -581,9 +581,30 @@ function showLogin(msg) {
   };
   $("#l-go").onclick = go; $("#l-pass").onkeydown = (e) => { if (e.key === "Enter") go(); };
 }
+// Gérant invité par sa centrale : il arrive connecté par le lien de l'email
+// et choisit son mot de passe avant d'entrer.
+function showWelcome(email) {
+  $("#nav").classList.add("hidden"); $("#fab").classList.add("hidden");
+  $("#view").innerHTML = `<div class="screen" style="padding-top:60px">
+    <div style="text-align:center;margin-bottom:24px"><img src="/icon-512.png" alt="" style="width:72px;height:72px;border-radius:18px"><h1 class="title" style="margin-top:14px">Bienvenue sur Vitriin</h1><div class="sub">Votre centrale vous a ouvert un espace magasin. Choisissez votre mot de passe pour ${esc(email)}.</div></div>
+    <span class="label">Mot de passe (8 caractères minimum)</span><input class="in" id="w-pass" type="password" autocomplete="new-password">
+    <span class="label">Confirmation</span><input class="in" id="w-pass2" type="password" autocomplete="new-password">
+    <p class="small" id="w-err" style="color:var(--red);margin-top:10px"></p>
+    <button class="big-btn" id="w-go" style="margin-top:12px">Entrer dans mon espace</button></div>`;
+  $("#w-go").onclick = async () => {
+    const a = $("#w-pass").value, b = $("#w-pass2").value;
+    if (a.length < 8) return $("#w-err").textContent = "8 caractères minimum.";
+    if (a !== b) return $("#w-err").textContent = "Les deux mots de passe ne correspondent pas.";
+    $("#w-go").disabled = true;
+    const { error } = await sb.auth.updateUser({ password: a });
+    if (error) { $("#w-go").disabled = false; return $("#w-err").textContent = errText(error); }
+    history.replaceState(null, "", location.pathname); boot();
+  };
+}
 async function boot() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return showLogin();
+  if (new URLSearchParams(location.search).has("bienvenue")) return showWelcome(session.user.email);
   $("#view").innerHTML = '<div class="screen"><div class="empty" style="margin-top:80px">Chargement…</div></div>';
   try { await loadData(); }
   catch (e) { return showLogin(errText(e)); }

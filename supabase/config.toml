@@ -373,3 +373,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 [functions.network-invite]
 # Ajout d'un utilisateur à l'équipe d'une centrale (admin vérifié dans la fonction).
 verify_jwt = true
+
+[functions.network-stores-invite]
+# Invitation des gérants des magasins importés (admin vérifié dans la fonction).
+verify_jwt = true

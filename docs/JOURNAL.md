@@ -20,6 +20,26 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-021 · Centrale : import Excel / CSV des points de vente et invitation des gérants
+- **Quoi** : dans « Ajouter des magasins », la centrale importe un fichier
+  .xlsx, .xls ou .csv (une ligne par magasin ; colonnes reconnues
+  automatiquement ; modèle téléchargeable ; aperçu avant import). Les
+  doublons (même nom et même code postal) sont ignorés, les lignes fautives
+  listées. Chaque gérant avec un email reçoit une invitation Vitriin ; s'il a
+  déjà un compte, le magasin est ajouté à son espace. Bouton « Réessayer »
+  pour les envois refusés. Dans la liste, « Invité le … » tant que le magasin
+  n'a rien connecté. Côté app magasin, le gérant invité choisit son mot de
+  passe à l'arrivée (`?bienvenue=1`).
+- **Sécurité** : RPC `import_network_stores` (SECURITY DEFINER, admin du
+  réseau vérifié en base, 1000 lignes max) ; fonction `network-stores-invite`
+  (admin vérifié avec le jeton de l'appelant, magasins du réseau uniquement,
+  clé service_role côté serveur seulement).
+- **Fichiers** : `centrale/index.html`, `magasin/index.html`,
+  `supabase/functions/network-stores-invite/index.ts`,
+  migrations `20261030131730_network_stores_import`, `20261030131848_network_stores_import_fix`.
+- **Retour arrière** : `git revert` du commit ; supprimer la fonction
+  `network-stores-invite` ; `drop function public.import_network_stores(uuid, jsonb)`.
+
 ### MOD-020 · Publication Meta : personnalisation magasin, réseaux coupés, promos suspendues
 - **Quoi** : la fonction `meta-publish` (version 5 déployée) publie le titre,
   le texte et la photo personnalisés par le magasin ; elle ignore un compte

@@ -250,6 +250,12 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 .code-box{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg);border-radius:14px;padding:16px 18px}
 .code-box b{font-size:26px;letter-spacing:.12em;font-weight:700}
 .copy{display:flex;gap:8px;margin-top:12px}
+.imp{border:1.5px dashed var(--line);border-radius:14px;padding:14px 16px}
+.imp-hd b{display:block;font-size:14px}.imp-hd span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.45}
+.imp table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}.imp th,.imp td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.imp th{color:var(--muted);font-weight:700}.imp .tw{overflow-x:auto}
+.imp .res{font-size:13px;line-height:1.55;margin-top:10px}.imp .res li{margin-left:16px}
+.imp label.ck{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px}
 .copy input{flex:1;min-width:0}
 
 /* Détail promo */
@@ -508,9 +514,14 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 <!-- ============ MODALE : INVITER DES MAGASINS ============ -->
 <div class="ov hidden" id="m-invite">
   <div class="modal sm">
-    <div class="mh"><div><h2>Ajouter des magasins</h2><p>Chaque magasin crée son compte et rejoint votre réseau avec ce code.</p></div><button class="x" data-close aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="mh"><div><h2>Ajouter des magasins</h2><p>Importez votre liste de points de vente, ou partagez le code du réseau.</p></div><button class="x" data-close aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="mb">
-      <label class="fl">Code du réseau</label>
+      <div class="imp" id="imp">
+        <div class="imp-hd"><div><b>Importer une liste (Excel ou CSV)</b><span>Une ligne par magasin : nom, adresse, code postal, ville, prénom, nom et email du gérant, téléphone. Chaque gérant reçoit une invitation par email.</span></div></div>
+        <div class="copy"><button class="btn-p" id="imp-pick">Choisir un fichier</button><button class="btn-s" id="imp-tpl">Télécharger le modèle</button><input type="file" id="imp-file" accept=".xlsx,.xls,.csv" hidden></div>
+        <div id="imp-body"></div>
+      </div>
+      <label class="fl">Ou partagez le code du réseau</label>
       <div class="code-box"><b id="i-code"></b><button class="btn-s" id="i-regen" title="Les magasins déjà rattachés restent dans le réseau">Nouveau code</button></div>
       <label class="fl">Lien d'invitation</label>
       <div class="copy"><input class="in" id="i-link" readonly><button class="btn-p" id="i-copy">Copier</button></div>
@@ -1173,7 +1184,7 @@ function viewStores(D) {
       ${list.length ? list.map(s => {
         const [cl, cc] = CONN[s.conn], sel = S.dw && S.dw.k === "store" && S.dw.id === s.id;
         return `<div class="trow click${sel ? " sel" : ""}" style="${cols}" data-store="${s.id}">
-          <div class="cell-name">${storeAv(s)}<div style="min-width:0"><b>${esc(s.name)}</b><small style="color:${s.pending ? "var(--c-amber)" : "var(--teal)"};font-weight:700">${s.pending ? `${s.pending} promo${s.pending > 1 ? "s" : ""} à valider` : "À jour"}</small></div></div>
+          <div class="cell-name">${storeAv(s)}<div style="min-width:0"><b>${esc(s.name)}</b><small style="color:${s.pending ? "var(--c-amber)" : s.conn === "none" && s.invited_at ? "var(--muted)" : "var(--teal)"};font-weight:700">${s.pending ? `${s.pending} promo${s.pending > 1 ? "s" : ""} à valider` : s.conn === "none" && s.invited_at ? `Invité le ${dshort(s.invited_at)}` : "À jour"}</small></div></div>
           <div class="mut">${esc(s.city || "—")}</div><div class="mut">${esc(s.region ? (SHORT_REGION[s.region] || s.region) : "—")}</div>
           <div class="soc"><span class="${s.fbOk ? "fb" : ""}">f</span><span class="${s.igOk ? "ig" : ""}">IG</span><span title="Bientôt">TT</span><span title="Bientôt">WA</span></div>
           <div><span class="pill ${cc}">${cl}</span></div>
@@ -1455,7 +1466,96 @@ function fillInvite() {
   $("i-link").value = inviteLink();
   $("i-msg").value = fillTpl("invite", { reseau: S.net.name, lien: inviteLink(), code: S.net.join_code, magasin: "" });
 }
-function openInvite() { fillInvite(); show("m-invite"); }
+function openInvite() { fillInvite(); $("imp-body").innerHTML = ""; show("m-invite"); }
+
+/* ---------- Import Excel / CSV des points de vente ---------- */
+// Colonnes reconnues (en-têtes comparés sans accents ni casse).
+const IMP_COLS = [
+  ["name", "Magasin", /^(nom( du)? (magasin|point de vente|pdv|site|concession)|magasin|point de vente|pdv|enseigne|raison sociale|nom)$/],
+  ["address", "Adresse", /^(adresse|rue|adresse postale)/],
+  ["postal_code", "Code postal", /^(code postal|cp|code_postal|postal)/],
+  ["city", "Ville", /^(ville|commune|localite)/],
+  ["first_name", "Prénom", /^prenom/],
+  ["last_name", "Nom du gérant", /^(nom (du )?(gerant|contact|responsable|directeur)|nom de famille)/],
+  ["email", "Email", /(e-?mail|courriel|mail)/],
+  ["phone", "Téléphone", /^(tel|telephone|portable|mobile)/],
+];
+const norm = (t) => String(t ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[_]/g, " ").replace(/\s+/g, " ").trim();
+let XLSXP = null;
+const loadXlsx = () => XLSXP || (XLSXP = new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; sc.onload = () => ok(window.XLSX); sc.onerror = () => { XLSXP = null; ko(new Error("Lecture Excel indisponible, vérifiez votre connexion.")); }; document.head.appendChild(sc); }));
+let IMP = null;
+$("imp-pick").onclick = () => $("imp-file").click();
+$("imp-tpl").onclick = () => {
+  const csv = "\ufeffMagasin;Adresse;Code postal;Ville;Prénom;Nom du gérant;Email;Téléphone\n" + `${S.net.name} Lyon;12 rue de la République;69002;Lyon;Marie;Durand;marie.durand@exemple.fr;04 78 00 00 00\n`;
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = "modele-magasins-vitriin.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+$("imp-file").onchange = async (ev) => {
+  const file = ev.target.files[0]; ev.target.value = ""; if (!file) return;
+  const out = $("imp-body"); out.innerHTML = `<p class="hint">Lecture du fichier…</p>`;
+  try {
+    if (file.size > 5e6) throw new Error("Fichier trop lourd (5 Mo maximum).");
+    const X = await loadXlsx();
+    const wb = X.read(await file.arrayBuffer(), { type: "array", raw: false });
+    const grid = X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "", raw: false, blankrows: false });
+    // L'en-tête est la première ligne qui contient une colonne « magasin » reconnue.
+    const hi = grid.findIndex(r => r.some(c => IMP_COLS[0][2].test(norm(c))));
+    if (hi < 0) throw new Error("Colonne « Magasin » introuvable. Partez du modèle à télécharger.");
+    const head = grid[hi].map(norm), map = {};
+    IMP_COLS.forEach(([k, , re]) => { const i = head.findIndex((h, j) => re.test(h) && !Object.values(map).includes(j)); if (i >= 0) map[k] = i; });
+    const rows = grid.slice(hi + 1).map(r => {
+      const o = {}; Object.entries(map).forEach(([k, i]) => o[k] = String(r[i] ?? "").trim());
+      if (/^\d{4}$/.test(o.postal_code || "")) o.postal_code = "0" + o.postal_code; // 1000 lu comme nombre
+      return o;
+    }).filter(o => Object.values(o).some(Boolean));
+    if (!rows.length) throw new Error("Aucune ligne de magasin dans ce fichier.");
+    if (rows.length > 1000) throw new Error("1000 magasins maximum par fichier.");
+    IMP = rows;
+    const cols = IMP_COLS.filter(([k]) => k in map), missing = IMP_COLS.filter(([k]) => !(k in map)).map(c => c[1]);
+    const withMail = rows.filter(r => r.email).length;
+    out.innerHTML = `<div class="res"><b>${rows.length} magasin${rows.length > 1 ? "s" : ""}</b> trouvé${rows.length > 1 ? "s" : ""} dans « ${esc(file.name)} », dont ${withMail} avec un email de gérant.${missing.length ? `<br><span style="color:var(--muted)">Colonnes absentes : ${missing.join(", ")}.</span>` : ""}</div>
+      <div class="tw"><table><tr>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr>${rows.slice(0, 5).map(r => `<tr>${cols.map(([k]) => `<td>${esc(r[k] || "")}</td>`).join("")}</tr>`).join("")}</table></div>
+      ${rows.length > 5 ? `<p class="hint">… et ${rows.length - 5} autre${rows.length - 5 > 1 ? "s" : ""}.</p>` : ""}
+      <label class="ck"><input type="checkbox" id="imp-send" ${withMail ? "checked" : "disabled"}> Envoyer l'invitation par email aux gérants</label>
+      <div class="copy" style="justify-content:flex-end"><button class="btn-s" id="imp-cancel">Annuler</button><button class="btn-p" id="imp-go">Importer ${rows.length} magasin${rows.length > 1 ? "s" : ""}</button></div>`;
+    $("imp-cancel").onclick = () => { IMP = null; out.innerHTML = ""; };
+    $("imp-go").onclick = runImport;
+  } catch (e) { out.innerHTML = `<p class="hint" style="color:var(--err)">${esc(errText(e))}</p>`; }
+};
+async function sendInvites(ids) {
+  const res = [];
+  for (let i = 0; i < ids.length; i += 200) {
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/network-stores-invite`, { method: "POST", headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: "Bearer " + (await sb.auth.getSession()).data.session.access_token }, body: JSON.stringify({ network_id: S.net.id, store_ids: ids.slice(i, i + 200) }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || "Envoi des invitations impossible.");
+    res.push(...(j.results || []));
+  }
+  return res;
+}
+function inviteReport(inv) {
+  const by = (st) => inv.filter(x => x.status === st), sent = by("invited"), linked = by("linked"), failed = by("failed");
+  return `${sent.length ? `<li>${sent.length} invitation${sent.length > 1 ? "s" : ""} envoyée${sent.length > 1 ? "s" : ""}</li>` : ""}${linked.length ? `<li>${linked.length} gérant${linked.length > 1 ? "s" : ""} ayant déjà un compte Vitriin : magasin ajouté à son espace</li>` : ""}${failed.length ? `<li style="color:var(--err)">${failed.length} invitation${failed.length > 1 ? "s" : ""} non envoyée${failed.length > 1 ? "s" : ""} : ${failed.slice(0, 5).map(f => esc(f.name) + " (" + esc(f.reason) + ")").join(", ")}${failed.length > 5 ? "…" : ""} <button class="btn-s" id="imp-retry" style="padding:4px 10px;font-size:12px">Réessayer</button></li>` : ""}`;
+}
+async function runImport() {
+  const btn = $("imp-go"); btn.disabled = true; btn.textContent = "Import en cours…";
+  const out = $("imp-body"), send = $("imp-send")?.checked;
+  try {
+    const { data, error } = await sb.rpc("import_network_stores", { p_network_id: S.net.id, p_rows: IMP });
+    if (error) throw error;
+    const created = data.created || [], skipped = data.skipped || [], errs = data.errors || [];
+    let inv = [];
+    if (send) { const ids = created.filter(c => c.email).map(c => c.id); if (ids.length) { btn.textContent = "Envoi des invitations…"; inv = await sendInvites(ids); } }
+    IMP = null;
+    const draw = () => out.innerHTML = `<div class="res"><b>Import terminé.</b><ul>
+      <li>${created.length} magasin${created.length > 1 ? "s" : ""} ajouté${created.length > 1 ? "s" : ""} au réseau</li>
+      ${skipped.length ? `<li>${skipped.length} déjà présent${skipped.length > 1 ? "s" : ""}, ignoré${skipped.length > 1 ? "s" : ""}</li>` : ""}
+      ${errs.length ? `<li style="color:var(--err)">${errs.length} ligne${errs.length > 1 ? "s" : ""} en erreur : ${errs.slice(0, 5).map(x => "ligne " + x.line + " (" + esc(x.error) + ")").join(", ")}${errs.length > 5 ? "…" : ""}</li>` : ""}
+      ${inviteReport(inv)}</ul></div>`;
+    draw();
+    const retry = () => { const b = $("imp-retry"); if (b) b.onclick = async () => { b.disabled = true; const again = await sendInvites(inv.filter(x => x.status === "failed").map(x => x.id)).catch(e => (toast(errText(e)), [])); inv = inv.filter(x => x.status !== "failed").concat(again); draw(); retry(); }; };
+    retry();
+    await load(); render();
+  } catch (e) { btn.disabled = false; btn.textContent = "Importer"; toast(errText(e)); }
+}
 $("i-copy").onclick = () => copy($("i-link").value);
 $("i-copy-msg").onclick = () => copy($("i-msg").value);
 $("i-regen").onclick = async () => {
@@ -1608,7 +1708,7 @@ $("f-send").onclick = async () => {
 async function load() {
   const id = S.net.id;
   const [st, ac, pr, sp] = await Promise.all([
-    sb.from("stores").select("id, name, address, city, postal_code, auto_accept, logo_url, created_at").eq("network_id", id).order("name").range(0, 4999),
+    sb.from("stores").select("id, name, address, city, postal_code, auto_accept, logo_url, created_at, invited_at").eq("network_id", id).order("name").range(0, 4999),
     sb.from("social_accounts").select("store_id, channel, status, display_name, stores!inner(network_id)").eq("stores.network_id", id).range(0, 9999),
     sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
     sb.from("store_promotions").select("id, promotion_id, store_id, status, hidden, suspended, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),
