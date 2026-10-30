@@ -511,12 +511,17 @@ async function loadData() {
   if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
   const st = mem[0].stores;
   await sb.rpc("demo_tick", { p_store_id: st.id }); // fait avancer la démo ; sans effet ailleurs
-  const [net, acc, rows] = await Promise.all([
+  const [net, acc, rows, rev] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status").eq("store_id", st.id),
     sb.from("store_promotions").select("id, status, overrides, suspended, hidden, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
+    // Codes révélés par les clients (drive to store), lisibles par le magasin seulement.
+    sb.from("code_reveals").select("store_promotion_id, revealed_at").eq("store_id", st.id).order("revealed_at", { ascending: false }).range(0, 9999),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
+  const reveals = (!rev.error && rev.data) || [];
+  S.codes7 = reveals.filter(r => Date.now() - new Date(r.revealed_at) < 7 * DAY).length;
+  S.codesBy = reveals.reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
   const n = net.data?.[0];
   const fb = acc.data.find(a => a.channel === "facebook"), ig = acc.data.find(a => a.channel === "instagram");
   Object.assign(STORE, {
@@ -644,7 +649,7 @@ function viewHome() {
     <div class="todo-box">${rows.join("") || `<div class="all-ok">${I.check}<span>Rien à faire : tout est à jour.</span></div>`}</div>
     <div class="sec"><h2>En ce moment</h2><button class="link" data-go="promos:live">Tout voir ${I.chev}</button></div>
     ${live.length ? `<div class="carousel">${live.map(p => `<div class="slide">${cardBig(p)}</div>`).join("")}</div>` : `<div class="empty" style="padding:18px 10px">Aucune promo en ligne pour l'instant.</div>`}
-    <button class="week" data-go="stats"><span class="sp"><b>7 derniers jours</b><span>${nf(sum(1))} vues · ${nf(sum(2))} interactions · ${pubCount()} publication${pubCount() > 1 ? "s" : ""}</span></span><span class="chev">${I.chev}</span></button>
+    <button class="week" data-go="stats"><span class="sp"><b>7 derniers jours</b><span>${nf(sum(1))} vues · ${nf(S.codes7 || 0)} code${(S.codes7 || 0) > 1 ? "s" : ""} utilisé${(S.codes7 || 0) > 1 ? "s" : ""} en magasin</span></span><span class="chev">${I.chev}</span></button>
   </div>`;
 }
 function activity() {
@@ -754,7 +759,7 @@ function viewStats() {
       <div><b style="color:var(--p)">${activeCount()}</b><span>Actives</span></div>
       <div><b style="color:var(--teal)">${pubCount()}</b><span>Publiées</span></div>
       <div><b style="color:var(--red)">${failCount()}</b><span>En échec</span></div>
-      <div><b style="color:var(--v)">${compactNum(sum(0))}</b><span>Portée 7 j</span></div>
+      <div><b style="color:var(--v)">${compactNum(S.codes7 || 0)}</b><span>Codes utilisés 7 j</span></div>
     </div>
     <div class="sec"><h2 style="font-size:16px">Résultats Facebook &amp; Instagram</h2><span style="font-size:13px;color:var(--muted);white-space:nowrap">7 derniers jours</span></div>
     <div class="sk" style="margin-top:0">${card("Portée", 0, "personnes touchées")}${card("Vues", 1, "affichages")}${card("Interactions", 2, "réactions, partages, enregistrements")}${card("Commentaires", 3, "sur vos publications")}</div>
@@ -893,7 +898,7 @@ function openPromo(p) {
       <div class="scroll">
         <div class="row" style="justify-content:space-between;align-items:center;gap:10px">
           <span class="stchip">${esc(st.l)}</span>${chanIcons(p, true)}</div>
-        <div class="kpis4">${[["Portée", 0], ["Vues", 1], ["Interactions", 2], ["Commentaires", 3]].map(([l, i]) => `<div><b>${p.stats ? nf(sum(i)) : "—"}</b><span>${l}</span></div>`).join("")}</div>
+        <div class="kpis4">${[["Portée", 0], ["Vues", 1], ["Interactions", 2]].map(([l, i]) => `<div><b>${p.stats ? nf(sum(i)) : "—"}</b><span>${l}</span></div>`).join("")}<div><b style="color:var(--v)">${nf((S.codesBy || {})[p.spId] || 0)}</b><span>Codes utilisés</span></div></div>
         ${editable ? "" : `<p class="hint" style="color:var(--muted);margin-top:14px">${p.hidden || isOver(p) ? "Cette promo n'est plus modifiable." : `Votre centrale ${esc(STORE.net)} ne permet pas de modifier ses promos.`}</p>`}
         <div class="${editable ? "" : "ro-box"}">
           <div class="fl">TITRE</div><input class="in" id="pf-title" maxlength="90" value="${esc(F.title)}" ${editable ? "" : "disabled"}>
@@ -1230,6 +1235,16 @@ function barcode(code) {
   add(1, 1); add(1, 0); add(1, 1);
   return bars;
 }
+// Identifiant anonyme de l'appareil : un client compte une fois par promo et par jour.
+const newId = () => (crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join(""));
+function clientId() {
+  try { let id = localStorage.getItem("vitriin-client"); if (!id) { id = newId(); localStorage.setItem("vitriin-client", id); } return id; }
+  catch { return newId(); }
+}
+function countReveal(p) {
+  Promise.resolve(sb.rpc("record_code_reveal", { p_store_promotion_id: p.spId, p_client_id: clientId() }))
+    .then(() => loadData()).catch(() => {});
+}
 function codeBox(p) {
   const el = document.createElement("div"); el.className = "codebox";
   const draw = (shown) => {
@@ -1238,7 +1253,7 @@ function codeBox(p) {
       <div class="digits ${shown ? "" : "mask-d"}">${esc(p.code || "9 901230 000017")}</div>
       ${shown ? `<div class="used">${I.check}Promotion activée · présentez ce code en caisse</div><button class="dark-btn" id="cb-x">Terminé</button>` :
       `<p class="small" style="font-size:14px;margin:14px 0 0;line-height:1.45">Révélez le code pour le scanner en caisse : on compte ainsi chaque promo réellement utilisée.</p><button class="big-btn" id="cb-go">${I.eye}Utiliser cette promotion</button>`}</div>`;
-    $("#cb-go", el) && ($("#cb-go", el).onclick = () => draw(true));
+    $("#cb-go", el) && ($("#cb-go", el).onclick = () => { draw(true); countReveal(p); });
     $("#cb-x", el) && ($("#cb-x", el).onclick = () => el.remove());
   };
   el.onclick = (e) => { if (e.target === el) el.remove(); };

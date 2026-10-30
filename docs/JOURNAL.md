@@ -20,6 +20,26 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-016 · Drive to store : « Codes utilisés »
+- **Quoi** : quand un client touche « Utiliser cette promotion » et révèle le
+  code-barre, l'événement est enregistré. Affiché : Stats › 4e tuile « Codes
+  utilisés 7 j » (remplace la portée, déjà dans les cartes), page promo ›
+  4e statistique « Codes utilisés », accueil › ligne de la semaine.
+- **Base** : migration `20261030081255_code_reveals` :
+  - table `code_reveals` (RLS : lecture par le magasin et sa centrale ;
+    aucune écriture directe, ni anon ni authenticated) ;
+  - RPC `record_code_reveal(store_promotion_id, client_id)` (anon et
+    connectés) : ne compte que les promos activées, ni suspendues ni
+    supprimées, en cours ; un appareil compte une fois par promo et par jour ;
+    les membres du magasin qui testent leur vue client ne comptent pas, sauf
+    sur un réseau de démo. Testé en base.
+- **Démo** : 54 révélations fictives (`source = 'demo'`) sur les promos en
+  ligne de Chausselandia Lyon, réparties sur 7 jours.
+  Retour arrière : `delete from code_reveals where source = 'demo';`
+- **Limite** : mesure le code affiché par le client, pas l'achat validé en caisse.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-016 ; la table peut rester.
+
 ### MOD-015 · App magasin : Stats plus compactes
 - **Quoi** : les trois grandes barres (promos actives, publications réussies,
   en échec) deviennent quatre tuiles sur une ligne, dans le style de la page
