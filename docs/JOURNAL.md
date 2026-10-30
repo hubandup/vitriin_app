@@ -20,6 +20,12 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-035 · Manager > Site web : onglets Statistiques / Demandes
+- **Quoi** : onglets « Statistiques » (visites) et « Demandes » (liste d'attente, avec compteur).
+  Carte « Compteur à installer » et code du compteur (SNIPPET) retirés : le compteur est en place sur vitriin.fr.
+- **Où** : `public/manager/index.html` (vSite, vWaitlist, bind).
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-033 · Liste d'attente des indépendants (vitriin.fr → Manager)
 - **Quoi** : table fermée `waitlist_signups` ; `join_waitlist` (anon, email validé,
   doublon ignoré sans le révéler, plafond 200/h) ; `manager_waitlist` et

@@ -92,7 +92,6 @@ label.f{display:block;font-size:12.5px;font-weight:700;margin-top:14px}label.f .
 .help{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.55;color:var(--muted)}.help b{color:var(--ink)}
 .empty{color:var(--muted);font-size:13px;padding:10px 0}
 .list li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}.list{list-style:none;margin:0;padding:0}.list li:last-child{border-bottom:none}
-pre{background:var(--bg);border-radius:12px;padding:12px;font-size:12px;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
 .ch{display:inline-flex;gap:4px}.ch span{font-size:11px;font-weight:700;border-radius:6px;padding:2px 5px;background:var(--bg);color:var(--muted)}
 .ch .ok{background:var(--t-ok);color:var(--ok)}.ch .ko{background:var(--t-err);color:var(--err)}
 .back{border:none;background:none;color:var(--muted);font-weight:700;padding:0;margin-bottom:8px}
@@ -488,27 +487,20 @@ function vHealth() {
 }
 
 /* ---------- Site web ---------- */
-const SNIPPET = `<script>
-/* Vitriin : mesure d'audience sans cookie. */
-(function(){var U="${SUPABASE_URL}/rest/v1/rpc/track_visit",K="${ANON_KEY}";
-var V;try{var k="vt_"+new Date().toISOString().slice(0,10);V=localStorage.getItem(k);if(!V){V=Math.random().toString(36).slice(2,12);localStorage.setItem(k,V)}}catch(e){}
-var q=new URLSearchParams(location.search),w=innerWidth,dev=w<700?"mobile":w<1100?"tablet":"desktop",ref="";try{ref=document.referrer?new URL(document.referrer).hostname:"";if(ref===location.hostname)ref=""}catch(e){}
-function send(ev,p){try{fetch(U,{method:"POST",keepalive:true,headers:{"Content-Type":"application/json",apikey:K,Authorization:"Bearer "+K},body:JSON.stringify({p_path:p||location.pathname,p_ref:ref,p_source:q.get("utm_source"),p_device:dev,p_visitor:V,p_event:ev,p_site:location.hostname})})}catch(e){}}
-var last="";function view(){if(location.pathname!==last){last=location.pathname;send("view")}}
-view();var ps=history.pushState;history.pushState=function(){ps.apply(this,arguments);setTimeout(view,0)};addEventListener("popstate",view);
-document.addEventListener("click",function(e){var a=e.target.closest("a,button");if(!a)return;var t=(a.textContent+" "+(a.getAttribute("href")||"")).toLowerCase();
-if(/d[ée]mo/.test(t))send("demo_click");else if(/essai|inscri|cr[ée]er (mon|un) compte|commencer/.test(t))send("signup_click")});})();
-<\/script>`;
 function vWaitlist() {
   const W = C.wl;
-  if (!W) return "";
-  return `<div class="card" style="margin-top:14px"><h3>Liste d'attente indépendants · ${nf(W.total)} inscrit${W.total > 1 ? "s" : ""}${W.week ? ` (+${nf(W.week)} cette semaine)` : ""}</h3>
+  if (!W) return `<div class="card"><p class="empty">Demandes indisponibles pour l'instant.</p></div>`;
+  return `<div class="card"><h3>Liste d'attente indépendants · ${nf(W.total)} inscrit${W.total > 1 ? "s" : ""}${W.week ? ` (+${nf(W.week)} cette semaine)` : ""}</h3>
     ${W.rows.length ? `<ul class="list">${W.rows.map(r => `<li><span><b>${esc(r.business || "—")}</b> · ${esc(r.activity || "")} ${r.city ? "· " + esc(r.city) : ""}<br><a href="mailto:${esc(r.email)}">${esc(r.email)}</a> · ${day(r.created_at)}${r.source ? " · " + esc(r.source) : ""}</span><label style="white-space:nowrap"><input type="checkbox" data-wl="${r.id}" ${r.contacted_at ? "checked" : ""}> contacté</label></li>`).join("")}</ul>` : `<p class="empty">Aucune inscription pour l'instant.</p>`}</div>`;
 }
 function vSite() {
   const D = C.site;
-  return `<div class="bar"><div><h2>Site web · vitriin.fr</h2><p class="sub">30 derniers jours. Mesure sans cookie : ni adresse IP ni donnée personnelle conservée.</p></div></div>
-  ${D.last ? "" : `<div class="help" style="margin-bottom:14px"><b>Aucune visite reçue pour l'instant.</b> Le compteur doit être ajouté au site (voir en bas de page).</div>`}
+  const st = UI.stab || "stats", n = C.wl ? C.wl.total : 0;
+  const head = `<div class="bar"><div><h2>Site web · vitriin.fr</h2><p class="sub">${st === "stats" ? "30 derniers jours. Mesure sans cookie : ni adresse IP ni donnée personnelle conservée." : "Inscriptions reçues depuis les formulaires du site."}</p></div>
+    <div class="chips"><button class="chip ${st === "stats" ? "on" : ""}" data-stab="stats">Statistiques</button><button class="chip ${st === "req" ? "on" : ""}" data-stab="req">Demandes${n ? ` · ${nf(n)}` : ""}</button></div></div>`;
+  if (st === "req") return head + vWaitlist();
+  return `${head}
+  ${D.last ? "" : `<div class="help" style="margin-bottom:14px"><b>Aucune visite reçue pour l'instant.</b> Le compteur est installé sur vitriin.fr : les premières visites apparaîtront ici.</div>`}
   <div class="kpis">${kpi(nf(D.views), "pages vues")}${kpi(nf(D.visitors), "visiteurs")}${kpi(nf(D.demo), "clics « démo »")}${kpi(nf(D.signup), "clics « essai / inscription »")}${kpi(D.visitors ? (D.demo / D.visitors * 100).toFixed(1).replace(".", ",") + " %" : "—", "visiteurs qui demandent une démo")}</div>
   <div class="card" style="margin-top:14px"><h3>Visites par jour</h3>${bars(D.series, "n", "v")}</div>
   <div class="two">
@@ -516,9 +508,7 @@ function vSite() {
     <div class="card"><h3>Provenance</h3>${D.sources.length ? `<ul class="list">${D.sources.map(p => `<li><span>${esc(p.src)}</span><b>${nf(p.n)}</b></li>`).join("")}</ul>` : `<p class="empty">—</p>`}
       <h3 style="margin-top:16px">Appareils</h3><ul class="list">${Object.entries(D.devices || {}).map(([k, v]) => `<li><span>${{ mobile: "Mobile", tablet: "Tablette", desktop: "Ordinateur" }[k] || k}</span><b>${nf(v)}</b></li>`).join("") || "<li><span>—</span></li>"}</ul></div>
   </div>
-  ${vWaitlist()}
-  <div class="card" style="margin-top:14px"><h3>Compteur à installer sur vitriin.fr</h3><p class="sub">Dans Lovable : demandez d'ajouter ce code juste avant &lt;/body&gt; de index.html. Il compte les pages vues (navigation comprise), la provenance (utm_source ou site d'origine), l'appareil et les clics sur les boutons « démo » et « essai ».</p>
-    <pre id="snip">${esc(SNIPPET)}</pre><button class="btn-s" id="copy-snip">Copier le code</button></div>`;
+`;
 }
 
 const VIEWS = { home: vHome, support: vSupport, ticket: vTicket, clients: vClients, net: vNet, stores: vStores, demos: vDemos, health: vHealth, site: vSite };
@@ -544,7 +534,7 @@ function bind() {
   v.querySelectorAll("[data-net]").forEach(r => r.onclick = () => { UI.net = r.dataset.net; show("net"); });
   if ($("q")) { $("q").oninput = (e) => { UI.q = e.target.value; const pos = e.target.selectionStart; $("view").innerHTML = vStores(); bind(); $("q").focus(); $("q").setSelectionRange(pos, pos); }; }
   if ($("sf")) $("sf").onchange = (e) => { UI.sf = e.target.value; $("view").innerHTML = vStores(); bind(); };
-  if ($("copy-snip")) $("copy-snip").onclick = () => navigator.clipboard.writeText(SNIPPET).then(() => toast("Code copié."), () => toast("Copie impossible : sélectionnez le texte."));
+  v.querySelectorAll("[data-stab]").forEach(b => b.onclick = () => { UI.stab = b.dataset.stab; $("view").innerHTML = vSite(); bind(); });
   v.querySelectorAll("[data-wl]").forEach(x => x.onchange = () => rpc("manager_waitlist_contacted", { p_id: +x.dataset.wl, p_done: x.checked }).then(() => toast(x.checked ? "Marqué contacté." : "Marqué à contacter."), (e) => { x.checked = !x.checked; toast(e.message); }));
   bindReset(v);
   // À traiter
