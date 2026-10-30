@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Vitriin Manager</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--p:#e5087e;--v:#951b81;--grad:linear-gradient(90deg,#e5087e,#951b81);--ink:#2D2D2D;--muted:#8a847c;--line:#ECE8E2;--bg:#f6f3ee;--card:#fff;--ok:#0c9875;--err:#c0352b}
+@media (prefers-color-scheme:dark){:root{--ink:#f1ede7;--muted:#a39d94;--line:#2f2b27;--bg:#151312;--card:#1f1c1a}}
+*{box-sizing:border-box}
+body{margin:0;font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 16px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:10px}.brand img{width:36px;height:36px;border-radius:10px}
+.brand b{font-size:18px}.brand span{display:block;font-size:12px;color:var(--muted)}
+h2{font-size:17px;margin:28px 0 4px}.sub{color:var(--muted);font-size:13px;margin:0 0 14px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+.card.on{border-color:var(--p);box-shadow:0 0 0 2px rgba(229,8,126,.15)}
+.card h3{margin:0;font-size:16px}.card .lbl{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:14px 0}
+.stats div{background:var(--bg);border-radius:10px;padding:8px 6px;text-align:center}.stats b{display:block;font-size:16px}.stats span{font-size:11px;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-p{border:none;border-radius:12px;background:var(--grad);color:#fff;font-weight:700;padding:10px 14px}
+.btn-s{border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-weight:700;padding:9px 13px;text-decoration:none;display:inline-block}
+button:disabled{opacity:.5;cursor:default}
+.pill{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:3px 9px;background:#e7f5f0;color:var(--ok)}
+.pill.grey{background:var(--bg);color:var(--muted)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-size:12px}
+td.r,th.r{text-align:right}.tw{overflow-x:auto}
+.auth{max-width:380px;margin:12vh auto 0;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px}
+.auth h1{margin:0 0 4px;font-size:22px}.in{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;background:var(--card);color:var(--ink);margin-top:6px}
+label{display:block;font-size:12.5px;font-weight:700;margin-top:14px}
+.err{color:var(--err);font-size:13px;margin-top:10px;min-height:18px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px)}
+.hidden{display:none}
+.help{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.55;color:var(--muted)}
+.help b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast hidden" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Vitriin Manager : espace réservé à l'équipe Vitriin. Les droits sont vérifiés
+// côté serveur (is_platform_admin dans chaque fonction) ; cette page n'a que la clé publique.
+const SUPABASE_URL = "https://zjugauidrijghesgsmap.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU";
+const sb = supabase.createClient(SUPABASE_URL, ANON_KEY, { auth: { storageKey: "vitriin-manager-auth" } });
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nf = (n) => new Intl.NumberFormat("fr-FR").format(n || 0);
+const errText = (e) => (e && (e.message || e.error_description)) || String(e);
+let tt; const toast = (t) => { const el = $("toast"); el.textContent = t; el.classList.remove("hidden"); clearTimeout(tt); tt = setTimeout(() => el.classList.add("hidden"), 3500); };
+let D = null, busy = false;
+
+function showLogin(msg = "") {
+  $("app").innerHTML = `<div class="auth"><h1>Vitriin Manager</h1><p class="sub">Espace réservé à l'équipe Vitriin.</p>
+    <label>Email<input class="in" id="l-email" type="email" autocomplete="username"></label>
+    <label>Mot de passe<input class="in" id="l-pass" type="password" autocomplete="current-password"></label>
+    <div class="err" id="l-err">${esc(msg)}</div><button class="btn-p" id="l-go" style="width:100%;margin-top:6px">Se connecter</button></div>`;
+  const go = async () => {
+    $("l-go").disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email: $("l-email").value.trim(), password: $("l-pass").value });
+    if (error) { $("l-go").disabled = false; $("l-err").textContent = "Email ou mot de passe incorrect."; return; }
+    boot();
+  };
+  $("l-go").onclick = go; $("l-pass").onkeydown = (e) => { if (e.key === "Enter") go(); };
+}
+
+async function boot() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return showLogin();
+  const { data: ok } = await sb.rpc("is_platform_admin");
+  if (!ok) { await sb.auth.signOut(); return showLogin("Ce compte n'a pas accès au Manager."); }
+  await load(); render();
+}
+async function load() {
+  const { data, error } = await sb.rpc("manager_overview");
+  if (error) throw error;
+  D = data;
+}
+
+function demoCard(sec) {
+  const n = D.networks.find(x => x.is_demo && x.demo_sector === sec.key);
+  const st = n ? `<div class="stats"><div><b>${nf(n.stores)}</b><span>magasins</span></div><div><b>${nf(n.connected)}</b><span>connectés</span></div><div><b>${nf(n.promos)}</b><span>promos</span></div><div><b>${nf(n.published)}</b><span>publiées</span></div></div>` : `<p class="sub" style="margin:14px 0">Démo pas encore générée.</p>`;
+  return `<div class="card ${n?.active ? "on" : ""}">
+    <div class="row" style="justify-content:space-between;align-items:center"><span class="lbl">${esc(sec.label)}</span>${n?.active ? `<span class="pill">Démo active</span>` : ""}</div>
+    <h3 style="margin-top:6px">${esc(n?.name || sec.brand)}</h3>${st}
+    <div class="row">
+      ${n && !n.active ? `<button class="btn-p" data-use="${n.id}">Utiliser cette démo</button>` : ""}
+      ${n?.active ? `<a class="btn-s" href="/centrale/" target="_blank" rel="noopener">Ouvrir la centrale</a><a class="btn-s" href="/magasin/" target="_blank" rel="noopener">Ouvrir l'app magasin</a>` : ""}
+      ${sec.generated ? `<button class="btn-s" data-build="${sec.key}" data-has="${n ? 1 : 0}">${n ? "Réinitialiser" : "Générer"}</button>` : ""}
+    </div></div>`;
+}
+
+function render() {
+  const clients = D.networks.filter(n => !n.is_demo);
+  $("app").innerHTML = `<div class="wrap">
+    <header><div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Manager</b><span>Équipe Vitriin</span></div></div>
+      <button class="btn-s" id="out">Se déconnecter</button></header>
+
+    <h2>Démos</h2>
+    <p class="sub">Choisissez la démo à montrer. La centrale (votre compte) et l'app magasin de démonstration basculent dessus. Une démo réinitialisée repart avec des dates et des chiffres à jour.</p>
+    <div class="grid">${D.sectors.map(demoCard).join("")}</div>
+    <div class="help" style="margin-top:14px"><b>Pour la présenter :</b> centrale sur <b>app.vitriin.co/centrale</b> avec votre compte ; app magasin sur <b>app.vitriin.co/magasin</b> avec le compte magasin.demo@vitriin.co. Si un onglet était déjà ouvert, rechargez-le.</div>
+
+    <h2>Clients</h2>
+    <p class="sub">${clients.length} centrale${clients.length > 1 ? "s" : ""} cliente${clients.length > 1 ? "s" : ""} · ${nf(D.independent_stores)} magasin${D.independent_stores > 1 ? "s" : ""} indépendant${D.independent_stores > 1 ? "s" : ""}.</p>
+    ${clients.length ? `<div class="tw"><table><tr><th>Centrale</th><th class="r">Magasins</th><th class="r">Connectés</th><th class="r">Promos</th><th class="r">Publications</th><th>Équipe</th><th>Depuis</th></tr>
+      ${clients.map(n => `<tr><td><b>${esc(n.name)}</b></td><td class="r">${nf(n.stores)}</td><td class="r">${nf(n.connected)}</td><td class="r">${nf(n.promos)}</td><td class="r">${nf(n.published)}</td><td>${n.members.map(esc).join("<br>") || "—"}</td><td>${new Date(n.created_at).toLocaleDateString("fr-FR")}</td></tr>`).join("")}
+    </table></div>` : `<div class="help">Aucune centrale cliente pour l'instant.</div>`}
+  </div>`;
+  $("out").onclick = async () => { await sb.auth.signOut(); showLogin(); };
+  document.querySelectorAll("[data-use]").forEach(b => b.onclick = () => act(b, async () => {
+    const { error } = await sb.rpc("manager_activate_demo", { p_network_id: b.dataset.use }); if (error) throw error;
+    toast("Démo activée. Rechargez la centrale et l'app magasin si elles sont ouvertes.");
+  }));
+  document.querySelectorAll("[data-build]").forEach(b => b.onclick = () => {
+    if (b.dataset.has === "1" && !confirm("Réinitialiser cette démo ? Ses magasins, promos et chiffres seront recréés.")) return;
+    act(b, async () => {
+      b.textContent = "Génération…";
+      const { error } = await sb.rpc("manager_build_demo", { p_sector: b.dataset.build }); if (error) throw error;
+      toast("Démo prête.");
+    });
+  });
+}
+async function act(btn, fn) {
+  if (busy) return; busy = true; btn.disabled = true;
+  try { await fn(); await load(); render(); }
+  catch (e) { toast(errText(e)); btn.disabled = false; }
+  finally { busy = false; }
+}
+boot().catch(e => showLogin(errText(e)));
+</script>
+</body>
+</html>

@@ -20,6 +20,30 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-023 · Vitriin Manager (super admin) et démos sectorielles
+- **Quoi** : nouvelle page `app.vitriin.co/manager`, réservée à l'équipe Vitriin
+  (au départ : charles@hubandup.com). Bloc « Démos » : une carte par secteur
+  (Retail · Chausselandia, Cheminées et poêles · Flamme & Foyer, Jardinerie ·
+  Jardins & Saisons) avec ses chiffres, « Utiliser cette démo » (bascule la
+  centrale de Charles et le compte magasin.demo@vitriin.co sur ce réseau),
+  « Réinitialiser » (recrée la démo avec des dates et chiffres à jour).
+  Bloc « Clients » : centrales réelles, magasins, connexions, promos,
+  publications, équipe.
+- **Générateur** : `manager_build_demo(secteur)` crée 20 magasins (villes
+  françaises), comptes Facebook / Instagram simulés (dont partiels, un à
+  reconnecter, deux sans réseau), 7 promos centrale (passées, en cours, à
+  venir, une obligatoire), 2 promos du magasin vitrine, publications avec
+  statistiques qui montent (demo_tick), codes utilisés. Contenu des secteurs
+  dans la table `demo_sectors` : ajouter un secteur = ajouter une ligne.
+- **Sécurité** : table `platform_admins` sans policy (illisible depuis le
+  navigateur) ; `is_platform_admin()` vérifié dans chaque fonction manager ;
+  fonctions internes demo_* non exécutables par les utilisateurs ; testé :
+  magasin et visiteur refusés.
+- **Fichiers** : `web/espace-magasin/public/manager/index.html`, migrations
+  `20261030135650_manager_demos`, `20261030135705_manager_demos_ig_parent`.
+- **Retour arrière** : réactiver Chausselandia depuis le Manager ; `git revert`
+  du commit ; les démos générées se suppriment via `demo_drop_network`.
+
 ### MOD-022 · Centrale : import Excel / CSV des promos
 - **Quoi** : carte « Importer un fichier Excel » (page Promotions) et bouton
   « Importer » de la barre latérale. Une ligne = une promo (Titre, Offre,
