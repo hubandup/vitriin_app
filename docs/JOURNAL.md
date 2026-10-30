@@ -20,6 +20,15 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-015 · App magasin : Stats plus compactes
+- **Quoi** : les trois grandes barres (promos actives, publications réussies,
+  en échec) deviennent quatre tuiles sur une ligne, dans le style de la page
+  promo : Actives · Publiées · En échec · Portée 7 j (décidé à l'oral).
+  Cartes de résultats et taux d'engagement resserrés.
+- **Code retiré** : CSS `.bigk`.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-015.
+
 ### MOD-014 · App magasin : accueil simplifié, logo = bascule côté clients
 - **Accueil en trois blocs** (décidé avec Charles à l'oral) :
   1. « À faire maintenant » : une seule carte qui regroupe promos de la

@@ -200,19 +200,17 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .empty{text-align:center;color:var(--muted);font-size:14px;padding:30px 10px}
 
 /* ---- Stats ---- */
-.bigk{display:flex;align-items:center;justify-content:space-between;border-radius:18px;padding:18px 20px;margin-top:10px;font-weight:600;font-size:16px}
-.bigk .num{font-size:34px}
-.sk{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.skc{border:1px solid var(--line);border-radius:16px;padding:14px}
-.skc b{font-size:14.5px}
-.skc .num{font-size:30px;margin-top:8px;color:var(--ink);line-height:1}
-.skc .small{margin-top:4px}
+.sk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.skc{border:1px solid var(--line);border-radius:14px;padding:11px 12px}
+.skc b{font-size:13.5px}
+.skc .num{font-size:24px;margin-top:5px;color:var(--ink);line-height:1}
+.skc .small{margin-top:3px;font-size:12px}
 .split{display:flex;gap:12px;margin-top:9px;font-size:13px;font-weight:600}
 .split span{display:flex;align-items:center;gap:5px}
 .split span::before{content:"";width:8px;height:8px;border-radius:50%}
 .split .f::before{background:var(--fb)}.split .i::before{background:#e1306c}
-.eng{display:flex;align-items:center;justify-content:space-between;background:var(--lilac);border-radius:16px;padding:14px 16px;margin-top:10px;font-weight:600}
-.eng .num{font-size:26px;color:var(--v)}
+.eng{display:flex;align-items:center;justify-content:space-between;background:var(--lilac);border-radius:14px;padding:10px 14px;margin-top:8px;font-weight:600;font-size:15px}
+.eng .num{font-size:22px;color:var(--v)}
 .legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);margin-top:10px;align-items:center}
 .legend span{display:flex;align-items:center;gap:5px}
 .legend .f::before,.legend .i::before{content:"";width:8px;height:8px;border-radius:50%}
@@ -616,6 +614,7 @@ function totals() {
   S.promos.forEach(p => ["fb", "ig"].forEach(c => p.stats?.[c]?.forEach((v, i) => t[c][i] += v)));
   return t;
 }
+const compactNum = (n) => n >= 1e4 ? Math.round(n / 1e3) + " k" : n >= 1e3 ? (n / 1e3).toFixed(1).replace(".", ",").replace(",0", "") + " k" : String(n);
 const nf = (n) => new Intl.NumberFormat("fr-FR").format(n).replace(/ /g, " ");
 
 /* ===================== Fragments ===================== */
@@ -751,9 +750,12 @@ function viewStats() {
   const card = (l, i, s) => `<div class="skc"><b>${l}</b><div class="num">${nf(sum(i))}</div><div class="small">${s}</div><div class="split"><span class="f">${nf(t.fb[i])}</span><span class="i">${nf(t.ig[i])}</span></div></div>`;
   return `<div class="screen">
     <h1 class="title">Stats</h1><div class="sub">Suivi de vos publications</div>
-    <div class="bigk k1" style="margin-top:16px"><span>Promos actives</span><span class="num" style="color:var(--p)">${activeCount()}</span></div>
-    <div class="bigk k2"><span>Publications réussies</span><span class="num" style="color:var(--teal)">${pubCount()}</span></div>
-    <div class="bigk k3"><span>Publications en échec</span><span class="num" style="color:var(--red)">${failCount()}</span></div>
+    <div class="kpis4" style="margin-top:16px">
+      <div><b style="color:var(--p)">${activeCount()}</b><span>Actives</span></div>
+      <div><b style="color:var(--teal)">${pubCount()}</b><span>Publiées</span></div>
+      <div><b style="color:var(--red)">${failCount()}</b><span>En échec</span></div>
+      <div><b style="color:var(--v)">${compactNum(sum(0))}</b><span>Portée 7 j</span></div>
+    </div>
     <div class="sec"><h2 style="font-size:16px">Résultats Facebook &amp; Instagram</h2><span style="font-size:13px;color:var(--muted);white-space:nowrap">7 derniers jours</span></div>
     <div class="sk" style="margin-top:0">${card("Portée", 0, "personnes touchées")}${card("Vues", 1, "affichages")}${card("Interactions", 2, "réactions, partages, enregistrements")}${card("Commentaires", 3, "sur vos publications")}</div>
     <div class="eng"><span>Taux d'engagement</span><span class="num">${eng} %</span></div>
