@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vitriin · Les promos de vos magasins</title>
+<meta name="description" content="Les promos des magasins près de chez vous. Présentez votre code en caisse.">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vitriin">
+<link rel="manifest" href="/v/manifest.webmanifest">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Racing+Sans+One&display=swap" rel="stylesheet">
+<style>
+/* Vitriin · vitrine publique (côté client). Même charte que l'app magasin. */
+:root{
+  --p:#e5087e; --v:#951b81; --grad:linear-gradient(100deg,#e5087e 0%,#951b81 100%);
+  --ink:#2D2D2D; --muted:#706b64; --line:#EEECE8; --bg:#f6f3ee; --rose:#fdf1f4; --teal:#0c8a6a;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none;padding:0}
+input{font-family:inherit;color:var(--ink)}
+a{color:inherit}
+img{display:block}
+.hidden{display:none!important}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+header.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:var(--sat)}
+header.top .wrap{display:flex;align-items:center;gap:12px;height:58px}
+.logo{font-family:'Racing Sans One',sans-serif;font-size:26px;color:var(--p);text-decoration:none;letter-spacing:.01em}
+.top .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 16px;border-radius:999px;font-weight:700;font-size:14.5px;text-decoration:none}
+.pill.ghost{border:1.5px solid var(--line);background:#fff}
+.pill.brand{background:var(--grad);color:#fff}
+.pill.dark{background:#16130f;color:#fff}
+.pill[disabled]{opacity:.55}
+main{padding:18px 0 calc(40px + var(--sab))}
+h1{font-size:28px;line-height:1.15;margin:6px 0 6px}
+h2{font-size:20px;margin:26px 0 12px}
+.sub{color:var(--muted);font-size:15px;margin:0}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
+.search{flex:1 1 240px;display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:0 14px;min-height:46px}
+.search input{border:none;outline:none;flex:1;font-size:16px;background:none;min-width:0}
+.search:focus-within{border-color:var(--p)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{background:#fff;border-radius:20px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(0,0,0,.04);border:1px solid var(--line)}
+.card .ph{position:relative;aspect-ratio:1;background:var(--rose)}
+.card .ph img{width:100%;height:100%;object-fit:cover}
+.badge{position:absolute;left:10px;top:10px;background:var(--p);color:#fff;font-weight:800;font-size:14px;padding:5px 10px;border-radius:10px}
+.card .bd{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
+.card b{font-size:16px;line-height:1.25}
+.card small{color:var(--muted);font-size:13px}
+.price{display:flex;align-items:baseline;gap:8px}
+.price strong{font-size:20px}
+.price s{color:var(--muted);font-size:14px}
+.stores{display:flex;flex-direction:column;gap:10px}
+.srow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;text-decoration:none}
+.av{width:46px;height:46px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex:none;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover;background:#fff}
+.srow div{flex:1;min-width:0}
+.srow b{display:block}
+.srow span{color:var(--muted);font-size:13.5px}
+.chip{display:inline-block;background:var(--rose);color:var(--p);font-weight:700;font-size:12.5px;padding:4px 9px;border-radius:999px}
+.demo{background:#fff4d6;color:#7a5600}
+.empty{background:#fff;border:1px dashed #d9d4cc;border-radius:18px;padding:22px;text-align:center;color:var(--muted)}
+.shead{display:flex;gap:14px;align-items:center;background:#fff;border-radius:22px;padding:18px;border:1px solid var(--line)}
+.shead .av{width:64px;height:64px;font-size:24px}
+.shead h1{font-size:23px;margin:0 0 2px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.promo{display:grid;gap:18px;grid-template-columns:1fr}
+@media (min-width:800px){.promo{grid-template-columns:1.05fr 1fr;align-items:start}}
+.promo .ph{border-radius:24px;overflow:hidden;background:var(--rose);aspect-ratio:1;position:relative}
+.promo .ph img{width:100%;height:100%;object-fit:cover}
+.promo .ph .badge{font-size:17px;padding:7px 12px;left:14px;top:14px}
+.panel{background:#fff;border-radius:22px;padding:20px;border:1px solid var(--line)}
+.panel h1{font-size:26px}
+.panel .price strong{font-size:30px}
+.panel p{line-height:1.55}
+.cta{width:100%;justify-content:center;min-height:54px;font-size:17px;margin-top:14px}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(15,12,10,.55);display:flex;align-items:flex-end;justify-content:center;animation:fade .18s}
+@media (min-width:600px){.ov{align-items:center}}
+.sheet{background:#fff;width:100%;max-width:440px;border-radius:26px 26px 0 0;padding:22px 20px calc(22px + var(--sab));max-height:92dvh;overflow:auto}
+@media (min-width:600px){.sheet{border-radius:26px}}
+.sheet h3{margin:0 0 6px;font-size:21px}
+.sheet .x{float:right;width:44px;height:44px;margin:-10px -8px 0 0;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.code{text-align:center}
+.code svg{max-width:100%;height:auto}
+.code .txt{font-size:26px;font-weight:800;letter-spacing:.12em;margin:8px 0 2px;word-break:break-all}
+.ok{background:#e8f5ee;color:var(--teal);border-radius:14px;padding:12px;font-weight:700;font-size:14.5px;margin-top:14px}
+label.f{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+input.in{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:14px;padding:0 14px;font-size:16px;outline:none}
+input.in:focus{border-color:var(--p)}
+.note{font-size:13px;color:var(--muted);line-height:1.5}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.tabs button{min-height:40px;padding:0 15px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:14px}
+.tabs button.on{background:#16130f;color:#fff;border-color:#16130f}
+.switch{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;white-space:nowrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + var(--sab));background:#2D2D2D;color:#fff;font-weight:600;font-size:14.5px;padding:12px 18px;border-radius:14px;z-index:60;max-width:calc(100% - 32px);text-align:center;animation:fade .2s}
+.load{padding:40px 0;text-align:center;color:var(--muted)}
+footer.ft{border-top:1px solid var(--line);padding:22px 0 calc(28px + var(--sab));color:var(--muted);font-size:13px}
+footer.ft a{margin-right:14px}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/v/" data-link>Vitriin</a><span class="sp"></span>
+  <a class="pill ghost" href="/v/compte" data-link id="acc">Mon compte</a>
+</div></header>
+<main class="wrap" id="app"><div class="load">Chargement…</div></main>
+<footer class="ft"><div class="wrap">
+  <a href="https://www.vitriin.fr/confidentialite" target="_blank" rel="noopener">Confidentialité</a><a href="https://www.vitriin.fr/cgu" target="_blank" rel="noopener">CGU</a><a href="https://www.vitriin.fr/mentions-legales" target="_blank" rel="noopener">Mentions légales</a>
+  <p style="margin:10px 0 0">Vitriin est une marque de Hub &amp; Up. Les promos sont publiées par chaque magasin, sous sa responsabilité.</p>
+</div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+<script>
+const SUPABASE_URL = "https://zjugauidrijghesgsmap.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU";
+const sb = supabase.createClient(SUPABASE_URL, ANON_KEY, { auth: { storageKey: "vitriin-client-auth", detectSessionInUrl: true } });
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const eur = (n) => new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n).replace(",00", "") + " €";
+const day = (t) => new Date(t).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+const km = (d) => d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1).replace(".", ",")} km`;
+const ls = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+const ss = { get(k) { try { return sessionStorage.getItem(k); } catch { return null; } }, set(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch {} } };
+function toast(t) { $(".toast")?.remove(); const d = document.createElement("div"); d.className = "toast"; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2800); }
+const errText = (e) => (e && (e.message || e.error_description)) || "Une erreur est survenue.";
+
+// Démo : les réseaux de démonstration n'apparaissent dans « autour de moi » qu'avec ?demo=1.
+if (new URLSearchParams(location.search).has("demo")) ss.set("vt-demo", "1");
+const DEMO = ss.get("vt-demo") === "1";
+
+// Identifiant anonyme de l'appareil : une utilisation comptée par promo et par jour.
+function clientId() {
+  let id = ls.get("vitriin-client");
+  if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join(""); ls.set("vitriin-client", id); }
+  return id;
+}
+const herePos = (timeout = 8000) => new Promise((ok) => {
+  if (!navigator.geolocation) return ok(null);
+  navigator.geolocation.getCurrentPosition((x) => ok(x.coords), () => ok(null), { enableHighAccuracy: false, timeout, maximumAge: 600000 });
+});
+
+function pricing(p) {
+  const o = p.orig, v = p.val;
+  if (p.mechanic && (v == null || (p.type === "x_plus_y" && o == null && v == null))) return { price: null, old: null, badge: p.mechanic };
+  switch (p.type) {
+    case "percent": return { price: o != null && v != null ? Math.round(o * (100 - v)) / 100 : null, old: o, badge: `-${v} %` };
+    case "amount": return { price: o != null ? Math.max(0, o - v) : null, old: o, badge: `-${eur(v)}` };
+    case "new_price": return { price: v, old: o, badge: o ? `-${Math.round((1 - v / o) * 100)} %` : "Nouveau prix" };
+    case "x_plus_y": return { price: v, old: o, badge: `${p.xy?.[0] ?? 2} + ${p.xy?.[1] ?? 1} offert` };
+    case "cashback": return { price: null, old: null, badge: `${v} % cagnottés` };
+    case "free_with_condition": return { price: null, old: null, badge: "Offert" };
+  }
+  return { price: null, old: null, badge: p.mechanic || "Promo" };
+}
+const avatar = (s) => s.logo_url || s.network_logo ? `<img src="${esc(s.logo_url || s.network_logo)}" alt="">` : esc((s.name || "?").trim()[0].toUpperCase());
+const mapsUrl = (s) => s.lat != null ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([s.name, s.address, s.city].filter(Boolean).join(" "))}`;
+
+function promoCard({ promo: p, store: s, d }) {
+  const pr = pricing(p);
+  return `<a class="card" href="/v/p/${p.id}" data-link>
+    <div class="ph">${p.img ? `<img loading="lazy" src="${esc(p.img)}" alt="" onerror="this.remove()">` : ""}<span class="badge">${esc(pr.badge)}</span></div>
+    <div class="bd"><b>${esc(p.title)}</b>
+      ${pr.price != null ? `<div class="price"><strong>${eur(pr.price)}</strong>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}</div>` : ""}
+      <small>${esc(s.name)}${d != null ? ` · ${km(d)}` : ""}</small><small>Jusqu'au ${day(p.ends_at)}</small></div></a>`;
+}
+function storeRow(s) {
+  return `<a class="srow" href="/v/m/${esc(s.slug)}" data-link><span class="av">${avatar(s)}</span><div><b>${esc(s.name)}</b><span>${esc([s.address, s.city].filter(Boolean).join(", ") || s.city || "")}</span></div>
+    ${s.live ? `<span class="chip">${s.live} promo${s.live > 1 ? "s" : ""}</span>` : ""}${s.demo ? ` <span class="chip demo">Démo</span>` : ""}</a>`;
+}
+function dist(a, s) {
+  if (!a || s.lat == null) return null;
+  const r = (x) => x * Math.PI / 180, dLat = r(s.lat - a.latitude), dLng = r(s.lng - a.longitude);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.latitude)) * Math.cos(r(s.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(h));
+}
+
+/* ---------- Compte ---------- */
+let SESSION = null, ME = null;
+async function refreshMe() {
+  const { data } = await sb.auth.getSession(); SESSION = data.session;
+  $("#acc").textContent = SESSION ? "Mon compte" : "Se connecter";
+  if (!SESSION) { ME = null; return null; }
+  const r = await sb.rpc("customer_me"); ME = r.error ? null : r.data; return ME;
+}
+const isFollowing = (storeId) => !!ME?.follows?.some(f => f.id === storeId);
+const isSaved = (spId) => !!ME?.saves?.some(x => x.promo.id === spId);
+
+function sheet(html) {
+  const ov = document.createElement("div"); ov.className = "ov";
+  ov.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><button class="x" data-x aria-label="Fermer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>${html}</div>`;
+  ov.onclick = (e) => { if (e.target === ov || e.target.closest("[data-x]")) ov.remove(); };
+  document.body.appendChild(ov); return ov;
+}
+function loginSheet(why, pending) {
+  if (pending) ss.set("vt-pending", JSON.stringify(pending));
+  const ov = sheet(`<h3>Votre compte Vitriin</h3><p class="note" style="margin:0">${esc(why || "Suivez vos magasins et retrouvez vos promos enregistrées.")}</p>
+    <form id="lg"><label class="f" for="lg-mail">Votre email</label><input class="in" id="lg-mail" type="email" autocomplete="email" required>
+    <button class="pill brand cta" id="lg-go">Recevoir mon lien de connexion</button>
+    <p class="note">Pas de mot de passe : nous vous envoyons un lien. En créant un compte, vous acceptez les <a href="https://www.vitriin.fr/cgu" target="_blank" rel="noopener">CGU</a>. Vos données : <a href="https://www.vitriin.fr/confidentialite" target="_blank" rel="noopener">confidentialité</a>.</p></form>`);
+  $("#lg", ov).onsubmit = async (e) => {
+    e.preventDefault(); const email = $("#lg-mail", ov).value.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast("Adresse email invalide.");
+    $("#lg-go", ov).disabled = true;
+    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + (pending?.back || "/v/compte"), shouldCreateUser: true } });
+    if (error) { $("#lg-go", ov).disabled = false; return toast(errText(error)); }
+    $(".sheet", ov).innerHTML = `<h3>Vérifiez vos emails</h3><p>Un lien de connexion vient d'être envoyé à <b>${esc(email)}</b>. Ouvrez-le sur cet appareil.</p><button class="pill dark cta" data-x>Compris</button>`;
+  };
+}
+// Action en attente après connexion (suivre un magasin, enregistrer une promo).
+async function runPending() {
+  const raw = ss.get("vt-pending"); if (!raw || !SESSION) return;
+  ss.set("vt-pending", null);
+  try { const p = JSON.parse(raw); if (p.follow) await follow(p.follow, true, true); if (p.save) await savePromo(p.save, true, true); } catch {}
+}
+async function follow(storeId, on, quiet) {
+  if (!SESSION) return loginSheet("Créez votre compte pour suivre ce magasin et retrouver ses promos.", { follow: storeId, back: location.pathname });
+  const q = on ? sb.from("customer_follows").upsert({ store_id: storeId }, { onConflict: "user_id,store_id", ignoreDuplicates: true }) : sb.from("customer_follows").delete().eq("store_id", storeId);
+  const { error } = await q; if (error) return toast(errText(error));
+  await refreshMe(); if (!quiet) toast(on ? "Magasin suivi." : "Vous ne suivez plus ce magasin.");
+}
+async function savePromo(spId, on, quiet) {
+  if (!SESSION) return loginSheet("Créez votre compte pour enregistrer cette promo.", { save: spId, back: location.pathname });
+  const q = on ? sb.from("customer_saves").upsert({ store_promotion_id: spId }, { onConflict: "user_id,store_promotion_id", ignoreDuplicates: true }) : sb.from("customer_saves").delete().eq("store_promotion_id", spId);
+  const { error } = await q; if (error) return toast(errText(error));
+  await refreshMe(); if (!quiet) toast(on ? "Promo enregistrée." : "Promo retirée de vos enregistrements.");
+}
+
+/* ---------- Code en caisse ---------- */
+function codeSheet(p, s) {
+  const ov = sheet(`<div class="code"><h3>${esc(p.title)}</h3><p class="note" style="margin:0 0 14px">${esc(s.name)}</p>
+    <p style="line-height:1.5">Affichez votre code au moment de passer en caisse. Nous comptons l'utilisation pour le magasin, sans conserver votre position.</p>
+    <button class="pill brand cta" id="rv">Afficher mon code</button></div>`);
+  $("#rv", ov).onclick = async () => {
+    $("#rv", ov).disabled = true;
+    const c = await herePos(5000);
+    const { data, error } = await sb.rpc("vitrine_reveal", { p_id: p.id, p_client_id: clientId(), p_lat: c ? c.latitude : null, p_lng: c ? c.longitude : null });
+    if (error) { $("#rv", ov).disabled = false; return toast(errText(error)); }
+    const code = data?.ean || data?.code;
+    $(".code", ov).innerHTML = `<h3>${esc(p.title)}</h3><p class="note" style="margin:0 0 12px">${esc(s.name)}</p>
+      ${code ? `<svg id="bc"></svg><div class="txt">${esc(data.code || data.ean)}</div>` : `<p>Cette promo s'applique directement en caisse, sans code.</p>`}
+      <div class="ok">Promo activée : présentez cet écran en caisse.</div><button class="pill dark cta" data-x>Terminé</button>`;
+    if (code && window.JsBarcode) {
+      try { const ean = data.ean && /^\d{13}$/.test(data.ean); JsBarcode("#bc", ean ? data.ean : code, { format: ean ? "EAN13" : "CODE128", displayValue: false, height: 90, margin: 0, width: 2.2 }); }
+      catch { $("#bc", ov)?.remove(); }
+    }
+  };
+}
+
+/* ---------- Pages ---------- */
+const app = () => $("#app");
+async function pageHome() {
+  document.title = "Vitriin · Les promos de vos magasins";
+  app().innerHTML = `<h1>Les promos près de chez vous</h1><p class="sub">Les offres publiées par vos magasins, à présenter en caisse.</p>
+    <div class="bar"><button class="pill brand" id="geo">Autour de moi</button>
+      <form class="search" id="sf" role="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Ville, code postal ou magasin" aria-label="Rechercher une ville ou un magasin" value="${esc(ss.get("vt-q") || "")}"></form></div>
+    ${DEMO ? `<p class="note">Mode démo : les réseaux de démonstration sont affichés.</p>` : ""}
+    <div id="res"></div>`;
+  $("#geo").onclick = async () => {
+    $("#res").innerHTML = `<div class="load">Localisation…</div>`;
+    const c = await herePos(10000);
+    if (!c) { $("#res").innerHTML = `<div class="empty">Position indisponible. Cherchez plutôt votre ville.</div>`; return; }
+    const { data, error } = await sb.rpc("vitrine_nearby", { p_lat: c.latitude, p_lng: c.longitude, p_km: 20, p_demo: DEMO });
+    if (error) return $("#res").innerHTML = `<div class="empty">${esc(errText(error))}</div>`;
+    const L = (data || []).map(x => ({ ...x, d: dist(c, x.store) }));
+    $("#res").innerHTML = L.length ? `<h2>${L.length} promo${L.length > 1 ? "s" : ""} à moins de 20 km</h2><div class="grid">${L.map(promoCard).join("")}</div>`
+      : `<div class="empty">Aucune promo autour de vous pour l'instant. Vos magasins n'utilisent peut-être pas encore Vitriin.</div>`;
+  };
+  let t; const run = async () => {
+    const q = $("#q").value.trim(); ss.set("vt-q", q);
+    if (q.length < 2) { $("#res").innerHTML = ""; return; }
+    const { data, error } = await sb.rpc("vitrine_search", { p_q: q, p_demo: DEMO });
+    if (error) return toast(errText(error));
+    $("#res").innerHTML = data?.length ? `<h2>Magasins</h2><div class="stores">${data.map(storeRow).join("")}</div>` : `<div class="empty">Aucun magasin trouvé pour « ${esc(q)} ».</div>`;
+  };
+  $("#q").oninput = () => { clearTimeout(t); t = setTimeout(run, 300); };
+  $("#sf").onsubmit = (e) => { e.preventDefault(); run(); };
+  if (ss.get("vt-q")) run();
+}
+
+async function pageStore(slug) {
+  const { data, error } = await sb.rpc("vitrine_store", { p_slug: slug });
+  if (error || !data) return notFound("Ce magasin n'existe pas ou plus.");
+  const s = data.store, L = data.promos || [];
+  document.title = `${s.name} · Promos · Vitriin`;
+  const draw = () => {
+    const on = isFollowing(s.id);
+    app().innerHTML = `<div class="shead"><span class="av">${avatar(s)}</span><div style="flex:1;min-width:0"><h1>${esc(s.name)}</h1>
+      <p class="sub">${esc([s.address, s.city].filter(Boolean).join(", "))}</p>${s.demo ? `<span class="chip demo">Magasin de démonstration</span>` : ""}
+      <div class="acts"><button class="pill ${on ? "ghost" : "brand"}" id="fl">${on ? "Suivi ✓" : "Suivre ce magasin"}</button>
+        <a class="pill ghost" href="${mapsUrl(s)}" target="_blank" rel="noopener">Itinéraire</a>${s.website ? `<a class="pill ghost" href="${esc(s.website)}" target="_blank" rel="noopener">Site web</a>` : ""}
+        <button class="pill ghost" id="sh">Partager</button></div></div></div>
+      <h2>${L.length ? `${L.length} promo${L.length > 1 ? "s" : ""} en cours` : "Promos en cours"}</h2>
+      ${L.length ? `<div class="grid">${L.map(p => promoCard({ promo: p, store: s })).join("")}</div>` : `<div class="empty">Pas de promo en ce moment. Suivez le magasin pour retrouver les prochaines.</div>`}`;
+    $("#fl").onclick = async () => { await follow(s.id, !isFollowing(s.id)); draw(); };
+    $("#sh").onclick = () => share(s.name, `Les promos de ${s.name}`);
+  };
+  draw();
+}
+
+async function pagePromo(id) {
+  const { data, error } = await sb.rpc("vitrine_promo", { p_id: id });
+  if (error || !data) return notFound("Cette promo est terminée ou n'existe plus.");
+  const p = data.promo, s = data.store, pr = pricing(p);
+  document.title = `${p.title} · ${s.name} · Vitriin`;
+  const draw = () => {
+    const saved = isSaved(p.id);
+    app().innerHTML = `<div class="promo"><div class="ph">${p.img ? `<img src="${esc(p.img)}" alt="${esc(p.title)}">` : ""}<span class="badge">${esc(pr.badge)}</span></div>
+      <div class="panel"><a class="srow" href="/v/m/${esc(s.slug)}" data-link style="border:none;padding:0 0 12px"><span class="av">${avatar(s)}</span><div><b>${esc(s.name)}</b><span>${esc([s.address, s.city].filter(Boolean).join(", "))}</span></div></a>
+        <h1>${esc(p.title)}</h1>
+        ${pr.price != null ? `<div class="price"><strong>${eur(pr.price)}</strong>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}</div>` : ""}
+        ${p.text ? `<p>${esc(p.text)}</p>` : ""}${p.sub ? `<p class="note">${esc(p.sub)}</p>` : ""}
+        <p class="note">Valable jusqu'au ${day(p.ends_at)}, dans ce magasin.${s.demo ? " Promo de démonstration." : ""}</p>
+        <button class="pill brand cta" id="go">J'en profite en magasin</button>
+        <div class="acts"><button class="pill ghost" id="sv">${saved ? "Enregistrée ✓" : "Enregistrer"}</button>
+          <a class="pill ghost" href="${mapsUrl(s)}" target="_blank" rel="noopener">Itinéraire</a><button class="pill ghost" id="sh">Partager</button></div></div></div>`;
+    $("#go").onclick = () => codeSheet(p, s);
+    $("#sv").onclick = async () => { await savePromo(p.id, !isSaved(p.id)); draw(); };
+    $("#sh").onclick = () => share(p.title, `${p.title} chez ${s.name}`);
+  };
+  draw();
+}
+
+async function pageAccount() {
+  document.title = "Mon compte · Vitriin";
+  if (!SESSION) {
+    app().innerHTML = `<h1>Mon compte</h1><p class="sub">Suivez vos magasins préférés et gardez vos promos sous la main.</p>
+      <div class="panel" style="margin-top:16px;max-width:460px"><button class="pill brand cta" id="li" style="margin:0">Se connecter ou créer un compte</button>
+      <p class="note">Un simple lien par email, sans mot de passe.</p></div>`;
+    $("#li").onclick = () => loginSheet();
+    return;
+  }
+  const tab = ss.get("vt-tab") || "feed";
+  const M = ME || { follows: [], saves: [], feed: [] };
+  const body = tab === "feed" ? (M.feed.length ? `<div class="grid">${M.feed.map(promoCard).join("")}</div>` : `<div class="empty">Suivez des magasins pour voir leurs promos ici.</div>`)
+    : tab === "saves" ? (M.saves.length ? `<div class="grid">${M.saves.map(promoCard).join("")}</div>` : `<div class="empty">Aucune promo enregistrée en cours.</div>`)
+    : tab === "follows" ? (M.follows.length ? `<div class="stores">${M.follows.map(s => `<div class="srow"><span class="av">${avatar(s)}</span><div><a href="/v/m/${esc(s.slug)}" data-link><b>${esc(s.name)}</b></a><span>${esc(s.city || "")}${s.live ? ` · ${s.live} promo${s.live > 1 ? "s" : ""}` : ""}</span></div>
+          <label class="switch"><input type="checkbox" data-al="${s.id}" ${s.alerts ? "checked" : ""}> Alertes</label><button class="pill ghost" data-uf="${s.id}">Ne plus suivre</button></div>`).join("")}</div>` : `<div class="empty">Vous ne suivez aucun magasin.</div>`)
+    : `<div class="panel" style="max-width:520px"><p>Connecté avec <b>${esc(M.email || "")}</b>.</p>
+        <p class="note">Bientôt : une alerte par email quand un magasin suivi publie une nouvelle promo. Vous pourrez la couper magasin par magasin dans « Magasins suivis ».</p>
+        <div class="acts"><button class="pill ghost" id="lo">Se déconnecter</button><button class="pill ghost" id="del" style="color:#b3261e">Supprimer mon compte</button></div></div>`;
+  app().innerHTML = `<h1>Mon compte</h1><div class="tabs" role="tablist">${[["feed", "Mes magasins : promos"], ["saves", `Enregistrées${M.saves.length ? ` · ${M.saves.length}` : ""}`], ["follows", `Magasins suivis${M.follows.length ? ` · ${M.follows.length}` : ""}`], ["me", "Réglages"]]
+    .map(([k, l]) => `<button role="tab" aria-selected="${k === tab}" class="${k === tab ? "on" : ""}" data-tab="${k}">${l}</button>`).join("")}</div>${body}`;
+  $$("[data-tab]").forEach(b => b.onclick = () => { ss.set("vt-tab", b.dataset.tab); pageAccount(); });
+  $$("[data-uf]").forEach(b => b.onclick = async () => { await follow(b.dataset.uf, false); pageAccount(); });
+  $$("[data-al]").forEach(x => x.onchange = async () => {
+    const { error } = await sb.from("customer_follows").update({ alerts: x.checked }).eq("store_id", x.dataset.al);
+    if (error) { x.checked = !x.checked; return toast(errText(error)); }
+    await refreshMe(); toast(x.checked ? "Alertes activées." : "Alertes coupées.");
+  });
+  $("#lo") && ($("#lo").onclick = async () => { await sb.auth.signOut(); await refreshMe(); go("/v/"); });
+  $("#del") && ($("#del").onclick = () => {
+    const ov = sheet(`<h3>Supprimer mon compte ?</h3><p>Vos magasins suivis et vos promos enregistrées seront effacés. Cette action est définitive.</p><button class="pill dark cta" id="del-ok">Supprimer définitivement</button>`);
+    $("#del-ok", ov).onclick = async () => {
+      const { error } = await sb.rpc("customer_delete_account"); if (error) return toast(errText(error));
+      await sb.auth.signOut(); ov.remove(); await refreshMe(); toast("Compte supprimé."); go("/v/");
+    };
+  });
+}
+
+function notFound(msg) { app().innerHTML = `<div class="empty" style="margin-top:20px">${esc(msg)}<br><br><a class="pill brand" href="/v/" data-link>Voir les promos près de chez moi</a></div>`; }
+async function share(title, text) {
+  const url = location.href.split("#")[0];
+  try { if (navigator.share) return await navigator.share({ title, text, url }); } catch { return; }
+  try { await navigator.clipboard.writeText(url); toast("Lien copié."); } catch { toast(url); }
+}
+
+/* ---------- Routeur ---------- */
+function go(path) { history.pushState({}, "", path); route(); }
+async function route() {
+  const parts = location.pathname.replace(/^\/v\/?/, "").split("/").filter(Boolean);
+  app().innerHTML = `<div class="load">Chargement…</div>`; window.scrollTo(0, 0);
+  try {
+    if (!parts.length) await pageHome();
+    else if (parts[0] === "m" && parts[1]) await pageStore(decodeURIComponent(parts[1]));
+    else if (parts[0] === "p" && /^[0-9a-f-]{36}$/i.test(parts[1] || "")) await pagePromo(parts[1]);
+    else if (parts[0] === "compte") await pageAccount();
+    else notFound("Page introuvable.");
+  } catch (e) { notFound(errText(e)); }
+}
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a[data-link]");
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || a.target) return;
+  e.preventDefault(); go(a.getAttribute("href"));
+});
+addEventListener("popstate", route);
+sb.auth.onAuthStateChange(async (ev) => { if (ev === "SIGNED_IN" || ev === "SIGNED_OUT") { await refreshMe(); if (ev === "SIGNED_IN") await runPending(); } });
+
+(async () => { await refreshMe(); await runPending(); route(); })();
+</script>
+</body>
+</html>

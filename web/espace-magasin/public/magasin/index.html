@@ -513,7 +513,7 @@ function mapRow(row, accounts) {
 }
 
 async function loadData() {
-  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, name, address, city, postal_code, auto_accept, logo_url, contact_first_name, contact_last_name, contact_phone, contact_email, website)").limit(1);
+  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, slug, name, address, city, postal_code, auto_accept, logo_url, contact_first_name, contact_last_name, contact_phone, contact_email, website)").limit(1);
   if (e0) throw e0;
   if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
   const st = mem[0].stores;
@@ -535,7 +535,7 @@ async function loadData() {
   const n = net.data?.[0];
   const fb = acc.data.find(a => a.channel === "facebook"), ig = acc.data.find(a => a.channel === "instagram");
   Object.assign(STORE, {
-    id: st.id, name: st.name, city: st.city || "", address: st.address || "", autoAccept: st.auto_accept !== false, hasNet: !!n,
+    id: st.id, slug: st.slug || "", name: st.name, city: st.city || "", address: st.address || "", autoAccept: st.auto_accept !== false, hasNet: !!n,
     // Logo du magasin, sinon celui de l'enseigne (même règle que la Centrale).
     logo: st.logo_url || n?.logo_url || null, canEdit: !!n?.store_edit, canDelete: !!n?.store_delete, support: n?.support_email || "", phone: n?.phone || "", cgv: n?.cgv_url || "",
     net: n?.network_name || "votre centrale", netFull: n ? `${n.network_name} · ${st.city || ""}` : "Magasin indépendant",
@@ -830,6 +830,9 @@ function viewSettings() {
       ${soon("Google Business Profile", mono("G", "#4285f4"))}
       ${soon("Pinterest", mono("P", "#e60023"))}
     </div>
+
+    ${STORE.slug ? `<div class="lbl">MA VITRINE</div>
+    <div class="box"><a class="li" href="/v/m/${encodeURIComponent(STORE.slug)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Ce que voient vos clients, avec le code en caisse</span><b style="font-size:15.5px">Voir ma vitrine publique</b></span><span class="chev">${I.chev}</span></a></div>` : ""}
 
     <div class="lbl">SUPPORT</div>
     <div class="box">

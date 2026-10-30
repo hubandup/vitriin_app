@@ -20,6 +20,32 @@ Repères :
 
 ## 2026-10-30
 
+### SEC-001 · Coordonnées des gérants lisibles publiquement (corrigé)
+- **Problème** : la règle `stores_select_public` (lecture de tous les magasins par tous, y compris
+  sans connexion) exposait `contact_email`, `contact_phone`, noms des gérants. Les promos actives
+  (avec leurs codes) étaient aussi lisibles directement.
+- **Correction** : lecture des magasins réservée aux membres du magasin, de sa centrale et à l'équipe
+  Vitriin ; lectures publiques directes de `stores`, `promotions`, `store_promotions` supprimées.
+  Le public passe par les fonctions `vitrine_*`, qui ne renvoient que les champs publics.
+- **Testé** : anon refusé sur les 3 tables ; gérant démo : 1 magasin visible ; compte client : 0.
+- **Retour arrière** : recréer les règles `*_select_public` (déconseillé).
+
+### MOD-036 · Vitrine publique et compte client (app.vitriin.co/v)
+- **Quoi** : page `/v/` (promos autour de moi, recherche ville / code postal / magasin), `/v/m/<slug>`
+  (vitrine d'un magasin : suivre, itinéraire, partager), `/v/p/<id>` (promo : code en caisse
+  EAN-13 ou Code 128, enregistrer, partager), `/v/compte` (connexion par lien email, fil des
+  magasins suivis, promos enregistrées, alertes par magasin, suppression du compte).
+  Réseaux de démo masqués dans « autour de moi » sauf `?demo=1`.
+- **Base** : migration `20261030210000_vitrine_publique` : `vitrine_store`, `vitrine_promo`,
+  `vitrine_nearby`, `vitrine_search`, `vitrine_reveal` (compte l'utilisation puis renvoie le code),
+  tables `customer_follows` / `customer_saves` (RLS : ses lignes seulement), `customer_me`,
+  `customer_delete_account` (refusé pour un compte magasin ou centrale).
+- **App magasin** : Réglages > « Voir ma vitrine publique ».
+- **Reste à faire** : SMTP Supabase (sinon pas d'email de connexion), URL de redirection
+  `https://app.vitriin.co/v/**` dans Supabase Auth, envoi réel des alertes, lien de la vitrine
+  dans les publications Meta.
+- **Retour arrière** : `git revert` ; `drop function vitrine_*, customer_*` ; `drop table customer_follows, customer_saves`.
+
 ### MOD-035 · Manager > Site web : onglets Statistiques / Demandes
 - **Quoi** : onglets « Statistiques » (visites) et « Demandes » (liste d'attente, avec compteur).
   Carte « Compteur à installer » et code du compteur (SNIPPET) retirés : le compteur est en place sur vitriin.fr.

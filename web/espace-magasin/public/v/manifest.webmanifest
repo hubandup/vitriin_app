@@ -1,0 +1,16 @@
+{
+  "name": "Vitriin · Les promos de vos magasins",
+  "short_name": "Vitriin",
+  "description": "Les promos des magasins près de chez vous, à présenter en caisse.",
+  "start_url": "/v/",
+  "scope": "/v/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "lang": "fr",
+  "icons": [
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
