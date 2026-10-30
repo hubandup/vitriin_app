@@ -20,6 +20,12 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-039 · Manager > fiche client > Intégration : on coche directement la pastille
+- **Quoi** : les étapes manuelles (contrat, SEPA, formations) se valident en cliquant la pastille de gauche
+  (re-clic pour annuler) ; la case « fait » à droite est supprimée. Étapes automatiques non cliquables.
+- **Où** : `public/manager/index.html` (onbHtml, bind).
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-038 · App particulier refaite selon la maquette Claude Design « Vitriin » (remplace MOD-036 côté écran)
 - **Pourquoi** : la première version (MOD-036) était une page web générique ; Charles voulait les écrans
   particulier de la maquette (projet claude.ai, `Vitriin.dc.html`).

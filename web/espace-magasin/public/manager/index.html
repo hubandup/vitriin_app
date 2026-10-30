@@ -111,7 +111,7 @@ textarea.in{min-height:110px;resize:vertical}
 .prog{height:8px;border-radius:999px;background:var(--bg);overflow:hidden;margin:8px 0 4px}.prog i{display:block;height:100%;background:var(--grad);border-radius:999px}
 .step{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}.step:last-child{border-bottom:none}
 .step .ok{width:20px;height:20px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--bg);color:var(--muted)}
-.step .ok.y{background:var(--ok);color:#fff}.step small{color:var(--muted);margin-left:auto;white-space:nowrap}
+.step .ok.y{background:var(--ok);color:#fff}.step .tick{width:26px;height:26px;margin:-3px;border:2px solid var(--line);cursor:pointer}.step .tick:hover{border-color:var(--ok)}.step .tick.y{border-color:var(--ok)}.step small{color:var(--muted);margin-left:auto;white-space:nowrap}
 .unread{width:8px;height:8px;border-radius:50%;background:var(--p);display:inline-block;margin-right:6px}
 </style>
 </head>
@@ -372,8 +372,10 @@ function onbHtml(steps) {
   const done = steps.filter(s => s.done).length, pct = Math.round(done / steps.length * 100);
   return `<div class="card" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Intégration</h3><b>${done} / ${steps.length} · ${pct} %</b></div>
     <div class="prog"><i style="width:${pct}%"></i></div>
-    ${steps.map(s => `<div class="step"><span class="ok ${s.done ? "y" : ""}">${s.done ? "✓" : ""}</span><span>${esc(s.l)}${s.manual ? "" : ' <small style="margin:0">· automatique</small>'}</span>
-      ${s.manual ? `<small><label class="ck" style="margin:0"><input type="checkbox" data-onb="${s.k}" ${s.done ? "checked" : ""}> fait</label></small>` : `<small>${esc(s.info || "")}</small>`}</div>`).join("")}</div>`;
+    ${steps.map(s => `<div class="step">${s.manual
+      ? `<button class="ok ${s.done ? "y" : ""} tick" data-onb="${s.k}" data-done="${s.done ? 1 : 0}" role="checkbox" aria-checked="${!!s.done}" aria-label="${esc(s.l)}" title="${s.done ? "Marquer comme à faire" : "Valider l'étape"}">${s.done ? "✓" : ""}</button>`
+      : `<span class="ok ${s.done ? "y" : ""}" title="Étape validée automatiquement">${s.done ? "✓" : ""}</span>`}<span>${esc(s.l)}${s.manual ? "" : ' <small style="margin:0">· automatique</small>'}</span>
+      ${s.manual ? "" : `<small>${esc(s.info || "")}</small>`}</div>`).join("")}</div>`;
 }
 
 /* ---------- Clients ---------- */
@@ -555,7 +557,7 @@ function bind() {
     $("tk-send").onclick = () => send(false); $("tk-solve").onclick = () => send(true);
   }
   // Intégration
-  v.querySelectorAll("[data-onb]").forEach(c => c.onchange = () => act(null, async () => { C.netOnb = await rpc("manager_onboarding_toggle", { p_net: UI.net, p_step: c.dataset.onb, p_done: c.checked }); $("view").innerHTML = vNet(); bind(); return "Étape mise à jour."; }));
+  v.querySelectorAll("[data-onb]").forEach(c => c.onclick = () => act(null, async () => { const done = c.dataset.done !== "1"; C.netOnb = await rpc("manager_onboarding_toggle", { p_net: UI.net, p_step: c.dataset.onb, p_done: done }); $("view").innerHTML = vNet(); bind(); return done ? "Étape validée." : "Étape remise à faire."; }));
   v.querySelectorAll("[data-inv]").forEach(b => b.onclick = () => act(b, async () => { const m = await invite([b.dataset.inv], C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }));
   if ($("inv-all")) $("inv-all").onclick = () => { const ids = C.net.stores.filter(s => !s.activated && s.contact_email).map(s => s.id); if (!confirm(`Envoyer l'invitation à ${ids.length} gérant(s) ?`)) return; act($("inv-all"), async () => { const m = await invite(ids.slice(0, 200), C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }); };
   v.querySelectorAll("[data-use]").forEach(b => b.onclick = () => act(b, async () => { await rpc("manager_activate_demo", { p_network_id: b.dataset.use }); await need("demos"); $("view").innerHTML = vDemos(); bind(); return "Démo activée. Rechargez la centrale et l'app magasin si elles sont ouvertes."; }));
