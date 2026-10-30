@@ -20,6 +20,14 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-013 · Page promo : changement de photo simplifié
+- **Quoi** : toucher la photo ouvre directement le sélecteur du téléphone
+  (sur iPhone : « Prendre une photo » / « Photothèque » / « Fichiers »), sans
+  menu Vitriin avant. La médiathèque de la centrale a son propre bouton
+  « Médiathèque » sur la photo. Fin du double menu.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-013.
+
 ### MOD-012 · Promos par catégories qu'on balaye, logos réseaux, page promo
 - **Page Promos** : cinq catégories qu'on fait défiler en balayant (ou en
   touchant l'onglet) : À traiter (magenta) · En cours (vert) · À venir
