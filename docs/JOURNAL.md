@@ -20,6 +20,19 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-022 · Centrale : import Excel / CSV des promos
+- **Quoi** : carte « Importer un fichier Excel » (page Promotions) et bouton
+  « Importer » de la barre latérale. Une ligne = une promo (Titre, Offre,
+  Texte, Code en caisse, EAN, Début, Fin, Obligatoire, Image). Image : lien
+  https, ou nom d'un fichier sélectionné à côté (recadré au format
+  Instagram et envoyé dans le stockage). Aperçu ligne par ligne avec les
+  erreurs (image manquante, dates illisibles…), puis envoi à tous les
+  magasins ou enregistrement en brouillon. Type de promo déduit de l'offre ;
+  formats par défaut Instagram Feed + Facebook Photo. Mêmes contrôles que
+  la création manuelle (`promoRow`). 100 promos max par fichier.
+- **Fichier** : `web/espace-magasin/public/centrale/index.html`.
+- **Retour arrière** : `git revert` du commit MOD-022.
+
 ### MOD-021 · Centrale : import Excel / CSV des points de vente et invitation des gérants
 - **Quoi** : dans « Ajouter des magasins », la centrale importe un fichier
   .xlsx, .xls ou .csv (une ligne par magasin ; colonnes reconnues

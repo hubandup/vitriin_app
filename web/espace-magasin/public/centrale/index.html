@@ -533,6 +533,26 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
   </div>
 </div>
 
+<!-- ============ MODALE : IMPORTER DES PROMOS ============ -->
+<div class="ov hidden" id="m-pimp">
+  <div class="modal sm">
+    <div class="mh"><div><h2>Importer des promos</h2><p>Une ligne par promo. Les images : un lien https, ou le nom d'un fichier ajouté ci-dessous.</p></div><button class="x" data-close aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="mb">
+      <div class="imp">
+        <div class="imp-hd"><div><b>1. Le fichier Excel ou CSV</b><span>Colonnes : Titre, Offre, Texte, Code en caisse, EAN, Début, Fin, Obligatoire (oui / non), Image.</span></div></div>
+        <div class="copy"><button class="btn-p" id="pi-pick">Choisir le fichier</button><button class="btn-s" id="pi-tpl">Télécharger le modèle</button><input type="file" id="pi-file" accept=".xlsx,.xls,.csv" hidden></div>
+        <p class="hint" id="pi-fname"></p>
+      </div>
+      <div class="imp" style="margin-top:12px">
+        <div class="imp-hd"><div><b>2. Les images (si la colonne Image donne des noms de fichiers)</b><span>Sélectionnez-les toutes d'un coup. JPEG ou PNG, recadrées au format Instagram.</span></div></div>
+        <div class="copy"><button class="btn-s" id="pi-imgs-pick">Ajouter les images</button><input type="file" id="pi-imgs" accept="image/*" multiple hidden></div>
+        <p class="hint" id="pi-iname"></p>
+      </div>
+      <div id="pi-body"></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast hidden" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -693,7 +713,7 @@ function go(v) { if (!confirmLeave()) return; S.view = v; S.dw = null; E = null;
 navBtns().forEach(b => b.onclick = () => go(b.dataset.v));
 $("mnav").innerHTML = [...navBtns()].map(b => `<button data-v="${b.dataset.v}">${esc(b.querySelector(".lbl").textContent)}</button>`).join("");
 $("mnav").querySelectorAll("button").forEach(b => b.onclick = () => go(b.dataset.v));
-$("bulk-go").onclick = () => go("promos");
+$("bulk-go").onclick = () => openPimp();
 $("bell").onclick = () => go("stores");
 $("q").oninput = (e) => { S.q = e.target.value.trim().toLowerCase(); if (S.view !== "stores") { S.view = "stores"; S.dw = null; E = null; } render(); $("q").focus(); };
 
@@ -746,7 +766,7 @@ function renderDrawer(D) {
 function closeDetail() { if (!S.dw || !confirmLeave()) return; S.dw = null; E = null; render(); }
 $("dw-x").onclick = closeDetail; $("dw-ov").onclick = closeDetail;
 $("dw-cancel").onclick = () => { if (E) { E = null; render(); } };
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("m-promo").classList.contains("hidden") && $("m-invite").classList.contains("hidden")) closeDetail(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("m-promo").classList.contains("hidden") && $("m-invite").classList.contains("hidden") && $("m-pimp").classList.contains("hidden")) closeDetail(); });
 const markDirty = () => { if (E) { E.dirty = true; $("dw-save").disabled = false; } };
 
 /* ---------- Tableau de bord ---------- */
@@ -839,7 +859,7 @@ function viewPromos(D) {
   return `
   ${tip("pr", "<b>Astuce :</b> cliquez sur une campagne pour modifier tous ses critères (visuel, offre, dates, codes…). Les magasins voient la version à jour.")}
   <div class="g3">
-    <div class="src dash"><span class="soon">Bientôt</span><span class="ic" style="background:var(--t-green);color:var(--teal)">${svg(ICON.xls, 26, 1.9)}</span><b>Importer un fichier Excel</b><p>Glisse ton .xlsx ou .csv, on mappe automatiquement tes colonnes promo.</p><button class="btn-p" data-soon="L'import Excel arrive bientôt. En attendant, créez la promo avec un visuel.">Choisir un fichier</button></div>
+    <div class="src dash"><span class="ic" style="background:var(--t-green);color:var(--teal)">${svg(ICON.xls, 26, 1.9)}</span><b>Importer un fichier Excel</b><p>Une ligne par promo, avec ses images : tout part aux magasins en une fois.</p><button class="btn-p" data-pimp>Choisir un fichier</button></div>
     <div class="src"><span class="ic" style="background:var(--t-pink);color:var(--p)">${svg(ICON.img, 26, 1.9)}</span><b>Importer des visuels</b><p>Diffuse une affiche à tout ou partie de ton réseau.</p><button class="btn-s" data-new>Téléverser</button></div>
     <div class="src"><span class="soon">Bientôt</span><span class="ic" style="background:var(--t-indigo);color:var(--c-indigo)">${svg(ICON.db, 26, 1.9)}</span><b>Connecter mon PIM</b><p>Synchronise ton catalogue produits en temps réel via l'API.</p><button class="btn-s" data-soon="La connexion PIM arrive bientôt.">Configurer</button></div>
   </div>
@@ -1451,13 +1471,14 @@ function bindView(D) {
   c.querySelectorAll("[data-promo]").forEach(r => r.onclick = () => openDw("promo", r.dataset.promo));
   c.querySelectorAll("[data-store]").forEach(r => r.onclick = () => openDw("store", r.dataset.store));
   c.querySelectorAll("[data-invite]").forEach(b => b.onclick = openInvite);
+  c.querySelectorAll("[data-pimp]").forEach(b => b.onclick = openPimp);
   c.querySelectorAll("[data-relance]").forEach(b => b.onclick = (e) => { e.stopPropagation(); relance(b.dataset.relance); });
   c.querySelectorAll("[data-topall]").forEach(b => b.onclick = () => { S.topAll = !S.topAll; render(); });
   c.querySelectorAll("[data-tipx]").forEach(b => b.onclick = () => { ls.set("c-tips-x", JSON.stringify([...tipsHidden(), b.dataset.tipx])); render(); });
   if (S.view === "settings") bindSettings();
 }
 $("new-promo").onclick = () => openPromo();
-document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => { show("m-promo", false); show("m-invite", false); });
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => { show("m-promo", false); show("m-invite", false); show("m-pimp", false); });
 
 /* ---------- Invitation ---------- */
 function inviteLink() { return `${location.origin}/?rejoindre=${encodeURIComponent(S.net.join_code)}`; }
@@ -1565,6 +1586,101 @@ $("i-regen").onclick = async () => {
   if (error) return toast(errText(error));
   S.net.join_code = data; fillInvite(); toast("Nouveau code créé. L'ancien ne fonctionne plus.");
 };
+
+/* ---------- Import Excel / CSV des promos ---------- */
+const PI_COLS = [
+  ["title", "Titre", /^(titre|nom( de la)? promo|promo|promotion|produit|libelle)$/],
+  ["mech", "Offre", /^(offre|mecanique|remise|reduction)/],
+  ["desc", "Texte", /^(texte|description|message|accroche)/],
+  ["code", "Code en caisse", /^(code( en caisse| promo| de reduction)?)$/],
+  ["ean", "EAN", /^(ean|code ean|gencod|code barre)/],
+  ["start", "Début", /^(debut|date de debut|date debut|du|start)/],
+  ["end", "Fin", /^(fin|date de fin|date fin|au|end)/],
+  ["mand", "Obligatoire", /^(obligatoire|imposee?)/],
+  ["image", "Image", /^(image|visuel|photo|fichier|url)/],
+];
+const PI = { rows: null, files: new Map() };
+function openPimp() { PI.rows = null; PI.files = new Map(); ["pi-fname", "pi-iname"].forEach(i => $(i).textContent = ""); $("pi-body").innerHTML = ""; show("m-promo", false); show("m-pimp"); }
+$("pi-pick").onclick = () => $("pi-file").click();
+$("pi-imgs-pick").onclick = () => $("pi-imgs").click();
+$("pi-tpl").onclick = () => {
+  const t = new Date(), d = (n) => new Date(t.getTime() + n * DAY).toLocaleDateString("fr-FR");
+  const csv = "\ufeffTitre;Offre;Texte;Code en caisse;EAN;Début;Fin;Obligatoire;Image\n" + `Semaine du jardin;-20 %;Toute la gamme jardin à -20 % en magasin.;JARDIN20;;${d(1)};${d(15)};non;affiche-jardin.jpg\n`;
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = "modele-promos-vitriin.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+$("pi-imgs").onchange = (ev) => {
+  [...ev.target.files].forEach(f => PI.files.set(norm(f.name), f)); ev.target.value = "";
+  $("pi-iname").textContent = `${PI.files.size} image${PI.files.size > 1 ? "s" : ""} prête${PI.files.size > 1 ? "s" : ""}.`;
+  if (PI.rows) piPreview();
+};
+// Date Excel (objet Date), « jj/mm/aaaa » ou « aaaa-mm-jj » → « aaaa-mm-jj ».
+function piDate(v) {
+  if (v instanceof Date && !isNaN(v)) return iso(v);
+  const t = String(v ?? "").trim(); let m;
+  if ((m = t.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/))) return `${m[3].length === 2 ? "20" + m[3] : m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+  if ((m = t.match(/^(\d{4})-(\d{2})-(\d{2})/))) return `${m[1]}-${m[2]}-${m[3]}`;
+  return "";
+}
+// Type de promo déduit du texte de l'offre.
+const piType = (o) => /offert|gratuit/i.test(o) && !/\d\s*\+\s*\d/.test(o) ? "free_with_condition" : /\d\s*\+\s*\d|achet/i.test(o) ? "x_plus_y" : /cagnott|cr[ée]dit|cashback/i.test(o) ? "cashback" : /au lieu/i.test(o) ? "new_price" : /%/.test(o) ? "percent" : /€|eur/i.test(o) ? "amount" : "percent";
+const piImage = (r) => /^https:\/\//i.test(r.image) ? { url: r.image } : PI.files.get(norm(r.image)) ? { file: PI.files.get(norm(r.image)) } : null;
+function piCheck(r) {
+  if (!r.title) return "Titre manquant";
+  if (!r.mech) return "Offre manquante";
+  if (!r.start || !r.end) return "Dates illisibles";
+  if (!r.image) return "Image manquante";
+  if (!piImage(r)) return /^http:/i.test(r.image) ? "Lien d'image non sécurisé (https requis)" : `Image « ${r.image} » non ajoutée`;
+  return "";
+}
+$("pi-file").onchange = async (ev) => {
+  const file = ev.target.files[0]; ev.target.value = ""; if (!file) return;
+  const out = $("pi-body"); out.innerHTML = `<p class="hint">Lecture du fichier…</p>`; $("pi-fname").textContent = file.name;
+  try {
+    if (file.size > 5e6) throw new Error("Fichier trop lourd (5 Mo maximum).");
+    const X = await loadXlsx();
+    const wb = X.read(await file.arrayBuffer(), { type: "array", cellDates: true });
+    const grid = X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "", raw: true, blankrows: false });
+    const hi = grid.findIndex(r => r.some(c => PI_COLS[0][2].test(norm(c))));
+    if (hi < 0) throw new Error("Colonne « Titre » introuvable. Partez du modèle à télécharger.");
+    const head = grid[hi].map(norm), map = {};
+    PI_COLS.forEach(([k, , re]) => { const i = head.findIndex((h, j) => re.test(h) && !Object.values(map).includes(j)); if (i >= 0) map[k] = i; });
+    const rows = grid.slice(hi + 1).map(r => {
+      const o = {}; Object.entries(map).forEach(([k, i]) => o[k] = r[i] instanceof Date ? r[i] : String(r[i] ?? "").trim());
+      o.start = piDate(o.start); o.end = piDate(o.end); o.mand = /^(oui|o|yes|x|1|vrai)$/i.test(o.mand || ""); o.ean = String(o.ean || "").replace(/\D/g, "");
+      return o;
+    }).filter(o => o.title || o.mech);
+    if (!rows.length) throw new Error("Aucune promo dans ce fichier.");
+    if (rows.length > 100) throw new Error("100 promos maximum par fichier.");
+    PI.rows = rows; piPreview();
+  } catch (e) { PI.rows = null; out.innerHTML = `<p class="hint" style="color:var(--err)">${esc(errText(e))}</p>`; }
+};
+function piPreview() {
+  const rows = PI.rows, bad = rows.map(piCheck), ok = bad.filter(x => !x).length, n = S.stores.length;
+  $("pi-body").innerHTML = `<div class="res"><b>${rows.length} promo${rows.length > 1 ? "s" : ""}</b> dans le fichier, ${ok} prête${ok > 1 ? "s" : ""}.</div>
+    <div class="imp" style="margin-top:10px;padding:8px 12px"><div class="tw"><table><tr><th>Titre</th><th>Offre</th><th>Du</th><th>Au</th><th>Image</th><th></th></tr>${rows.map((r, i) => `<tr><td style="max-width:110px">${esc(r.title)}</td><td style="max-width:80px">${esc(r.mech)}</td><td>${r.start ? dshort(r.start) : "—"}</td><td>${r.end ? dshort(r.end) : "—"}</td><td style="max-width:90px">${esc(r.image || "—")}</td><td style="color:${bad[i] ? "var(--err)" : "var(--teal)"};font-weight:700;white-space:normal;max-width:none;min-width:90px">${bad[i] ? esc(bad[i]) : "OK"}</td></tr>`).join("")}</table></div></div>
+    <label class="ck"><input type="checkbox" id="pi-send" checked> Envoyer tout de suite à mes ${n} magasin${n > 1 ? "s" : ""} (sinon, enregistrées en brouillon)</label>
+    <div class="copy" style="justify-content:flex-end"><button class="btn-p" id="pi-go" ${ok ? "" : "disabled"}>Importer ${ok} promo${ok > 1 ? "s" : ""}</button></div>`;
+  $("pi-go").onclick = piRun;
+}
+async function piRun() {
+  const btn = $("pi-go"), send = $("pi-send").checked; btn.disabled = true;
+  const todo = PI.rows.filter(r => !piCheck(r)), done = [], fails = [];
+  for (const [i, r] of todo.entries()) {
+    btn.textContent = `Import ${i + 1} / ${todo.length}…`;
+    try {
+      const img = piImage(r), media = img.url ? [img.url] : await uploadPromoImages([img.file]);
+      const row = promoRow({ kind: "promo", media, title: r.title, type: piType(r.mech), mech: r.mech, desc: r.desc || "", start: r.start, end: r.end,
+        code: feat("discount_code") ? r.code || "" : "", ean: feat("ean_code") ? r.ean : "", mand: r.mand, formats: syncFormats(new Set(), 1, "promo") });
+      const { data, error } = await sb.from("promotions").insert({ ...row, created_by_network_id: S.net.id, status: "draft" }).select("id").single();
+      if (error) throw error;
+      if (send) { const { error: e2 } = await sb.rpc("send_promotion", { p_promotion_id: data.id, p_store_ids: null }); if (e2) throw e2; }
+      done.push(r.title);
+    } catch (e) { fails.push(`${r.title} (${errText(e)})`); }
+  }
+  const skipped = PI.rows.length - todo.length;
+  $("pi-body").innerHTML = `<div class="res"><b>Import terminé.</b><ul><li>${done.length} promo${done.length > 1 ? "s" : ""} ${send ? "envoyée" + (done.length > 1 ? "s" : "") + " aux magasins" : "enregistrée" + (done.length > 1 ? "s" : "") + " en brouillon"}</li>${skipped ? `<li>${skipped} ligne${skipped > 1 ? "s" : ""} incomplète${skipped > 1 ? "s" : ""}, non importée${skipped > 1 ? "s" : ""}</li>` : ""}${fails.length ? `<li style="color:var(--err)">${fails.length} en erreur : ${fails.slice(0, 5).map(esc).join(", ")}</li>` : ""}</ul></div>`;
+  PI.rows = null; await load(); S.view = "promos"; render();
+}
 
 /* ---------- Nouvelle promo ---------- */
 const F = { kind: "promo", type: "percent", media: [], formats: new Set(), pv: null, target: "all", zone: "all", picked: new Set(), resend: null };
