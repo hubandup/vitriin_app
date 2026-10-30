@@ -20,6 +20,16 @@ Repères :
 
 ## 2026-10-30
 
+### BUG-005 · Page promo qui bouge de côté sur iPhone — corrigé
+- **Cause** : sur Safari iOS, les deux champs de date et la ligne de
+  statistiques débordaient légèrement de l'écran ; la page pouvait alors
+  glisser horizontalement (vidéo de Charles du 30/10).
+- **Correction** : page promo bloquée en largeur (`overflow-x:hidden`,
+  défilement vertical seul), champs et colonnes contraints à la largeur
+  (`min-width:0`, grilles `minmax(0,1fr)`), champs date sans largeur native.
+  Vérifié sans débordement sur iPhone 13 et iPhone SE émulés.
+- **Fichier** : `web/espace-magasin/public/magasin/index.html`.
+
 ### MOD-013 · Page promo : changement de photo simplifié
 - **Quoi** : toucher la photo ouvre directement le sélecteur du téléphone
   (sur iPhone : « Prendre une photo » / « Photothèque » / « Fichiers »), sans
