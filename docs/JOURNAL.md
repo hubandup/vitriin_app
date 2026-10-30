@@ -20,6 +20,15 @@ Repères :
 
 ## 2026-10-30
 
+### BUG-008 · Fonctions serveur sans droits sur les tables (corrigé)
+- **Symptôme** : emails du support jamais envoyés (`support-notify` répond 404 « Demande introuvable ») ;
+  « Modifier l'email » d'un gérant refusé (400) ; invitation des magasins par la centrale en échec.
+- **Cause** : la clé service_role contourne la RLS mais pas les GRANT. Elle n'avait aucun droit de lecture sur
+  `support_tickets`, `support_messages`, `stores`, `networks`, `platform_admins`, ni d'écriture sur `store_members`.
+- **Correctif** : migration `20261031010000_service_role_grants.sql`, droits minimaux (mises à jour limitées aux
+  colonnes utilisées). anon et authenticated inchangés. Vérifié en SQL sous le rôle service_role.
+- **Retour arrière** : `revoke` des mêmes droits (les trois fonctions cessent alors de marcher).
+
 ### MOD-047 · Emails du support via Brevo
 - **Quoi** : nouvelle demande ou message client → email à l'équipe (SUPPORT_INBOX, hello@vitriin.co par défaut),
   « répondre » va au client, bouton vers le ticket dans le Manager (`/manager/?ticket=<id>`). Réponse de l'équipe →
