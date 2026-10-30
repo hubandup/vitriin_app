@@ -10,40 +10,73 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
-:root{--p:#e5087e;--v:#951b81;--grad:linear-gradient(90deg,#e5087e,#951b81);--ink:#2D2D2D;--muted:#8a847c;--line:#ECE8E2;--bg:#f6f3ee;--card:#fff;--ok:#0c9875;--err:#c0352b}
-@media (prefers-color-scheme:dark){:root{--ink:#f1ede7;--muted:#a39d94;--line:#2f2b27;--bg:#151312;--card:#1f1c1a}}
+:root{--p:#e5087e;--v:#951b81;--grad:linear-gradient(90deg,#e5087e,#951b81);--ink:#2D2D2D;--muted:#8a847c;--line:#ECE8E2;--bg:#f6f3ee;--card:#fff;--ok:#0c9875;--err:#c0352b;--warn:#b26a00;--t-ok:#e7f5f0;--t-err:#fdecea;--t-warn:#fff4e0;--t-p:#fdf0f6}
+@media (prefers-color-scheme:dark){:root{--ink:#f1ede7;--muted:#a39d94;--line:#2f2b27;--bg:#151312;--card:#1f1c1a;--t-ok:#173a30;--t-err:#3d1f1c;--t-warn:#3a2c14;--t-p:#3a1a2c}}
 *{box-sizing:border-box}
 body{margin:0;font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
-button{font:inherit;cursor:pointer}
-.wrap{max-width:1120px;margin:0 auto;padding:24px 16px 60px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+button{font:inherit;cursor:pointer;color:inherit}
+a{color:var(--p)}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px}.brand img{width:36px;height:36px;border-radius:10px}
 .brand b{font-size:18px}.brand span{display:block;font-size:12px;color:var(--muted)}
-h2{font-size:17px;margin:28px 0 4px}.sub{color:var(--muted);font-size:13px;margin:0 0 14px;line-height:1.45}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+nav{display:flex;gap:4px;overflow-x:auto;margin:18px 0 6px;border-bottom:1px solid var(--line);scrollbar-width:none}
+nav button{border:none;background:none;padding:10px 12px;font-weight:700;color:var(--muted);border-bottom:2.5px solid transparent;white-space:nowrap}
+nav button.on{color:var(--p);border-bottom-color:var(--p)}
+nav em{font-style:normal;background:var(--err);color:#fff;font-size:11px;border-radius:9px;padding:1px 6px;margin-left:5px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:16px 0 14px}
+h2{font-size:18px;margin:0}h3{font-size:15px;margin:0 0 10px}
+.sub{color:var(--muted);font-size:13px;margin:4px 0 0;line-height:1.45}
+.ck{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.kpi b{display:block;font-size:24px;letter-spacing:-.02em}.kpi span{font-size:12.5px;color:var(--muted)}.kpi small{display:block;font-size:12px;margin-top:4px;font-weight:700}
+.up{color:var(--ok)}.down{color:var(--err)}
+.two{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
 .card.on{border-color:var(--p);box-shadow:0 0 0 2px rgba(229,8,126,.15)}
-.card h3{margin:0;font-size:16px}
-.logo{width:48px;height:48px;border-radius:12px;object-fit:cover;flex:none;background:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:var(--muted)}.card .lbl{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.chart{display:flex;align-items:flex-end;gap:3px;height:120px;margin-top:8px}
+.chart i{flex:1;background:var(--grad);border-radius:3px 3px 0 0;min-height:2px;opacity:.85}
+.chart.v i{background:#2f6fdb}
+.axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px}
+.todo{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}.todo:last-child{border-bottom:none}
+.todo .dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:none;background:var(--err)}.todo .dot.w{background:var(--warn)}
+.todo b{display:block;font-size:13.5px}.todo span{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.logo{width:44px;height:44px;border-radius:12px;object-fit:cover;flex:none;background:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:var(--muted)}
+.lbl{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:14px 0}
 .stats div{background:var(--bg);border-radius:10px;padding:8px 6px;text-align:center}.stats b{display:block;font-size:16px}.stats span{font-size:11px;color:var(--muted)}
-.row{display:flex;gap:8px;flex-wrap:wrap}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .btn-p{border:none;border-radius:12px;background:var(--grad);color:#fff;font-weight:700;padding:10px 14px}
-.btn-s{border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-weight:700;padding:9px 13px;text-decoration:none;display:inline-block}
+.btn-s{border:1.5px solid var(--line);border-radius:12px;background:var(--card);font-weight:700;padding:8px 12px;text-decoration:none;display:inline-block;color:var(--ink)}
+.btn-s.sm{padding:5px 9px;font-size:12px;border-radius:9px}
 button:disabled{opacity:.5;cursor:default}
-.pill{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:3px 9px;background:#e7f5f0;color:var(--ok)}
-.pill.grey{background:var(--bg);color:var(--muted)}
-table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
-th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-size:12px}
-td.r,th.r{text-align:right}.tw{overflow-x:auto}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 8px;background:var(--t-ok);color:var(--ok);white-space:nowrap}
+.pill.err{background:var(--t-err);color:var(--err)}.pill.warn{background:var(--t-warn);color:var(--warn)}.pill.grey{background:var(--bg);color:var(--muted)}.pill.p{background:var(--t-p);color:var(--p)}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:16px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+th{color:var(--muted);font-size:12px;white-space:nowrap}tr:last-child td{border-bottom:none}
+td.r,th.r{text-align:right}tr.click{cursor:pointer}tr.click:hover td{background:var(--bg)}
+td small{display:block;color:var(--muted);font-size:12px}
+.in{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;background:var(--card);color:var(--ink)}
+.search{max-width:280px}
+select.in{width:auto}
 .auth{max-width:380px;margin:12vh auto 0;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px}
-.auth h1{margin:0 0 4px;font-size:22px}.in{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;background:var(--card);color:var(--ink);margin-top:6px}
-label{display:block;font-size:12.5px;font-weight:700;margin-top:14px}
+.auth h1{margin:0 0 4px;font-size:22px}
+label.f{display:block;font-size:12.5px;font-weight:700;margin-top:14px}label.f .in{margin-top:6px}
 .err{color:var(--err);font-size:13px;margin-top:10px;min-height:18px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px);z-index:9}
 .hidden{display:none}
-.help{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.55;color:var(--muted)}
-.help b{color:var(--ink)}
+.help{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.55;color:var(--muted)}.help b{color:var(--ink)}
+.empty{color:var(--muted);font-size:13px;padding:10px 0}
+.list li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}.list{list-style:none;margin:0;padding:0}.list li:last-child{border-bottom:none}
+pre{background:var(--bg);border-radius:12px;padding:12px;font-size:12px;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.ch{display:inline-flex;gap:4px}.ch span{font-size:11px;font-weight:700;border-radius:6px;padding:2px 5px;background:var(--bg);color:var(--muted)}
+.ch .ok{background:var(--t-ok);color:var(--ok)}.ch .ko{background:var(--t-err);color:var(--err)}
+.back{border:none;background:none;color:var(--muted);font-weight:700;padding:0;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -51,22 +84,33 @@ label{display:block;font-size:12.5px;font-weight:700;margin-top:14px}
 <div class="toast hidden" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Vitriin Manager : espace réservé à l'équipe Vitriin. Les droits sont vérifiés
-// côté serveur (is_platform_admin dans chaque fonction) ; cette page n'a que la clé publique.
+// Vitriin Manager : poste de pilotage de l'équipe Vitriin. Chaque fonction
+// serveur appelée ici vérifie is_platform_admin() ; la page n'a que la clé publique.
 const SUPABASE_URL = "https://zjugauidrijghesgsmap.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU";
 const sb = supabase.createClient(SUPABASE_URL, ANON_KEY, { auth: { storageKey: "vitriin-manager-auth" } });
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const nf = (n) => new Intl.NumberFormat("fr-FR").format(n || 0);
+const nf = (n) => new Intl.NumberFormat("fr-FR").format(Math.round(n || 0));
+const cnum = (n) => n >= 1e4 ? Math.round(n / 1e3) + " k" : n >= 1e3 ? (n / 1e3).toFixed(1).replace(".", ",").replace(",0", "") + " k" : nf(n);
+const day = (d) => d ? new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }).replace(".", "") : "—";
+const since = (d) => { if (!d) return "jamais"; const j = Math.floor((Date.now() - new Date(d)) / 864e5); return j <= 0 ? "aujourd'hui" : j === 1 ? "hier" : `il y a ${j} j`; };
 const errText = (e) => (e && (e.message || e.error_description)) || String(e);
-let tt; const toast = (t) => { const el = $("toast"); el.textContent = t; el.classList.remove("hidden"); clearTimeout(tt); tt = setTimeout(() => el.classList.add("hidden"), 3500); };
-let D = null, busy = false;
+const ls = { get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+let tt; const toast = (t) => { const el = $("toast"); el.textContent = t; el.classList.remove("hidden"); clearTimeout(tt); tt = setTimeout(() => el.classList.add("hidden"), 3800); };
+const rpc = async (n, a) => { const { data, error } = await sb.rpc(n, a); if (error) throw error; return data; };
 
+const TABS = [["home", "Accueil"], ["clients", "Clients"], ["stores", "Magasins"], ["demos", "Démos"], ["health", "Santé"], ["site", "Site web"]];
+const UI = { tab: ls.get("m-tab", "home"), demo: ls.get("m-demo", true), net: null, q: "", sf: "all" };
+const C = {}; // cache des réponses serveur, par onglet
+const MILESTONES = [["Validation Meta (App Review)", "2026-11-30"], ["Bêta Brisach prête", "2026-12-08"]];
+let busy = false;
+
+/* ---------- Connexion ---------- */
 function showLogin(msg = "") {
   $("app").innerHTML = `<div class="auth"><h1>Vitriin Manager</h1><p class="sub">Espace réservé à l'équipe Vitriin.</p>
-    <label>Email<input class="in" id="l-email" type="email" autocomplete="username"></label>
-    <label>Mot de passe<input class="in" id="l-pass" type="password" autocomplete="current-password"></label>
+    <label class="f">Email<input class="in" id="l-email" type="email" autocomplete="username"></label>
+    <label class="f">Mot de passe<input class="in" id="l-pass" type="password" autocomplete="current-password"></label>
     <div class="err" id="l-err">${esc(msg)}</div><button class="btn-p" id="l-go" style="width:100%;margin-top:6px">Se connecter</button></div>`;
   const go = async () => {
     $("l-go").disabled = true;
@@ -76,69 +120,240 @@ function showLogin(msg = "") {
   };
   $("l-go").onclick = go; $("l-pass").onkeydown = (e) => { if (e.key === "Enter") go(); };
 }
-
 async function boot() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return showLogin();
-  const { data: ok } = await sb.rpc("is_platform_admin");
+  const ok = await rpc("is_platform_admin").catch(() => false);
   if (!ok) { await sb.auth.signOut(); return showLogin("Ce compte n'a pas accès au Manager."); }
-  await load(); render();
-}
-async function load() {
-  const { data, error } = await sb.rpc("manager_overview");
-  if (error) throw error;
-  D = data;
+  show();
 }
 
+/* ---------- Chargement par onglet ---------- */
+async function need(tab) {
+  const d = UI.demo;
+  if (tab === "home") C.home = await rpc("manager_dashboard", { p_demo: d });
+  if (tab === "clients" || tab === "demos") C.ov = await rpc("manager_overview");
+  if (tab === "stores") C.stores = await rpc("manager_stores", { p_demo: d });
+  if (tab === "health") C.health = await rpc("manager_health", { p_demo: d });
+  if (tab === "site") C.site = await rpc("manager_site", { p_days: 30 });
+  if (tab === "net") C.net = await rpc("manager_network", { p_id: UI.net });
+}
+async function show(tab = UI.tab) {
+  UI.tab = tab; ls.set("m-tab", tab === "net" ? "clients" : tab);
+  frame(`<div class="empty" style="padding:40px 0">Chargement…</div>`);
+  try { await need(tab); frame(VIEWS[tab]()); bind(); }
+  catch (e) { frame(`<div class="help" style="margin-top:16px">Chargement impossible : ${esc(errText(e))}</div>`); }
+}
+function frame(inner) {
+  const todo = C.home ? C.home.todo.accounts.length + C.home.todo.failures.length + C.home.todo.invites.length + C.home.todo.idle.length : 0;
+  $("app").innerHTML = `<div class="wrap">
+    <header><div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Manager</b><span>Poste de pilotage</span></div></div>
+      <div class="row"><label class="ck"><input type="checkbox" id="demo-ck" ${UI.demo ? "checked" : ""}> Inclure les démos dans les chiffres</label><button class="btn-s sm" id="out">Se déconnecter</button></div></header>
+    <nav>${TABS.map(([k, l]) => `<button class="${(UI.tab === k || (UI.tab === "net" && k === "clients")) ? "on" : ""}" data-tab="${k}">${l}${k === "home" && todo ? `<em>${todo}</em>` : ""}</button>`).join("")}</nav>
+    <div id="view">${inner}</div></div>`;
+  $("out").onclick = async () => { await sb.auth.signOut(); showLogin(); };
+  $("demo-ck").onchange = (e) => { UI.demo = e.target.checked; ls.set("m-demo", UI.demo); Object.keys(C).forEach(k => delete C[k]); show(UI.tab); };
+  document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => show(b.dataset.tab));
+}
+
+/* ---------- Petits composants ---------- */
+const kpi = (v, l, extra = "", color = "") => `<div class="kpi"><b ${color ? `style="color:${color}"` : ""}>${v}</b><span>${l}</span>${extra}</div>`;
+const trend = (a, b) => { if (!b) return a ? `<small class="up">nouveau</small>` : ""; const p = Math.round((a - b) / b * 100); return `<small class="${p >= 0 ? "up" : "down"}">${p >= 0 ? "+" : ""}${p} % vs 30 j précédents</small>`; };
+function bars(series, key, cls = "") {
+  const max = Math.max(1, ...series.map(s => s[key]));
+  return `<div class="chart ${cls}">${series.map(s => `<i style="height:${Math.max(2, s[key] / max * 100)}%" title="${day(s.d)} : ${s[key]}"></i>`).join("")}</div>
+    <div class="axis"><span>${day(series[0]?.d)}</span><span>${day(series[series.length - 1]?.d)}</span></div>`;
+}
+const chState = (ch) => { const s = (k, l) => { const v = ch?.[k]; return `<span class="${v === "active" ? "ok" : v ? "ko" : ""}" title="${v === "active" ? "Connecté" : v === "off" ? "Désactivé par le magasin" : v ? "À reconnecter" : "Non connecté"}">${l}</span>`; }; return `<span class="ch">${s("facebook", "FB")}${s("instagram", "IG")}</span>`; };
+const logo = (n) => n.logo_url ? `<img class="logo" src="${esc(n.logo_url)}" alt="">` : `<span class="logo">${esc((n.name || "?").slice(0, 1))}</span>`;
+
+/* ---------- Accueil ---------- */
+function vHome() {
+  const D = C.home, T = D.todo, st = D.stores || 0;
+  const pct = (a) => st ? Math.round(a / st * 100) + " %" : "—";
+  const items = [
+    ...T.accounts.map(a => ({ w: 0, t: `${a.store} · ${a.channel === "instagram" ? "Instagram" : "Facebook"} à reconnecter`, s: `${a.network || "Indépendant"}${a.last_error ? " · " + a.last_error : ""}` })),
+    ...T.failures.map(f => ({ w: 0, t: `Échec ${f.channel === "instagram" ? "Instagram" : "Facebook"} · « ${f.promo} »`, s: `${f.store} · ${f.network || "Indépendant"} · ${day(f.created_at)}${f.error_message ? " · " + f.error_message : ""}` })),
+    ...T.invites.map(i => ({ w: 1, t: `${i.store} n'a rien connecté`, s: `Invité le ${day(i.invited_at)} · ${i.contact_email || "sans email"} · ${i.network || ""}` })),
+    ...T.idle.map(n => ({ w: 1, t: `${n.name} ne s'est pas connectée`, s: `Dernière connexion de l'équipe : ${since(n.last_seen)}` })),
+  ];
+  return `<div class="bar"><div><h2>Accueil</h2><p class="sub">${UI.demo ? "Chiffres démos comprises." : "Centrales clientes et magasins indépendants, hors démos."}</p></div></div>
+  <div class="kpis">
+    ${kpi(nf(D.networks), "centrales" + (UI.demo ? " (dont démos)" : ""))}
+    ${kpi(nf(st), "magasins", `<small style="color:var(--muted)">${nf(D.independent)} indépendant${D.independent > 1 ? "s" : ""}</small>`)}
+    ${kpi(pct(D.connected), "connectés à un réseau", `<small style="color:var(--muted)">${nf(D.connected)} magasins · ${nf(D.activated)} comptes actifs</small>`)}
+    ${kpi(nf(D.pub30), "publications 30 j", trend(D.pub30, D.pubPrev30))}
+    ${kpi(cnum(D.reach30), "personnes touchées 30 j", `<small style="color:var(--muted)">${cnum(D.views30)} vues</small>`)}
+    ${kpi(nf(D.codes30), "codes utilisés 30 j")}
+    ${kpi(nf(D.visits30), "visites vitriin.fr 30 j")}
+    ${kpi(nf(D.fail7), "échecs de publication 7 j", "", D.fail7 ? "var(--err)" : "var(--ok)")}
+  </div>
+  <div class="two">
+    <div class="card"><h3>Publications par jour</h3>${bars(D.series, "pub")}<h3 style="margin-top:18px">Visites de vitriin.fr</h3>${bars(D.series, "visits", "v")}</div>
+    <div class="card"><h3>À traiter <span class="pill ${items.length ? "err" : ""}">${items.length || "Rien"}</span></h3>
+      ${items.length ? items.slice(0, 14).map(i => `<div class="todo"><span class="dot ${i.w ? "w" : ""}"></span><div><b>${esc(i.t)}</b><span>${esc(i.s)}</span></div></div>`).join("") + (items.length > 14 ? `<p class="sub">… et ${items.length - 14} autres, détail dans Santé et Magasins.</p>` : "") : `<p class="empty">Tout va bien : aucun compte à reconnecter, aucun échec, aucune invitation en souffrance.</p>`}
+      <h3 style="margin-top:18px">Échéances</h3><ul class="list">${MILESTONES.map(([l, d]) => `<li><span>${l}</span><b>${day(d)} · ${Math.ceil((new Date(d) - Date.now()) / 864e5)} j</b></li>`).join("")}</ul></div>
+  </div>`;
+}
+
+/* ---------- Clients ---------- */
+function vClients() {
+  const all = C.ov.networks.filter(n => UI.demo || !n.is_demo);
+  return `<div class="bar"><div><h2>Clients</h2><p class="sub">${all.filter(n => !n.is_demo).length} centrale(s) cliente(s) · ${nf(C.ov.independent_stores)} magasin(s) indépendant(s).</p></div></div>
+  ${all.length ? `<div class="tw"><table><tr><th>Centrale</th><th class="r">Magasins</th><th class="r">Connectés</th><th class="r">Promos</th><th class="r">Publications</th><th>Équipe</th><th>Depuis</th></tr>
+    ${all.map(n => `<tr class="click" data-net="${n.id}"><td><div class="row" style="flex-wrap:nowrap">${logo(n)}<div><b>${esc(n.name)}</b>${n.is_demo ? `<small>Démo</small>` : ""}</div></div></td><td class="r">${nf(n.stores)}</td><td class="r">${nf(n.connected)}<small>${n.stores ? Math.round(n.connected / n.stores * 100) : 0} %</small></td><td class="r">${nf(n.promos)}</td><td class="r">${nf(n.published)}</td><td>${n.members.map(esc).join("<br>") || "—"}</td><td>${day(n.created_at)}</td></tr>`).join("")}
+  </table></div>` : `<div class="help">Aucune centrale cliente pour l'instant. Cochez « Inclure les démos » pour voir les démos.</div>`}`;
+}
+function vNet() {
+  const D = C.net, n = D.network, S = D.stores, P = D.promos;
+  const act = S.filter(s => s.activated).length, conn = S.filter(s => Object.values(s.channels || {}).includes("active")).length;
+  const toInvite = S.filter(s => !s.activated && s.contact_email);
+  return `<button class="back" data-tab="clients">← Clients</button>
+  <div class="bar"><div class="row" style="flex-wrap:nowrap">${logo(n)}<div><h2>${esc(n.name)}</h2><p class="sub">${n.is_demo ? "Démo · " : ""}${esc(n.legal_name || "")}${n.siret ? " · SIRET " + esc(n.siret) : ""} · client depuis le ${day(n.created_at)} · code réseau ${esc(n.join_code)}</p></div></div>
+    ${toInvite.length ? `<button class="btn-p" id="inv-all">${toInvite.length > 1 ? `Inviter les ${toInvite.length} gérants en attente` : "Inviter le gérant en attente"}</button>` : ""}</div>
+  <div class="kpis">
+    ${kpi(nf(S.length), "magasins")}${kpi(`${S.length ? Math.round(act / S.length * 100) : 0} %`, "comptes activés", `<small style="color:var(--muted)">${act} / ${S.length}</small>`)}
+    ${kpi(`${S.length ? Math.round(conn / S.length * 100) : 0} %`, "connectés à un réseau", `<small style="color:var(--muted)">${conn} / ${S.length}</small>`)}
+    ${kpi(nf(P.length), "promos envoyées")}${kpi(nf(S.reduce((t, s) => t + s.pub30, 0)), "publications 30 j")}
+  </div>
+  <div class="two">
+    <div class="card"><h3>Équipe de la centrale</h3>${D.members.length ? `<ul class="list">${D.members.map(m => `<li><span><b>${esc(m.email)}</b><br><small style="color:var(--muted)">${{ owner: "Propriétaire", admin: "Administrateur", member: "Éditeur" }[m.role] || m.role} · dernière connexion ${since(m.last_sign_in_at)}</small></span><button class="btn-s sm" data-reset="${esc(m.email)}" data-to="centrale">Renvoyer l'accès</button></li>`).join("")}</ul>` : `<p class="empty">Aucun utilisateur.</p>`}
+      <p class="sub" style="margin-top:10px">Contact : ${esc(n.support_email || "—")} · ${esc(n.phone || "—")}</p></div>
+    <div class="card"><h3>Promos de la centrale</h3>${P.length ? `<ul class="list">${P.slice(0, 12).map(p => `<li><span><b>${esc(p.title)}</b>${p.is_mandatory ? ' <span class="pill p">Obligatoire</span>' : ""}<br><small style="color:var(--muted)">${day(p.starts_at)} → ${day(p.ends_at)} · ${p.active}/${p.sent} activées · ${p.relayed} relayées</small></span><b>${cnum(p.views)} vues</b></li>`).join("")}</ul>` : `<p class="empty">Aucune promo envoyée.</p>`}</div>
+  </div>
+  <h3 style="margin-top:18px">Magasins</h3>
+  <div class="tw"><table><tr><th>Magasin</th><th>Compte</th><th>Réseaux</th><th class="r">Publications 30 j</th><th class="r">À valider</th><th>Dernière connexion</th><th></th></tr>
+    ${S.map(s => `<tr><td><b>${esc(s.name)}</b><small>${esc(s.postal_code || "")} ${esc(s.city || "")}</small></td>
+      <td>${s.activated ? `<span class="pill">Activé</span>` : s.invited_at ? `<span class="pill warn">Invité le ${day(s.invited_at)}</span>` : `<span class="pill grey">Pas invité</span>`}<small>${esc(s.contact_email || "")}</small></td>
+      <td>${chState(s.channels)}</td><td class="r">${nf(s.pub30)}</td><td class="r">${s.pending ? `<span class="pill warn">${s.pending}</span>` : "0"}</td><td>${s.activated ? since(s.last_seen) : "—"}</td>
+      <td class="r">${!s.activated && s.contact_email ? `<button class="btn-s sm" data-inv="${s.id}">Inviter</button>` : s.activated && s.contact_email ? `<button class="btn-s sm" data-reset="${esc(s.contact_email)}" data-to="magasin">Renvoyer l'accès</button>` : ""}</td></tr>`).join("")}
+  </table></div>`;
+}
+
+/* ---------- Magasins ---------- */
+const SF = [["all", "Tous"], ["off", "Sans réseau"], ["broken", "À reconnecter"], ["pending", "Pas activés"], ["idle", "Sans publication 30 j"], ["indep", "Indépendants"]];
+function storeMatch(s) {
+  const v = Object.values(s.channels || {});
+  if (UI.sf === "off" && v.includes("active")) return false;
+  if (UI.sf === "broken" && !v.some(x => x === "error" || x === "revoked")) return false;
+  if (UI.sf === "pending" && s.activated) return false;
+  if (UI.sf === "idle" && s.last_pub && Date.now() - new Date(s.last_pub) < 30 * 864e5) return false;
+  if (UI.sf === "indep" && s.network_id) return false;
+  const q = UI.q.trim().toLowerCase();
+  return !q || [s.name, s.city, s.postal_code, s.network, s.owner, s.contact_email].some(x => String(x || "").toLowerCase().includes(q));
+}
+function vStores() {
+  const list = C.stores.filter(storeMatch);
+  return `<div class="bar"><div><h2>Magasins</h2><p class="sub">${nf(list.length)} sur ${nf(C.stores.length)}.</p></div>
+    <div class="row"><input class="in search" id="q" placeholder="Nom, ville, centrale, email…" value="${esc(UI.q)}"><select class="in" id="sf">${SF.map(([k, l]) => `<option value="${k}" ${UI.sf === k ? "selected" : ""}>${l}</option>`).join("")}</select></div></div>
+  <div class="tw"><table><tr><th>Magasin</th><th>Centrale</th><th>Gérant</th><th>Réseaux</th><th>Dernière publication</th><th>Dernière connexion</th></tr>
+    ${list.slice(0, 500).map(s => `<tr ${s.network_id ? `class="click" data-net="${s.network_id}"` : ""}><td><b>${esc(s.name)}</b><small>${esc(s.postal_code || "")} ${esc(s.city || "")}</small></td><td>${esc(s.network || "Indépendant")}</td>
+      <td>${s.activated ? esc(s.owner || "") : `<span class="pill ${s.invited_at ? "warn" : "grey"}">${s.invited_at ? "Invité" : "Pas activé"}</span><small>${esc(s.contact_email || "")}</small>`}</td>
+      <td>${chState(s.channels)}</td><td>${s.last_pub ? since(s.last_pub) : "—"}</td><td>${s.activated ? since(s.last_seen) : "—"}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">Aucun magasin ne correspond.</td></tr>`}
+  </table></div>${list.length > 500 ? `<p class="sub">Affichage limité à 500 lignes : affinez la recherche.</p>` : ""}`;
+}
+
+/* ---------- Démos ---------- */
 function demoCard(sec) {
-  const n = D.networks.find(x => x.is_demo && x.demo_sector === sec.key);
+  const n = C.ov.networks.find(x => x.is_demo && x.demo_sector === sec.key);
   const st = n ? `<div class="stats"><div><b>${nf(n.stores)}</b><span>magasins</span></div><div><b>${nf(n.connected)}</b><span>connectés</span></div><div><b>${nf(n.promos)}</b><span>promos</span></div><div><b>${nf(n.published)}</b><span>publiées</span></div></div>` : `<p class="sub" style="margin:14px 0">Démo pas encore générée.</p>`;
   return `<div class="card ${n?.active ? "on" : ""}">
-    <div class="row" style="justify-content:space-between;align-items:center"><span class="lbl">${esc(sec.label)}</span>${n?.active ? `<span class="pill">Démo active</span>` : ""}</div>
-    <div class="row" style="align-items:center;gap:12px;margin-top:10px">${n?.logo_url ? `<img class="logo" src="${esc(n.logo_url)}" alt="">` : `<span class="logo">${esc((n?.name || sec.brand).slice(0, 1))}</span>`}<h3>${esc(n?.name || sec.brand)}</h3></div>${st}
+    <div class="row" style="justify-content:space-between"><span class="lbl">${esc(sec.label)}</span>${n?.active ? `<span class="pill">Démo active</span>` : ""}</div>
+    <div class="row" style="gap:12px;margin-top:10px;flex-wrap:nowrap">${logo(n || { name: sec.brand })}<h3 style="margin:0">${esc(n?.name || sec.brand)}</h3></div>${st}
     <div class="row">
       ${n && !n.active ? `<button class="btn-p" data-use="${n.id}">Utiliser cette démo</button>` : ""}
       ${n?.active ? `<a class="btn-s" href="/centrale/" target="_blank" rel="noopener">Ouvrir la centrale</a><a class="btn-s" href="/magasin/" target="_blank" rel="noopener">Ouvrir l'app magasin</a>` : ""}
       ${sec.generated ? `<button class="btn-s" data-build="${sec.key}" data-has="${n ? 1 : 0}">${n ? "Réinitialiser" : "Générer"}</button>` : ""}
     </div></div>`;
 }
+function vDemos() {
+  return `<div class="bar"><div><h2>Démos</h2><p class="sub">Choisissez la démo à montrer : votre centrale et le compte magasin de démonstration basculent dessus. « Réinitialiser » remet les dates et les chiffres à jour.</p></div></div>
+  <div class="grid">${C.ov.sectors.map(demoCard).join("")}</div>
+  <div class="help" style="margin-top:14px"><b>Pour la présenter :</b> centrale sur <b>app.vitriin.co/centrale</b> avec votre compte ; app magasin sur <b>app.vitriin.co/magasin</b> avec magasin.demo@vitriin.co. Rechargez les onglets déjà ouverts.</div>`;
+}
 
-function render() {
-  const clients = D.networks.filter(n => !n.is_demo);
-  $("app").innerHTML = `<div class="wrap">
-    <header><div class="brand"><img src="/icon-512.png" alt=""><div><b>Vitriin Manager</b><span>Équipe Vitriin</span></div></div>
-      <button class="btn-s" id="out">Se déconnecter</button></header>
+/* ---------- Santé ---------- */
+function vHealth() {
+  const H = C.health, A = H.accounts || {}, P = H.pubStatus || {}, tot = (P.published || 0) + (P.failed || 0);
+  return `<div class="bar"><div><h2>Santé technique</h2><p class="sub">Publications et comptes sociaux sur 30 jours${UI.demo ? ", démos comprises" : ""}.</p></div></div>
+  <div class="kpis">
+    ${kpi(tot ? Math.round((P.published || 0) / tot * 100) + " %" : "—", "publications réussies", `<small style="color:var(--muted)">${nf(P.published)} publiées · ${nf(P.failed)} échecs · ${nf(P.pending)} programmées</small>`)}
+    ${kpi(nf(A.active), "comptes sociaux actifs")}
+    ${kpi(nf((A.error || 0) + (A.revoked || 0)), "comptes à reconnecter", "", (A.error || 0) + (A.revoked || 0) ? "var(--err)" : "var(--ok)")}
+    ${kpi(nf(A.off), "réseaux désactivés par le magasin")}
+    ${kpi(nf(H.users.total), "comptes utilisateurs", `<small style="color:var(--muted)">${nf(H.users.invitedPending)} invitation(s) jamais ouverte(s)</small>`)}
+    ${kpi(H.lastMetrics ? since(H.lastMetrics) : "—", "dernière collecte des stats Meta")}
+  </div>
+  <div class="card" style="margin-top:14px"><h3>Échecs par cause</h3>${H.failByCause.length ? `<ul class="list">${H.failByCause.map(f => `<li><span><b>${f.channel === "instagram" ? "Instagram" : "Facebook"}</b> · ${esc(f.cause)}<br><small style="color:var(--muted)">dernier : ${day(f.last)}</small></span><b>${nf(f.n)}</b></li>`).join("")}</ul>` : `<p class="empty">Aucun échec sur 30 jours.</p>`}</div>
+  <div class="help" style="margin-top:14px">Les emails non délivrés et les erreurs des fonctions serveur se consultent pour l'instant dans Supabase (Logs). Ils remonteront ici quand l'envoi d'emails passera par votre propre service (SMTP).</div>`;
+}
 
-    <h2>Démos</h2>
-    <p class="sub">Choisissez la démo à montrer. La centrale (votre compte) et l'app magasin de démonstration basculent dessus. Une démo réinitialisée repart avec des dates et des chiffres à jour.</p>
-    <div class="grid">${D.sectors.map(demoCard).join("")}</div>
-    <div class="help" style="margin-top:14px"><b>Pour la présenter :</b> centrale sur <b>app.vitriin.co/centrale</b> avec votre compte ; app magasin sur <b>app.vitriin.co/magasin</b> avec le compte magasin.demo@vitriin.co. Si un onglet était déjà ouvert, rechargez-le.</div>
+/* ---------- Site web ---------- */
+const SNIPPET = `<script>
+/* Vitriin : mesure d'audience sans cookie. */
+(function(){var U="${SUPABASE_URL}/rest/v1/rpc/track_visit",K="${ANON_KEY}";
+var V;try{var k="vt_"+new Date().toISOString().slice(0,10);V=localStorage.getItem(k);if(!V){V=Math.random().toString(36).slice(2,12);localStorage.setItem(k,V)}}catch(e){}
+var q=new URLSearchParams(location.search),w=innerWidth,dev=w<700?"mobile":w<1100?"tablet":"desktop",ref="";try{ref=document.referrer?new URL(document.referrer).hostname:"";if(ref===location.hostname)ref=""}catch(e){}
+function send(ev,p){try{fetch(U,{method:"POST",keepalive:true,headers:{"Content-Type":"application/json",apikey:K,Authorization:"Bearer "+K},body:JSON.stringify({p_path:p||location.pathname,p_ref:ref,p_source:q.get("utm_source"),p_device:dev,p_visitor:V,p_event:ev,p_site:location.hostname})})}catch(e){}}
+var last="";function view(){if(location.pathname!==last){last=location.pathname;send("view")}}
+view();var ps=history.pushState;history.pushState=function(){ps.apply(this,arguments);setTimeout(view,0)};addEventListener("popstate",view);
+document.addEventListener("click",function(e){var a=e.target.closest("a,button");if(!a)return;var t=(a.textContent+" "+(a.getAttribute("href")||"")).toLowerCase();
+if(/d[ée]mo/.test(t))send("demo_click");else if(/essai|inscri|cr[ée]er (mon|un) compte|commencer/.test(t))send("signup_click")});})();
+<\/script>`;
+function vSite() {
+  const D = C.site;
+  return `<div class="bar"><div><h2>Site web · vitriin.fr</h2><p class="sub">30 derniers jours. Mesure sans cookie : ni adresse IP ni donnée personnelle conservée.</p></div></div>
+  ${D.last ? "" : `<div class="help" style="margin-bottom:14px"><b>Aucune visite reçue pour l'instant.</b> Le compteur doit être ajouté au site (voir en bas de page).</div>`}
+  <div class="kpis">${kpi(nf(D.views), "pages vues")}${kpi(nf(D.visitors), "visiteurs")}${kpi(nf(D.demo), "clics « démo »")}${kpi(nf(D.signup), "clics « essai / inscription »")}${kpi(D.visitors ? (D.demo / D.visitors * 100).toFixed(1).replace(".", ",") + " %" : "—", "visiteurs qui demandent une démo")}</div>
+  <div class="card" style="margin-top:14px"><h3>Visites par jour</h3>${bars(D.series, "n", "v")}</div>
+  <div class="two">
+    <div class="card"><h3>Pages les plus vues</h3>${D.pages.length ? `<ul class="list">${D.pages.map(p => `<li><span>${esc(p.path)}</span><b>${nf(p.n)}</b></li>`).join("")}</ul>` : `<p class="empty">—</p>`}</div>
+    <div class="card"><h3>Provenance</h3>${D.sources.length ? `<ul class="list">${D.sources.map(p => `<li><span>${esc(p.src)}</span><b>${nf(p.n)}</b></li>`).join("")}</ul>` : `<p class="empty">—</p>`}
+      <h3 style="margin-top:16px">Appareils</h3><ul class="list">${Object.entries(D.devices || {}).map(([k, v]) => `<li><span>${{ mobile: "Mobile", tablet: "Tablette", desktop: "Ordinateur" }[k] || k}</span><b>${nf(v)}</b></li>`).join("") || "<li><span>—</span></li>"}</ul></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>Compteur à installer sur vitriin.fr</h3><p class="sub">Dans Lovable : demandez d'ajouter ce code juste avant &lt;/body&gt; de index.html. Il compte les pages vues (navigation comprise), la provenance (utm_source ou site d'origine), l'appareil et les clics sur les boutons « démo » et « essai ».</p>
+    <pre id="snip">${esc(SNIPPET)}</pre><button class="btn-s" id="copy-snip">Copier le code</button></div>`;
+}
 
-    <h2>Clients</h2>
-    <p class="sub">${clients.length} centrale${clients.length > 1 ? "s" : ""} cliente${clients.length > 1 ? "s" : ""} · ${nf(D.independent_stores)} magasin${D.independent_stores > 1 ? "s" : ""} indépendant${D.independent_stores > 1 ? "s" : ""}.</p>
-    ${clients.length ? `<div class="tw"><table><tr><th>Centrale</th><th class="r">Magasins</th><th class="r">Connectés</th><th class="r">Promos</th><th class="r">Publications</th><th>Équipe</th><th>Depuis</th></tr>
-      ${clients.map(n => `<tr><td><b>${esc(n.name)}</b></td><td class="r">${nf(n.stores)}</td><td class="r">${nf(n.connected)}</td><td class="r">${nf(n.promos)}</td><td class="r">${nf(n.published)}</td><td>${n.members.map(esc).join("<br>") || "—"}</td><td>${new Date(n.created_at).toLocaleDateString("fr-FR")}</td></tr>`).join("")}
-    </table></div>` : `<div class="help">Aucune centrale cliente pour l'instant.</div>`}
-  </div>`;
-  $("out").onclick = async () => { await sb.auth.signOut(); showLogin(); };
-  document.querySelectorAll("[data-use]").forEach(b => b.onclick = () => act(b, async () => {
-    const { error } = await sb.rpc("manager_activate_demo", { p_network_id: b.dataset.use }); if (error) throw error;
-    toast("Démo activée. Rechargez la centrale et l'app magasin si elles sont ouvertes.");
-  }));
-  document.querySelectorAll("[data-build]").forEach(b => b.onclick = () => {
-    if (b.dataset.has === "1" && !confirm("Réinitialiser cette démo ? Ses magasins, promos et chiffres seront recréés.")) return;
+const VIEWS = { home: vHome, clients: vClients, net: vNet, stores: vStores, demos: vDemos, health: vHealth, site: vSite };
+
+/* ---------- Actions ---------- */
+async function act(btn, fn, okMsg) {
+  if (busy) return; busy = true; if (btn) btn.disabled = true;
+  try { const m = await fn(); toast(m || okMsg || "Fait."); }
+  catch (e) { toast(errText(e)); }
+  finally { busy = false; if (btn) btn.disabled = false; }
+}
+async function invite(ids, networkId) {
+  const { data: { session } } = await sb.auth.getSession();
+  const r = await fetch(`${SUPABASE_URL}/functions/v1/network-stores-invite`, { method: "POST", headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: "Bearer " + session.access_token }, body: JSON.stringify({ network_id: networkId, store_ids: ids }) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || "Envoi impossible.");
+  const res = j.results || [], ok = res.filter(x => x.status === "invited" || x.status === "linked").length, ko = res.filter(x => x.status === "failed");
+  return `${ok} invitation${ok > 1 ? "s" : ""} envoyée${ok > 1 ? "s" : ""}${ko.length ? ` · ${ko.length} en échec (${ko[0].reason})` : ""}.`;
+}
+function bind() {
+  const v = $("view");
+  v.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => show(b.dataset.tab));
+  v.querySelectorAll("[data-net]").forEach(r => r.onclick = () => { UI.net = r.dataset.net; show("net"); });
+  if ($("q")) { $("q").oninput = (e) => { UI.q = e.target.value; const pos = e.target.selectionStart; $("view").innerHTML = vStores(); bind(); $("q").focus(); $("q").setSelectionRange(pos, pos); }; }
+  if ($("sf")) $("sf").onchange = (e) => { UI.sf = e.target.value; $("view").innerHTML = vStores(); bind(); };
+  if ($("copy-snip")) $("copy-snip").onclick = () => navigator.clipboard.writeText(SNIPPET).then(() => toast("Code copié."), () => toast("Copie impossible : sélectionnez le texte."));
+  v.querySelectorAll("[data-reset]").forEach(b => b.onclick = () => {
+    if (!confirm(`Envoyer à ${b.dataset.reset} un email pour choisir un nouveau mot de passe ?`)) return;
     act(b, async () => {
-      b.textContent = "Génération…";
-      const { error } = await sb.rpc("manager_build_demo", { p_sector: b.dataset.build }); if (error) throw error;
-      toast("Démo prête.");
+      const { error } = await sb.auth.resetPasswordForEmail(b.dataset.reset, { redirectTo: `${location.origin}/${b.dataset.to}/?bienvenue=1` });
+      if (error) throw error; return "Email envoyé à " + b.dataset.reset + ".";
     });
   });
-}
-async function act(btn, fn) {
-  if (busy) return; busy = true; btn.disabled = true;
-  try { await fn(); await load(); render(); }
-  catch (e) { toast(errText(e)); btn.disabled = false; }
-  finally { busy = false; }
+  v.querySelectorAll("[data-inv]").forEach(b => b.onclick = () => act(b, async () => { const m = await invite([b.dataset.inv], C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }));
+  if ($("inv-all")) $("inv-all").onclick = () => { const ids = C.net.stores.filter(s => !s.activated && s.contact_email).map(s => s.id); if (!confirm(`Envoyer l'invitation à ${ids.length} gérant(s) ?`)) return; act($("inv-all"), async () => { const m = await invite(ids.slice(0, 200), C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }); };
+  v.querySelectorAll("[data-use]").forEach(b => b.onclick = () => act(b, async () => { await rpc("manager_activate_demo", { p_network_id: b.dataset.use }); await need("demos"); $("view").innerHTML = vDemos(); bind(); return "Démo activée. Rechargez la centrale et l'app magasin si elles sont ouvertes."; }));
+  v.querySelectorAll("[data-build]").forEach(b => b.onclick = () => {
+    if (b.dataset.has === "1" && !confirm("Réinitialiser cette démo ? Ses magasins, promos et chiffres seront recréés.")) return;
+    b.textContent = "Génération…";
+    act(b, async () => { await rpc("manager_build_demo", { p_sector: b.dataset.build }); await need("demos"); $("view").innerHTML = vDemos(); bind(); return "Démo prête."; });
+  });
 }
 boot().catch(e => showLogin(errText(e)));
 </script>

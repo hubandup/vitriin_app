@@ -1,6 +1,6 @@
 // network-stores-invite — invite les gérants des magasins importés par une centrale.
 //
-// JWT requis (verify_jwt = true). L'appelant doit être admin du réseau :
+// JWT requis (verify_jwt = true). L'appelant doit être admin du réseau (ou de l'équipe Vitriin) :
 // vérifié avec SON jeton avant toute action en service_role.
 //
 //   POST { network_id, store_ids: uuid[] }  (200 magasins max par appel)
@@ -51,8 +51,10 @@ Deno.serve(async (req) => {
   const asUser = createClient(URL_, ANON, { global: { headers: { Authorization: auth } } });
   const { data: me } = await asUser.auth.getUser();
   if (!me?.user) return json(req, { error: "Connexion requise." }, 401);
+  // Admin de la centrale, ou équipe Vitriin (Manager) : vérifié en base avec le jeton de l'appelant.
   const { data: isAdmin, error: e0 } = await asUser.rpc("is_network_admin", { p_network_id: networkId });
-  if (e0 || !isAdmin) return json(req, { error: "Seuls les administrateurs de la centrale peuvent inviter des magasins." }, 403);
+  const { data: isStaff } = isAdmin ? { data: false } : await asUser.rpc("is_platform_admin");
+  if (e0 || !(isAdmin || isStaff)) return json(req, { error: "Seuls les administrateurs de la centrale peuvent inviter des magasins." }, 403);
 
   // 2. Les magasins, strictement ceux de CE réseau.
   const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });

@@ -20,6 +20,41 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-026 · Manager V2 : poste de pilotage de Vitriin
+- **Quoi** : le Manager passe en onglets.
+  - **Accueil** : centrales, magasins, part connectée, publications 30 j (et
+    tendance), personnes touchées, codes utilisés, visites du site, échecs ;
+    courbes 30 jours ; colonne « À traiter » (comptes à reconnecter, échecs
+    de publication, magasins invités qui n'ont rien connecté, centrales
+    inactives depuis 15 j) ; échéances (Meta 30/11, Brisach 8/12).
+  - **Clients** : liste puis fiche centrale (équipe et dernière connexion,
+    promos et taux de relais, magasins avec état du compte, réseaux,
+    publications, promos à valider). Actions : inviter un gérant ou tous ceux
+    en attente, « Renvoyer l'accès » (email pour choisir un nouveau mot de
+    passe).
+  - **Magasins** : tous les magasins avec recherche et filtres (sans réseau,
+    à reconnecter, pas activés, sans publication, indépendants).
+  - **Démos** : inchangé.
+  - **Santé** : taux de réussite des publications, échecs par cause, comptes
+    à reconnecter ou désactivés, invitations jamais ouvertes, dernière
+    collecte des statistiques Meta.
+  - **Site web** : pages vues, visiteurs, clics « démo » et « essai »,
+    pages, provenance, appareils, et le code du compteur à installer.
+  - Case « Inclure les démos dans les chiffres ».
+- **Compteur de visites** : table `site_visits` (aucune policy, illisible du
+  navigateur) alimentée par `track_visit` (seule fonction ouverte au public :
+  valeurs bornées, vitriin.fr uniquement, 30 envois par minute et par
+  visiteur au plus). Sans cookie, sans IP ; identifiant visiteur aléatoire
+  renouvelé chaque jour.
+- **Sécurité** : fonctions `manager_dashboard`, `manager_network`,
+  `manager_stores`, `manager_health`, `manager_site` protégées par
+  `is_platform_admin()` (testé : magasin et visiteur refusés).
+  `network-stores-invite` (version 2) accepte aussi l'équipe Vitriin.
+- **Fichiers** : `manager/index.html`, migration `20261030150000_manager_v2`,
+  `supabase/functions/network-stores-invite/index.ts`.
+- **Retour arrière** : `git revert` du commit ; les fonctions SQL peuvent
+  rester, elles ne sont utilisées que par le Manager.
+
 ### MOD-025 · Manager : logo des enseignes de démo
 - **Quoi** : chaque carte de démo affiche le logo de l'enseigne (sinon son
   initiale). Logos créés pour Flamme & Foyer et Jardins & Saisons
