@@ -20,6 +20,16 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-045 · Liens des emails sur app.vitriin.co (page /auth/)
+- **Quoi** : les liens des emails (connexion, invitation, mot de passe, confirmation, changement d'email)
+  pointent vers `https://app.vitriin.co/auth/?t=…&type=…&next=…` au lieu de `…supabase.co/auth/v1/verify…`.
+  La page /auth/ valide le jeton (`verifyOtp` avec `token_hash`) **seulement au clic** sur le bouton : les
+  antivirus et aperçus de messagerie (Outlook Safe Links…) ne grillent plus le lien à usage unique.
+  La session est rangée sous la clé de l'espace de destination (/v, /magasin, /centrale, /manager) ;
+  destination limitée à app.vitriin.co ; le jeton est retiré de la barre d'adresse.
+- **Où** : `public/auth/index.html` (nouveau), `supabase/templates/*.html` (`{{ .TokenHash }}`).
+- **Retour arrière** : remettre `{{ .ConfirmationURL }}` dans les modèles Supabase ; `git revert`.
+
 ### MOD-044 · Emails d'authentification en place dans Supabase
 - **Quoi** : les 6 modèles (`supabase/templates/*.html`) et leurs objets en français sont enregistrés dans le
   Dashboard (Authentication > Emails > Templates) : Confirm sign up, Invite user, Magic link, Change email,

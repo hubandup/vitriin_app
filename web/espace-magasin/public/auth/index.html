@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vitriin · Connexion</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+/* Vitriin · validation des liens reçus par email (connexion, invitation, mot de passe, changement d'email).
+   Le lien n'est consommé qu'au clic sur le bouton : les antivirus et aperçus de messagerie qui
+   « ouvrent » les liens ne le grillent plus. */
+:root{--p:#e5087e;--grad:linear-gradient(100deg,#e5087e 0%,#951b81 100%);--ink:#2D2D2D;--muted:#706b64;--line:#EEECE8}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:linear-gradient(165deg,#fdf1f4 0%,#faf6f0 48%,#f2f6f2 100%);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+main{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.card{width:100%;max-width:420px;background:#fff;border-radius:24px;padding:32px 26px;text-align:center;box-shadow:0 20px 50px rgba(60,45,40,.12)}
+.logo{display:inline-flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:19px;background:var(--grad);color:#fff;font-weight:700;font-size:30px;box-shadow:0 12px 28px rgba(229,8,126,.3)}
+h1{font-size:24px;letter-spacing:-.02em;margin:18px 0 8px}
+p{color:var(--muted);font-size:15px;line-height:1.5;margin:0}
+button,a.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;margin-top:24px;border:none;border-radius:15px;background:var(--grad);color:#fff;font:700 16px 'DM Sans',sans-serif;cursor:pointer;text-decoration:none;box-shadow:0 8px 20px rgba(229,8,126,.3)}
+button[disabled]{opacity:.6;cursor:default}
+a.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);box-shadow:none;margin-top:12px}
+.err{color:#b3261e}
+</style>
+</head>
+<body>
+<main><div class="card" id="card" role="main">
+  <span class="logo" aria-hidden="true">V</span>
+  <h1 id="h">Connexion à Vitriin</h1>
+  <p id="p">Touchez le bouton pour continuer.</p>
+  <button id="go">Continuer</button>
+</div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://zjugauidrijghesgsmap.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU";
+const $ = (id) => document.getElementById(id);
+const q = new URLSearchParams(location.search);
+const token = q.get("t") || "";
+const type = q.get("type") || "magiclink";
+// « next » est toujours le dernier paramètre : on prend le reste de l'adresse tel quel (il peut contenir « ? »).
+const rawNext = (() => { const i = location.search.indexOf("next="); if (i < 0) return "/"; let n = location.search.slice(i + 5); try { n = decodeURIComponent(n); } catch {} return n; })();
+// Destination limitée à app.vitriin.co (pas de redirection vers un autre site).
+const next = (() => { try { const u = new URL(rawNext, location.origin); return u.origin === location.origin ? u.pathname + u.search : "/"; } catch { return "/"; } })();
+// Chaque espace garde sa session sous sa propre clé.
+const KEYS = [["/v", "vitriin-client-auth"], ["/magasin", "vitriin-magasin-auth"], ["/centrale", "vitriin-centrale-auth"], ["/manager", "vitriin-manager-auth"]];
+const storageKey = (KEYS.find(([p]) => next === p || next.startsWith(p + "/") || next.startsWith(p + "?")) || [])[1];
+const sb = supabase.createClient(SUPABASE_URL, ANON_KEY, { auth: { detectSessionInUrl: false, ...(storageKey ? { storageKey } : {}) } });
+const TXT = {
+  magiclink: ["Connexion à Vitriin", "Touchez le bouton pour vous connecter.", "Me connecter"],
+  signup: ["Confirmez votre adresse", "Touchez le bouton pour activer votre compte.", "Confirmer mon adresse"],
+  email: ["Connexion à Vitriin", "Touchez le bouton pour vous connecter.", "Me connecter"],
+  invite: ["Bienvenue sur Vitriin", "Touchez le bouton pour activer votre compte. Vous choisirez ensuite votre mot de passe.", "Activer mon compte"],
+  recovery: ["Votre mot de passe", "Touchez le bouton pour choisir votre mot de passe.", "Choisir mon mot de passe"],
+  email_change: ["Nouvelle adresse email", "Touchez le bouton pour confirmer votre nouvelle adresse.", "Confirmer"],
+};
+const [h, p, b] = TXT[type] || TXT.magiclink;
+$("h").textContent = h; $("p").textContent = p; $("go").textContent = b;
+// Le jeton ne reste pas dans l'historique ni dans les en-têtes Referer.
+history.replaceState(null, "", "/auth/");
+if (!/^[A-Za-z0-9_-]{20,200}$/.test(token) || !TXT[type]) fail("Ce lien est incomplet.");
+$("go").onclick = async () => {
+  $("go").disabled = true; $("go").textContent = "Un instant…";
+  const { error } = await sb.auth.verifyOtp({ token_hash: token, type });
+  if (error) return fail(/expired|invalid|not found/i.test(error.message) ? "Ce lien a expiré ou a déjà servi." : "La vérification a échoué.");
+  location.replace(next);
+};
+function fail(msg) {
+  $("card").innerHTML = `<span class="logo" aria-hidden="true">V</span><h1>Lien non valable</h1><p class="err">${msg}</p><p style="margin-top:8px">Demandez un nouveau lien depuis l'application : il est valable une heure et ne sert qu'une fois.</p><a class="btn" href="${next.replace(/"/g, "")}">Retourner à Vitriin</a>`;
+}
+</script>
+</body>
+</html>
