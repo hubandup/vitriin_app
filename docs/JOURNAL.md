@@ -20,6 +20,12 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-043 · Emails d'authentification : logo Vitriin blanc dans le bandeau
+- **Quoi** : `public/email/logo-vitriin-blanc.png` (logo officiel du projet passé en blanc, PNG car Gmail
+  n'affiche pas le SVG), servi sur https://app.vitriin.co/email/logo-vitriin-blanc.png, utilisé dans les
+  6 modèles `supabase/templates/*.html` (affiché à 140 px, image 2x).
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-042 · Manager > Utilisateurs > Gérants : pictos et « Modifier l'email » ; emails d'authentification en français
 - **Gérants des magasins** : actions en pictos (modifier l'email, renvoyer l'accès, bloquer / débloquer,
   retirer). « Modifier » : saisie en ligne ; l'email du compte et du magasin est remplacé, un lien pour choisir
