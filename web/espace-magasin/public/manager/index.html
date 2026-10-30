@@ -186,7 +186,7 @@ async function need(tab) {
   if (tab !== "home" && !C.home) C.home = await rpc("manager_dashboard", { p_demo: d }).catch(() => null);
   if (tab === "stores") C.stores = await rpc("manager_stores", { p_demo: d });
   if (tab === "health") C.health = await rpc("manager_health", { p_demo: d });
-  if (tab === "site") C.site = await rpc("manager_site", { p_days: 30 });
+  if (tab === "site") [C.site, C.wl] = await Promise.all([rpc("manager_site", { p_days: 30 }), rpc("manager_waitlist").catch(() => null)]);
   if (tab === "net") [C.net, C.netOnb] = await Promise.all([rpc("manager_network", { p_id: UI.net }), rpc("manager_onboarding", { p_net: UI.net })]);
 }
 async function show(tab = UI.tab) {
@@ -499,6 +499,12 @@ view();var ps=history.pushState;history.pushState=function(){ps.apply(this,argum
 document.addEventListener("click",function(e){var a=e.target.closest("a,button");if(!a)return;var t=(a.textContent+" "+(a.getAttribute("href")||"")).toLowerCase();
 if(/d[ée]mo/.test(t))send("demo_click");else if(/essai|inscri|cr[ée]er (mon|un) compte|commencer/.test(t))send("signup_click")});})();
 <\/script>`;
+function vWaitlist() {
+  const W = C.wl;
+  if (!W) return "";
+  return `<div class="card" style="margin-top:14px"><h3>Liste d'attente indépendants · ${nf(W.total)} inscrit${W.total > 1 ? "s" : ""}${W.week ? ` (+${nf(W.week)} cette semaine)` : ""}</h3>
+    ${W.rows.length ? `<ul class="list">${W.rows.map(r => `<li><span><b>${esc(r.business || "—")}</b> · ${esc(r.activity || "")} ${r.city ? "· " + esc(r.city) : ""}<br><a href="mailto:${esc(r.email)}">${esc(r.email)}</a> · ${day(r.created_at)}${r.source ? " · " + esc(r.source) : ""}</span><label style="white-space:nowrap"><input type="checkbox" data-wl="${r.id}" ${r.contacted_at ? "checked" : ""}> contacté</label></li>`).join("")}</ul>` : `<p class="empty">Aucune inscription pour l'instant.</p>`}</div>`;
+}
 function vSite() {
   const D = C.site;
   return `<div class="bar"><div><h2>Site web · vitriin.fr</h2><p class="sub">30 derniers jours. Mesure sans cookie : ni adresse IP ni donnée personnelle conservée.</p></div></div>
@@ -510,6 +516,7 @@ function vSite() {
     <div class="card"><h3>Provenance</h3>${D.sources.length ? `<ul class="list">${D.sources.map(p => `<li><span>${esc(p.src)}</span><b>${nf(p.n)}</b></li>`).join("")}</ul>` : `<p class="empty">—</p>`}
       <h3 style="margin-top:16px">Appareils</h3><ul class="list">${Object.entries(D.devices || {}).map(([k, v]) => `<li><span>${{ mobile: "Mobile", tablet: "Tablette", desktop: "Ordinateur" }[k] || k}</span><b>${nf(v)}</b></li>`).join("") || "<li><span>—</span></li>"}</ul></div>
   </div>
+  ${vWaitlist()}
   <div class="card" style="margin-top:14px"><h3>Compteur à installer sur vitriin.fr</h3><p class="sub">Dans Lovable : demandez d'ajouter ce code juste avant &lt;/body&gt; de index.html. Il compte les pages vues (navigation comprise), la provenance (utm_source ou site d'origine), l'appareil et les clics sur les boutons « démo » et « essai ».</p>
     <pre id="snip">${esc(SNIPPET)}</pre><button class="btn-s" id="copy-snip">Copier le code</button></div>`;
 }
@@ -538,6 +545,7 @@ function bind() {
   if ($("q")) { $("q").oninput = (e) => { UI.q = e.target.value; const pos = e.target.selectionStart; $("view").innerHTML = vStores(); bind(); $("q").focus(); $("q").setSelectionRange(pos, pos); }; }
   if ($("sf")) $("sf").onchange = (e) => { UI.sf = e.target.value; $("view").innerHTML = vStores(); bind(); };
   if ($("copy-snip")) $("copy-snip").onclick = () => navigator.clipboard.writeText(SNIPPET).then(() => toast("Code copié."), () => toast("Copie impossible : sélectionnez le texte."));
+  v.querySelectorAll("[data-wl]").forEach(x => x.onchange = () => rpc("manager_waitlist_contacted", { p_id: +x.dataset.wl, p_done: x.checked }).then(() => toast(x.checked ? "Marqué contacté." : "Marqué à contacter."), (e) => { x.checked = !x.checked; toast(e.message); }));
   bindReset(v);
   // À traiter
   const items = todoItems();

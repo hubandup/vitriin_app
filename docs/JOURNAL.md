@@ -20,6 +20,23 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-033 · Liste d'attente des indépendants (vitriin.fr → Manager)
+- **Quoi** : table fermée `waitlist_signups` ; `join_waitlist` (anon, email validé,
+  doublon ignoré sans le révéler, plafond 200/h) ; `manager_waitlist` et
+  `manager_waitlist_contacted` (équipe Vitriin seulement). Manager > Site web :
+  carte « Liste d'attente indépendants » avec case « contacté ».
+- **Où** : migration `20261030170000_waitlist_independants`, `public/manager/index.html`.
+- **Sécurité testée** : anon sans droit de lecture sur la table ni sur `manager_waitlist`.
+- **Retour arrière** : `git revert` du commit ; `drop function` des 4 fonctions et `drop table public.waitlist_signups`.
+
+### MOD-034 · vitriin.fr : quick wins SEO (non publié)
+- **Quoi** : réponses FAQ présentes dans le HTML serveur, JSON-LD FAQPage, title et
+  description orientés acheteurs, UTM sur les liens Calendly (utm_content = emplacement),
+  `llms.txt`, `lastmod` au sitemap. Décisions de Charles : email reste en .co,
+  bandeau de preuve en attente de l'accord Brisach, indépendants en liste d'attente.
+- **Où** : projet Lovable « Vitriin ».
+- **Retour arrière** : version antérieure dans l'historique Lovable.
+
 ### MOD-032 · vitriin.fr : hero avec téléphone et maquettes de publications (non publié)
 - **Quoi** : hero en deux colonnes avec un iPhone dessiné en CSS et 6 écrans
   qui défilent (légendes synchronisées). 3e écran : maquette de post Instagram
