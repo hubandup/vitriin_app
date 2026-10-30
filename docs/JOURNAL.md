@@ -20,6 +20,15 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-044 · Emails d'authentification en place dans Supabase
+- **Quoi** : les 6 modèles (`supabase/templates/*.html`) et leurs objets en français sont enregistrés dans le
+  Dashboard (Authentication > Emails > Templates) : Confirm sign up, Invite user, Magic link, Change email,
+  Reset password, Reauthentication. Vérifié après rechargement ; aperçu Supabase : logo affiché.
+- **Non modifiés** : les notifications de sécurité (mot de passe changé, email changé, etc.), désactivées
+  ou en anglais par défaut ; à traduire si on les active.
+- **Retour arrière** : recoller les modèles par défaut de Supabase (bouton dans chaque modèle) ou une version
+  antérieure des fichiers.
+
 ### BUG-007 · Logo des emails non affiché (corrigé)
 - **Problème** : le logo hébergé sur app.vitriin.co ne s'affichait pas dans l'aperçu des emails.
 - **Correction** : logo déposé dans un bucket public Supabase `email-assets`
