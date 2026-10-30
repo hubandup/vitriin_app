@@ -28,6 +28,7 @@ Repères :
   La session est rangée sous la clé de l'espace de destination (/v, /magasin, /centrale, /manager) ;
   destination limitée à app.vitriin.co ; le jeton est retiré de la barre d'adresse.
 - **Où** : `public/auth/index.html` (nouveau), `supabase/templates/*.html` (`{{ .TokenHash }}`).
+- **En place** : les 5 modèles sont mis à jour dans le Dashboard Supabase (vérifié après rechargement).
 - **Retour arrière** : remettre `{{ .ConfirmationURL }}` dans les modèles Supabase ; `git revert`.
 
 ### MOD-044 · Emails d'authentification en place dans Supabase
