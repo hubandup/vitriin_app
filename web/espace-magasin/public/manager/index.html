@@ -390,27 +390,26 @@ function vNet() {
   const D = C.net, n = D.network, S = D.stores, P = D.promos;
   const act = S.filter(s => s.activated).length, conn = S.filter(s => Object.values(s.channels || {}).includes("active")).length;
   const toInvite = S.filter(s => !s.activated && s.contact_email);
+  const tab = UI.ntab || "over", O = C.netOnb || [], pctOnb = O.length ? Math.round(O.filter(x => x.done).length / O.length * 100) : 0;
   return `<button class="back" data-tab="clients">← Clients</button>
   <div class="bar"><div class="row" style="flex-wrap:nowrap">${logo(n)}<div><h2>${esc(n.name)}</h2><p class="sub">${n.is_demo ? "Démo · " : ""}${esc(n.legal_name || "")}${n.siret ? " · SIRET " + esc(n.siret) : ""} · client depuis le ${day(n.created_at)} · code réseau ${esc(n.join_code)}</p></div></div>
     ${toInvite.length ? `<button class="btn-p" id="inv-all">${toInvite.length > 1 ? `Inviter les ${toInvite.length} gérants en attente` : "Inviter le gérant en attente"}</button>` : ""}</div>
-  <div class="kpis">
+  <div class="chips" role="tablist" style="margin:2px 0 16px">${[["over", "Vue d'ensemble"], ["onb", `Intégration · ${pctOnb} %`], ["stores", `Magasins · ${S.length}`], ["promos", `Promos · ${P.length}`]].map(([k, l]) => `<button class="chip ${tab === k ? "on" : ""}" role="tab" aria-selected="${tab === k}" data-ntab="${k}">${l}</button>`).join("")}</div>
+  ${tab === "over" ? `<div class="kpis">
     ${kpi(nf(S.length), "magasins")}${kpi(`${S.length ? Math.round(act / S.length * 100) : 0} %`, "comptes activés", `<small style="color:var(--muted)">${act} / ${S.length}</small>`)}
     ${kpi(`${S.length ? Math.round(conn / S.length * 100) : 0} %`, "connectés à un réseau", `<small style="color:var(--muted)">${conn} / ${S.length}</small>`)}
     ${kpi(nf(P.length), "promos envoyées")}${kpi(nf(S.reduce((t, s) => t + s.pub30, 0)), "publications 30 j")}
   </div>
-  <div class="two">
-    <div class="card"><h3>Équipe de la centrale</h3>${D.members.length ? `<ul class="list">${D.members.map(m => `<li><span><b>${esc(m.email)}</b><br><small style="color:var(--muted)">${{ owner: "Propriétaire", admin: "Administrateur", member: "Éditeur" }[m.role] || m.role} · dernière connexion ${since(m.last_sign_in_at)}</small></span><button class="btn-s sm" data-reset="${esc(m.email)}" data-to="centrale">Renvoyer l'accès</button></li>`).join("")}</ul>` : `<p class="empty">Aucun utilisateur.</p>`}
-      <p class="sub" style="margin-top:10px">Contact : ${esc(n.support_email || "—")} · ${esc(n.phone || "—")}</p></div>
-    <div class="card"><h3>Promos de la centrale</h3>${P.length ? `<ul class="list">${P.slice(0, 12).map(p => `<li><span><b>${esc(p.title)}</b>${p.is_mandatory ? ' <span class="pill p">Obligatoire</span>' : ""}<br><small style="color:var(--muted)">${day(p.starts_at)} → ${day(p.ends_at)} · ${p.active}/${p.sent} activées · ${p.relayed} relayées</small></span><b>${cnum(p.views)} vues</b></li>`).join("")}</ul>` : `<p class="empty">Aucune promo envoyée.</p>`}</div>
-  </div>
-  ${onbHtml(C.netOnb)}
-  <h3 style="margin-top:18px">Magasins</h3>
-  <div class="tw"><table><tr><th>Magasin</th><th>Compte</th><th>Réseaux</th><th class="r">Publications 30 j</th><th class="r">À valider</th><th>Dernière connexion</th><th></th></tr>
+  <div class="card" style="margin-top:14px"><h3>Équipe de la centrale</h3>${D.members.length ? `<ul class="list">${D.members.map(m => `<li><span><b>${esc(m.email)}</b><br><small style="color:var(--muted)">${{ owner: "Propriétaire", admin: "Administrateur", member: "Éditeur" }[m.role] || m.role} · dernière connexion ${since(m.last_sign_in_at)}</small></span><button class="btn-s sm" data-reset="${esc(m.email)}" data-to="centrale">Renvoyer l'accès</button></li>`).join("")}</ul>` : `<p class="empty">Aucun utilisateur.</p>`}
+      <p class="sub" style="margin-top:10px">Contact : ${esc(n.support_email || "—")} · ${esc(n.phone || "—")}</p></div>` : ""}
+  ${tab === "promos" ? `<div class="card"><h3>Promos de la centrale</h3>${P.length ? `<ul class="list">${P.map(p => `<li><span><b>${esc(p.title)}</b>${p.is_mandatory ? ' <span class="pill p">Obligatoire</span>' : ""}<br><small style="color:var(--muted)">${day(p.starts_at)} → ${day(p.ends_at)} · ${p.active}/${p.sent} activées · ${p.relayed} relayées</small></span><b>${cnum(p.views)} vues</b></li>`).join("")}</ul>` : `<p class="empty">Aucune promo envoyée.</p>`}</div>` : ""}
+  ${tab === "onb" ? onbHtml(O).replace('style="margin-top:14px"', "") : ""}
+  ${tab === "stores" ? `<div class="tw"><table><tr><th>Magasin</th><th>Compte</th><th>Réseaux</th><th class="r">Publications 30 j</th><th class="r">À valider</th><th>Dernière connexion</th><th></th></tr>
     ${S.map(s => `<tr><td><b>${esc(s.name)}</b><small>${esc(s.postal_code || "")} ${esc(s.city || "")}</small></td>
       <td>${s.activated ? `<span class="pill">Activé</span>` : s.invited_at ? `<span class="pill warn">Invité le ${day(s.invited_at)}</span>` : `<span class="pill grey">Pas invité</span>`}<small>${esc(s.contact_email || "")}</small></td>
       <td>${chState(s.channels)}</td><td class="r">${nf(s.pub30)}</td><td class="r">${s.pending ? `<span class="pill warn">${s.pending}</span>` : "0"}</td><td>${s.activated ? since(s.last_seen) : "—"}</td>
       <td class="r">${!s.activated && s.contact_email ? `<button class="btn-s sm" data-inv="${s.id}">Inviter</button>` : s.activated && s.contact_email ? `<button class="btn-s sm" data-reset="${esc(s.contact_email)}" data-to="magasin">Renvoyer l'accès</button>` : ""}</td></tr>`).join("")}
-  </table></div>`;
+  </table></div>` : ""}`;
 }
 
 /* ---------- Magasins ---------- */
@@ -533,7 +532,7 @@ async function invite(ids, networkId) {
 function bind() {
   const v = $("view");
   v.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => show(b.dataset.tab));
-  v.querySelectorAll("[data-net]").forEach(r => r.onclick = () => { UI.net = r.dataset.net; show("net"); });
+  v.querySelectorAll("[data-net]").forEach(r => r.onclick = () => { if (UI.net !== r.dataset.net) UI.ntab = "over"; UI.net = r.dataset.net; show("net"); });
   if ($("q")) { $("q").oninput = (e) => { UI.q = e.target.value; const pos = e.target.selectionStart; $("view").innerHTML = vStores(); bind(); $("q").focus(); $("q").setSelectionRange(pos, pos); }; }
   if ($("sf")) $("sf").onchange = (e) => { UI.sf = e.target.value; $("view").innerHTML = vStores(); bind(); };
   v.querySelectorAll("[data-stab]").forEach(b => b.onclick = () => { UI.stab = b.dataset.stab; $("view").innerHTML = vSite(); bind(); });
@@ -556,6 +555,7 @@ function bind() {
       act(null, async () => { await rpc("manager_ticket_reply", { p_id: id, p_body: body, p_internal: internal, p_status: solve ? "resolved" : null }); await reload(); return internal ? "Note ajoutée." : solve ? "Réponse envoyée, ticket résolu." : "Réponse envoyée au client."; }); };
     $("tk-send").onclick = () => send(false); $("tk-solve").onclick = () => send(true);
   }
+  v.querySelectorAll("[data-ntab]").forEach(b => b.onclick = () => { UI.ntab = b.dataset.ntab; $("view").innerHTML = vNet(); bind(); });
   // Intégration
   v.querySelectorAll("[data-onb]").forEach(c => c.onclick = () => act(null, async () => { const done = c.dataset.done !== "1"; C.netOnb = await rpc("manager_onboarding_toggle", { p_net: UI.net, p_step: c.dataset.onb, p_done: done }); $("view").innerHTML = vNet(); bind(); return done ? "Étape validée." : "Étape remise à faire."; }));
   v.querySelectorAll("[data-inv]").forEach(b => b.onclick = () => act(b, async () => { const m = await invite([b.dataset.inv], C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }));

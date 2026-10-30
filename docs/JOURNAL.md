@@ -20,6 +20,13 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-040 · Manager > fiche client en onglets
+- **Quoi** : onglets « Vue d'ensemble » (indicateurs, équipe), « Intégration · x % », « Magasins · n »,
+  « Promos · n » (toutes les promos, plus seulement les 12 dernières). L'onglet revient à « Vue d'ensemble »
+  quand on ouvre un autre client.
+- **Où** : `public/manager/index.html` (vNet, bind).
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-039 · Manager > fiche client > Intégration : on coche directement la pastille
 - **Quoi** : les étapes manuelles (contrat, SEPA, formations) se valident en cliquant la pastille de gauche
   (re-clic pour annuler) ; la case « fait » à droite est supprimée. Étapes automatiques non cliquables.
