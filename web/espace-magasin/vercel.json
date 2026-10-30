@@ -1,2 +1,2 @@
-{"rewrites":[{"source":"/v/m/:slug","destination":"/v/index.html"},{"source":"/v/p/:id","destination":"/v/index.html"},{"source":"/v/compte","destination":"/v/index.html"}],
+{"rewrites":[{"source":"/v/:path*","destination":"/v/index.html"}],
 "headers":[{"source":"/(.*)","headers":[{"key":"X-Robots-Tag","value":"noindex"}]}]}

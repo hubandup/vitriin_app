@@ -20,6 +20,21 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-038 · App particulier refaite selon la maquette Claude Design « Vitriin » (remplace MOD-036 côté écran)
+- **Pourquoi** : la première version (MOD-036) était une page web générique ; Charles voulait les écrans
+  particulier de la maquette (projet claude.ai, `Vitriin.dc.html`).
+- **Quoi** (`/v/`, app mobile, charte magenta) : Découvrir (« Près de vous », recherche, localisation ou ville,
+  filtres par catégorie, « À la une », « Autour de vous », enregistrer), plein écran façon reels (enregistrer,
+  coupon, partager, « Trouver en magasin »), coupon avec code-barres, Mes promos (Sauvegardées / Utilisées
+  et euros économisés), Enseignes suivies, Profil (statistiques, centres d'intérêt, alertes, rayon, prénom,
+  suppression du compte, passer en mode commerçant), fiche commerce `/v/m/<slug>`, lien direct `/v/p/<id>`.
+  Connexion par lien email (SMS, Apple, Google : plus tard).
+- **Base** : migration `20261030223000_vitrine_app_particulier` : `code_reveals.user_id` (utilisation
+  rattachée au compte connecté), table `customer_prefs` (RLS : ses lignes), `customer_me` enrichi
+  (prefs, uses), `vitrine_reveal` rattache l'utilisation au compte.
+- **Vercel** : réécriture `/v/:path*` vers `/v/index.html`.
+- **Retour arrière** : `git revert` du commit (revient à MOD-037) ; colonnes et table sans effet si inutilisées.
+
 ### MOD-037 · Vitrine : cartes alignées, adresse sans doublon ; lien vitrine dans les posts Facebook
 - **Vitrine** : images des cartes contraintes au carré (les cartes avaient des hauteurs différentes),
   ville non répétée quand l'adresse la contient déjà. Vérifié en ligne : magasin, promo, code Code 128.
