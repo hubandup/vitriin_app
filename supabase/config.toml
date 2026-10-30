@@ -377,3 +377,6 @@ verify_jwt = true
 [functions.network-stores-invite]
 # Invitation des gérants des magasins importés (admin vérifié dans la fonction).
 verify_jwt = true
+
+[functions.manager-invite]
+verify_jwt = true

@@ -20,6 +20,21 @@ Repères :
 
 ## 2026-10-30
 
+### MOD-041 · Manager > fiche client > Utilisateurs : gestion des comptes
+- **Quoi** : onglet « Utilisateurs ». Équipe de la centrale : ajouter (email + rôle, invitation si nouveau
+  compte), changer le rôle, renvoyer l'accès, bloquer / débloquer, retirer. Gérants des magasins : recherche,
+  inviter un gérant (email pré-rempli), renvoyer l'accès, bloquer, retirer du magasin. Statuts : invitation en
+  attente, bloqué, dernière connexion. La carte « Équipe » de la vue d'ensemble est remplacée par un lien vers l'onglet.
+- **Base** : migration `20261030233000_manager_users` : `manager_network_users`, `manager_user_set_role`,
+  `manager_user_remove`, `manager_user_block` (équipe Vitriin seulement, via `manager_guard`) ; garde-fous :
+  toujours au moins un propriétaire, pas de blocage de son propre compte ni d'un compte de l'équipe Vitriin ;
+  le blocage coupe aussi les sessions. `guard_network_owner` laisse l'équipe Vitriin changer un propriétaire.
+- **Fonction Edge** `manager-invite` (v1, verify_jwt) : invitation d'un utilisateur centrale ou d'un gérant,
+  réservée à l'équipe Vitriin (vérifiée avec le jeton de l'appelant), clé service_role côté serveur seulement.
+- **Testé en base** : magasin refusé, dernier propriétaire protégé, auto-blocage refusé, blocage effectif.
+- **Retour arrière** : `git revert` ; `drop function` des 4 fonctions et `manager_user_json` ; supprimer la
+  fonction Edge `manager-invite` ; restaurer `guard_network_owner` (version de la migration initiale).
+
 ### MOD-040 · Manager > fiche client en onglets
 - **Quoi** : onglets « Vue d'ensemble » (indicateurs, équipe), « Intégration · x % », « Magasins · n »,
   « Promos · n » (toutes les promos, plus seulement les 12 dernières). L'onglet revient à « Vue d'ensemble »
