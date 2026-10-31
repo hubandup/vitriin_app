@@ -55,11 +55,12 @@ h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0}
 .feat .txt{position:absolute;left:16px;right:16px;bottom:15px;color:#fff}
 .feat small{color:rgba(255,255,255,.8);font-size:12px;font-weight:600}
 .feat b{display:block;font-size:20px;margin-top:4px;letter-spacing:-.01em}
-.prc{display:flex;align-items:baseline;gap:9px;margin-top:7px}
+.prc{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 9px;margin-top:7px}
+.prc strong,.prc s,.mini,.bdg{white-space:nowrap}
 .feat .prc strong{font-size:24px}.feat .prc s{color:rgba(255,255,255,.55);font-size:14px}
 .sect{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px}
 .sect span{font-weight:700;font-size:17px;letter-spacing:-.01em}
-.lnk{color:var(--p);font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:3px;min-height:40px}
+.lnk{color:var(--p);font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:3px;min-height:40px;white-space:nowrap;flex:none}
 .list{display:flex;flex-direction:column;gap:11px;padding:0 20px}
 .card{display:flex;gap:13px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:11px;width:100%;text-align:left}
 .th{width:78px;height:78px;border-radius:13px;object-fit:cover;flex:none;background:var(--rose)}
@@ -153,6 +154,66 @@ nav.tabs a.on{color:var(--p)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + var(--sab));background:#2D2D2D;color:#fff;font-weight:600;font-size:14px;padding:12px 18px;border-radius:14px;z-index:80;max-width:calc(100% - 32px);text-align:center;animation:fade .2s}
 .load{padding:60px 0;text-align:center;color:var(--muted)}
 @keyframes fade{from{opacity:0}to{opacity:1}}
+/* Feuille « J'en profite » : code flouté, affiché 2 minutes à la demande */
+.ov.sh{align-items:flex-end;padding:0}
+@media (min-width:560px){.ov.sh{align-items:center;padding:24px}}
+.sht{width:100%;max-width:430px;background:#fff;border-radius:26px 26px 0 0;padding:10px 20px calc(22px + var(--sab));display:flex;flex-direction:column;gap:14px;animation:up .22s ease-out;max-height:100dvh;overflow-y:auto}
+@media (min-width:560px){.sht{border-radius:26px}}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+.grab{align-self:center;width:40px;height:5px;border-radius:3px;background:#e2ded8}
+.t1{display:block;font-size:15.5px;letter-spacing:-.01em}.t2{font-size:12.5px;color:var(--muted);margin-top:2px}
+.xb{width:40px;height:40px;border-radius:50%;background:#f4f3f0;display:flex;align-items:center;justify-content:center;flex:none}
+.cbox{position:relative;border:1.5px dashed #e2ded8;border-radius:22px;padding:18px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;overflow:hidden}
+.cbox small{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cbody{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;transition:filter .3s}
+.cbody.blur{filter:blur(9px);user-select:none;pointer-events:none}
+.cbody svg{max-width:100%;height:96px}
+.cbody .code{font-size:20px;font-weight:700;letter-spacing:.16em;word-break:break-all;text-align:center}
+.cveil{position:absolute;inset:34px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px}
+.cveil span{font-size:12.5px;color:var(--muted);background:rgba(255,255,255,.88);padding:3px 9px;border-radius:7px}
+.btn.dark{background:var(--ink);color:#fff;width:auto;padding:0 22px;box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.btn.dark.full{width:100%;box-shadow:none}
+.ctime{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600}
+.live{width:44px;height:6px;border-radius:999px;background:linear-gradient(90deg,#e5087e,#951b81,#5ebca3,#e5087e);background-size:300% 100%;animation:live 1.6s linear infinite}
+@keyframes live{from{background-position:0 0}to{background-position:300% 0}}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.g2 .btn{font-size:13.5px;min-height:48px;padding:0 8px}
+.keep{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:16px;background:var(--rose);text-align:left;width:100%}
+.keep i{width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.keep span{flex:1;font-size:13.5px;line-height:1.35}.keep em{font-style:normal;color:var(--muted)}
+/* Écran « Profité » */
+.done{position:fixed;inset:0;z-index:70;background:#fff;overflow-y:auto;display:flex;flex-direction:column;align-items:center;text-align:center;padding:calc(var(--sat) + 18px) 22px calc(26px + var(--sab));gap:12px;animation:fade .2s}
+@media (min-width:560px){.done{max-width:430px;margin:0 auto}}
+.done .ok{position:relative;width:108px;height:108px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 40px rgba(229,8,126,.35);margin-top:30px;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.done .ok b{position:absolute;border-radius:50%}
+.done h2{font-size:32px;letter-spacing:-.02em;margin:0;line-height:1.1}
+.done .fcard{width:100%;border:1.5px solid var(--line);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px;text-align:left}
+/* Ajout à l'écran d'accueil */
+.ibar{position:absolute;top:calc(var(--sat) + 10px);left:10px;right:10px;z-index:3;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;border-radius:16px;background:rgba(20,20,20,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:#fff}
+.ibar .wm{font-weight:800;font-size:18px;letter-spacing:-.03em}
+.ibar span{flex:1;font-size:12px;line-height:1.3;color:rgba(255,255,255,.86)}
+.ibar .get{background:#fff;color:var(--ink);font-weight:700;font-size:13px;padding:0 12px;min-height:36px;border-radius:10px}
+.reel.wb .prog{top:calc(var(--sat) + 76px)}.reel.wb .rh{top:calc(var(--sat) + 88px)}
+.strip{position:fixed;left:12px;right:12px;bottom:calc(88px + var(--sab));z-index:19;display:flex;align-items:center;gap:10px;padding:10px 8px 10px 14px;border-radius:16px;background:var(--ink);color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+@media (min-width:560px){.strip{max-width:406px;margin:0 auto}}
+.strip span{flex:1;font-size:13px;line-height:1.35}.strip em{font-style:normal;opacity:.75}
+.strip .get{background:#fff;color:var(--ink);font-weight:700;font-size:13px;padding:0 12px;min-height:36px;border-radius:10px}
+.fol-rh{border:1.5px solid rgba(255,255,255,.8);color:#fff;font-weight:700;font-size:12.5px;padding:0 12px;min-height:34px;border-radius:10px;flex:none}
+.rhint{margin-top:9px;text-align:center;font-size:12px;color:rgba(255,255,255,.75);width:calc(100% + 60px)}
+/* Villes et commerce d'origine */
+.cities{display:flex;flex-direction:column}
+.cities button{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line);text-align:left;width:100%}
+.cities i{width:38px;height:38px;border-radius:12px;background:var(--rose);color:var(--p);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;font-size:13.5px;flex:none}
+.cities b{flex:1;font-size:15px}.cities small{font-size:12.5px;color:var(--muted)}
+.tiles{display:flex;gap:11px;overflow-x:auto;padding:0 20px 4px}
+.tile{position:relative;flex:none;width:156px;height:198px;border-radius:18px;overflow:hidden;background:var(--rose);text-align:left}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tile .shade{background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.78))}
+.tile .mini{position:absolute;top:9px;left:9px}
+.tile .tt{position:absolute;left:11px;right:11px;bottom:10px;color:#fff;font-weight:700;font-size:14px;line-height:1.2}
+.tile .tt small{display:block;font-weight:500;font-size:11.5px;opacity:.85;margin-top:3px}
+.fsug{margin:14px 20px 0;padding:13px;border-radius:18px;background:var(--rose);display:flex;align-items:center;gap:12px}
 </style>
 </head>
 <body>
@@ -227,6 +288,11 @@ const geo = (timeout = 9000) => new Promise((ok) => {
   if (!navigator.geolocation) return ok(null);
   navigator.geolocation.getCurrentPosition((x) => ok({ lat: x.coords.latitude, lng: x.coords.longitude }), () => ok(null), { enableHighAccuracy: false, timeout, maximumAge: 600000 });
 });
+
+const STANDALONE = (() => { try { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch { return false; } })();
+let BIP = null; // invitation d'installation Android/Chrome, gardée pour le bouton « Ajouter »
+addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); BIP = e; });
+const showInstall = () => !STANDALONE && ls.get("vt-noinstall") !== "1";
 
 /* ---------- État ---------- */
 if (new URLSearchParams(location.search).has("demo")) ss.set("vt-demo", "1");
@@ -343,9 +409,35 @@ function shell(tab, html) {
   $$("#tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
 }
 
+// Villes qui ont des promos en cours : jamais d'écran vide.
+async function loadCities() {
+  if (S.cities) return S.cities;
+  const r = await sb.rpc("vitrine_cities", { p_demo: DEMO });
+  return (S.cities = (!r.error && r.data) || []);
+}
+const citiesHtml = (C) => C.length ? `<div class="cities">${C.map((c, k) => `<button data-city="${k}"><i>${esc(c.city.slice(0, 2).toUpperCase())}</i><b>${esc(c.city)}</b><small>${c.n} promo${c.n > 1 ? "s" : ""}</small>${IC.chev}</button>`).join("")}</div>` : "";
+function bindCities(C) { $$("[data-city]").forEach(b => b.onclick = () => { const c = C[+b.dataset.city]; S.pos = { lat: +c.lat, lng: +c.lng, label: c.city }; ls.set("vt-pos", JSON.stringify(S.pos)); S.items = null; route(); }); }
+// Commerce par lequel le visiteur est arrivé (lien, QR code) : ses promos en premier dans le fil.
+async function loadOrigin() {
+  const slug = ls.get("vt-origin"); if (!slug) return null;
+  if (S.origin?.store?.slug === slug) return S.origin;
+  const r = await sb.rpc("vitrine_store", { p_slug: slug });
+  if (r.error || !r.data?.promos?.length) { S.origin = null; return null; }
+  return (S.origin = { store: r.data.store, list: r.data.promos.map(p => ({ promo: p, store: r.data.store, d: dist(S.pos, r.data.store) })) });
+}
+function stripHtml() {
+  return showInstall() && !ss.get("vt-strip-off") ? `<div class="strip" id="strip"><span><b>Vitriin sur votre écran d'accueil</b><br><em>Gratuit, sans passer par un store</em></span><button class="get" id="strip-go">Ajouter</button><button class="xb" id="strip-x" aria-label="Fermer" style="background:none;color:#fff;width:32px;height:32px">×</button></div>` : "";
+}
+function bindStrip() {
+  $("#strip-go") && ($("#strip-go").onclick = installSheet);
+  $("#strip-x") && ($("#strip-x").onclick = () => { ss.set("vt-strip-off", "1"); $("#strip").remove(); });
+}
+
 async function pageFeed() {
   document.title = "Vitriin · Les promos près de chez vous";
   if (S.pos && !S.items) { shell("feed", `<div class="load">Recherche des promos…</div>`); await loadNearby(); }
+  const C = (!S.pos || !(S.items || []).length) ? await loadCities() : [];
+  const O = S.pos ? await loadOrigin() : null;
   const name = S.me?.prefs?.first_name;
   const all = S.items || [];
   const cats = ["Tout", ...[...new Set(all.map(x => catLabel(x.store.category)))]];
@@ -361,8 +453,13 @@ async function pageFeed() {
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>
       <input id="q" type="search" placeholder="${S.pos ? "Un produit, un commerce…" : "Ta ville ou ton code postal"}" aria-label="${S.pos ? "Rechercher un produit ou un commerce" : "Ta ville ou ton code postal"}" value="${esc(S.pos ? S.q : "")}">
       <button type="button" class="loc" id="loc">${IC.pin}${esc(S.pos?.label || "Me localiser")}</button></form></div>
-    ${!S.pos ? `<div class="pad" style="padding-top:26px">${emptyHtml("Où es-tu ?", "Active la localisation ou tape ta ville pour voir les promos des commerces autour de toi.", IC.pin)}
-        <button class="btn p" id="geo">${IC.pin} Activer la localisation</button></div>` : `
+    ${!S.pos ? `<div class="pad" style="padding-top:22px"><h1 style="font-size:26px;line-height:1.15">Les bons plans de vos commerces, près de chez vous</h1>
+        <p style="font-size:14.5px;color:var(--muted);line-height:1.5;margin:8px 0 16px">Dites-nous où chercher. Votre position n'est jamais enregistrée.</p>
+        <button class="btn p" id="geo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Autour de moi</button>
+        ${C.length ? `<div class="lbl" style="margin:24px 0 2px">VILLES OÙ ÇA BOUGE</div>${citiesHtml(C)}` : ""}</div>` : `
+    ${O && !isFollowing(O.store.id) ? `<div class="sect" style="padding-top:16px"><span>Chez ${esc(O.store.name)}</span><a class="lnk" href="/v/m/${esc(O.store.slug)}" data-link>${O.list.length} promo${O.list.length > 1 ? "s" : ""}${IC.chev}</a></div>
+      <div class="tiles" id="otiles">${O.list.map((x, k) => { const pr = pricing(x.promo); return `<button class="tile" data-o="${k}">${x.promo.img ? `<img src="${esc(x.promo.img)}" alt="" loading="lazy">` : ""}<span class="shade" style="position:absolute;inset:0"></span><span class="mini">${esc(pr.badge)}</span><span class="tt">${esc(x.promo.title)}<small>Jusqu'au ${day(x.promo.ends_at)}</small></span></button>`; }).join("")}</div>
+      <div class="fsug"><span class="av" style="width:44px;height:44px;background:var(--p);color:#fff">${logo(O.store) ? `<img src="${esc(logo(O.store))}" alt="">` : init(O.store)}</span><span style="flex:1;font-size:13.5px;line-height:1.35"><b>Suivez ${esc(O.store.name)}</b><br><span style="color:var(--muted)">Leurs promos en premier, dans votre fil</span></span><button class="fbtn" id="ofol" style="background:var(--p);color:#fff">Suivre</button></div>` : ""}
     <div class="chips">${cats.map(c => `<button class="chip ${S.filter === c ? "on" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("")}</div>
     ${feat ? `<div class="pad" style="padding-top:8px"><button class="feat" data-feat>
         ${feat.promo.img ? `<img src="${esc(feat.promo.img)}" alt="">` : ""}<div class="shade"></div>
@@ -371,7 +468,8 @@ async function pageFeed() {
           <span class="prc">${fp.price != null ? `<strong>${eur(fp.price)}</strong>${fp.old ? `<s>${eur(fp.old)}</s>` : ""}` : ""}<span style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600">Voir en plein écran${IC.chev}</span></span></span></button></div>` : ""}
     <div class="sect"><span>Autour de vous</span>${list.length ? `<button class="lnk" data-full>Plein écran${IC.chev}</button>` : ""}</div>
     ${S.wide && list.length ? `<p class="pad" style="margin:-6px 0 10px;font-size:12.5px;color:var(--muted)">Rien à moins de ${radius()} km : on a élargi la recherche.</p>` : ""}
-    <div class="list">${list.length ? list.map(cardHtml).join("") : emptyHtml("Pas encore de promo par ici", "Les commerces de ton quartier n'utilisent peut-être pas encore Vitriin. Essaie une autre ville.")}</div>`}`);
+    <div class="list" id="mlist">${list.length ? list.map(cardHtml).join("") : emptyHtml("Pas encore de promo par ici", "Les commerces de ton quartier n'utilisent pas encore Vitriin. Ailleurs, ça bouge :")}</div>
+    ${!list.length && C.length ? `<div class="pad" style="padding-top:4px">${citiesHtml(C)}</div>` : ""}`}${stripHtml()}`);
   $("#loc").onclick = locate;
   $("#geo") && ($("#geo").onclick = locate);
   $("#sf").onsubmit = (e) => { e.preventDefault(); const v = $("#q").value.trim(); if (!S.pos && v.length >= 2) setPlace(v); };
@@ -379,7 +477,9 @@ async function pageFeed() {
   $$("[data-cat]").forEach(b => b.onclick = () => { S.filter = b.dataset.cat; pageFeed(); });
   $("[data-feat]") && ($("[data-feat]").onclick = () => openReels(list, 0));
   $("[data-full]") && ($("[data-full]").onclick = () => openReels(list, 0));
-  bindCards(app(), list);
+  bindCards($("#mlist") || app(), list);
+  bindCities(C); bindStrip();
+  if (O) { $$("[data-o]").forEach(b => b.onclick = () => openReels(O.list, +b.dataset.o)); $("#ofol") && ($("#ofol").onclick = async () => { if (await toggleFollow(O.store) != null) pageFeed(); }); }
 }
 
 async function pagePromos() {
@@ -494,6 +594,7 @@ async function pageStore(slug) {
   if (error || !data) return notFound("Ce commerce n'existe pas ou plus.");
   const s = data.store, list = (data.promos || []).map(p => ({ promo: p, store: s, d: dist(S.pos, s) }));
   document.title = `${s.name} · Vitriin`;
+  ls.set("vt-origin", s.slug);
   const on = isFollowing(s.id);
   shell("feed", `<div class="pad"><button class="back" id="bk" aria-label="Retour">${IC.back}</button></div>
     <div class="pad row" style="gap:14px;padding-top:18px"><span class="av" style="width:64px;height:64px;border-radius:20px;background:var(--p);color:#fff;font-size:24px">${logo(s) ? `<img src="${esc(logo(s))}" alt="">` : init(s)}</span>
@@ -508,56 +609,157 @@ async function pageStore(slug) {
   bindCards(app(), list);
 }
 
+// Arrivée par un lien (post, QR code, newsletter) : la promo s'ouvre tout de suite en plein écran,
+// suivie des autres promos du même commerce. En fermant, on arrive sur la fiche du commerce.
 async function pagePromo(id) {
+  shell(null, `<div class="load">Chargement…</div>`);
   const { data, error } = await sb.rpc("vitrine_promo", { p_id: id });
   if (error || !data) return notFound("Cette promo est terminée ou n'existe plus.");
-  await pageFeed();
-  openReels([{ promo: data.promo, store: data.store, d: dist(S.pos, data.store) }], 0, true);
+  const s = data.store; ls.set("vt-origin", s.slug);
+  const r = await sb.rpc("vitrine_store", { p_slug: s.slug });
+  const more = (!r.error && r.data?.promos || []).filter(p => p.id !== id).map(p => ({ promo: p, store: r.data.store, d: dist(S.pos, r.data.store) }));
+  openReels([{ promo: data.promo, store: s, d: dist(S.pos, s) }, ...more], 0, s.slug);
 }
 
 function notFound(msg) { shell("feed", `<div class="pad" style="padding-top:30px">${emptyHtml(msg, "Découvre les autres promos autour de toi.")}<a class="btn p" href="/v/" data-link>Voir les promos</a></div>`); }
 
 /* ---------- Plein écran façon reels ---------- */
+// direct : slug du commerce quand on arrive par un lien ; fermer mène alors à sa fiche.
 function openReels(list, start, direct) {
   if (!list.length) return;
   const el = document.createElement("div"); el.className = "reels"; el.id = "reels"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Promos en plein écran");
-  el.innerHTML = list.map((x, k) => { const p = x.promo, s = x.store, pr = pricing(p), sv = isSaved(p.id); return `<section class="reel">
+  const bar = direct && showInstall();
+  el.innerHTML = list.map((x, k) => { const p = x.promo, s = x.store, pr = pricing(p), sv = isSaved(p.id), fo = isFollowing(s.id); return `<section class="reel ${bar && k === 0 ? "wb" : ""}">
     ${p.img ? `<img src="${esc(p.img)}" alt="">` : ""}<div class="shade"></div>
+    ${bar && k === 0 ? `<div class="ibar"><span class="wm">vitriin</span><span>Toutes les promos de vos magasins, au même endroit</span><button class="get" data-inst>Obtenir</button><button class="rb" data-ibx aria-label="Fermer" style="width:30px;height:30px">×</button></div>` : ""}
     <div class="prog">${list.length > 1 ? list.slice(0, 8).map((_, j) => `<i class="${j === Math.min(k, 7) ? "on" : ""}"></i>`).join("") : ""}</div>
     <div class="rh"><button class="rb gl" data-x aria-label="Fermer">${IC.back}</button><a class="av" href="/v/m/${esc(s.slug)}" data-store="${k}">${logo(s) ? `<img src="${esc(logo(s))}" alt="">` : init(s)}</a>
-      <a href="/v/m/${esc(s.slug)}" data-store="${k}" style="flex:1;min-width:0;line-height:1.25"><b>${esc(s.name)}</b><span>${esc([s.city, km(x.d)].filter(Boolean).join(" · "))}</span></a></div>
-    <div class="side"><button data-sv="${k}" aria-pressed="${sv}"><i class="gl">${IC.save(sv)}</i><span>${sv ? "Enregistré" : "Enregistrer"}</span></button>
-      <button data-cp="${k}"><i class="gl">${IC.coupon}</i>Coupon</button>
+      <a href="/v/m/${esc(s.slug)}" data-store="${k}" style="flex:1;min-width:0;line-height:1.25"><b>${esc(s.name)}</b><span>${esc([s.city, km(x.d)].filter(Boolean).join(" · "))}</span></a>
+      ${fo ? "" : `<button class="fol-rh" data-fo="${k}">Suivre</button>`}</div>
+    <div class="side"><button data-sv="${k}" aria-pressed="${sv}"><i class="gl">${IC.save(sv)}</i><span>${sv ? "Gardée" : "Garder"}</span></button>
+      <a href="${mapsUrl(s)}" target="_blank" rel="noopener"><i class="gl">${IC.go.replace('width="19" height="19"', 'width="21" height="21"')}</i>Y aller</a>
       <button data-sh="${k}"><i class="gl">${IC.share}</i>Partager</button></div>
     <div class="rinfo"><small>${esc(catLabel(s.category))} · Jusqu'au ${day(p.ends_at)}</small><h3>${esc(p.title)}</h3>${p.text || p.sub ? `<p>${esc(p.text || p.sub)}</p>` : ""}
       <div class="prc" style="margin-top:13px;align-items:center">${pr.price != null ? `<strong>${eur(pr.price)}</strong>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}` : ""}<span class="bdg">${esc(pr.badge)}</span></div>
-      <a class="rcta" href="${mapsUrl(s)}" target="_blank" rel="noopener">${IC.go}Trouver en magasin${x.d != null ? ` · ${km(x.d)}` : ""}</a>
+      <button class="rcta" data-cp="${k}">${IC.coupon}J'en profite</button>
+      <div class="rhint">${S.session ? "Un code à montrer en caisse" : "Sans inscription · un code à montrer en caisse"}</div>
       ${k < list.length - 1 ? `<div class="next"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg>Promo suivante</div>` : direct ? `<a class="next" href="/v/" data-close style="color:#fff">Voir les autres promos près de moi</a>` : ""}</div>
   </section>`; }).join("");
   document.body.appendChild(el); document.body.style.overflow = "hidden";
   el.scrollTop = start * window.innerHeight;
-  const close = () => { el.remove(); document.body.style.overflow = ""; if (direct) history.replaceState({}, "", "/v/"); };
-  $$("[data-x],[data-close]", el).forEach(b => b.onclick = (e) => { e.preventDefault(); close(); });
-  $$("[data-store]", el).forEach(a => a.onclick = (e) => { e.preventDefault(); close(); go(`/v/m/${list[+a.dataset.store].store.slug}`); });
-  $$("[data-sv]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.sv]; if (!S.session) { close(); needLogin({ save: x.promo.id, back: `/v/p/${x.promo.id}` }); return; } const on = await toggleSave(x.promo, x.store); if (on != null) { b.innerHTML = `<i class="gl">${IC.save(on)}</i><span>${on ? "Enregistré" : "Enregistrer"}</span>`; b.setAttribute("aria-pressed", on); } });
+  const close = (to) => { el.remove(); document.body.style.overflow = ""; if (direct) { history.replaceState({}, "", to || `/v/m/${direct}`); route(); } };
+  $$("[data-x]", el).forEach(b => b.onclick = (e) => { e.preventDefault(); close(); });
+  $$("[data-close]", el).forEach(b => b.onclick = (e) => { e.preventDefault(); close("/v/"); });
+  $$("[data-store]", el).forEach(a => a.onclick = (e) => { e.preventDefault(); el.remove(); document.body.style.overflow = ""; go(`/v/m/${list[+a.dataset.store].store.slug}`); });
+  $$("[data-sv]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.sv]; if (!S.session) { el.remove(); document.body.style.overflow = ""; needLogin({ save: x.promo.id, back: `/v/p/${x.promo.id}` }); return; } const on = await toggleSave(x.promo, x.store); if (on != null) { b.innerHTML = `<i class="gl">${IC.save(on)}</i><span>${on ? "Gardée" : "Garder"}</span>`; b.setAttribute("aria-pressed", on); } });
+  $$("[data-fo]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.fo]; if (!S.session) { el.remove(); document.body.style.overflow = ""; needLogin({ follow: x.store.id, back: `/v/m/${x.store.slug}` }); return; } if (await toggleFollow(x.store)) $$(`[data-fo]`, el).forEach(o => list[+o.dataset.fo].store.id === x.store.id && o.remove()); });
   $$("[data-cp]", el).forEach(b => b.onclick = () => coupon(list[+b.dataset.cp]));
   $$("[data-sh]", el).forEach(b => b.onclick = () => { const x = list[+b.dataset.sh]; share(x.promo.title, `${x.promo.title} chez ${x.store.name}`, `${location.origin}/v/p/${x.promo.id}`); });
+  $$("[data-inst]", el).forEach(b => b.onclick = installSheet);
+  $$("[data-ibx]", el).forEach(b => b.onclick = () => { ls.set("vt-noinstall", "1"); $$(".ibar", el).forEach(x => x.remove()); $$(".reel.wb", el).forEach(x => x.classList.remove("wb")); });
 }
+
+/* ---------- J'en profite : code flouté, affiché 2 minutes devant la caisse ---------- */
+// Chaque affichage est enregistré côté serveur (vitrine_reveal) avec un indice de confiance
+// (position, heure). Le code se refloute après 2 minutes : on le réaffiche en caisse.
+const SHOW_SECONDS = 120;
+const fakeBars = () => `<svg viewBox="0 0 290 96" preserveAspectRatio="none" aria-hidden="true">${[3,1,1,2,1,3,2,1,1,1,3,2,1,2,2,1,3,1,1,2,1,1,3,2,2,1,1,3,1,2,1,2,3,1,1,2,1,3,2,1].reduce((a, w, i) => { if (i % 2 === 0) a.h += `<rect x="${a.x}" y="0" width="${w * 3}" height="96" fill="#2D2D2D"/>`; a.x += w * 3 + 1; return a; }, { x: 0, h: "" }).h}</svg>`;
 async function coupon(x) {
-  const p = x.promo, s = x.store;
-  const ov = document.createElement("div"); ov.className = "ov";
-  ov.innerHTML = `<div class="cp" role="dialog" aria-modal="true" aria-label="Coupon"><small>${esc(p.title)}</small><h3>Code produit</h3><div class="load" style="padding:40px 0">Activation…</div></div>`;
+  const p = x.promo, s = x.store, pr = pricing(p);
+  const ov = document.createElement("div"); ov.className = "ov sh";
+  let timer = null, lock = null, shown = false;
+  const stop = () => { clearInterval(timer); timer = null; try { lock?.release(); } catch {} lock = null; };
+  ov.innerHTML = `<div class="sht" role="dialog" aria-modal="true" aria-label="J'en profite">
+    <div class="grab"></div>
+    <div class="row" style="gap:12px"><span class="av" style="background:var(--p);color:#fff">${logo(s) ? `<img src="${esc(logo(s))}" alt="">` : init(s)}</span>
+      <div style="flex:1;min-width:0"><b class="t1">${esc(p.title)}</b><div class="t2">${esc(s.name)} · jusqu'au ${day(p.ends_at)}</div></div>
+      <button class="xb" data-x aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="cbox"><small id="clab">Votre code est prêt</small>
+      <div class="cbody blur" id="cbody">${fakeBars()}<div class="code">0 000000 000000</div></div>
+      <div class="cveil" id="cveil"><button class="btn dark" id="show"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Afficher mon code</button><span>À faire devant la caisse</span></div>
+      <div class="ctime hidden" id="ctime"><i class="live"></i><span id="cleft">2:00</span><span>· luminosité au maximum</span></div></div>
+    <div class="g2"><a class="btn line" href="${mapsUrl(s)}" target="_blank" rel="noopener">${IC.go}Y aller${x.d != null ? ` · ${km(x.d)}` : ""}</a><button class="btn line" id="c-sh"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-4-9-9-4 20-5Z"/></svg>Envoyer à un ami</button></div>
+    ${isSaved(p.id) ? "" : `<button class="keep" id="keep"><i>${IC.bookmark(true)}</i><span><b>Garder ce code</b><br><em>Retrouvez-le dans Mes promos</em></span>${IC.chev}</button>`}
+    <button class="btn dark full" id="used" disabled>C'est fait, je l'ai utilisé</button></div>`;
+  const shut = () => { stop(); ov.remove(); };
+  ov.onclick = (e) => { if (e.target === ov || e.target.closest("[data-x]")) shut(); };
+  document.body.appendChild(ov);
+  $("#c-sh", ov).onclick = () => share(p.title, `${p.title} chez ${s.name}`, `${location.origin}/v/p/${p.id}`);
+  $("#keep", ov) && ($("#keep", ov).onclick = async () => {
+    if (!S.session) { shut(); $("#reels")?.remove(); document.body.style.overflow = ""; needLogin({ save: p.id, back: `/v/p/${p.id}` }); return; }
+    if (await toggleSave(p, s)) $("#keep", ov)?.remove();
+  });
+  const blur = () => {
+    stop(); $("#cbody", ov).classList.add("blur"); $("#cveil", ov).classList.remove("hidden"); $("#ctime", ov).classList.add("hidden");
+    $("#clab", ov).textContent = "Code masqué"; $("#show", ov).lastChild.textContent = "Afficher à nouveau"; $("#show", ov).disabled = false;
+  };
+  $("#show", ov).onclick = async () => {
+    const btn = $("#show", ov); btn.disabled = true; btn.lastChild.textContent = "Un instant…";
+    const pos = await geo(4000);
+    const { data, error } = await sb.rpc("vitrine_reveal", { p_id: p.id, p_client_id: clientId(), p_lat: pos?.lat ?? null, p_lng: pos?.lng ?? null });
+    if (error) { btn.disabled = false; btn.lastChild.textContent = "Afficher mon code"; return toast(errText(error)); }
+    const code = data?.ean || data?.code, ean = !!(data?.ean && /^\d{13}$/.test(data.ean));
+    $("#cbody", ov).innerHTML = code ? `<svg id="bc"></svg><div class="code">${esc(code)}</div>`
+      : `<p style="font-size:14.5px;line-height:1.5;margin:6px 0;color:var(--ink)">Pas de code à scanner : la promo s'applique directement en caisse chez ${esc(s.name)}.<br>Montrez cet écran au vendeur.</p>`;
+    if (code && window.JsBarcode) { try { JsBarcode($("#bc", ov), ean ? data.ean : code, { format: ean ? "EAN13" : "CODE128", displayValue: false, height: 96, margin: 0, width: 2.2 }); } catch { $("#bc", ov)?.remove(); } }
+    $("#cbody", ov).classList.remove("blur"); $("#cveil", ov).classList.add("hidden"); $("#ctime", ov).classList.remove("hidden");
+    $("#clab", ov).textContent = code ? "Scannez en caisse" : "Promo active";
+    $("#used", ov).disabled = false; shown = true;
+    try { lock = await navigator.wakeLock?.request("screen"); } catch {}
+    let left = SHOW_SECONDS; $("#cleft", ov).textContent = "2:00";
+    timer = setInterval(() => { left--; if (!$("#cleft", ov)) return stop(); $("#cleft", ov).textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`; if (left <= 0) blur(); }, 1000);
+    if (S.session) refreshMe();
+  };
+  $("#used", ov).onclick = async () => {
+    if (!shown) return;
+    $("#used", ov).disabled = true;
+    await sb.rpc("vitrine_confirm_use", { p_id: p.id, p_client_id: clientId() });
+    shut(); done(x);
+  };
+}
+
+/* ---------- Après la caisse : « Profité » ---------- */
+function done(x) {
+  const p = x.promo, s = x.store, pr = pricing(p), fo = isFollowing(s.id);
+  $("#reels")?.remove(); document.body.style.overflow = "";
+  const el = document.createElement("div"); el.className = "done"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Promo utilisée");
+  el.innerHTML = `<div style="align-self:flex-end"><button class="xb" data-x aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="ok"><b style="left:-24px;top:8px;width:10px;height:10px;background:#5ebca3"></b><b style="right:-26px;top:24px;width:8px;height:8px;background:var(--v);border-radius:2px"></b><b style="right:-12px;bottom:-4px;width:12px;height:12px;background:#f5ecd3"></b>
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <div style="font-size:15px;color:var(--muted);margin-top:8px">Bien joué !</div>
+    <h2>${pr.saving ? `${eur(pr.saving)} économisés` : "Promo utilisée"}</h2>
+    <p style="font-size:14.5px;color:var(--muted);line-height:1.5;margin:0;max-width:300px">${esc(p.title)} chez ${esc(s.name)}, aujourd'hui.</p>
+    <div style="flex:1;min-height:20px"></div>
+    ${fo ? (S.session ? `<a class="btn line" href="/v/promos" data-link style="width:100%">Voir mes économies</a>` : "") : `<div class="fcard"><div class="row" style="gap:12px"><span class="av" style="width:48px;height:48px;background:var(--p);color:#fff">${logo(s) ? `<img src="${esc(logo(s))}" alt="">` : init(s)}</span>
+      <div style="flex:1"><b style="font-size:16px">Ne ratez plus leurs promos</b><div style="font-size:13.5px;color:var(--muted);margin-top:2px">Soyez prévenu dès leur prochaine offre.</div></div></div>
+      <button class="btn p" id="d-fo">Suivre ${esc(s.name)}</button>${S.session ? "" : `<div style="text-align:center;font-size:12.5px;color:var(--muted)">Gratuit · une adresse email suffit</div>`}</div>`}
+    <div class="g2" style="width:100%"><button class="btn line" id="d-sh">Partager le bon plan</button><a class="btn line" href="/v/" data-link>Autres promos</a></div>`;
+  const shut = () => el.remove();
+  document.body.appendChild(el);
+  $("[data-x]", el).onclick = () => { shut(); if (location.pathname.startsWith("/v/p/")) history.replaceState({}, "", `/v/m/${s.slug}`); route(); };
+  $$("a[data-link]", el).forEach(a => a.addEventListener("click", shut));
+  $("#d-sh", el).onclick = () => share(p.title, `Bon plan : ${p.title} chez ${s.name}`, `${location.origin}/v/p/${p.id}`);
+  $("#d-fo", el) && ($("#d-fo", el).onclick = async () => {
+    if (!S.session) { shut(); needLogin({ follow: s.id, back: `/v/m/${s.slug}` }); return; }
+    if (await toggleFollow(s)) { shut(); go(`/v/m/${s.slug}`); }
+  });
+}
+
+/* ---------- Ajouter Vitriin à l'écran d'accueil ---------- */
+async function installSheet() {
+  if (BIP) { try { BIP.prompt(); const r = await BIP.userChoice; BIP = null; if (r?.outcome === "accepted") { ls.set("vt-noinstall", "1"); toast("Vitriin est sur votre écran d'accueil."); } return; } catch {} }
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const ov = document.createElement("div"); ov.className = "ov sh";
+  const stp = (n, t) => `<div class="row" style="gap:12px;font-size:14.5px"><span class="dot" style="width:26px;height:26px;font-size:12.5px;background:var(--rose);color:var(--p)">${n}</span><span style="flex:1;line-height:1.4">${t}</span></div>`;
+  ov.innerHTML = `<div class="sht" role="dialog" aria-modal="true" aria-label="Ajouter Vitriin à l'écran d'accueil"><div class="grab"></div>
+    <b style="font-size:21px;letter-spacing:-.01em;margin-top:6px">Vitriin sur votre écran d'accueil</b>
+    <p style="margin:0;font-size:14px;color:var(--muted);line-height:1.5">Plein écran, accès en un geste, sans passer par un store. Votre compte reste le même sur le web.</p>
+    ${ios ? stp(1, `Touchez <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px" role="img" aria-label="Partager"><path d="M12 3v12M8 7l4-4 4 4M5 12v8h14v-8"/></svg> en bas de Safari`) + stp(2, "Choisissez « Sur l'écran d'accueil »") + stp(3, "Touchez « Ajouter »")
+      : stp(1, "Ouvrez le menu du navigateur (⋮)") + stp(2, "Choisissez « Ajouter à l'écran d'accueil » ou « Installer »")}
+    <button class="btn p" data-x>J'ai compris</button><button class="btn" id="i-no" style="color:var(--muted);font-weight:600;min-height:40px">Continuer sur le web</button></div>`;
   ov.onclick = (e) => { if (e.target === ov || e.target.closest("[data-x]")) ov.remove(); };
   document.body.appendChild(ov);
-  const pos = S.pos?.label === "Autour de moi" ? S.pos : await geo(4000);
-  const { data, error } = await sb.rpc("vitrine_reveal", { p_id: p.id, p_client_id: clientId(), p_lat: pos?.lat ?? null, p_lng: pos?.lng ?? null });
-  if (error) { ov.remove(); return toast(errText(error)); }
-  const code = data?.ean || data?.code;
-  $(".cp", ov).innerHTML = `<small>${esc(p.title)}</small><h3>${code ? "Code produit" : "Promo activée"}</h3>
-    ${code ? `<svg class="bc" id="bc"></svg><div class="code">${esc(data.ean || data.code)}</div>` : `<p style="color:var(--muted);font-size:14px;line-height:1.5">Cette promo s'applique directement en caisse chez ${esc(s.name)}, sans code.</p>`}
-    <div class="hint">${IC.clock}Présentez ce code en caisse</div><button class="btn p" data-x style="margin-top:18px">Fermer</button>`;
-  if (code && window.JsBarcode) { try { const ean = data.ean && /^\d{13}$/.test(data.ean); JsBarcode("#bc", ean ? data.ean : code, { format: ean ? "EAN13" : "CODE128", displayValue: false, height: 100, margin: 0, width: 2.2 }); } catch { $("#bc", ov)?.remove(); } }
-  if (S.session) refreshMe();
+  $("#i-no", ov).onclick = () => { ls.set("vt-noinstall", "1"); ov.remove(); $("#strip")?.remove(); $$(".ibar").forEach(x => x.remove()); $$(".reel.wb").forEach(x => x.classList.remove("wb")); };
 }
 async function share(title, text, url) {
   try { if (navigator.share) return await navigator.share({ title, text, url }); } catch { return; }

@@ -20,6 +20,29 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-049 · Particulier : arrivée sur la promo, code flouté 2 min, « Profité », fiabilité des codes
+- **Arrivée par un lien** (`/v/p/<id>` : post, QR code, newsletter) : la promo s'ouvre directement en plein écran,
+  suivie des autres promos du même commerce ; fermer mène à la fiche du commerce. Le commerce d'origine
+  (lien ou fiche visitée) apparaît en tête du fil (« Chez … » + carte « Suivez … ») tant qu'il n'est pas suivi.
+- **J'en profite, sans compte** : bouton principal du plein écran (remplace « Trouver en magasin »). Feuille avec
+  code-barres flouté, « Afficher mon code » (à faire devant la caisse) : le code reste visible 2 minutes
+  (compte à rebours, barre animée pour distinguer d'une capture, écran maintenu allumé), puis se refloute.
+  « Garder ce code » (inscription si besoin), « Y aller », « Envoyer à un ami », « C'est fait, je l'ai utilisé ».
+- **Écran « Profité »** après confirmation : économie réalisée quand elle est calculable, invitation à suivre le commerce.
+- **Plus d'écran vide** : sans position, « Autour de moi » + villes qui ont des promos (`vitrine_cities`) ; si rien
+  autour, les villes s'affichent sous le message.
+- **Ajout à l'écran d'accueil** (web et appli) : bandeau dans le plein écran à l'arrivée par lien, bandeau dans le
+  fil, refermables ; invitation native Android, mode d'emploi Safari sur iPhone. « Continuer sur le web » les masque.
+- **Fiabilité des codes (serveur)** : `code_reveals.confidence` = probable (≤ 200 m du magasin, 8 h-21 h heure de
+  Paris), incertain (sans position, 8 h-21 h), distance (sinon) ; `distance_m` ; un nouvel affichage le même jour
+  ne peut qu'améliorer l'indice. `used_at` via `vitrine_confirm_use` (déclaratif, seulement après un affichage de
+  moins de 24 h sur le même appareil). Espace magasin : les codes « à distance » non confirmés ne comptent plus
+  comme utilisés ; détail par promo (confirmés, au magasin, sans position, à distance).
+- **Où** : `public/v/index.html`, `public/magasin/index.html`, migration `20261031030000_reveal_confidence.sql`.
+- **Retour arrière** : `git revert` (front) ; les colonnes ajoutées sont sans effet si le front revient en arrière.
+- **À venir (décidé le 31/10)** : promo à usage unique (option à la création) ; validation vendeur et rapprochement
+  ventes par EAN, à la demande.
+
 ### MOD-048 · Email « Nouvelle campagne » aux gérants
 - **Quoi** : quand la centrale envoie une campagne, chaque gérant concerné reçoit un email avec l'image, les dates
   et un bouton : « Voir et activer » (campagne à valider) ou « Voir et publier » (obligatoire ou validation

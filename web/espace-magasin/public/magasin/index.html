@@ -523,11 +523,14 @@ async function loadData() {
     sb.from("social_accounts").select("channel, display_name, status, enabled").eq("store_id", st.id),
     sb.from("store_promotions").select("id, status, overrides, suspended, hidden, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
     // Codes révélés par les clients (drive to store), lisibles par le magasin seulement.
-    sb.from("code_reveals").select("store_promotion_id, revealed_at").eq("store_id", st.id).order("revealed_at", { ascending: false }).range(0, 9999),
+    sb.from("code_reveals").select("store_promotion_id, revealed_at, confidence, used_at").eq("store_id", st.id).order("revealed_at", { ascending: false }).range(0, 9999),
     sb.rpc("support_mine"),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
-  const reveals = (!rev.error && rev.data) || [];
+  // Un code affiché loin du magasin ou hors des heures d'ouverture, et non confirmé, ne compte pas comme utilisé.
+  const allRev = (!rev.error && rev.data) || [];
+  const reveals = allRev.filter(r => r.confidence !== "distance" || r.used_at);
+  S.codesDetail = allRev.reduce((m, r) => { const d = m[r.store_promotion_id] ||= { probable: 0, incertain: 0, distance: 0, used: 0 }; if (r.used_at) d.used++; else d[r.confidence || "incertain"]++; return m; }, {});
   S.tickets = (!tk.error && tk.data) || [];
   S.codes7 = reveals.filter(r => Date.now() - new Date(r.revealed_at) < 7 * DAY).length;
   S.codesBy = reveals.reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
@@ -978,6 +981,7 @@ function statsPromo(p) {
       <tr><td>Publication</td><td class="sm">${pubAt("fb")}</td><td class="sm">${pubAt("ig")}</td></tr></tbody></table>
     <div class="st-line"><span>Taux d'engagement</span><b>${eng}</b></div>
     <div class="st-line"><span>Codes utilisés en magasin</span><b style="color:var(--v)">${nf((S.codesBy || {})[p.spId] || 0)}<small> · ${nf((S.codes7By || {})[p.spId] || 0)} sur 7 j</small></b></div>
+    ${(() => { const d = (S.codesDetail || {})[p.spId]; return d ? `<p class="small" style="margin-top:6px">${d.used ? `${nf(d.used)} confirmé${d.used > 1 ? "s" : ""} par le client · ` : ""}${nf(d.probable)} au magasin · ${nf(d.incertain)} sans position · ${nf(d.distance)} à distance (non comptés)</p>` : ""; })()}
     ${p.stats ? "" : `<p class="small" style="margin-top:10px">Les statistiques arrivent quelques heures après la publication.</p>`}
     <button class="big-btn" id="sp-open">Ouvrir la promo</button><button class="txt-btn" data-close>Fermer</button>`);
   $("#sp-open").onclick = () => { closeLayer(); openPromo(p); };
