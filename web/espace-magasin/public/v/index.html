@@ -645,11 +645,12 @@ async function pageStore(slug) {
     ${s.description ? `<p class="pad" style="font-size:14.5px;line-height:1.55;margin:16px 0 0;white-space:pre-line">${esc(s.description)}</p>` : ""}
     ${infos.length ? `<div class="pad" style="padding-top:16px"><div class="box sinfo">${infos.join("")}</div></div>` : ""}
     ${bb ? `<div class="pad" style="padding-top:12px"><a class="smap" href="${mapsUrl(s)}" target="_blank" rel="noopener" aria-label="Ouvrir le plan"><iframe title="Plan : ${esc(s.name)}" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${bb}&amp;layer=mapnik&amp;marker=${s.lat},${s.lng}"></iframe><span>Ouvrir le plan</span></a></div>` : ""}
-    <div class="sect" style="padding-top:26px"><span>${list.length ? `${list.length} promo${list.length > 1 ? "s" : ""} en cours` : "Promos en cours"}</span></div>
-    <div class="posts" id="spost">${list.length ? list.map((x, k) => postHtml(x, k, false)).join("") : emptyHtml("Pas de promo en ce moment", "Suivez ce commerce pour être prévenu de ses prochaines promos.")}</div>`);
+    ${list.length ? `<div class="sect" style="padding-top:24px"><span>En ce moment</span></div>
+    <div class="tiles" style="padding-bottom:8px">${list.map((x, k) => { const pr = pricing(x.promo); return `<button class="tile" data-st="${k}" aria-label="Voir ${esc(x.promo.title)}">${x.promo.img ? `<img src="${esc(x.promo.img)}" alt="" loading="lazy">` : ""}<span class="shade" style="position:absolute;inset:0"></span><span class="mini">${esc(pr.badge)}</span><span class="tt">${esc(x.promo.title)}<small>Jusqu'au ${day(x.promo.ends_at)}</small></span></button>`; }).join("")}</div>` : ""}`);
   $("#bk").onclick = () => history.length > 1 ? history.back() : go("/v/");
   $("#fl").onclick = async () => { const r = await toggleFollow(s); if (r != null) pageStore(slug); };
-  bindPosts($("#spost"), list);
+  // Toucher une promo ouvre le plein écran à cette promo ; on fait défiler les suivantes.
+  $$("[data-st]").forEach(b => b.onclick = () => openReels(list, +b.dataset.st));
 }
 
 // Arrivée par un lien (post, QR code, newsletter) : la promo s'ouvre tout de suite en plein écran,

@@ -24,7 +24,9 @@ Repères :
 - **Fiche commerce (particulier)** : photo de couverture (dégradé à défaut), logo, nom, catégorie et distance,
   Suivre + Itinéraire, présentation, coordonnées clients (adresse, téléphone, email, site), plan OpenStreetMap avec
   le point du magasin (ouvre l'itinéraire), puis les promos en fil.
-- **Promos en fil partout** (fiche commerce et « Autour de vous ») : image 4:5, badge, titre, prix, date de fin,
+- **Fiche commerce, promos** (corrigé le 31/10 à la demande de Charles) : plus de liste en fil sur la fiche ; carrousel
+  « En ce moment » sous le plan, toucher une promo ouvre le plein écran à cette promo, puis on fait défiler.
+- **Promos en fil sur l'accueil** (« Autour de vous ») : image 4:5, badge, titre, prix, date de fin,
   « J'en profite », garder, partager. Toucher l'image ouvre le plein écran. « À la une » est retiré du fil.
 - **Données** : `stores.description`, `cover_url`, `public_phone`, `public_email` (coordonnées publiques, distinctes du
   contact gérant qui reste privé), droits de mise à jour colonne par colonne pour le gérant ; `vitrine_store_json` les expose.
