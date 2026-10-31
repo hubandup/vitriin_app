@@ -72,11 +72,6 @@ h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0}
 .fol{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px}
 .fol .av{width:46px;height:46px;border-radius:14px;background:var(--p);color:#fff;font-size:18px}
 .fbtn{font-weight:600;font-size:12.5px;padding:0 15px;min-height:40px;border-radius:999px;flex:none}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-.stats div{border-radius:16px;padding:14px 11px}
-.stats b{display:block;font-size:22px;letter-spacing:-.03em;line-height:1}
-.stats span{display:block;font-size:11.5px;color:var(--muted);margin-top:5px}
-.lbl{font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);margin-bottom:11px}
 .box{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .li{display:flex;align-items:center;gap:12px;padding:0 15px;min-height:54px;width:100%;text-align:left;font-size:14.5px}
 .li+.li{border-top:1px solid var(--line)}
@@ -199,9 +194,12 @@ nav.tabs a.on{color:var(--p)}
 .scard .av{width:46px;height:46px;border:3px solid #fff;margin:-23px 0 0 12px;background:var(--p);color:#fff;border-radius:14px}
 .scard .sb{padding:6px 12px 12px;display:flex;flex-direction:column;gap:2px;flex:1}
 .scard .fbtn{margin-top:8px;align-self:flex-start;background:var(--p);color:#fff;min-height:34px}
-.intg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.intg .int{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:78px;border-radius:16px;padding:8px 4px;font-size:12.5px;line-height:1.2;text-align:center}
-.intg .int em{font-style:normal;font-size:26px;line-height:1}
+.pav{width:88px;height:88px;font-size:32px;border:4px solid #fff;margin:-44px 0 0 20px;background:var(--beige);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.pav .avc{right:0;bottom:0;width:28px;height:28px}
+.chips.wrap{flex-wrap:wrap;overflow:visible;padding-top:0}
+.pst{display:grid;grid-template-columns:repeat(3,1fr)}
+.pst a{padding:14px 8px;text-align:center}.pst a+a{border-left:1px solid var(--line)}
+.pst b{display:block;font-size:20px;letter-spacing:-.02em}.pst span{display:block;font-size:12px;color:var(--muted);margin-top:3px}
 .avb{position:relative;overflow:visible}.avb img{border-radius:50%}
 .avc{position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;border:2px solid #fff;display:flex;align-items:center;justify-content:center}
 .fld{display:flex;align-items:center;gap:12px;padding:0 16px;min-height:52px;border-bottom:1px solid var(--line)}
@@ -683,22 +681,27 @@ async function pageProfile() {
   const cats = [...new Set([...Object.keys(CAT), ...(S.items || []).map(x => x.store.category).filter(Boolean), ...(P.interests || [])])];
   const sw = (id, on, label, sub) => `<button class="li" id="${id}" role="switch" aria-checked="${on}"><span class="sp">${label}${sub ? `<small style="display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:2px">${sub}</small>` : ""}</span><span class="tg ${on ? "on" : ""}"><i></i></span></button>`;
   const fld = (id, label, val, attrs) => `<div class="fld"><label for="${id}">${label}</label><input id="${id}" value="${esc(val || "")}" ${attrs}></div>`;
-  shell("profile", `<div class="pad" style="padding-bottom:8px"><h1>Profil</h1></div>
-    <div class="pad row" style="gap:14px;padding-top:8px;padding-bottom:18px"><button class="av avb" id="av" aria-label="Changer ma photo de profil" style="width:64px;height:64px;font-size:25px">${meAv()}<span class="avc"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span></button>
-      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:18px;overflow:hidden;text-overflow:ellipsis">${esc([P.first_name, P.last_name].filter(Boolean).join(" ") || M.email || "")}</div><div style="font-size:13px;color:var(--muted);margin-top:2px">${since ? `Membre depuis ${since}` : ""}</div></div></div>
-    <div class="pad stats"><div style="background:var(--rose)"><b style="color:var(--p)">${uses.length}</b><span>utilisées</span></div><div style="background:var(--mint)"><b style="color:#5f8f62">${eur(total).replace(",00", "")}</b><span>économisés</span></div><div style="background:var(--sand)"><b style="color:#a8835c">${(M.saves || []).length}</b><span>gardées</span></div></div>
-    <form class="pad" id="acc" style="padding-top:22px" novalidate><div class="lbl">MON COMPTE</div><div class="box">
+  // Même grammaire que la fiche commerce : bandeau, avatar en surimpression, titres de section du fil.
+  shell("profile", `<div class="cover" style="height:150px"></div>
+    <button class="av avb pav" id="av" aria-label="Changer ma photo de profil">${meAv()}<span class="avc"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span></button>
+    <div class="pad" style="padding-top:12px"><h1 style="font-size:23px">${esc([P.first_name, P.last_name].filter(Boolean).join(" ") || M.email || "")}</h1>
+      <div style="font-size:13.5px;color:var(--muted);margin-top:4px">${since ? `Membre depuis ${since}` : ""}</div></div>
+    <div class="pad" style="padding-top:16px"><div class="box pst"><a href="/v/promos" data-link><b>${uses.length}</b><span>utilisée${uses.length > 1 ? "s" : ""}</span></a><a href="/v/promos" data-link><b style="color:var(--p)">${eur(total).replace(",00", "")}</b><span>économisés</span></a><a href="/v/promos" data-link><b>${(M.saves || []).length}</b><span>gardée${(M.saves || []).length > 1 ? "s" : ""}</span></a></div></div>
+    <div class="sect" style="padding-top:24px"><span>Mon compte</span></div>
+    <form class="pad" id="acc" novalidate><div class="box">
       ${fld("a-fn", "Prénom", P.first_name, 'maxlength="40" autocomplete="given-name"')}
       ${fld("a-ln", "Nom", P.last_name, 'maxlength="60" autocomplete="family-name"')}
       ${fld("a-em", "Email", M.email, 'type="email" autocomplete="email" inputmode="email"')}
       ${fld("a-ph", "Téléphone", P.phone, 'type="tel" maxlength="20" autocomplete="tel" inputmode="tel"')}</div>
       <button class="btn p hidden" id="a-ok" style="margin-top:10px">Enregistrer</button></form>
-    <div class="pad" style="padding-top:22px"><div class="lbl">CENTRES D'INTÉRÊT</div><div class="intg">${cats.map(c => `<button class="int ${(P.interests || []).includes(c) ? "on" : ""}" data-int="${esc(c)}" aria-pressed="${(P.interests || []).includes(c)}"><em aria-hidden="true">${picto(c)}</em>${esc(catLabel(c))}</button>`).join("")}</div></div>
-    <div class="pad" style="padding-top:22px"><div class="lbl">PRÉFÉRENCES</div><div class="box">
+    <div class="sect" style="padding-top:24px"><span>Centres d'intérêt</span></div>
+    <div class="chips wrap">${cats.map(c => `<button class="chip ${(P.interests || []).includes(c) ? "on" : ""}" data-int="${esc(c)}" aria-pressed="${(P.interests || []).includes(c)}"><span aria-hidden="true">${picto(c)}</span> ${esc(catLabel(c))}</button>`).join("")}</div>
+    <div class="sect" style="padding-top:24px"><span>Préférences</span></div>
+    <div class="pad"><div class="box">
       ${sw("p-geo", P.geo !== false, "Localisation", "Les promos les plus proches en premier")}
       ${sw("p-al", P.alerts !== false, "Alertes nouvelles promos", "Pour les commerces que vous suivez")}
       ${sw("p-nl", P.newsletter === true, "Newsletter Vitriin", "Les meilleurs bons plans, une fois par mois")}</div></div>
-    <div class="pad" style="padding-top:22px;display:flex;flex-direction:column;gap:10px">
+    <div class="pad" style="padding-top:26px;display:flex;flex-direction:column;gap:10px">
       <button class="btn line" id="out">Se déconnecter</button>
       <button class="btn" id="del" style="color:#b3261e;font-weight:600;min-height:44px">Supprimer mon compte</button>
       <p style="font-size:12px;color:var(--muted);text-align:center;margin:4px 0 0"><a href="https://www.vitriin.fr/cgu" target="_blank" rel="noopener" style="color:var(--p)">CGU</a> · <a href="https://www.vitriin.fr/confidentialite" target="_blank" rel="noopener" style="color:var(--p)">Confidentialité</a></p></div>`);

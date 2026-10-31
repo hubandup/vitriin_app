@@ -20,6 +20,11 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-060 · Profil particulier aligné sur le reste de l'app
+- Bandeau dégradé et avatar en surimpression (même grammaire que la fiche commerce), titres de section du fil (« Mon compte », « Centres d'intérêt », « Préférences »), centres d'intérêt en pastilles du fil avec picto, compteurs dans une carte blanche menant à Mes promos.
+- Styles retirés : `.stats`, `.lbl`, `.intg`.
+- **Retour arrière** : `git revert` du commit.
+
 ### BUG-009 · Fil particulier vide pour le compte de démo
 - **Constat** : sur iPhone, charles@baulu.net ne voyait que « Vos commerces » puis « Pas encore de promo ». Ouvert sans `?demo=1`, le fil n'interrogeait que les commerces réels (aucun en production) ; seuls les commerces suivis, tous de démo, s'affichaient.
 - **Correction** (`/v/`) : un compte qui suit au moins un commerce de démonstration passe automatiquement en mode démo. Le message « Pas encore de promo » ne s'affiche plus quand « Vos commerces » a du contenu.
