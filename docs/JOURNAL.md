@@ -20,6 +20,16 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-057 · Démos fleuriste, opticien, hoodies et compte particulier de démonstration
+- **Secteurs de démo** : « Pétale & Tige » (fleuriste), « Lunetterie Lumière » (opticien), « Hoodie Club » (hoodies),
+  chacun 20 magasins et 6 promos centrale + 2 promos magasin, construits par `manager_build_demo` (images Unsplash).
+  Logos `public/demo/petale-tige.svg`, `lunetterie-lumiere.svg`, `hoodie-club.svg`. Magasins lyonnais placés à des
+  adresses distinctes (Presqu'île, Gambetta), avec présentation, téléphone et couverture.
+- **Compte particulier charles@baulu.net** : prénom, centres d'intérêt, 6 commerces suivis, 8 promos gardées,
+  8 promos utilisées déclarées sur les jours passés (historique et économies). Données de démonstration.
+- **Où** : migration `20261031050000_demo_sectors_fleuriste_optique_mode.sql`, données en base, logos.
+- **Retour arrière** : Manager > Démos (supprimer les réseaux) ; supprimer les lignes du compte dans customer_* et code_reveals.
+
 ### MOD-056 · Particulier : noms des stories lisibles, badges courts
 - **Stories** : nom de l'enseigne sans la ville, sur deux lignes au plus (plus de « Jardins & S… »).
 - **Badges** : un texte libre de plus de 14 caractères est raccourci (« Atelier offert samedi » → « Offert »,
