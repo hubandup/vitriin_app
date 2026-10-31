@@ -328,14 +328,14 @@ const storeUrl = () => STORES[PLATFORM] || "";
 const showInstall = () => !!storeUrl() && ls.get("vt-noinstall") !== "1";
 
 /* ---------- État ---------- */
-if (new URLSearchParams(location.search).has("demo")) ss.set("vt-demo", "1");
-const DEMO = ss.get("vt-demo") === "1";
+// Mode démo (commerces de démonstration visibles) : mémorisé sur l'appareil, ?demo=0 pour le quitter.
+{ const d = new URLSearchParams(location.search).get("demo"); if (d != null) ls.set("vt-demo", d === "0" ? null : "1"); }
+const DEMO = ls.get("vt-demo") === "1";
 const S = {
   session: null, me: null,
   pos: (() => { try { return JSON.parse(ls.get("vt-pos")); } catch { return null; } })(),
   items: null, filter: "Tout", q: "", promoTab: "saved", wide: false,
 };
-const radius = () => S.me?.prefs?.radius_km || +ls.get("vt-radius") || 5;
 const isSaved = (id) => !!S.me?.saves?.some(x => x.promo.id === id);
 const isFollowing = (id) => !!S.me?.follows?.some(f => f.id === id);
 async function refreshMe() {
@@ -345,17 +345,12 @@ async function refreshMe() {
 }
 
 /* ---------- Données ---------- */
-async function loadNearby() {
-  if (!S.pos) { S.items = []; return; }
-  let km0 = radius(), data = [];
-  for (const k of [km0, 20, 50]) {
-    if (k < km0) continue;
-    const r = await sb.rpc("vitrine_nearby", { p_lat: S.pos.lat, p_lng: S.pos.lng, p_km: k, p_demo: DEMO });
-    if (r.error) { toast(errText(r.error)); break; }
-    data = r.data || []; S.wide = k > km0;
-    if (data.length) break;
-  }
-  S.items = data.map(x => ({ ...x, d: dist(S.pos, x.store) }));
+// Le fil s'affiche toujours : avec une position, les promos les plus proches d'abord ; sans, les plus récentes.
+async function loadFeed() {
+  const r = await sb.rpc("vitrine_feed", { p_lat: S.pos?.lat ?? null, p_lng: S.pos?.lng ?? null, p_demo: DEMO });
+  if (r.error) toast(errText(r.error));
+  S.items = ((!r.error && r.data) || []).map(x => ({ ...x, d: dist(S.pos, x.store) }));
+  if (S.pos?.label === "Autour de moi") { const n = S.items.filter(x => x.d != null).sort((a, b) => a.d - b.d)[0]; if (n?.store.city && n.d < 15) { S.pos.label = n.store.city; ls.set("vt-pos", JSON.stringify(S.pos)); } }
 }
 async function setPlace(q) {
   const { data, error } = await sb.rpc("vitrine_search", { p_q: q, p_demo: DEMO });
@@ -363,17 +358,35 @@ async function setPlace(q) {
   const pts = (data || []).filter(s => s.lat != null);
   if (!pts.length) return toast(`Aucun commerce Vitriin trouvé pour « ${q} ».`);
   const c = pts.find(s => (s.city || "").toLowerCase().startsWith(q.toLowerCase())) || pts[0];
-  S.pos = { lat: c.lat, lng: c.lng, label: c.city || q }; ls.set("vt-pos", JSON.stringify(S.pos));
-  S.items = null; route();
+  usePlace({ lat: c.lat, lng: c.lng, label: c.city || q });
 }
-async function locate() {
-  const p = await geo();
-  if (!p) return toast("Position indisponible : choisis ta ville.");
-  S.pos = { ...p, label: "Autour de moi" };
-  const r = await sb.rpc("vitrine_nearby", { p_lat: p.lat, p_lng: p.lng, p_km: 50, p_demo: DEMO });
-  const near = (r.data || []).map(x => ({ c: x.store.city, d: dist(p, x.store) })).sort((a, b) => a.d - b.d)[0];
-  if (near?.c && near.d < 15) S.pos.label = near.c;
-  ls.set("vt-pos", JSON.stringify(S.pos)); S.items = null; route();
+function usePlace(p) { S.pos = p; ls.set("vt-pos", p ? JSON.stringify(p) : null); S.items = null; $("#place")?.remove(); route(); }
+async function locate(silent) {
+  const p = await geo(silent ? 4000 : 9000);
+  if (!p) { if (!silent) toast("Position indisponible : choisissez une ville."); return; }
+  usePlace({ ...p, label: "Autour de moi" });
+}
+// Position déjà autorisée sur cet appareil : on l'utilise sans rien demander.
+async function autoLocate() {
+  if (S.pos) return;
+  try { const st = await navigator.permissions?.query({ name: "geolocation" }); if (st?.state === "granted") locate(true); } catch {}
+}
+// Choix du lieu : une feuille par-dessus le fil (jamais un écran à part).
+async function placeSheet() {
+  const C = await loadCities();
+  const ov = document.createElement("div"); ov.className = "ov sh"; ov.id = "place";
+  ov.innerHTML = `<div class="sht" role="dialog" aria-modal="true" aria-label="Où chercher ?"><div class="grab"></div>
+    <b style="font-size:21px;letter-spacing:-.01em">Où chercher ?</b>
+    <button class="btn p" id="pl-geo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Autour de moi</button>
+    <form class="search" id="pl-f"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg><input id="pl-q" type="search" placeholder="Une ville, un code postal" aria-label="Une ville ou un code postal"></form>
+    ${C.length ? citiesHtml(C) : ""}
+    ${S.pos ? `<button class="btn" id="pl-all" style="color:var(--muted);font-weight:600;min-height:42px">Voir les promos partout</button>` : ""}</div>`;
+  ov.onclick = (e) => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  $("#pl-geo", ov).onclick = () => locate(false);
+  $("#pl-f", ov).onsubmit = (e) => { e.preventDefault(); const v = $("#pl-q", ov).value.trim(); if (v.length >= 2) setPlace(v); };
+  $("#pl-all", ov) && ($("#pl-all", ov).onclick = () => usePlace(null));
+  bindCities(C);
 }
 
 /* ---------- Actions compte ---------- */
@@ -490,7 +503,7 @@ async function loadCities() {
   return (S.cities = (!r.error && r.data) || []);
 }
 const citiesHtml = (C) => C.length ? `<div class="cities">${C.map((c, k) => `<button data-city="${k}"><i>${esc(c.city.slice(0, 2).toUpperCase())}</i><b>${esc(c.city)}</b><small>${c.n} promo${c.n > 1 ? "s" : ""}</small>${IC.chev}</button>`).join("")}</div>` : "";
-function bindCities(C) { $$("[data-city]").forEach(b => b.onclick = () => { const c = C[+b.dataset.city]; S.pos = { lat: +c.lat, lng: +c.lng, label: c.city }; ls.set("vt-pos", JSON.stringify(S.pos)); S.items = null; route(); }); }
+function bindCities(C) { $$("[data-city]").forEach(b => b.onclick = () => { const c = C[+b.dataset.city]; usePlace({ lat: +c.lat, lng: +c.lng, label: c.city }); }); }
 // Promos déjà vues en plein écran : l'anneau d'une story devient gris quand tout est vu.
 const seen = (() => { try { return new Set(JSON.parse(ls.get("vt-seen") || "[]")); } catch { return new Set(); } })();
 function markSeen(ids) { ids.forEach(id => seen.add(id)); ls.set("vt-seen", JSON.stringify([...seen].slice(-400))); }
@@ -519,49 +532,47 @@ function bindStrip() {
   $("#strip-x") && ($("#strip-x").onclick = () => { ss.set("vt-strip-off", "1"); $("#strip").remove(); });
 }
 
+// Accueil : toujours un fil de promos à faire défiler (écran 4 de la maquette).
 async function pageFeed() {
   document.title = "Vitriin · Les promos près de chez vous";
-  if (S.pos && !S.items) { shell("feed", `<div class="load">Recherche des promos…</div>`); await loadNearby(); }
-  const C = (!S.pos || !(S.items || []).length) ? await loadCities() : [];
-  const O = S.pos ? await loadOrigin() : null;
+  if (!S.items) { shell("feed", `<div class="load">Chargement des promos…</div>`); await loadFeed(); }
+  const O = await loadOrigin();
   const name = S.me?.prefs?.first_name;
   const all = S.items || [];
+  const mine = (S.me?.feed || []).map(x => ({ ...x, d: dist(S.pos, x.store) }));
   const cats = ["Tout", ...[...new Set(all.map(x => catLabel(x.store.category)))]];
   if (!cats.includes(S.filter)) S.filter = "Tout";
   const q = S.q.trim().toLowerCase();
   const list = all.filter(x => (S.filter === "Tout" || catLabel(x.store.category) === S.filter) && (!q || (x.promo.title + " " + x.store.name).toLowerCase().includes(q)));
-  const ST = storiesOf(all);
+  const ST = storiesOf([...mine, ...all]);
   const byCat = [...list.reduce((m, x) => { const c = catLabel(x.store.category); m.set(c, [...(m.get(c) || []), x]); return m; }, new Map())].filter(([, l]) => l.length > 1);
+  const showMine = mine.length && S.filter === "Tout" && !q;
   shell("feed", `<div class="pad row" style="justify-content:space-between;gap:8px">
       <span class="wm" aria-label="Vitriin">vitriin</span>
-      <div class="row" style="gap:8px">${S.pos ? `<button class="cityp" id="city" aria-label="Changer de ville">${IC.pin}<span>${esc(S.pos.label || "Autour de moi")}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>` : ""}
+      <div class="row" style="gap:8px"><button class="cityp" id="city" aria-label="Choisir où chercher">${IC.pin}<span>${esc(S.pos?.label || "Partout")}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
         ${S.session ? `<a class="av" href="/v/profil" data-link aria-label="Profil" style="width:38px;height:38px">${esc((name || S.me?.email || "?")[0].toUpperCase())}</a>` : `<button class="loginp" id="login">Connexion</button>`}</div></div>
-    ${S.pos && ST.length ? `<div class="stories" aria-label="Commerces avec des promos">${ST.map((g, k) => `<button class="story" data-story="${k}"><span class="ring ${g.fresh ? "new" : ""}"><span class="av">${logo(g.store) ? `<img src="${esc(logo(g.store))}" alt="">` : init(g.store)}</span></span><small>${esc(storyName(g.store))}</small></button>`).join("")}</div>` : ""}
+    ${ST.length ? `<div class="stories" aria-label="Commerces avec des promos">${ST.map((g, k) => `<button class="story" data-story="${k}"><span class="ring ${g.fresh ? "new" : ""}"><span class="av">${logo(g.store) ? `<img src="${esc(logo(g.store))}" alt="">` : init(g.store)}</span></span><small>${esc(storyName(g.store))}</small></button>`).join("")}</div>` : ""}
     <div class="pad" style="padding-top:12px"><form class="search" id="sf" role="search">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>
-      <input id="q" type="search" placeholder="${S.pos ? "Un produit, un commerce…" : "Ta ville ou ton code postal"}" aria-label="${S.pos ? "Rechercher un produit ou un commerce" : "Ta ville ou ton code postal"}" value="${esc(S.pos ? S.q : "")}"></form></div>
-    ${!S.pos ? `<div class="pad" style="padding-top:22px"><h1 style="font-size:26px;line-height:1.15">Les bons plans de vos commerces, près de chez vous</h1>
-        <p style="font-size:14.5px;color:var(--muted);line-height:1.5;margin:8px 0 16px">Dites-nous où chercher. Votre position n'est jamais enregistrée.</p>
-        <button class="btn p" id="geo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Autour de moi</button>
-        ${C.length ? `<div class="lbl" style="margin:24px 0 2px">VILLES OÙ ÇA BOUGE</div>${citiesHtml(C)}` : ""}</div>` : `
-    ${O && !isFollowing(O.store.id) ? `<div class="sect" style="padding-top:16px"><span>Chez ${esc(O.store.name)}</span><a class="lnk" href="/v/m/${esc(O.store.slug)}" data-link>${O.list.length} promo${O.list.length > 1 ? "s" : ""}${IC.chev}</a></div>
+      <input id="q" type="search" placeholder="Un produit, un commerce…" aria-label="Rechercher un produit ou un commerce" value="${esc(S.q)}"></form></div>
+    ${showMine ? `<div class="sect" style="padding-top:16px"><span>Vos commerces</span><a class="lnk" href="/v/suivies" data-link>Suivis${IC.chev}</a></div>${tilesHtml(mine, "m", true)}` : ""}
+    ${O && !isFollowing(O.store.id) && !q ? `<div class="sect" style="padding-top:16px"><span>Chez ${esc(O.store.name)}</span><a class="lnk" href="/v/m/${esc(O.store.slug)}" data-link>${O.list.length} promo${O.list.length > 1 ? "s" : ""}${IC.chev}</a></div>
       ${tilesHtml(O.list, "o")}
       <div class="fsug"><span class="av" style="width:44px;height:44px;background:var(--p);color:#fff">${logo(O.store) ? `<img src="${esc(logo(O.store))}" alt="">` : init(O.store)}</span><span style="flex:1;font-size:13.5px;line-height:1.35"><b>Suivez ${esc(O.store.name)}</b><br><span style="color:var(--muted)">Leurs promos en premier, dans votre fil</span></span><button class="fbtn" id="ofol" style="background:var(--p);color:#fff">Suivre</button></div>` : ""}
-    <div class="chips">${cats.map(c => `<button class="chip ${S.filter === c ? "on" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("")}</div>
-    <div class="sect"><span>Autour de vous</span>${list.length ? `<button class="lnk" data-full>Plein écran${IC.chev}</button>` : ""}</div>
-    ${S.wide && list.length ? `<p class="pad" style="margin:-6px 0 10px;font-size:12.5px;color:var(--muted)">Rien à moins de ${radius()} km : on a élargi la recherche.</p>` : ""}
-    ${list.length ? tilesHtml(list, "a", true) + (S.filter === "Tout" ? byCat.map(([c, l], i) => `<div class="sect" style="padding-top:22px"><span>${esc(c)}</span></div>${tilesHtml(l, "c" + i, true)}`).join("") : "") : emptyHtml("Pas encore de promo par ici", "Les commerces de votre quartier n'utilisent pas encore Vitriin. Ailleurs, ça bouge :")}
-    ${!list.length && C.length ? `<div class="pad" style="padding-top:4px">${citiesHtml(C)}</div>` : ""}`}${stripHtml()}`);
-  $("#city") && ($("#city").onclick = () => { S.pos = null; S.items = null; ls.set("vt-pos", null); pageFeed(); });
+    ${cats.length > 2 ? `<div class="chips">${cats.map(c => `<button class="chip ${S.filter === c ? "on" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("")}</div>` : ""}
+    <div class="sect"><span>${S.pos ? "Autour de vous" : "À la une"}</span>${list.length ? `<button class="lnk" data-full>Plein écran${IC.chev}</button>` : ""}</div>
+    ${list.length ? tilesHtml(list, "a", true) + (S.filter === "Tout" && !q ? byCat.map(([c, l], i) => `<div class="sect" style="padding-top:22px"><span>${esc(c)}</span></div>${tilesHtml(l, "c" + i, true)}`).join("") : "")
+      : emptyHtml(q ? "Aucune promo ne correspond" : "Pas encore de promo", q ? "Essayez un autre mot." : "Les commerces Vitriin publient bientôt leurs premières offres.")}
+    ${stripHtml()}`);
+  $("#city").onclick = placeSheet;
   $("#login") && ($("#login").onclick = () => gateSheet());
   $$("[data-story]").forEach(b => b.onclick = () => { const g = ST[+b.dataset.story]; openReels(g.list, 0); });
-  $("#geo") && ($("#geo").onclick = locate);
-  $("#sf").onsubmit = (e) => { e.preventDefault(); const v = $("#q").value.trim(); if (!S.pos && v.length >= 2) setPlace(v); };
-  let t; $("#q").oninput = () => { if (!S.pos) return; clearTimeout(t); t = setTimeout(() => { S.q = $("#q").value; const pos = $("#q").selectionStart; pageFeed(); $("#q").focus(); $("#q").setSelectionRange(pos, pos); }, 250); };
+  $("#sf").onsubmit = (e) => e.preventDefault();
+  let t; $("#q").oninput = () => { clearTimeout(t); t = setTimeout(() => { S.q = $("#q").value; const pos = $("#q").selectionStart; pageFeed(); $("#q").focus(); $("#q").setSelectionRange(pos, pos); }, 250); };
   $$("[data-cat]").forEach(b => b.onclick = () => { S.filter = b.dataset.cat; pageFeed(); });
   $("[data-full]") && ($("[data-full]").onclick = () => openReels(list, 0));
-  bindTiles({ a: list, o: O?.list || [], ...Object.fromEntries(byCat.map(([, l], i) => ["c" + i, l])) });
-  bindCities(C); bindStrip();
+  bindTiles({ a: list, m: mine, o: O?.list || [], ...Object.fromEntries(byCat.map(([, l], i) => ["c" + i, l])) });
+  bindStrip();
   if (O) { $("#ofol") && ($("#ofol").onclick = async () => { if (await toggleFollow(O.store) != null) pageFeed(); }); }
 }
 
@@ -618,15 +629,13 @@ async function pageProfile() {
     <div class="pad" style="padding-top:20px"><div class="lbl">CENTRES D'INTÉRÊT</div><div style="display:flex;gap:8px;flex-wrap:wrap">${cats.map(c => `<button class="int ${(P.interests || []).includes(c) ? "on" : ""}" data-int="${esc(c)}" aria-pressed="${(P.interests || []).includes(c)}">${esc(catLabel(c))}</button>`).join("")}</div></div>
     <div class="pad" style="padding-top:20px"><div class="lbl">PRÉFÉRENCES</div><div class="box">
       <button class="li" id="al" role="switch" aria-checked="${P.alerts !== false}"><span class="sp">Alertes nouvelles promos</span><span class="tg ${P.alerts !== false ? "on" : ""}"><i></i></span></button>
-      <button class="li" id="rad"><span class="sp">Rayon de recherche</span><span style="font-size:13px;color:var(--muted)">${radius()} km</span>${IC.chev}</button>
       <button class="li" id="acc"><span class="sp">Mon compte</span>${IC.chev}</button></div>
-      <p style="font-size:12px;color:var(--muted);margin:8px 2px 0;line-height:1.4">Les alertes par email arrivent bientôt pour les commerces que tu suis.</p></div>
+      <p style="font-size:12px;color:var(--muted);margin:8px 2px 0;line-height:1.4">Les alertes par email arrivent bientôt pour les commerces que vous suivez.</p></div>
     <div class="pad" style="padding-top:18px;display:flex;flex-direction:column;gap:10px">
       <a class="btn line" href="/magasin/"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h11a5 5 0 0 1 0 10h-1M16 21l4-4-4-4"/></svg>Passer en mode commerçant</a>
       <button class="btn line" id="out" style="color:#b3261e">Se déconnecter</button></div>`);
   $$("[data-int]").forEach(b => b.onclick = async () => { const set = new Set(P.interests || []); set.has(b.dataset.int) ? set.delete(b.dataset.int) : set.add(b.dataset.int); if (await savePrefs({ interests: [...set] })) pageProfile(); });
   $("#al").onclick = async () => { if (await savePrefs({ alerts: P.alerts === false })) pageProfile(); };
-  $("#rad").onclick = async () => { const opts = [3, 5, 10, 20, 50], n = opts[(opts.indexOf(radius()) + 1) % opts.length] || 5; ls.set("vt-radius", n); if (await savePrefs({ radius_km: n })) { S.items = null; pageProfile(); } };
   $("#acc").onclick = accountSheet;
   $("#out").onclick = async () => { await sb.auth.signOut(); await refreshMe(); go("/v/"); };
 }
@@ -910,7 +919,7 @@ document.addEventListener("click", (e) => {
 });
 addEventListener("popstate", route);
 sb.auth.onAuthStateChange(async (ev) => { if (ev === "SIGNED_IN" || ev === "SIGNED_OUT") { await refreshMe(); if (ev === "SIGNED_IN") { $("#gate")?.remove(); await runPending(); route(); maybeOnboard(); } } });
-(async () => { await refreshMe(); await runPending(); route(); maybeOnboard(); })();
+(async () => { await refreshMe(); await runPending(); route(); maybeOnboard(); autoLocate(); })();
 </script>
 </body>
 </html>

@@ -20,6 +20,12 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-058 · Accueil particulier : toujours le fil de promos
+- **Problème** : sans position connue, l'accueil `/v/` affichait un écran « Les bons plans de vos commerces… / Autour de moi / villes » au lieu du fil. Contraire à la maquette (écran 4).
+- **Base** : nouvelle fonction `vitrine_feed(p_lat, p_lng, p_demo)` (SECURITY DEFINER, anon/authenticated) : promos en cours dédupliquées par promotion (le magasin le plus proche quand une position est connue), triées par distance puis nouveauté, 80 max. Migration `20261031060000_vitrine_feed.sql`.
+- **Front `/v/`** : l'écran ville est supprimé. L'accueil affiche toujours stories, recherche, « Vos commerces » (suivis), « Chez X », filtres, « À la une » / « Autour de vous » et carrousels par catégorie. La pastille lieu (« Partout », « Lyon », « Autour de moi ») ouvre une feuille « Où chercher ? » par-dessus le fil. Position utilisée automatiquement si déjà autorisée. Mode démo mémorisé sur l'appareil (`?demo=0` pour le quitter). Réglage « Rayon de recherche » retiré (plus utilisé). `loadNearby` remplacé par `loadFeed`.
+- **Retour arrière** : `git revert` du commit ; `drop function public.vitrine_feed` par migration.
+
 ### MOD-057 · Démos fleuriste, opticien, hoodies et compte particulier de démonstration
 - **Secteurs de démo** : « Pétale & Tige » (fleuriste), « Lunetterie Lumière » (opticien), « Hoodie Club » (hoodies),
   chacun 20 magasins et 6 promos centrale + 2 promos magasin, construits par `manager_build_demo` (images Unsplash).
