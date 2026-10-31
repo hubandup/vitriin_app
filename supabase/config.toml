@@ -386,7 +386,7 @@ verify_jwt = true
 subject = "Votre accès Vitriin"
 content_path = "./supabase/templates/invite.html"
 [auth.email.template.magic_link]
-subject = "Votre lien de connexion Vitriin"
+subject = "Votre code de connexion Vitriin"
 content_path = "./supabase/templates/magic_link.html"
 [auth.email.template.confirmation]
 subject = "Confirmez votre adresse email"

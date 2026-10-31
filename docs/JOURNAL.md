@@ -20,6 +20,22 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-053 · Particulier : en-tête du fil, stories, inscription en feuille avec code, onboarding
+- **En-tête du fil** : logo Vitriin, ville (touchée : retour au choix de la ville), « Connexion » ou initiale du compte.
+  « Bonjour / Près de vous » et le bouton de localisation de la recherche sont retirés.
+- **Stories** : un rond par commerce qui a des promos autour, les commerces suivis d'abord ; anneau magenta tant qu'une
+  promo n'a pas été vue en plein écran (mémorisé sur l'appareil), gris ensuite. Toucher ouvre ses promos en plein écran.
+- **Inscription au bon moment** : Garder, Suivre ou Connexion ouvrent une feuille par-dessus l'écran (plus de changement
+  de page). Email, puis code à 6 chiffres reçu par email, saisi sur place (le lien de l'email marche toujours).
+  L'action demandée est faite juste après. Écran Connexion (onglets Mes promos, Suivies, Profil) : même formulaire.
+- **Emails** : « Votre code de connexion Vitriin » et « Confirmez votre adresse » affichent le code (`{{ .Token }}`) en
+  plus du bouton ; enregistrés dans le Dashboard Supabase (vérifié après rechargement) et dans `supabase/templates/`.
+- **Onboarding** (première connexion, prénom non renseigné) : prénom et envies, commerces à suivre (commerce d'origine
+  et autour), alertes ; « Passer » à chaque étape. Le bouton « Obtenir l'application » n'apparaît que si les liens
+  des stores sont renseignés.
+- **Où** : `public/v/index.html`, `supabase/templates/magic_link.html`, `confirmation.html`, `supabase/config.toml`.
+- **Retour arrière** : `git revert` ; remettre les modèles d'email précédents dans le Dashboard.
+
 ### MOD-052 · Fiche commerce et fil de promos façon publication
 - **Fiche commerce (particulier)** : photo de couverture (dégradé à défaut), logo, nom, catégorie et distance,
   Suivre + Itinéraire, présentation, coordonnées clients (adresse, téléphone, email, site), plan OpenStreetMap avec

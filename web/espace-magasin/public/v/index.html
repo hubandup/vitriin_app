@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Racing+Sans+One&display=swap" rel="stylesheet">
 <style>
 /* Vitriin · app particulier. Maquette Claude Design « Vitriin » (écrans particulier), charte magenta. */
 :root{
@@ -36,13 +36,11 @@ img{display:block}
 .scr{padding:calc(var(--sat) + 22px) 0 calc(104px + var(--sab))}
 .pad{padding-left:20px;padding-right:20px}
 h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0}
-.hello{font-size:13px;color:var(--muted)}
 .row{display:flex;align-items:center;gap:10px}
 .av{width:42px;height:42px;border-radius:50%;background:var(--beige);color:#7a5f3f;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex:none;overflow:hidden}
 .av img{width:100%;height:100%;object-fit:cover;background:#fff}
 .search{display:flex;align-items:center;gap:9px;background:#f7f6f3;border-radius:13px;padding:0 13px;min-height:46px;color:var(--faint)}
 .search input{flex:1;min-width:0;border:none;background:none;outline:none;font-size:15px}
-.loc{display:inline-flex;align-items:center;gap:4px;color:var(--p);font-weight:700;font-size:12.5px;white-space:nowrap;min-height:44px}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:12px 20px 8px}
 .chip{flex:none;font-size:12.5px;font-weight:600;padding:0 14px;min-height:36px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted)}
 .chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
@@ -205,6 +203,26 @@ nav.tabs a.on{color:var(--p)}
 .tile .mini{position:absolute;top:9px;left:9px}
 .tile .tt{position:absolute;left:11px;right:11px;bottom:10px;color:#fff;font-weight:700;font-size:14px;line-height:1.2}
 .tile .tt small{display:block;font-weight:500;font-size:11.5px;opacity:.85;margin-top:3px}
+/* En-tête du fil et stories */
+.wm{font-family:'Racing Sans One',sans-serif;font-size:29px;line-height:1;color:var(--p)}
+.cityp{display:inline-flex;align-items:center;gap:5px;background:#f4f3f0;border-radius:999px;padding:0 12px;min-height:38px;font-size:13.5px;font-weight:600;max-width:150px}
+.cityp span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.loginp{background:var(--ink);color:#fff;font-weight:700;font-size:13.5px;padding:0 15px;min-height:38px;border-radius:999px}
+.stories{display:flex;gap:14px;overflow-x:auto;padding:16px 20px 4px}
+.story{flex:none;width:68px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.story .ring{width:68px;height:68px;border-radius:50%;padding:3px;background:#e2ded8}
+.story .ring.new{background:linear-gradient(135deg,#e5087e,#951b81)}
+.story .ring .av{width:100%;height:100%;border:2.5px solid #fff;background:var(--p);color:#fff;font-size:18px}
+.story small{font-size:11.5px;max-width:68px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Inscription en feuille et onboarding */
+.otp{letter-spacing:.5em;text-align:center;font-size:24px}
+.onb{position:fixed;inset:0;z-index:75;background:#fff;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:calc(var(--sat) + 18px) 22px calc(26px + var(--sab));animation:fade .2s}
+@media (min-width:560px){.onb{max-width:430px;margin:0 auto}}
+.onb .bars{display:flex;gap:6px;align-items:center}.onb .bars i{width:26px;height:5px;border-radius:3px;background:var(--line)}.onb .bars i.on{background:var(--p)}
+.onb h2{font-size:27px;letter-spacing:-.02em;line-height:1.12;margin:16px 0 0}
+.onb .sub{font-size:14.5px;color:var(--muted);line-height:1.5;margin:-4px 0 0}
+.onb .chipset{display:flex;flex-wrap:wrap;gap:9px}
+.onb .sl{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
 /* Promos en fil, façon publication */
 .posts{display:flex;flex-direction:column;gap:26px;padding:0 20px}
 .post .ph{display:flex;align-items:center;gap:10px;margin-bottom:10px;min-height:40px}
@@ -365,8 +383,54 @@ async function locate() {
 /* ---------- Actions compte ---------- */
 function needLogin(pending) {
   if (S.session) return false;
+  gateSheet(pending); return true;
+}
+// Inscription au moment où elle sert : une feuille par-dessus l'écran, email puis code reçu par email.
+// L'action demandée (garder, suivre) est faite juste après la connexion.
+const GATE = {
+  save: ["Gardez vos promos sous la main", "Codes gardés, commerces suivis, alertes quand une offre arrive près de chez vous."],
+  follow: ["Suivez vos commerces", "Leurs nouvelles promos arrivent en premier dans votre fil, avec une alerte si vous le souhaitez."],
+  any: ["Bienvenue sur Vitriin", "Vos promos gardées, vos commerces et vos économies, sur le web comme dans l'application."],
+};
+function gateSheet(pending) {
   if (pending) ss.set("vt-pending", JSON.stringify(pending));
-  go("/v/connexion"); return true;
+  const [h, t] = GATE[pending?.save ? "save" : pending?.follow ? "follow" : "any"];
+  const ov = document.createElement("div"); ov.className = "ov sh"; ov.id = "gate";
+  ov.innerHTML = `<div class="sht" role="dialog" aria-modal="true" aria-label="${esc(h)}"><div class="grab"></div>
+    <span style="width:54px;height:54px;border-radius:17px;background:var(--rose);color:var(--p);display:flex;align-items:center;justify-content:center;margin-top:6px">${IC.bookmark(true).replace(/18/g, "24")}</span>
+    <b style="font-size:24px;letter-spacing:-.02em;line-height:1.15">${esc(h)}</b><p style="margin:-4px 0 0;font-size:14.5px;color:var(--muted);line-height:1.5">${esc(t)}</p>
+    <div id="g-body"></div><button class="btn" data-x style="color:var(--ink);font-weight:600;min-height:44px">Plus tard</button>
+    <div class="legal">En continuant, vous acceptez nos <a href="https://www.vitriin.fr/cgu" target="_blank" rel="noopener">CGU</a> et notre <a href="https://www.vitriin.fr/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>.</div></div>`;
+  ov.onclick = (e) => { if (e.target === ov || e.target.closest("[data-x]")) { ov.remove(); ss.set("vt-pending", null); } };
+  document.body.appendChild(ov);
+  authForm($("#g-body", ov), pending?.back || location.pathname);
+}
+// Connexion sans mot de passe : un code à 6 chiffres par email (le lien de l'email marche aussi).
+function authForm(root, back) {
+  root.innerHTML = `<form id="af" style="display:flex;flex-direction:column;gap:12px"><label for="em" style="font-size:13px;font-weight:600">Votre email</label>
+    <input class="inp" id="em" type="email" autocomplete="email" inputmode="email" placeholder="prenom@exemple.fr" required style="margin-top:-6px">
+    <button class="btn p" id="go">Recevoir mon code</button><p style="text-align:center;font-size:12.5px;color:var(--muted);margin:0">Pas de mot de passe : un code à 6 chiffres arrive par email.</p></form>`;
+  $("#af", root).onsubmit = async (e) => {
+    e.preventDefault(); const email = $("#em", root).value.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast("Adresse email invalide.");
+    $("#go", root).disabled = true;
+    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + (back === "/v/connexion" ? "/v/" : back), shouldCreateUser: true } });
+    if (error) { $("#go", root).disabled = false; return toast(errText(error)); }
+    root.innerHTML = `<form id="cf" style="display:flex;flex-direction:column;gap:12px"><p style="margin:0;font-size:14.5px;line-height:1.5">Code envoyé à <b>${esc(email)}</b>.</p>
+      <label for="code" style="font-size:13px;font-weight:600">Code reçu par email</label>
+      <input class="inp otp" id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="······" required style="margin-top:-6px">
+      <button class="btn p" id="ok">Valider</button><button type="button" class="btn" id="re" style="color:var(--muted);font-weight:600;min-height:40px;font-size:13.5px">Changer d'adresse</button></form>`;
+    $("#code", root).focus();
+    $("#re", root).onclick = () => authForm(root, back);
+    $("#cf", root).onsubmit = async (e2) => {
+      e2.preventDefault(); const token = $("#code", root).value.replace(/\D/g, "");
+      if (token.length < 6) return toast("Saisissez le code reçu par email.");
+      $("#ok", root).disabled = true;
+      const { error: e3 } = await sb.auth.verifyOtp({ email, token, type: "email" });
+      if (e3) { $("#ok", root).disabled = false; return toast(/expired|invalid/i.test(e3.message) ? "Code incorrect ou expiré." : errText(e3)); }
+      $("#gate")?.remove();
+    };
+  };
 }
 async function toggleSave(promo, store) {
   if (needLogin({ save: promo.id, back: location.pathname })) return;
@@ -455,6 +519,16 @@ async function loadCities() {
 }
 const citiesHtml = (C) => C.length ? `<div class="cities">${C.map((c, k) => `<button data-city="${k}"><i>${esc(c.city.slice(0, 2).toUpperCase())}</i><b>${esc(c.city)}</b><small>${c.n} promo${c.n > 1 ? "s" : ""}</small>${IC.chev}</button>`).join("")}</div>` : "";
 function bindCities(C) { $$("[data-city]").forEach(b => b.onclick = () => { const c = C[+b.dataset.city]; S.pos = { lat: +c.lat, lng: +c.lng, label: c.city }; ls.set("vt-pos", JSON.stringify(S.pos)); S.items = null; route(); }); }
+// Promos déjà vues en plein écran : l'anneau d'une story devient gris quand tout est vu.
+const seen = (() => { try { return new Set(JSON.parse(ls.get("vt-seen") || "[]")); } catch { return new Set(); } })();
+function markSeen(ids) { ids.forEach(id => seen.add(id)); ls.set("vt-seen", JSON.stringify([...seen].slice(-400))); }
+// Stories : un rond par commerce qui a des promos autour de vous, les commerces suivis d'abord.
+function storiesOf(items) {
+  const by = new Map();
+  items.forEach(x => { const g = by.get(x.store.id) || { store: x.store, list: [] }; g.list.push(x); by.set(x.store.id, g); });
+  return [...by.values()].map(g => ({ ...g, fresh: g.list.some(x => !seen.has(x.promo.id)), fol: isFollowing(g.store.id) }))
+    .sort((a, b) => (b.fol - a.fol) || (b.fresh - a.fresh)).slice(0, 15);
+}
 // Commerce par lequel le visiteur est arrivé (lien, QR code) : ses promos en premier dans le fil.
 async function loadOrigin() {
   const slug = ls.get("vt-origin"); if (!slug) return null;
@@ -482,13 +556,15 @@ async function pageFeed() {
   if (!cats.includes(S.filter)) S.filter = "Tout";
   const q = S.q.trim().toLowerCase();
   const list = all.filter(x => (S.filter === "Tout" || catLabel(x.store.category) === S.filter) && (!q || (x.promo.title + " " + x.store.name).toLowerCase().includes(q)));
-  shell("feed", `<div class="pad row" style="justify-content:space-between;align-items:flex-start;padding-bottom:4px">
-      <div><div class="hello">${name ? `Bonjour ${esc(name)} 👋` : "Bonjour 👋"}</div><h1 style="margin-top:2px">Près de vous</h1></div>
-      <a class="av" href="/v/profil" data-link aria-label="${S.session ? "Profil" : "Se connecter"}">${S.session ? esc((name || S.me?.email || "?")[0].toUpperCase()) : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>'}</a></div>
+  const ST = storiesOf(all);
+  shell("feed", `<div class="pad row" style="justify-content:space-between;gap:8px">
+      <span class="wm" aria-label="Vitriin">vitriin</span>
+      <div class="row" style="gap:8px">${S.pos ? `<button class="cityp" id="city" aria-label="Changer de ville">${IC.pin}<span>${esc(S.pos.label || "Autour de moi")}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>` : ""}
+        ${S.session ? `<a class="av" href="/v/profil" data-link aria-label="Profil" style="width:38px;height:38px">${esc((name || S.me?.email || "?")[0].toUpperCase())}</a>` : `<button class="loginp" id="login">Connexion</button>`}</div></div>
+    ${S.pos && ST.length ? `<div class="stories" aria-label="Commerces avec des promos">${ST.map((g, k) => `<button class="story" data-story="${k}"><span class="ring ${g.fresh ? "new" : ""}"><span class="av">${logo(g.store) ? `<img src="${esc(logo(g.store))}" alt="">` : init(g.store)}</span></span><small>${esc(g.store.name)}</small></button>`).join("")}</div>` : ""}
     <div class="pad" style="padding-top:12px"><form class="search" id="sf" role="search">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>
-      <input id="q" type="search" placeholder="${S.pos ? "Un produit, un commerce…" : "Ta ville ou ton code postal"}" aria-label="${S.pos ? "Rechercher un produit ou un commerce" : "Ta ville ou ton code postal"}" value="${esc(S.pos ? S.q : "")}">
-      <button type="button" class="loc" id="loc">${IC.pin}${esc(S.pos?.label || "Me localiser")}</button></form></div>
+      <input id="q" type="search" placeholder="${S.pos ? "Un produit, un commerce…" : "Ta ville ou ton code postal"}" aria-label="${S.pos ? "Rechercher un produit ou un commerce" : "Ta ville ou ton code postal"}" value="${esc(S.pos ? S.q : "")}"></form></div>
     ${!S.pos ? `<div class="pad" style="padding-top:22px"><h1 style="font-size:26px;line-height:1.15">Les bons plans de vos commerces, près de chez vous</h1>
         <p style="font-size:14.5px;color:var(--muted);line-height:1.5;margin:8px 0 16px">Dites-nous où chercher. Votre position n'est jamais enregistrée.</p>
         <button class="btn p" id="geo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Autour de moi</button>
@@ -501,7 +577,9 @@ async function pageFeed() {
     ${S.wide && list.length ? `<p class="pad" style="margin:-6px 0 10px;font-size:12.5px;color:var(--muted)">Rien à moins de ${radius()} km : on a élargi la recherche.</p>` : ""}
     <div class="posts" id="mlist">${list.length ? list.map((x, k) => postHtml(x, k, true)).join("") : emptyHtml("Pas encore de promo par ici", "Les commerces de ton quartier n'utilisent pas encore Vitriin. Ailleurs, ça bouge :")}</div>
     ${!list.length && C.length ? `<div class="pad" style="padding-top:4px">${citiesHtml(C)}</div>` : ""}`}${stripHtml()}`);
-  $("#loc").onclick = locate;
+  $("#city") && ($("#city").onclick = () => { S.pos = null; S.items = null; ls.set("vt-pos", null); pageFeed(); });
+  $("#login") && ($("#login").onclick = () => gateSheet());
+  $$("[data-story]").forEach(b => b.onclick = () => { const g = ST[+b.dataset.story]; openReels(g.list, 0); });
   $("#geo") && ($("#geo").onclick = locate);
   $("#sf").onsubmit = (e) => { e.preventDefault(); const v = $("#q").value.trim(); if (!S.pos && v.length >= 2) setPlace(v); };
   let t; $("#q").oninput = () => { if (!S.pos) return; clearTimeout(t); t = setTimeout(() => { S.q = $("#q").value; const pos = $("#q").selectionStart; pageFeed(); $("#q").focus(); $("#q").setSelectionRange(pos, pos); }, 250); };
@@ -600,23 +678,11 @@ function pageAuth(why) {
   document.title = "Connexion · Vitriin";
   $("#tabs").classList.add("hidden");
   app().innerHTML = `<div class="auth"><div><button class="back" id="bk" aria-label="Retour">${IC.back}</button></div>
-    <div style="padding-top:34px;text-align:center"><span class="logo">V</span><h2>Bienvenue sur Vitriin</h2><p>${esc(why || "Entre ton email, on t'envoie un lien de connexion. C'est tout.")}</p></div>
-    <form id="lf" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px">
-      <label for="em" style="font-size:13px;font-weight:600">Ton email</label><input class="inp" id="em" type="email" autocomplete="email" inputmode="email" placeholder="prenom@exemple.fr" required>
-      <button class="btn p" id="go">Recevoir mon lien de connexion</button>
-      <p style="text-align:center;font-size:13px;color:var(--muted);margin:0">Pas de mot de passe : un simple lien, valable une fois.</p></form>
-    <div class="legal">En continuant, tu acceptes nos <a href="https://www.vitriin.fr/cgu" target="_blank" rel="noopener">CGU</a> et notre <a href="https://www.vitriin.fr/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>.</div></div>`;
+    <div style="padding-top:34px;text-align:center"><span class="wm" style="font-size:40px">vitriin</span><h2>Bienvenue sur Vitriin</h2><p>${esc(why || "Vos promos gardées, vos commerces et vos économies.")}</p></div>
+    <div id="ab" style="flex:1;display:flex;flex-direction:column;justify-content:center"></div>
+    <div class="legal">En continuant, vous acceptez nos <a href="https://www.vitriin.fr/cgu" target="_blank" rel="noopener">CGU</a> et notre <a href="https://www.vitriin.fr/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>.</div></div>`;
   $("#bk").onclick = () => history.length > 1 ? history.back() : go("/v/");
-  $("#lf").onsubmit = async (e) => {
-    e.preventDefault(); const email = $("#em").value.trim().toLowerCase();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast("Adresse email invalide.");
-    $("#go").disabled = true;
-    let back = location.pathname === "/v/connexion" ? "/v/" : location.pathname;
-    try { back = JSON.parse(ss.get("vt-pending") || "{}").back || back; } catch {}
-    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + back, shouldCreateUser: true } });
-    if (error) { $("#go").disabled = false; return toast(errText(error)); }
-    $("#lf").innerHTML = `<div style="text-align:center"><div style="font-weight:700;font-size:20px">Vérifie tes emails</div><p>On vient d'envoyer un lien à<br><b style="color:var(--ink)">${esc(email)}</b>.<br>Ouvre-le sur ce téléphone pour te connecter.</p></div>`;
-  };
+  authForm($("#ab"), location.pathname);
 }
 
 async function pageStore(slug) {
@@ -690,6 +756,8 @@ function openReels(list, start, direct) {
   </section>`; }).join("");
   document.body.appendChild(el); document.body.style.overflow = "hidden";
   el.scrollTop = start * window.innerHeight;
+  markSeen([list[start].promo.id]);
+  el.addEventListener("scroll", () => { const k = Math.round(el.scrollTop / window.innerHeight); if (list[k]) markSeen([list[k].promo.id]); }, { passive: true });
   if (list.length > 1 && start < list.length - 1 && !ss.get("vt-nudge")) {
     ss.set("vt-nudge", "1");
     setTimeout(() => { if (!el.isConnected || el.scrollTop !== start * window.innerHeight) return;
@@ -801,6 +869,49 @@ async function share(title, text, url) {
   try { await navigator.clipboard.writeText(url); toast("Lien copié."); } catch { toast(url); }
 }
 
+/* ---------- Onboarding (première connexion) : envies, commerces, alertes ---------- */
+function maybeOnboard() {
+  const uid = S.session?.user?.id;
+  if (!uid || S.me?.prefs?.first_name || ls.get("vt-onb-" + uid) || $(".onb")) return;
+  const O = { name: "", ints: new Set(S.me?.prefs?.interests || []), fol: new Set((S.me?.follows || []).map(f => f.id)), alerts: true, step: 0 };
+  const stores = (() => { const m = new Map(); (S.origin?.list || []).concat(S.items || []).forEach(x => m.set(x.store.id, x.store)); (S.me?.follows || []).forEach(f => m.set(f.id, f)); return [...m.values()].slice(0, 12); })();
+  const cats = [...new Set([...Object.keys(CAT), ...(S.items || []).map(x => x.store.category).filter(Boolean)])];
+  const el = document.createElement("div"); el.className = "onb"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Bienvenue");
+  document.body.appendChild(el);
+  const finish = async () => {
+    ls.set("vt-onb-" + uid, "1");
+    await savePrefs({ first_name: O.name.trim() || null, interests: [...O.ints], alerts: O.alerts });
+    const add = [...O.fol].filter(id => !isFollowing(id));
+    if (add.length) await sb.from("customer_follows").upsert(add.map(store_id => ({ store_id })), { onConflict: "user_id,store_id", ignoreDuplicates: true });
+    await refreshMe(); el.remove(); route(); toast(O.name ? `Bienvenue ${O.name.trim()} !` : "Bienvenue sur Vitriin !");
+  };
+  const draw = () => {
+    const bars = `<div class="bars">${[0, 1, 2].map(i => `<i class="${i <= O.step ? "on" : ""}"></i>`).join("")}<span style="flex:1"></span><button class="lnk" id="o-skip" style="color:var(--muted)">Passer</button></div>`;
+    if (O.step === 0) el.innerHTML = `${bars}<h2>Bienvenue sur Vitriin</h2>
+      <label for="o-n" style="font-size:13px;font-weight:600">Votre prénom</label><input class="inp" id="o-n" maxlength="40" autocomplete="given-name" value="${esc(O.name)}" style="margin-top:-6px">
+      <b style="font-size:19px;margin-top:10px">Qu'est-ce qui vous fait craquer ?</b><p class="sub">On mettra ces promos en premier.</p>
+      <div class="chipset">${cats.map(c => `<button class="int ${O.ints.has(c) ? "on" : ""}" data-i="${esc(c)}" aria-pressed="${O.ints.has(c)}">${esc(catLabel(c))}</button>`).join("")}</div>
+      <span style="flex:1"></span><button class="btn dark full" id="o-next">Continuer</button>`;
+    else if (O.step === 1) el.innerHTML = `${bars}<h2>Vos commerces près de chez vous</h2><p class="sub">Suivez-les : leurs promos arrivent en premier dans votre fil.</p>
+      <div>${stores.length ? stores.map((st, k) => `<div class="sl"><span class="av" style="width:48px;height:48px;background:var(--p);color:#fff">${logo(st) ? `<img src="${esc(logo(st))}" alt="">` : init(st)}</span>
+        <span style="flex:1;min-width:0"><b style="display:block;font-size:15px">${esc(st.name)}</b><small style="font-size:12.5px;color:var(--muted)">${esc([catLabel(st.category), km(dist(S.pos, st))].filter(Boolean).join(" · "))}</small></span>
+        <button class="fbtn" data-f="${k}" style="${O.fol.has(st.id) ? "background:#f4f3f0" : "background:var(--p);color:#fff"}">${O.fol.has(st.id) ? "Suivi" : "Suivre"}</button></div>`).join("")
+        : `<p class="sub" style="margin-top:8px">Choisissez une ville dans Découvrir pour voir les commerces autour de vous.</p>`}</div>
+      <span style="flex:1"></span><button class="btn dark full" id="o-next">Continuer${O.fol.size ? ` · ${O.fol.size} suivi${O.fol.size > 1 ? "s" : ""}` : ""}</button>`;
+    else el.innerHTML = `${bars}<h2>Ne ratez aucune promo</h2><p class="sub">Une alerte quand un commerce que vous suivez publie une nouvelle offre. Rien d'autre.</p>
+      <button class="li box" id="o-al" role="switch" aria-checked="${O.alerts}" style="margin-top:6px"><span class="sp">Alertes promos</span><span class="tg ${O.alerts ? "on" : ""}"><i></i></span></button>
+      ${storeUrl() ? `<a class="btn line" href="${esc(storeUrl())}">Obtenir l'application Vitriin</a>` : ""}
+      <span style="flex:1"></span><button class="btn p" id="o-next">C'est parti</button>`;
+    $("#o-skip", el).onclick = finish;
+    $("#o-n", el) && ($("#o-n", el).oninput = (e) => { O.name = e.target.value; });
+    $$("[data-i]", el).forEach(b => b.onclick = () => { const c = b.dataset.i; O.ints.has(c) ? O.ints.delete(c) : O.ints.add(c); b.classList.toggle("on"); b.setAttribute("aria-pressed", O.ints.has(c)); });
+    $$("[data-f]", el).forEach(b => b.onclick = () => { const id = stores[+b.dataset.f].id; O.fol.has(id) ? O.fol.delete(id) : O.fol.add(id); draw(); });
+    $("#o-al", el) && ($("#o-al", el).onclick = () => { O.alerts = !O.alerts; draw(); });
+    $("#o-next", el).onclick = () => { if (O.step < 2) { O.step++; draw(); el.scrollTop = 0; } else finish(); };
+  };
+  draw();
+}
+
 /* ---------- Routeur ---------- */
 function go(path) { history.pushState({}, "", path); route(); }
 async function route() {
@@ -824,8 +935,8 @@ document.addEventListener("click", (e) => {
   e.preventDefault(); go(a.getAttribute("href"));
 });
 addEventListener("popstate", route);
-sb.auth.onAuthStateChange(async (ev) => { if (ev === "SIGNED_IN" || ev === "SIGNED_OUT") { await refreshMe(); if (ev === "SIGNED_IN") { await runPending(); route(); } } });
-(async () => { await refreshMe(); await runPending(); route(); })();
+sb.auth.onAuthStateChange(async (ev) => { if (ev === "SIGNED_IN" || ev === "SIGNED_OUT") { await refreshMe(); if (ev === "SIGNED_IN") { $("#gate")?.remove(); await runPending(); route(); maybeOnboard(); } } });
+(async () => { await refreshMe(); await runPending(); route(); maybeOnboard(); })();
 </script>
 </body>
 </html>
