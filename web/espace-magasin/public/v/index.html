@@ -71,8 +71,12 @@ h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0}
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .eco{background:var(--grad);border-radius:20px;padding:18px 20px;color:#fff;margin-bottom:16px}
 .eco b{display:block;font-size:32px;letter-spacing:-.02em;margin-top:4px}
-.used{display:flex;align-items:center;gap:13px}
-.used img{width:48px;height:48px;border-radius:12px;object-fit:cover;flex:none;background:var(--rose)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.gt{position:relative;display:block;aspect-ratio:4/5;border-radius:12px;overflow:hidden;background:var(--rose);text-align:left;width:100%}
+.gt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gt .shade{background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(0,0,0,.7))}
+.gt .mini{font-size:10.5px;max-width:calc(100% - 14px);overflow:hidden;text-overflow:ellipsis}
+.gb{position:absolute;left:7px;right:7px;bottom:6px;color:#fff;font-size:10.5px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pill{background:var(--mint);color:#4f7a55;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px}
 .fol{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px}
 .fol .av{width:46px;height:46px;border-radius:14px;background:var(--p);color:#fff;font-size:18px}
@@ -216,20 +220,6 @@ nav.tabs a.on{color:var(--p)}
 .onb .sub{font-size:14.5px;color:var(--muted);line-height:1.5;margin:-4px 0 0}
 .onb .chipset{display:flex;flex-wrap:wrap;gap:9px}
 .onb .sl{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
-/* Promos en fil, façon publication */
-.posts{display:flex;flex-direction:column;gap:26px;padding:0 20px}
-.post .ph{display:flex;align-items:center;gap:10px;margin-bottom:10px;min-height:40px}
-.post .ph .dot{width:36px;height:36px;font-size:14px}
-.post .ph b{display:block;font-size:14px;letter-spacing:-.01em}.post .ph small{display:block;font-size:12px;color:var(--muted)}
-.pimg{position:relative;display:block;width:100%;aspect-ratio:4/5;border-radius:20px;overflow:hidden;background:var(--rose)}
-.pimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.pimg .bdg{position:absolute;top:12px;left:12px}
-.pact{display:flex;align-items:center;gap:8px;margin-top:12px}
-.pact .btn{flex:1;min-height:46px;font-size:15px}
-.pact .ic{width:46px;height:46px;border-radius:14px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;flex:none}
-.ptt{display:block;font-size:17px;letter-spacing:-.01em;margin-top:12px;line-height:1.25}
-.post .prc strong{font-size:19px;color:var(--p)}.post .prc s{font-size:13.5px;color:#b0aaa3}
-.post .when{font-size:12.5px;color:var(--muted);margin-top:5px}
 /* Fiche commerce */
 .cover{position:relative;height:190px;margin-top:calc(-1 * (var(--sat) + 22px));background:var(--grad) center/cover no-repeat}
 .cover .back{position:absolute;top:calc(var(--sat) + 14px);left:16px;border:none;box-shadow:0 2px 10px rgba(0,0,0,.15)}
@@ -464,29 +454,12 @@ async function runPending() {
 }
 
 /* ---------- Éléments ---------- */
-function bindCards(root, list) {
-  $$("[data-open]", root).forEach(b => b.onclick = () => openReels(list, +b.dataset.open));
-  $$("[data-save]", root).forEach(b => b.onclick = async () => { const x = list[+b.dataset.save]; const on = await toggleSave(x.promo, x.store); if (on != null) { b.innerHTML = IC.bookmark(on); b.setAttribute("aria-pressed", on); } });
+// Règle côté particulier : les promos s'affichent en carrousel (vignettes) ou en plein écran, jamais en liste.
+// Toucher une vignette ouvre le plein écran à cette promo ; on fait défiler les suivantes de la même rangée.
+function tilesHtml(list, key, withStore) {
+  return `<div class="tiles">${list.map((x, k) => { const pr = pricing(x.promo); return `<button class="tile" data-tl="${key}:${k}" aria-label="Voir ${esc(x.promo.title)}">${x.promo.img ? `<img src="${esc(x.promo.img)}" alt="" loading="lazy">` : ""}<span class="shade" style="position:absolute;inset:0"></span><span class="mini">${esc(pr.badge)}</span><span class="tt">${esc(x.promo.title)}<small>${esc(withStore ? [x.store.name, km(x.d)].filter(Boolean).join(" · ") : `Jusqu'au ${day(x.promo.ends_at)}`)}</small></span></button>`; }).join("")}</div>`;
 }
-// Une promo comme une publication : image 4:5, « J'en profite », garder, partager.
-function postHtml(x, k, head) {
-  const p = x.promo, s = x.store, pr = pricing(p), on = isSaved(p.id);
-  return `<article class="post">
-    ${head ? `<a class="ph" href="/v/m/${esc(s.slug)}" data-link><span class="dot">${logo(s) ? `<img src="${esc(logo(s))}" alt="">` : init(s)}</span><span><b>${esc(s.name)}</b><small>${esc([s.city, km(x.d)].filter(Boolean).join(" · "))}</small></span></a>` : ""}
-    <button class="pimg" data-open="${k}" aria-label="Voir ${esc(p.title)} en plein écran">${p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy">` : ""}<span class="bdg">${esc(pr.badge)}</span></button>
-    <b class="ptt">${esc(p.title)}</b>
-    ${pr.price != null ? `<span class="prc"><strong>${eur(pr.price)}</strong>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}</span>` : ""}
-    <div class="when">Jusqu'au ${day(p.ends_at)}</div>
-    <div class="pact"><button class="btn p" data-cpo="${k}">${IC.coupon.replace(/22/g, "19")}J'en profite</button>
-      <button class="ic" data-save="${k}" aria-label="${on ? "Retirer des promos gardées" : "Garder la promo"}" aria-pressed="${on}">${IC.bookmark(on)}</button>
-      <button class="ic" data-psh="${k}" aria-label="Partager">${IC.share.replace('stroke="#fff"', 'stroke="currentColor"').replace(/22/g, "19")}</button></div>
-  </article>`;
-}
-function bindPosts(root, list) {
-  bindCards(root, list);
-  $$("[data-cpo]", root).forEach(b => b.onclick = () => coupon(list[+b.dataset.cpo]));
-  $$("[data-psh]", root).forEach(b => b.onclick = () => { const x = list[+b.dataset.psh]; share(x.promo.title, `${x.promo.title} chez ${x.store.name}`, `${location.origin}/v/p/${x.promo.id}`); });
-}
+function bindTiles(lists) { $$("[data-tl]").forEach(b => b.onclick = () => { const [key, k] = b.dataset.tl.split(":"); openReels(lists[key], +k); }); }
 const emptyHtml = (title, text, icon) => `<div class="empty"><div class="ic">${icon || IC.bookmark(false)}</div><b>${title}</b><p>${text}</p></div>`;
 
 /* ---------- Écrans ---------- */
@@ -543,6 +516,7 @@ async function pageFeed() {
   const q = S.q.trim().toLowerCase();
   const list = all.filter(x => (S.filter === "Tout" || catLabel(x.store.category) === S.filter) && (!q || (x.promo.title + " " + x.store.name).toLowerCase().includes(q)));
   const ST = storiesOf(all);
+  const byCat = [...list.reduce((m, x) => { const c = catLabel(x.store.category); m.set(c, [...(m.get(c) || []), x]); return m; }, new Map())].filter(([, l]) => l.length > 1);
   shell("feed", `<div class="pad row" style="justify-content:space-between;gap:8px">
       <span class="wm" aria-label="Vitriin">vitriin</span>
       <div class="row" style="gap:8px">${S.pos ? `<button class="cityp" id="city" aria-label="Changer de ville">${IC.pin}<span>${esc(S.pos.label || "Autour de moi")}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>` : ""}
@@ -556,12 +530,12 @@ async function pageFeed() {
         <button class="btn p" id="geo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Autour de moi</button>
         ${C.length ? `<div class="lbl" style="margin:24px 0 2px">VILLES OÙ ÇA BOUGE</div>${citiesHtml(C)}` : ""}</div>` : `
     ${O && !isFollowing(O.store.id) ? `<div class="sect" style="padding-top:16px"><span>Chez ${esc(O.store.name)}</span><a class="lnk" href="/v/m/${esc(O.store.slug)}" data-link>${O.list.length} promo${O.list.length > 1 ? "s" : ""}${IC.chev}</a></div>
-      <div class="tiles" id="otiles">${O.list.map((x, k) => { const pr = pricing(x.promo); return `<button class="tile" data-o="${k}">${x.promo.img ? `<img src="${esc(x.promo.img)}" alt="" loading="lazy">` : ""}<span class="shade" style="position:absolute;inset:0"></span><span class="mini">${esc(pr.badge)}</span><span class="tt">${esc(x.promo.title)}<small>Jusqu'au ${day(x.promo.ends_at)}</small></span></button>`; }).join("")}</div>
+      ${tilesHtml(O.list, "o")}
       <div class="fsug"><span class="av" style="width:44px;height:44px;background:var(--p);color:#fff">${logo(O.store) ? `<img src="${esc(logo(O.store))}" alt="">` : init(O.store)}</span><span style="flex:1;font-size:13.5px;line-height:1.35"><b>Suivez ${esc(O.store.name)}</b><br><span style="color:var(--muted)">Leurs promos en premier, dans votre fil</span></span><button class="fbtn" id="ofol" style="background:var(--p);color:#fff">Suivre</button></div>` : ""}
     <div class="chips">${cats.map(c => `<button class="chip ${S.filter === c ? "on" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("")}</div>
     <div class="sect"><span>Autour de vous</span>${list.length ? `<button class="lnk" data-full>Plein écran${IC.chev}</button>` : ""}</div>
     ${S.wide && list.length ? `<p class="pad" style="margin:-6px 0 10px;font-size:12.5px;color:var(--muted)">Rien à moins de ${radius()} km : on a élargi la recherche.</p>` : ""}
-    <div class="posts" id="mlist">${list.length ? list.map((x, k) => postHtml(x, k, true)).join("") : emptyHtml("Pas encore de promo par ici", "Les commerces de ton quartier n'utilisent pas encore Vitriin. Ailleurs, ça bouge :")}</div>
+    ${list.length ? tilesHtml(list, "a", true) + (S.filter === "Tout" ? byCat.map(([c, l], i) => `<div class="sect" style="padding-top:22px"><span>${esc(c)}</span></div>${tilesHtml(l, "c" + i, true)}`).join("") : "") : emptyHtml("Pas encore de promo par ici", "Les commerces de votre quartier n'utilisent pas encore Vitriin. Ailleurs, ça bouge :")}
     ${!list.length && C.length ? `<div class="pad" style="padding-top:4px">${citiesHtml(C)}</div>` : ""}`}${stripHtml()}`);
   $("#city") && ($("#city").onclick = () => { S.pos = null; S.items = null; ls.set("vt-pos", null); pageFeed(); });
   $("#login") && ($("#login").onclick = () => gateSheet());
@@ -571,32 +545,33 @@ async function pageFeed() {
   let t; $("#q").oninput = () => { if (!S.pos) return; clearTimeout(t); t = setTimeout(() => { S.q = $("#q").value; const pos = $("#q").selectionStart; pageFeed(); $("#q").focus(); $("#q").setSelectionRange(pos, pos); }, 250); };
   $$("[data-cat]").forEach(b => b.onclick = () => { S.filter = b.dataset.cat; pageFeed(); });
   $("[data-full]") && ($("[data-full]").onclick = () => openReels(list, 0));
-  bindPosts($("#mlist") || app(), list);
+  bindTiles({ a: list, o: O?.list || [], ...Object.fromEntries(byCat.map(([, l], i) => ["c" + i, l])) });
   bindCities(C); bindStrip();
-  if (O) { $$("[data-o]").forEach(b => b.onclick = () => openReels(O.list, +b.dataset.o)); $("#ofol") && ($("#ofol").onclick = async () => { if (await toggleFollow(O.store) != null) pageFeed(); }); }
+  if (O) { $("#ofol") && ($("#ofol").onclick = async () => { if (await toggleFollow(O.store) != null) pageFeed(); }); }
 }
 
+// Mes promos : grille de 3 vignettes, « Voir + » affiche les suivantes.
+const GRID_STEP = 3;
+const gridTile = (img, top, bottom, attrs) => `<${attrs ? "button" : "div"} class="gt" ${attrs || ""}>${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : ""}<span class="shade" style="position:absolute;inset:0"></span>${top}${bottom ? `<span class="gb">${bottom}</span>` : ""}</${attrs ? "button" : "div"}>`;
 async function pagePromos() {
-  if (!S.session) return pageAuth("Retrouve tes promos enregistrées et ce que tu as économisé.");
+  if (!S.session) return pageAuth("Retrouvez vos promos gardées et ce que vous avez économisé.");
   document.title = "Mes promos · Vitriin";
   const saves = S.me?.saves || [], uses = S.me?.uses || [];
   const tab = S.promoTab;
+  S.gridN = S.gridN || { saved: GRID_STEP, used: GRID_STEP };
+  const n = S.gridN[tab], items = tab === "saved" ? saves : uses;
   const total = uses.reduce((t, u) => t + (pricing({ ...u, mechanic: null }).saving || 0), 0);
+  const more = items.length > n ? `<button class="btn line" id="more" style="margin-top:14px">Voir +</button>` : "";
   shell("promos", `<div class="pad" style="padding-bottom:12px"><h1>Mes promos</h1></div>
-    <div class="pad" style="padding-bottom:12px"><div class="seg" role="tablist"><button role="tab" aria-selected="${tab === "saved"}" class="${tab === "saved" ? "on" : ""}" data-t="saved">Sauvegardées</button><button role="tab" aria-selected="${tab === "used"}" class="${tab === "used" ? "on" : ""}" data-t="used">Utilisées</button></div></div>
-    ${tab === "saved" ? `<div class="posts" id="saved" style="padding-top:6px">${saves.length ? saves.map((x, k) => postHtml(x, k, true)).join("")
+    <div class="pad" style="padding-bottom:12px"><div class="seg" role="tablist"><button role="tab" aria-selected="${tab === "saved"}" class="${tab === "saved" ? "on" : ""}" data-t="saved">Gardées</button><button role="tab" aria-selected="${tab === "used"}" class="${tab === "used" ? "on" : ""}" data-t="used">Utilisées</button></div></div>
+    ${tab === "saved" ? `<div class="pad">${saves.length ? `<div class="grid3">${saves.slice(0, n).map((x, k) => gridTile(x.promo.img, `<span class="mini" style="position:absolute;top:7px;left:7px">${esc(pricing(x.promo).badge)}</span>`, esc(x.store.name), `data-g="${k}" aria-label="Voir ${esc(x.promo.title)}"`)).join("")}</div>${more}`
       : emptyHtml("Aucune promo gardée", "Touchez « Garder » sur une promo pour la retrouver ici.")}</div>`
     : `<div class="pad" style="padding-top:6px"><div class="eco"><div style="font-size:13px;opacity:.9">Économisé avec Vitriin</div><b>${eur(total)}</b><div style="font-size:12.5px;opacity:.85;margin-top:2px">sur ${uses.length} promo${uses.length > 1 ? "s" : ""} utilisée${uses.length > 1 ? "s" : ""}</div></div>
-      ${uses.length ? `<div style="display:flex;flex-direction:column;gap:14px">${uses.map(u => { const sv = pricing({ ...u, mechanic: null }).saving; return `<div class="used">${u.img ? `<img src="${esc(u.img)}" alt="">` : `<span style="width:48px;height:48px;border-radius:12px;background:var(--rose);flex:none"></span>`}
-        <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">${esc(u.title)}</div><div style="font-size:12px;color:var(--muted);margin-top:3px">${esc(u.store)} · ${day(u.at)}</div></div>
-        ${sv ? `<div style="text-align:right;flex:none"><div style="font-weight:700;font-size:14.5px;color:var(--green)">−${eur(sv)}</div><div style="font-size:10.5px;color:var(--faint)">économisé</div></div>` : ""}</div>`; }).join("")}</div>`
-      : emptyHtml("Pas encore de promo utilisée", "Quand tu présentes un coupon en caisse, il apparaît ici avec ce que tu as économisé.", IC.coupon.replace('stroke="currentColor"', 'stroke="#c9c4bc"'))}</div>`}`);
+      ${uses.length ? `<div class="grid3">${uses.slice(0, n).map(u => { const sv = pricing({ ...u, mechanic: null }).saving; return gridTile(u.img, sv ? `<span class="mini" style="position:absolute;top:7px;left:7px;background:var(--green)">−${eur(sv)}</span>` : "", `${esc(u.store)} · ${day(u.at)}`); }).join("")}</div>${more}`
+      : emptyHtml("Pas encore de promo utilisée", "Quand vous utilisez un code en caisse, il apparaît ici avec ce que vous avez économisé.", IC.coupon.replace('stroke="currentColor"', 'stroke="#c9c4bc"'))}</div>`}`);
   $$("[data-t]").forEach(b => b.onclick = () => { S.promoTab = b.dataset.t; pagePromos(); });
-  if ($("#saved")) {
-    bindPosts($("#saved"), saves);
-    // Retirer une promo gardée la fait disparaître de la liste.
-    $$("#saved [data-save]").forEach(b => b.onclick = async () => { const x = saves[+b.dataset.save]; if (await toggleSave(x.promo, x.store) === false) pagePromos(); });
-  }
+  $("#more") && ($("#more").onclick = () => { S.gridN[tab] += GRID_STEP * 2; pagePromos(); });
+  $$("[data-g]").forEach(b => b.onclick = () => openReels(saves, +b.dataset.g));
 }
 
 async function pageFollows() {
@@ -696,11 +671,11 @@ async function pageStore(slug) {
     ${infos.length ? `<div class="pad" style="padding-top:16px"><div class="box sinfo">${infos.join("")}</div></div>` : ""}
     ${bb ? `<div class="pad" style="padding-top:12px"><a class="smap" href="${mapsUrl(s)}" target="_blank" rel="noopener" aria-label="Ouvrir le plan"><iframe title="Plan : ${esc(s.name)}" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${bb}&amp;layer=mapnik&amp;marker=${s.lat},${s.lng}"></iframe><span>Ouvrir le plan</span></a></div>` : ""}
     ${list.length ? `<div class="sect" style="padding-top:24px"><span>En ce moment</span></div>
-    <div class="tiles" style="padding-bottom:8px">${list.map((x, k) => { const pr = pricing(x.promo); return `<button class="tile" data-st="${k}" aria-label="Voir ${esc(x.promo.title)}">${x.promo.img ? `<img src="${esc(x.promo.img)}" alt="" loading="lazy">` : ""}<span class="shade" style="position:absolute;inset:0"></span><span class="mini">${esc(pr.badge)}</span><span class="tt">${esc(x.promo.title)}<small>Jusqu'au ${day(x.promo.ends_at)}</small></span></button>`; }).join("")}</div>` : ""}`);
+    ${tilesHtml(list, "s")}` : ""}`);
   $("#bk").onclick = () => history.length > 1 ? history.back() : go("/v/");
   $("#fl").onclick = async () => { const r = await toggleFollow(s); if (r != null) pageStore(slug); };
   // Toucher une promo ouvre le plein écran à cette promo ; on fait défiler les suivantes.
-  $$("[data-st]").forEach(b => b.onclick = () => openReels(list, +b.dataset.st));
+  bindTiles({ s: list });
 }
 
 // Arrivée par un lien (post, QR code, newsletter) : la promo s'ouvre tout de suite en plein écran,

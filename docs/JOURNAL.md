@@ -20,6 +20,17 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-055 · Particulier : carrousels partout, grille pour Mes promos
+- **Accueil** : « Autour de vous » en carrousel de vignettes (plus de publications empilées), puis un carrousel par
+  catégorie quand le filtre est sur « Tout ». Toucher une vignette ouvre le plein écran sur cette promo, puis on fait
+  défiler la rangée. Même composant pour « Chez … » (commerce d'origine) et la fiche commerce.
+- **Mes promos** : « Gardées » et « Utilisées » en grille de 3 vignettes (badge ou économie, magasin), « Voir + » pour
+  les suivantes ; une vignette gardée ouvre le plein écran.
+- **Nettoyage** : suppression des publications en fil (`postHtml`, `bindPosts`, `bindCards`) et de leurs styles,
+  remplacés par `tilesHtml` / `bindTiles`.
+- **Règle mise à jour** : promos en plein écran ou en carrousel, grille autorisée pour Mes promos.
+- **Où** : `public/v/index.html`. **Retour arrière** : `git revert`.
+
 ### MOD-054 · Règle UI particulier : promos en fil ou en carrousel uniquement
 - **Règle (décidée avec Charles le 31/10)** : côté particulier, les promotions ne s'affichent que sous forme de fil
   (publications, plein écran) ou de carrousel, jamais en liste.
