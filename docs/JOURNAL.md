@@ -20,6 +20,14 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-059 · Particulier : fil enrichi, Mes promos sur un écran, profil complet, photo
+- **Fil `/v/`** : « Autour de vous » devient « À découvrir » (centres d'intérêt et catégories suivies d'abord, puis univers proches via la table `AFF`). Nouveaux carrousels « Derniers jours » (fin < 72 h), « Commerces à suivre » (cartes magasin), « Bientôt » (promos qui démarrent sous 21 jours), puis une tuile « Toutes les promos en plein écran ». Recherche ou filtre : un seul carrousel de résultats.
+- **Promo à venir en plein écran** : pas de code ni de « Garder », bouton « Disponible le X » qui fait suivre le commerce.
+- **Mes promos** : un seul écran, économies, carrousel « Gardées » (disparaissent à échéance), carrousel « Utilisées » grisé et inactif. Grille, onglets et « Voir + » retirés.
+- **Profil** : compte (prénom, nom, email, téléphone ; changement d'email confirmé par lien Supabase), centres d'intérêt en vignettes avec pictos, interrupteurs Localisation, Alertes, Newsletter (opt-in, désactivée par défaut). CTA « Passer en mode commerçant » retiré. Photo de profil en touchant l'avatar (carré 320 px JPEG).
+- **Base** (`20261031070000_customer_profile_soon.sql`) : `customer_prefs` + `last_name`, `phone`, `newsletter`, `geo`, `avatar_url` (limité au bucket avatars) ; fonction `vitrine_soon` (anon/authenticated, aucun code exposé) ; bucket public `avatars` (1 Mo, jpeg/png/webp), RLS : chacun n'écrit, ne liste et ne supprime que `avatars/<son uid>/`.
+- **Retour arrière** : `git revert` du commit ; migration inverse (drop des colonnes, de `vitrine_soon`, des policies et du bucket).
+
 ### MOD-058 · Accueil particulier : toujours le fil de promos
 - **Problème** : sans position connue, l'accueil `/v/` affichait un écran « Les bons plans de vos commerces… / Autour de moi / villes » au lieu du fil. Contraire à la maquette (écran 4).
 - **Base** : nouvelle fonction `vitrine_feed(p_lat, p_lng, p_demo)` (SECURITY DEFINER, anon/authenticated) : promos en cours dédupliquées par promotion (le magasin le plus proche quand une position est connue), triées par distance puis nouveauté, 80 max. Migration `20261031060000_vitrine_feed.sql`.
