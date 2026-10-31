@@ -20,6 +20,12 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-056 · Particulier : noms des stories lisibles, badges courts
+- **Stories** : nom de l'enseigne sans la ville, sur deux lignes au plus (plus de « Jardins & S… »).
+- **Badges** : un texte libre de plus de 14 caractères est raccourci (« Atelier offert samedi » → « Offert »,
+  « −20 % sur le rayon » → « −20 % », sinon « Bon plan ») ; le texte complet s'affiche sous le titre en plein écran.
+- **Où** : `public/v/index.html` (`shortBadge`, `storyName`). **Retour arrière** : `git revert`.
+
 ### MOD-055 · Particulier : carrousels partout, grille pour Mes promos
 - **Accueil** : « Autour de vous » en carrousel de vignettes (plus de publications empilées), puis un carrousel par
   catégorie quand le filtre est sur « Tout ». Toucher une vignette ouvre le plein écran sur cette promo, puis on fait

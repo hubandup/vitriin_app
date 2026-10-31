@@ -210,7 +210,8 @@ nav.tabs a.on{color:var(--p)}
 .story .ring{width:68px;height:68px;border-radius:50%;padding:3px;background:#e2ded8}
 .story .ring.new{background:linear-gradient(135deg,#e5087e,#951b81)}
 .story .ring .av{width:100%;height:100%;border:2.5px solid #fff;background:var(--p);color:#fff;font-size:18px}
-.story small{font-size:11.5px;max-width:68px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.story small{font-size:11px;line-height:1.25;width:78px;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.story{width:78px}
 /* Inscription en feuille et onboarding */
 .otp{letter-spacing:.5em;text-align:center;font-size:24px}
 .onb{position:fixed;inset:0;z-index:75;background:#fff;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:calc(var(--sat) + 18px) 22px calc(26px + var(--sab));animation:fade .2s}
@@ -275,9 +276,19 @@ const IC = {
   clock: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
 };
 
+// Badge court : un texte libre trop long (« Atelier offert samedi ») devient « Offert », « −20 % »… ;
+// le texte complet reste affiché sous le titre en plein écran.
+function shortBadge(t) {
+  t = String(t || "").trim();
+  if (t.length <= 14) return t || "Promo";
+  const pc = t.match(/[-−]\s?\d+\s?%/); if (pc) return pc[0].replace("-", "−").replace(/\s/g, " ");
+  if (/offert|gratuit/i.test(t)) return "Offert";
+  if (/\d+\s?\+\s?\d+/.test(t)) return t.match(/\d+\s?\+\s?\d+/)[0] + " offert";
+  return "Bon plan";
+}
 function pricing(p) {
   const o = p.orig != null ? +p.orig : null, v = p.val != null ? +p.val : null;
-  if (p.mechanic && v == null) return { price: null, old: null, badge: p.mechanic, saving: null };
+  if (p.mechanic && v == null) return { price: null, old: null, badge: shortBadge(p.mechanic), full: p.mechanic, saving: null };
   switch (p.type) {
     case "percent": return { price: o != null ? Math.round(o * (100 - v)) / 100 : null, old: o, badge: `−${v} %`, saving: o != null ? Math.round(o * v) / 100 : null };
     case "amount": return { price: o != null ? Math.max(0, o - v) : null, old: o, badge: `−${eur(v)}`, saving: v };
@@ -286,7 +297,7 @@ function pricing(p) {
     case "cashback": return { price: null, old: null, badge: `${v} % cagnottés`, saving: null };
     case "free_with_condition": return { price: null, old: null, badge: "Offert", saving: null };
   }
-  return { price: null, old: null, badge: p.mechanic || "Promo", saving: null };
+  return { price: null, old: null, badge: shortBadge(p.mechanic), full: p.mechanic, saving: null };
 }
 const init = (s) => (s?.name || "?").trim()[0].toUpperCase();
 const logo = (s) => s.logo_url || s.network_logo;
@@ -481,6 +492,8 @@ function bindCities(C) { $$("[data-city]").forEach(b => b.onclick = () => { cons
 // Promos déjà vues en plein écran : l'anneau d'une story devient gris quand tout est vu.
 const seen = (() => { try { return new Set(JSON.parse(ls.get("vt-seen") || "[]")); } catch { return new Set(); } })();
 function markSeen(ids) { ids.forEach(id => seen.add(id)); ls.set("vt-seen", JSON.stringify([...seen].slice(-400))); }
+// Nom sous une story : l'enseigne sans la ville, sur deux lignes au plus.
+const storyName = (st) => { const n = (st.network || st.name || "").trim(); const c = (st.city || "").trim(); return (c && n.toLowerCase().endsWith(" " + c.toLowerCase()) ? n.slice(0, -c.length - 1) : n.split(/\s+(?:Lyon|Paris|Marseille)\b/i)[0]).trim() || n; };
 // Stories : un rond par commerce qui a des promos autour de vous, les commerces suivis d'abord.
 function storiesOf(items) {
   const by = new Map();
@@ -521,7 +534,7 @@ async function pageFeed() {
       <span class="wm" aria-label="Vitriin">vitriin</span>
       <div class="row" style="gap:8px">${S.pos ? `<button class="cityp" id="city" aria-label="Changer de ville">${IC.pin}<span>${esc(S.pos.label || "Autour de moi")}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>` : ""}
         ${S.session ? `<a class="av" href="/v/profil" data-link aria-label="Profil" style="width:38px;height:38px">${esc((name || S.me?.email || "?")[0].toUpperCase())}</a>` : `<button class="loginp" id="login">Connexion</button>`}</div></div>
-    ${S.pos && ST.length ? `<div class="stories" aria-label="Commerces avec des promos">${ST.map((g, k) => `<button class="story" data-story="${k}"><span class="ring ${g.fresh ? "new" : ""}"><span class="av">${logo(g.store) ? `<img src="${esc(logo(g.store))}" alt="">` : init(g.store)}</span></span><small>${esc(g.store.name)}</small></button>`).join("")}</div>` : ""}
+    ${S.pos && ST.length ? `<div class="stories" aria-label="Commerces avec des promos">${ST.map((g, k) => `<button class="story" data-story="${k}"><span class="ring ${g.fresh ? "new" : ""}"><span class="av">${logo(g.store) ? `<img src="${esc(logo(g.store))}" alt="">` : init(g.store)}</span></span><small>${esc(storyName(g.store))}</small></button>`).join("")}</div>` : ""}
     <div class="pad" style="padding-top:12px"><form class="search" id="sf" role="search">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>
       <input id="q" type="search" placeholder="${S.pos ? "Un produit, un commerce…" : "Ta ville ou ton code postal"}" aria-label="${S.pos ? "Rechercher un produit ou un commerce" : "Ta ville ou ton code postal"}" value="${esc(S.pos ? S.q : "")}"></form></div>
@@ -707,7 +720,7 @@ function openReels(list, start, direct) {
     <div class="side"><button data-sv="${k}" aria-pressed="${sv}"><i class="gl">${IC.save(sv)}</i><span>${sv ? "Gardée" : "Garder"}</span></button>
       <a href="${mapsUrl(s)}" target="_blank" rel="noopener"><i class="gl">${IC.go.replace('width="19" height="19"', 'width="21" height="21"')}</i>Y aller</a>
       <button data-sh="${k}"><i class="gl">${IC.share}</i>Partager</button></div>
-    <div class="rinfo"><small>${esc(catLabel(s.category))} · Jusqu'au ${day(p.ends_at)}</small><h3>${esc(p.title)}</h3>${p.text || p.sub ? `<p>${esc(p.text || p.sub)}</p>` : ""}
+    <div class="rinfo"><small>${esc(catLabel(s.category))} · Jusqu'au ${day(p.ends_at)}</small><h3>${esc(p.title)}</h3>${p.text || p.sub || (pr.full && pr.full !== pr.badge) ? `<p>${esc(p.text || p.sub || pr.full)}</p>` : ""}
       <div class="prc" style="margin-top:13px;align-items:center">${pr.price != null ? `<strong>${eur(pr.price)}</strong>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}` : ""}<span class="bdg">${esc(pr.badge)}</span></div>
       <button class="rcta" data-cp="${k}">${IC.coupon}J'en profite</button>
       <div class="rhint">${S.session ? "Un code à montrer en caisse" : "Sans inscription · un code à montrer en caisse"}</div>
