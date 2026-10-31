@@ -282,7 +282,9 @@ function shortBadge(t) {
   t = String(t || "").trim();
   if (t.length <= 14) return t || "Promo";
   const pc = t.match(/[-−]\s?\d+\s?%/); if (pc) return pc[0].replace("-", "−").replace(/\s/g, " ");
+  const am = t.match(/[-−]\s?\d+(?:[.,]\d+)?\s?€/); if (am) return "−" + am[0].replace(/^[-−]\s?/, "").replace(/\s?€/, " €");
   if (/offert|gratuit/i.test(t)) return "Offert";
+  const des = t.match(/d[èe]s\s?(\d+(?:[.,]\d+)?)\s?€/i); if (des) return `Dès ${des[1]} €`;
   if (/\d+\s?\+\s?\d+/.test(t)) return t.match(/\d+\s?\+\s?\d+/)[0] + " offert";
   return "Bon plan";
 }

@@ -23,7 +23,8 @@ Repères :
 ### MOD-056 · Particulier : noms des stories lisibles, badges courts
 - **Stories** : nom de l'enseigne sans la ville, sur deux lignes au plus (plus de « Jardins & S… »).
 - **Badges** : un texte libre de plus de 14 caractères est raccourci (« Atelier offert samedi » → « Offert »,
-  « −20 % sur le rayon » → « −20 % », sinon « Bon plan ») ; le texte complet s'affiche sous le titre en plein écran.
+  « −20 % sur le rayon » → « −20 % », « −10 € sur la 2e paire » → « −10 € », « Dès 50 € d'achat » → « Dès 50 € »,
+  sinon « Bon plan ») ; le texte complet s'affiche sous le titre en plein écran.
 - **Où** : `public/v/index.html` (`shortBadge`, `storyName`). **Retour arrière** : `git revert`.
 
 ### MOD-055 · Particulier : carrousels partout, grille pour Mes promos
