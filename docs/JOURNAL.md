@@ -20,6 +20,14 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-051 · Plein écran des promos : épuré
+- **Quoi** : retrait des barres de progression en haut (elles suggéraient un balayage gauche/droite) et de
+  « Promo suivante » ; à la première ouverture (une fois par session), la promo fait un petit sursaut vers le haut
+  qui laisse apercevoir la suivante. Picto « Y aller » remplacé par un repère de carte (il ressemblait à
+  « Partager »), partout (plein écran, feuille du code, fiche commerce).
+- **Où** : `public/v/index.html`.
+- **Retour arrière** : `git revert`.
+
 ### MOD-050 · Particulier : cap sur l'application mobile, plus d'invitation à « ajouter à l'écran d'accueil »
 - **Quoi** : Vitriin particulier sera une application mobile (App Store, Google Play), pas une web app installée.
   Le mode d'emploi Safari et l'invitation d'installation Android sont retirés. Les bandeaux « Obtenir » (plein écran

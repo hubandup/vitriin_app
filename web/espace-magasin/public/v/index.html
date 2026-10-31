@@ -125,9 +125,7 @@ nav.tabs a.on{color:var(--p)}
 @media (min-width:560px){.reels{max-width:430px;margin:0 auto}}
 .reel{position:relative;height:100dvh;scroll-snap-align:start;overflow:hidden;background:#1a1a1a}
 .reel .shade{background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.25) 42%,rgba(0,0,0,.12) 70%,rgba(0,0,0,.3) 100%)}
-.prog{position:absolute;top:calc(var(--sat) + 12px);left:16px;right:16px;display:flex;gap:5px}
-.prog i{flex:1;height:3px;border-radius:999px;background:rgba(255,255,255,.3)}.prog i.on{background:#fff}
-.rh{position:absolute;top:calc(var(--sat) + 24px);left:16px;right:16px;display:flex;align-items:center;gap:10px;color:#fff}
+.rh{position:absolute;top:calc(var(--sat) + 14px);left:16px;right:16px;display:flex;align-items:center;gap:10px;color:#fff}
 .gl{background:rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .rb{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;flex:none}
 .rh .av{width:36px;height:36px;font-size:15px;background:rgba(255,255,255,.2);color:#fff}
@@ -194,7 +192,7 @@ nav.tabs a.on{color:var(--p)}
 .ibar .wm{font-weight:800;font-size:18px;letter-spacing:-.03em}
 .ibar span{flex:1;font-size:12px;line-height:1.3;color:rgba(255,255,255,.86)}
 .ibar .get{background:#fff;color:var(--ink);font-weight:700;font-size:13px;padding:0 12px;min-height:36px;border-radius:10px}
-.reel.wb .prog{top:calc(var(--sat) + 76px)}.reel.wb .rh{top:calc(var(--sat) + 88px)}
+.reel.wb .rh{top:calc(var(--sat) + 76px)}
 .strip{position:fixed;left:12px;right:12px;bottom:calc(88px + var(--sab));z-index:19;display:flex;align-items:center;gap:10px;padding:10px 8px 10px 14px;border-radius:16px;background:var(--ink);color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.2)}
 @media (min-width:560px){.strip{max-width:406px;margin:0 auto}}
 .strip span{flex:1;font-size:13px;line-height:1.35}.strip em{font-style:normal;opacity:.75}
@@ -251,7 +249,7 @@ const IC = {
   chev: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
   back: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
   coupon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M7 6v12M11 6v12M14 6v12M17 6v12"/></svg>',
-  go: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 21 3l-8 18-2.5-7.5L3 11Z"/></svg>',
+  go: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>',
   share: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-4-9-9-4 20-5Z"/></svg>',
   save: (on) => `<svg width="22" height="22" viewBox="0 0 24 24" fill="${on ? "var(--p)" : "none"}" stroke="${on ? "var(--p)" : "#fff"}" stroke-width="1.9" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4V4Z"/></svg>`,
   clock: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
@@ -634,7 +632,6 @@ function openReels(list, start, direct) {
   el.innerHTML = list.map((x, k) => { const p = x.promo, s = x.store, pr = pricing(p), sv = isSaved(p.id), fo = isFollowing(s.id); return `<section class="reel ${bar && k === 0 ? "wb" : ""}">
     ${p.img ? `<img src="${esc(p.img)}" alt="">` : ""}<div class="shade"></div>
     ${bar && k === 0 ? `<div class="ibar"><span class="wm">vitriin</span><span>Toutes les promos de vos magasins, au même endroit</span><button class="get" data-inst>Obtenir</button><button class="rb" data-ibx aria-label="Fermer" style="width:30px;height:30px">×</button></div>` : ""}
-    <div class="prog">${list.length > 1 ? list.slice(0, 8).map((_, j) => `<i class="${j === Math.min(k, 7) ? "on" : ""}"></i>`).join("") : ""}</div>
     <div class="rh"><button class="rb gl" data-x aria-label="Fermer">${IC.back}</button><a class="av" href="/v/m/${esc(s.slug)}" data-store="${k}">${logo(s) ? `<img src="${esc(logo(s))}" alt="">` : init(s)}</a>
       <a href="/v/m/${esc(s.slug)}" data-store="${k}" style="flex:1;min-width:0;line-height:1.25"><b>${esc(s.name)}</b><span>${esc([s.city, km(x.d)].filter(Boolean).join(" · "))}</span></a>
       ${fo ? "" : `<button class="fol-rh" data-fo="${k}">Suivre</button>`}</div>
@@ -645,10 +642,16 @@ function openReels(list, start, direct) {
       <div class="prc" style="margin-top:13px;align-items:center">${pr.price != null ? `<strong>${eur(pr.price)}</strong>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}` : ""}<span class="bdg">${esc(pr.badge)}</span></div>
       <button class="rcta" data-cp="${k}">${IC.coupon}J'en profite</button>
       <div class="rhint">${S.session ? "Un code à montrer en caisse" : "Sans inscription · un code à montrer en caisse"}</div>
-      ${k < list.length - 1 ? `<div class="next"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg>Promo suivante</div>` : direct ? `<a class="next" href="/v/" data-close style="color:#fff">Voir les autres promos près de moi</a>` : ""}</div>
+      ${k === list.length - 1 && direct ? `<a class="next" href="/v/" data-close style="color:#fff">Voir les autres promos près de moi</a>` : ""}</div>
   </section>`; }).join("");
   document.body.appendChild(el); document.body.style.overflow = "hidden";
   el.scrollTop = start * window.innerHeight;
+  if (list.length > 1 && start < list.length - 1 && !ss.get("vt-nudge")) {
+    ss.set("vt-nudge", "1");
+    setTimeout(() => { if (!el.isConnected || el.scrollTop !== start * window.innerHeight) return;
+      el.style.scrollSnapType = "none"; el.scrollTo({ top: el.scrollTop + 90, behavior: "smooth" });
+      setTimeout(() => { el.scrollTo({ top: start * window.innerHeight, behavior: "smooth" }); setTimeout(() => { el.style.scrollSnapType = ""; }, 450); }, 420); }, 1100);
+  }
   const close = (to) => { el.remove(); document.body.style.overflow = ""; if (direct) { history.replaceState({}, "", to || `/v/m/${direct}`); route(); } };
   $$("[data-x]", el).forEach(b => b.onclick = (e) => { e.preventDefault(); close(); });
   $$("[data-close]", el).forEach(b => b.onclick = (e) => { e.preventDefault(); close("/v/"); });
