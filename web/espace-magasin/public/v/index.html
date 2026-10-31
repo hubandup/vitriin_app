@@ -343,7 +343,7 @@ const showInstall = () => !!storeUrl() && ls.get("vt-noinstall") !== "1";
 /* ---------- État ---------- */
 // Mode démo (commerces de démonstration visibles) : mémorisé sur l'appareil, ?demo=0 pour le quitter.
 { const d = new URLSearchParams(location.search).get("demo"); if (d != null) ls.set("vt-demo", d === "0" ? null : "1"); }
-const DEMO = ls.get("vt-demo") === "1";
+let DEMO = ls.get("vt-demo") === "1";
 const S = {
   session: null, me: null,
   pos: (() => { try { return JSON.parse(ls.get("vt-pos")); } catch { return null; } })(),
@@ -355,6 +355,8 @@ async function refreshMe() {
   const { data } = await sb.auth.getSession(); S.session = data.session;
   if (!S.session) { S.me = null; return; }
   const r = await sb.rpc("customer_me"); S.me = r.error ? null : r.data;
+  // Un compte qui suit des commerces de démonstration voit tout le fil de démo.
+  if (!DEMO && (S.me?.follows || []).some(f => f.demo)) { DEMO = true; ls.set("vt-demo", "1"); S.items = null; }
 }
 
 /* ---------- Données ---------- */
@@ -622,7 +624,7 @@ async function pageFeed() {
     ${O && !isFollowing(O.store.id) ? sect(`Chez ${esc(O.store.name)}`, `<a class="lnk" href="/v/m/${esc(O.store.slug)}" data-link>${O.list.length} promo${O.list.length > 1 ? "s" : ""}${IC.chev}</a>`) + tilesHtml(O.list, "o") + `
       <div class="fsug"><span class="av" style="width:44px;height:44px;background:var(--p);color:#fff">${logo(O.store) ? `<img src="${esc(logo(O.store))}" alt="">` : init(O.store)}</span><span style="flex:1;font-size:13.5px;line-height:1.35"><b>Suivez ${esc(O.store.name)}</b><br><span style="color:var(--muted)">Leurs promos en premier, dans votre fil</span></span><button class="fbtn" id="ofol" style="background:var(--p);color:#fff">Suivre</button></div>` : ""}
     ${last.length ? sect("Derniers jours") + tilesHtml(last, "l", true) : ""}
-    ${disc.length ? sect("À découvrir") + tilesHtml(disc, "d", true) : emptyHtml("Pas encore de promo", "Les commerces Vitriin publient bientôt leurs premières offres.")}
+    ${disc.length ? sect("À découvrir") + tilesHtml(disc, "d", true) : mine.length ? "" : emptyHtml("Pas encore de promo", "Les commerces Vitriin publient bientôt leurs premières offres.")}
     ${toFollow.length ? sect("Commerces à suivre") + storeCardsHtml(toFollow) : ""}
     ${soon.length ? sect("Bientôt") + tilesHtml(soon, "n", true) : ""}
     ${all.length > 1 ? `<div class="tiles" style="padding-top:22px"><button class="tile end" data-full style="width:calc(100% - 40px);height:120px;flex-direction:row"><i>${IC.coupon}</i>Toutes les promos en plein écran</button></div>` : ""}`}

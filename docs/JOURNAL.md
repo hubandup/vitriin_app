@@ -20,6 +20,11 @@ Repères :
 
 ## 2026-10-31
 
+### BUG-009 · Fil particulier vide pour le compte de démo
+- **Constat** : sur iPhone, charles@baulu.net ne voyait que « Vos commerces » puis « Pas encore de promo ». Ouvert sans `?demo=1`, le fil n'interrogeait que les commerces réels (aucun en production) ; seuls les commerces suivis, tous de démo, s'affichaient.
+- **Correction** (`/v/`) : un compte qui suit au moins un commerce de démonstration passe automatiquement en mode démo. Le message « Pas encore de promo » ne s'affiche plus quand « Vos commerces » a du contenu.
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-059 · Particulier : fil enrichi, Mes promos sur un écran, profil complet, photo
 - **Fil `/v/`** : « Autour de vous » devient « À découvrir » (centres d'intérêt et catégories suivies d'abord, puis univers proches via la table `AFF`). Nouveaux carrousels « Derniers jours » (fin < 72 h), « Commerces à suivre » (cartes magasin), « Bientôt » (promos qui démarrent sous 21 jours), puis une tuile « Toutes les promos en plein écran ». Recherche ou filtre : un seul carrousel de résultats.
 - **Promo à venir en plein écran** : pas de code ni de « Garder », bouton « Disponible le X » qui fait suivre le commerce.
