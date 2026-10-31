@@ -20,6 +20,15 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-050 · Particulier : cap sur l'application mobile, plus d'invitation à « ajouter à l'écran d'accueil »
+- **Quoi** : Vitriin particulier sera une application mobile (App Store, Google Play), pas une web app installée.
+  Le mode d'emploi Safari et l'invitation d'installation Android sont retirés. Les bandeaux « Obtenir » (plein écran
+  à l'arrivée par lien, fil) ne s'affichent que lorsque les liens des stores sont renseignés dans `STORES`
+  (`public/v/index.html`) et mènent alors au bon store selon le téléphone. Le web reste complet sans l'application.
+- **Géolocalisation** : vérifié, aucun réglage serveur ne la bloque (pas d'en-tête Permissions-Policy). Le fil vide
+  sans `?demo=1` vient de l'absence de commerces hors démonstration, pas de la position.
+- **Retour arrière** : `git revert`.
+
 ### MOD-049 · Particulier : arrivée sur la promo, code flouté 2 min, « Profité », fiabilité des codes
 - **Arrivée par un lien** (`/v/p/<id>` : post, QR code, newsletter) : la promo s'ouvre directement en plein écran,
   suivie des autres promos du même commerce ; fermer mène à la fiche du commerce. Le commerce d'origine

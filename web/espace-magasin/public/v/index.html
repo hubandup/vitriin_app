@@ -289,10 +289,12 @@ const geo = (timeout = 9000) => new Promise((ok) => {
   navigator.geolocation.getCurrentPosition((x) => ok({ lat: x.coords.latitude, lng: x.coords.longitude }), () => ok(null), { enableHighAccuracy: false, timeout, maximumAge: 600000 });
 });
 
-const STANDALONE = (() => { try { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch { return false; } })();
-let BIP = null; // invitation d'installation Android/Chrome, gardée pour le bouton « Ajouter »
-addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); BIP = e; });
-const showInstall = () => !STANDALONE && ls.get("vt-noinstall") !== "1";
+// Vitriin sera une application mobile (App Store, Google Play). Tant que les liens des stores ne sont pas
+// renseignés ici, aucune invitation à installer n'est affichée : le web reste complet à lui seul.
+const STORES = { ios: "", android: "" };
+const PLATFORM = /iphone|ipad|ipod/i.test(navigator.userAgent) ? "ios" : /android/i.test(navigator.userAgent) ? "android" : null;
+const storeUrl = () => STORES[PLATFORM] || "";
+const showInstall = () => !!storeUrl() && ls.get("vt-noinstall") !== "1";
 
 /* ---------- État ---------- */
 if (new URLSearchParams(location.search).has("demo")) ss.set("vt-demo", "1");
@@ -426,7 +428,7 @@ async function loadOrigin() {
   return (S.origin = { store: r.data.store, list: r.data.promos.map(p => ({ promo: p, store: r.data.store, d: dist(S.pos, r.data.store) })) });
 }
 function stripHtml() {
-  return showInstall() && !ss.get("vt-strip-off") ? `<div class="strip" id="strip"><span><b>Vitriin sur votre écran d'accueil</b><br><em>Gratuit, sans passer par un store</em></span><button class="get" id="strip-go">Ajouter</button><button class="xb" id="strip-x" aria-label="Fermer" style="background:none;color:#fff;width:32px;height:32px">×</button></div>` : "";
+  return showInstall() && !ss.get("vt-strip-off") ? `<div class="strip" id="strip"><span><b>L'application Vitriin</b><br><em>Alertes et codes toujours sous la main</em></span><button class="get" id="strip-go">Obtenir</button><button class="xb" id="strip-x" aria-label="Fermer" style="background:none;color:#fff;width:32px;height:32px">×</button></div>` : "";
 }
 function bindStrip() {
   $("#strip-go") && ($("#strip-go").onclick = installSheet);
@@ -745,22 +747,8 @@ function done(x) {
   });
 }
 
-/* ---------- Ajouter Vitriin à l'écran d'accueil ---------- */
-async function installSheet() {
-  if (BIP) { try { BIP.prompt(); const r = await BIP.userChoice; BIP = null; if (r?.outcome === "accepted") { ls.set("vt-noinstall", "1"); toast("Vitriin est sur votre écran d'accueil."); } return; } catch {} }
-  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const ov = document.createElement("div"); ov.className = "ov sh";
-  const stp = (n, t) => `<div class="row" style="gap:12px;font-size:14.5px"><span class="dot" style="width:26px;height:26px;font-size:12.5px;background:var(--rose);color:var(--p)">${n}</span><span style="flex:1;line-height:1.4">${t}</span></div>`;
-  ov.innerHTML = `<div class="sht" role="dialog" aria-modal="true" aria-label="Ajouter Vitriin à l'écran d'accueil"><div class="grab"></div>
-    <b style="font-size:21px;letter-spacing:-.01em;margin-top:6px">Vitriin sur votre écran d'accueil</b>
-    <p style="margin:0;font-size:14px;color:var(--muted);line-height:1.5">Plein écran, accès en un geste, sans passer par un store. Votre compte reste le même sur le web.</p>
-    ${ios ? stp(1, `Touchez <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px" role="img" aria-label="Partager"><path d="M12 3v12M8 7l4-4 4 4M5 12v8h14v-8"/></svg> en bas de Safari`) + stp(2, "Choisissez « Sur l'écran d'accueil »") + stp(3, "Touchez « Ajouter »")
-      : stp(1, "Ouvrez le menu du navigateur (⋮)") + stp(2, "Choisissez « Ajouter à l'écran d'accueil » ou « Installer »")}
-    <button class="btn p" data-x>J'ai compris</button><button class="btn" id="i-no" style="color:var(--muted);font-weight:600;min-height:40px">Continuer sur le web</button></div>`;
-  ov.onclick = (e) => { if (e.target === ov || e.target.closest("[data-x]")) ov.remove(); };
-  document.body.appendChild(ov);
-  $("#i-no", ov).onclick = () => { ls.set("vt-noinstall", "1"); ov.remove(); $("#strip")?.remove(); $$(".ibar").forEach(x => x.remove()); $$(".reel.wb").forEach(x => x.classList.remove("wb")); };
-}
+/* ---------- Télécharger l'application ---------- */
+function installSheet() { const u = storeUrl(); if (u) location.href = u; }
 async function share(title, text, url) {
   try { if (navigator.share) return await navigator.share({ title, text, url }); } catch { return; }
   try { await navigator.clipboard.writeText(url); toast("Lien copié."); } catch { toast(url); }
