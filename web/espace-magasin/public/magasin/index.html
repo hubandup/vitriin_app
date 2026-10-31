@@ -513,7 +513,7 @@ function mapRow(row, accounts) {
 }
 
 async function loadData() {
-  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, slug, name, address, city, postal_code, auto_accept, logo_url, contact_first_name, contact_last_name, contact_phone, contact_email, website)").limit(1);
+  const { data: mem, error: e0 } = await sb.from("store_members").select("store_id, stores(id, slug, name, address, city, postal_code, auto_accept, logo_url, contact_first_name, contact_last_name, contact_phone, contact_email, website, description, cover_url, public_phone, public_email)").limit(1);
   if (e0) throw e0;
   if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
   const st = mem[0].stores;
@@ -544,6 +544,7 @@ async function loadData() {
     net: n?.network_name || "votre centrale", netFull: n ? `${n.network_name} · ${st.city || ""}` : "Magasin indépendant",
     page: fb?.display_name || "Non connectée", insta: ig?.display_name || "Non connecté",
     postal: st.postal_code || "", contact: { first: st.contact_first_name || "", last: st.contact_last_name || "", phone: st.contact_phone || "", email: st.contact_email || "", web: st.website || "" },
+    pub: { desc: st.description || "", cover: st.cover_url || "", phone: st.public_phone || "", email: st.public_email || "" },
   });
   const chState = (a) => !a ? "none" : a.enabled === false ? "off" : a.status === "active" ? "ok" : "broken";
   S.fb = chState(fb); S.ig = chState(ig);
@@ -858,7 +859,7 @@ function viewSettings() {
 }
 // Fiche du magasin : coordonnées et contact principal.
 function sheetStore() {
-  const C = STORE.contact;
+  const C = STORE.contact, P = STORE.pub; let cover = P.cover;
   const f = (id, label, val, attrs = "") => `<div class="fl">${label}</div><input class="in" id="${id}" value="${esc(val)}" ${attrs}>`;
   sheet(`<div class="grab"></div><h2>Informations du magasin</h2>
     ${f("se-name", "NOM DU MAGASIN", STORE.name, 'maxlength="120"')}
@@ -868,6 +869,13 @@ function sheetStore() {
     ${f("se-phone", "TÉLÉPHONE", C.phone, 'type="tel" maxlength="25" autocomplete="tel"')}
     ${f("se-mail", "EMAIL", C.email, 'type="email" maxlength="200" autocomplete="email"')}
     ${f("se-web", "SITE WEB", C.web, 'type="url" maxlength="300" placeholder="https://"')}
+    <h3 style="font-size:16px;margin:22px 0 2px">Ma vitrine</h3><p class="small" style="margin:0 0 4px">Ce que vos clients voient sur votre fiche Vitriin. Le contact ci-dessus reste privé.</p>
+    <div class="fl">PHOTO DE COUVERTURE</div>
+    <label style="display:block;position:relative;height:120px;border-radius:14px;overflow:hidden;background:#f4f3f0 center/cover no-repeat ${P.cover ? `url('${esc(P.cover)}')` : ""};cursor:pointer" id="se-cov-box">
+      <input type="file" accept="image/*" id="se-cov" style="position:absolute;opacity:0;width:1px;height:1px">
+      <span style="position:absolute;right:10px;bottom:10px;background:#fff;border-radius:10px;padding:7px 11px;font-size:13px;font-weight:700">${P.cover ? "Changer" : "Ajouter une photo"}</span></label>
+    <div class="fl">PRÉSENTATION</div><textarea class="in" id="se-desc" rows="4" maxlength="800" placeholder="Ce qui rend votre magasin unique : spécialités, services, conseils…">${esc(P.desc)}</textarea>
+    <div class="two"><div>${f("se-pphone", "TÉLÉPHONE CLIENTS", P.phone, 'type="tel" maxlength="25"')}</div><div>${f("se-pmail", "EMAIL CLIENTS", P.email, 'type="email" maxlength="200"')}</div></div>
     <button class="big-btn" id="se-go">Enregistrer</button><button class="txt-btn" data-close>Annuler</button>`);
   $("#se-go").onclick = async () => {
     const v = (id) => $("#" + id).value.trim();
@@ -875,15 +883,21 @@ function sheetStore() {
     const row = { name: v("se-name"), address: v("se-addr") || null, postal_code: v("se-pc") || null, city: v("se-city") || null,
       contact_first_name: v("se-first") || null, contact_last_name: v("se-last") || null, contact_phone: v("se-phone") || null,
       contact_email: v("se-mail").toLowerCase() || null, website: web || null };
+    Object.assign(row, { description: v("se-desc") || null, public_phone: v("se-pphone") || null, public_email: v("se-pmail").toLowerCase() || null });
+    if (row.public_phone && !/^[0-9 +().-]{6,25}$/.test(row.public_phone)) return toast("Téléphone clients invalide.");
+    if (row.public_email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(row.public_email)) return toast("Email clients invalide.");
     if (row.name.length < 2) return toast("Indiquez le nom du magasin.");
     if (row.contact_phone && !/^[0-9 +().-]{6,25}$/.test(row.contact_phone)) return toast("Numéro de téléphone invalide.");
     if (row.contact_email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(row.contact_email)) return toast("Adresse email invalide.");
     if (row.website && !/^https?:\/\/[^\s]+$/.test(row.website)) return toast("Adresse du site invalide.");
     $("#se-go").disabled = true;
+    try { row.cover_url = await ensureUploaded(cover) || null; } catch (e) { $("#se-go").disabled = false; return toast("Photo : " + errText(e)); }
     const { data, error } = await sb.from("stores").update(row).eq("id", STORE.id).select("id");
     if (error || !data?.length) { $("#se-go").disabled = false; return toast(error ? errText(error) : "Modification refusée."); }
     closeLayer(); await loadData(); render(true); toast("Informations enregistrées.");
   };
+  $("#se-cov").onchange = () => { const f = $("#se-cov").files[0]; if (!f) return; const r = new FileReader();
+    r.onload = () => { cover = r.result; $("#se-cov-box").style.backgroundImage = `url('${cover}')`; }; r.readAsDataURL(f); };
 }
 // Support Vitriin : mes demandes, nouvelle demande, fil de discussion.
 const TK_TOPICS = [["social", "Connexion Facebook / Instagram"], ["publication", "Une promo ne s'est pas publiée"], ["promo", "Créer ou modifier une promo"], ["account", "Mon compte, mon accès"], ["other", "Autre chose"]];
