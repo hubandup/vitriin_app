@@ -1753,7 +1753,7 @@ async function piRun() {
         code: feat("discount_code") ? r.code || "" : "", ean: feat("ean_code") ? r.ean : "", mand: r.mand, formats: syncFormats(new Set(), 1, "promo") });
       const { data, error } = await sb.from("promotions").insert({ ...row, created_by_network_id: S.net.id, status: "draft" }).select("id").single();
       if (error) throw error;
-      if (send) { const { error: e2 } = await sb.rpc("send_promotion", { p_promotion_id: data.id, p_store_ids: null }); if (e2) throw e2; }
+      if (send) { const { error: e2 } = await sb.rpc("send_promotion", { p_promotion_id: data.id, p_store_ids: null }); if (e2) throw e2; notifyCampaign(data.id); }
       done.push(r.title);
     } catch (e) { fails.push(`${r.title} (${errText(e)})`); }
   }
@@ -1893,6 +1893,7 @@ $("f-send").onclick = async () => {
     const allIds = storesForPicker().map(s => s.id);
     const { data: n, error: e2 } = await sb.rpc("send_promotion", { p_promotion_id: promoId, p_store_ids: F.target === "all" && !F.resend && ids.length === allIds.length ? null : ids });
     if (e2) throw e2;
+    notifyCampaign(promoId);
     show("m-promo", false);
     toast(`${F.kind === "post" && !F.resend ? "Post" : "Promo"} envoyé${F.kind === "post" && !F.resend ? "" : "e"} à ${n} magasin${n > 1 ? "s" : ""}. Ils le retrouvent dans leur espace.`);
     await load(); S.view = "promos"; S.dw = { k: "promo", id: promoId }; E = null; render();
@@ -1987,6 +1988,8 @@ async function boot() {
   const tk = qs.get("support");
   if (tk && /^[0-9a-f-]{36}$/i.test(tk)) { history.replaceState(null, "", location.pathname); helpThread(tk); }
 }
+// Email « Nouvelle campagne » aux gérants (Brevo), envoyé côté serveur ; un échec n'empêche pas l'envoi aux magasins.
+const notifyCampaign = (id) => sb.functions.invoke("campaign-notify", { body: { promotion_id: id } }).catch(() => {});
 // Email du support (Brevo), envoyé côté serveur ; un échec n'empêche pas le message d'être enregistré.
 const notifySupport = (id) => sb.functions.invoke("support-notify", { body: { ticket_id: id } }).catch(() => {});
 boot();

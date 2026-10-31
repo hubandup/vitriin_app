@@ -413,3 +413,6 @@ content_path = "./supabase/templates/email_changed_notification.html"
 
 [functions.support-notify]
 verify_jwt = true
+
+[functions.campaign-notify]
+verify_jwt = true

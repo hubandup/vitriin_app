@@ -605,8 +605,10 @@ async function boot() {
   $("#nav").classList.remove("hidden");
   render(); introOnce();
   // Lien « Voir la conversation » des emails du support.
-  const tk = new URLSearchParams(location.search).get("support");
+  const qs = new URLSearchParams(location.search), tk = qs.get("support"), pid = qs.get("promo");
   if (tk && /^[0-9a-f-]{36}$/i.test(tk)) { history.replaceState(null, "", location.pathname); sheetTicket(tk); }
+  // Lien « Voir et activer » de l'email « Nouvelle campagne ».
+  else if (pid && /^[0-9a-f-]{36}$/i.test(pid)) { history.replaceState(null, "", location.pathname); const p = find(pid); if (p) openPromo(p); }
 }
 // Email du support (Brevo), envoyé côté serveur ; un échec n'empêche pas le message d'être enregistré.
 const notifySupport = (id) => sb.functions.invoke("support-notify", { body: { ticket_id: id } }).catch(() => {});

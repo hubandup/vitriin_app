@@ -18,6 +18,21 @@ Repères :
 
 ---
 
+## 2026-10-31
+
+### MOD-048 · Email « Nouvelle campagne » aux gérants
+- **Quoi** : quand la centrale envoie une campagne, chaque gérant concerné reçoit un email avec l'image, les dates
+  et un bouton : « Voir et activer » (campagne à valider) ou « Voir et publier » (obligatoire ou validation
+  automatique). Le bouton ouvre la promo dans l'espace magasin (`/magasin/?promo=<id>`).
+- **Sécurité** : fonction `campaign-notify` (JWT requis), réservée aux membres de la centrale qui a créé la campagne.
+  `campaign_notify_claim` (service_role seulement) réserve les magasins ajoutés depuis moins d'une heure et pas encore
+  prévenus (`store_promotions.notified_at`) : pas de doublon, pas de renvoi d'anciennes campagnes. Magasins masqués,
+  suspendus ou sans compte activé : pas d'email. Comptes bloqués exclus.
+- **Mutualisation** : gabarit et envoi Brevo dans `supabase/functions/_shared/email.ts`, utilisé aussi par `support-notify`.
+- **Où** : `supabase/functions/campaign-notify/`, migration `20261031020000_campaign_notify.sql`, `centrale` (`notifyCampaign`),
+  `magasin` (lien profond `?promo=`).
+- **Retour arrière** : retirer l'appel `notifyCampaign` ; `git revert`.
+
 ## 2026-10-30
 
 ### BUG-008 · Fonctions serveur sans droits sur les tables (corrigé)
