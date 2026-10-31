@@ -20,6 +20,14 @@ Repères :
 
 ## 2026-10-31
 
+### MOD-054 · Règle UI particulier : promos en fil ou en carrousel uniquement
+- **Règle (décidée avec Charles le 31/10)** : côté particulier, les promotions ne s'affichent que sous forme de fil
+  (publications, plein écran) ou de carrousel, jamais en liste.
+- **Appliqué** : « Mes promos > Sauvegardées » passe en fil (mêmes publications que l'accueil) ; l'ancienne carte en
+  liste (`cardHtml`) et ses styles sont supprimés. L'onglet « Utilisées » reste un historique d'économies.
+- **Où** : `public/v/index.html`.
+- **Retour arrière** : `git revert`.
+
 ### MOD-053 · Particulier : en-tête du fil, stories, inscription en feuille avec code, onboarding
 - **En-tête du fil** : logo Vitriin, ville (touchée : retour au choix de la ville), « Connexion » ou initiale du compte.
   « Bonjour / Près de vous » et le bouton de localisation de la recherche sont retirés.
