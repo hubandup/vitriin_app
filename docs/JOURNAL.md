@@ -20,6 +20,11 @@ Repères :
 
 ## 2026-11-01
 
+### MOD-062 · Page des commerces suivis façon Instagram
+- `/v/suivies` : titre « Commerces », onglets « N suivis » / « Suggestions » soulignés, recherche, « Trier par » (Par défaut, Distance, Promos en cours), rangées sans cadre avec avatar rond à anneau dégradé quand le commerce a des promos (toucher l'anneau ouvre ses promos en plein écran), nom + catégorie · distance · promos, bouton gris « Suivi » ou rose « Suivre ».
+- Onglet du menu renommé « Commerces » (cohérent avec le picto magasin). Styles `.fol` retirés.
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-061 · Ouverture sur le feed plein écran, swipe vers Découvrir
 - **Ouverture de `/v/`** : le feed plein écran s'ouvre par défaut (commerces suivis, puis affinités, puis le reste), par-dessus Découvrir. Une seule fois par session de navigation (`S.booted`) : revenir sur l'onglet Découvrir ne le rouvre pas. Arrivée par un lien promo inchangée.
 - **Swipe vers la droite** sur n'importe quel feed plein écran : il glisse hors de l'écran et laisse Découvrir. Indice affiché à la première ouverture (« Glissez vers la droite pour tout découvrir »).

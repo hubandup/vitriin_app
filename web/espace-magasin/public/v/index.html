@@ -69,8 +69,21 @@ h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0}
 .eco{background:var(--grad);border-radius:20px;padding:18px 20px;color:#fff;margin-bottom:16px}
 .eco b{display:block;font-size:32px;letter-spacing:-.02em;margin-top:4px}
 .pill{background:var(--mint);color:#4f7a55;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px}
-.fol{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px}
-.fol .av{width:46px;height:46px;border-radius:14px;background:var(--p);color:#fff;font-size:18px}
+/* Commerces suivis, façon liste d'abonnements Instagram */
+.ftabs{display:flex;border-bottom:1px solid var(--line);margin-top:6px}
+.ftabs button{flex:1;min-height:48px;font-size:14.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.ftabs button.on{color:var(--ink);border-color:var(--ink)}
+.fsort{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 4px;font-size:14px;color:var(--muted)}
+.fsort b{color:var(--ink)}
+.frow{display:flex;align-items:center;gap:13px;padding:9px 20px}
+.frow .ring{width:62px;height:62px;border-radius:50%;padding:2.5px;background:#e2ded8;flex:none}
+.frow .ring.new{background:linear-gradient(135deg,#e5087e,#951b81)}
+.frow .ring .av{width:100%;height:100%;border:2.5px solid #fff;background:var(--p);color:#fff;font-size:18px}
+.frow .nm{flex:1;min-width:0;line-height:1.3}
+.frow .nm b{display:block;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow .nm span{display:block;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow .fbtn{min-width:92px;min-height:36px;border-radius:10px;background:#f1efeb;color:var(--ink);font-weight:700;font-size:13.5px}
+.frow .fbtn.go{background:var(--p);color:#fff}
 .fbtn{font-weight:600;font-size:12.5px;padding:0 15px;min-height:40px;border-radius:999px;flex:none}
 .box{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .li{display:flex;align-items:center;gap:12px;padding:0 15px;min-height:54px;width:100%;text-align:left;font-size:14.5px}
@@ -248,7 +261,7 @@ nav.tabs a.on{color:var(--p)}
 <nav class="tabs hidden" id="tabs" aria-label="Navigation">
   <a href="/v/" data-link data-tab="feed"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Découvrir</a>
   <a href="/v/promos" data-link data-tab="promos"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4V4Z"/></svg>Mes promos</a>
-  <a href="/v/suivies" data-link data-tab="follows"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 11.5V20h14v-8.5"/><path d="M10 20v-5h4v5"/></svg>Suivies</a>
+  <a href="/v/suivies" data-link data-tab="follows"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 11.5V20h14v-8.5"/><path d="M10 20v-5h4v5"/></svg>Commerces</a>
   <a href="/v/profil" data-link data-tab="profile"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>Profil</a>
 </nav>
 
@@ -667,19 +680,36 @@ async function pagePromos() {
   bindTiles({ g: saves });
 }
 
+// Commerces suivis : même logique qu'une liste d'abonnements Instagram (onglets, tri, rangées à anneau).
+const SORTS = [["recent", "Par défaut"], ["near", "Distance"], ["live", "Promos en cours"]];
 async function pageFollows() {
-  if (!S.session) return pageAuth("Suis tes commerces préférés pour ne rater aucune de leurs promos.");
-  document.title = "Enseignes suivies · Vitriin";
-  const F = S.me?.follows || [];
-  shell("follows", `<div class="pad row" style="padding-bottom:14px"><h1>Enseignes suivies</h1><span class="pill">${F.length}</span></div>
-    <div class="list">${F.length ? F.map((s, k) => `<div class="fol"><a class="av" href="/v/m/${esc(s.slug)}" data-link>${logo(s) ? `<img src="${esc(logo(s))}" alt="">` : init(s)}</a>
-      <a href="/v/m/${esc(s.slug)}" data-link style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">${esc(s.name)}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px">${esc([catLabel(s.category), s.city, km(dist(S.pos, s))].filter(Boolean).join(" · "))}</div>
-        <div style="font-size:12px;color:var(--p);font-weight:600;margin-top:4px">${s.live} promo${s.live > 1 ? "s" : ""} en cours</div></a>
-      <button class="fbtn" data-f="${k}" style="background:#f4f3f0">Suivi</button></div>`).join("")
-      : emptyHtml("Tu ne suis aucun commerce", "Ouvre la fiche d'un commerce et touche « Suivre » : ses nouvelles promos arriveront ici.")}</div>
-    <div class="pad" style="padding-top:18px"><a class="btn soft" href="/v/" data-link><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Découvrir d'autres commerces</a></div>`);
-  $$("[data-f]").forEach(b => b.onclick = async () => { await toggleFollow(F[+b.dataset.f]); pageFollows(); });
+  if (!S.session) return pageAuth("Suivez vos commerces préférés pour ne rater aucune de leurs promos.");
+  document.title = "Commerces suivis · Vitriin";
+  if (!S.items) await loadFeed();
+  S.fTab = S.fTab || "follows"; S.fSort = S.fSort || "recent"; S.fq = S.fq || "";
+  const q = S.fq.trim().toLowerCase();
+  const live = (id) => (S.items || []).filter(x => x.store.id === id);
+  const F = (S.me?.follows || []).map((s, i) => ({ s, i, d: dist(S.pos, s), n: s.live }));
+  const sug = [...(S.items || []).reduce((m, x) => isFollowing(x.store.id) || m.has(x.store.id) ? m : m.set(x.store.id, { s: x.store, d: x.d, n: live(x.store.id).length }), new Map()).values()];
+  const rows = (S.fTab === "follows" ? F : sug).filter(r => !q || (r.s.name + " " + catLabel(r.s.category) + " " + (r.s.city || "")).toLowerCase().includes(q));
+  if (S.fTab === "follows") rows.sort(S.fSort === "near" ? (a, b) => (a.d ?? 1e9) - (b.d ?? 1e9) : S.fSort === "live" ? (a, b) => b.n - a.n : (a, b) => a.i - b.i);
+  else rows.sort((a, b) => (a.d ?? 1e9) - (b.d ?? 1e9));
+  const sortLbl = SORTS.find(x => x[0] === S.fSort)[1];
+  shell("follows", `<div class="pad" style="padding-bottom:0"><h1>Commerces</h1></div>
+    <div class="ftabs" role="tablist"><button role="tab" data-ft="follows" class="${S.fTab === "follows" ? "on" : ""}" aria-selected="${S.fTab === "follows"}">${F.length} suivi${F.length > 1 ? "s" : ""}</button><button role="tab" data-ft="sug" class="${S.fTab === "sug" ? "on" : ""}" aria-selected="${S.fTab === "sug"}">Suggestions</button></div>
+    <div class="pad" style="padding-top:14px"><form class="search" id="ff" role="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg><input id="fq" type="search" placeholder="Rechercher" aria-label="Rechercher un commerce" value="${esc(S.fq)}"></form></div>
+    ${S.fTab === "follows" && F.length > 1 ? `<button class="fsort" id="fs" style="width:100%"><span>Trier par <b>${sortLbl}</b></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink)"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg></button>` : `<div style="height:8px"></div>`}
+    ${rows.length ? rows.map((r, k) => `<div class="frow"><button class="ring ${r.n ? "new" : ""}" data-fr="${k}" aria-label="Voir les promos de ${esc(r.s.name)}"><span class="av">${logo(r.s) ? `<img src="${esc(logo(r.s))}" alt="">` : init(r.s)}</span></button>
+      <a class="nm" href="/v/m/${esc(r.s.slug)}" data-link><b>${esc(r.s.name)}</b><span>${esc([catLabel(r.s.category), km(r.d), r.n ? `${r.n} promo${r.n > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · "))}</span></a>
+      <button class="fbtn ${S.fTab === "sug" ? "go" : ""}" data-fb="${k}">${S.fTab === "sug" ? "Suivre" : "Suivi"}</button></div>`).join("")
+      : `<div class="pad" style="padding-top:20px">${emptyHtml(q ? "Aucun commerce ne correspond" : S.fTab === "follows" ? "Vous ne suivez aucun commerce" : "Pas de suggestion pour l'instant", q ? "Essayez un autre mot." : S.fTab === "follows" ? "Suivez un commerce : ses promos arrivent en premier dans votre fil." : "Choisissez une ville dans Découvrir pour voir les commerces autour de vous.")}</div>`}
+    ${S.fTab === "follows" && !q ? `<div class="pad" style="padding-top:14px"><button class="btn soft" data-ft="sug">Voir les suggestions</button></div>` : ""}<div style="height:16px"></div>`);
+  $$("[data-ft]").forEach(b => b.onclick = () => { S.fTab = b.dataset.ft; S.fq = ""; pageFollows(); });
+  $("#ff").onsubmit = (e) => e.preventDefault();
+  let t; $("#fq").oninput = () => { clearTimeout(t); t = setTimeout(() => { S.fq = $("#fq").value; const pos = $("#fq").selectionStart; pageFollows(); $("#fq").focus(); $("#fq").setSelectionRange(pos, pos); }, 250); };
+  $("#fs") && ($("#fs").onclick = () => { const i = SORTS.findIndex(x => x[0] === S.fSort); S.fSort = SORTS[(i + 1) % SORTS.length][0]; pageFollows(); });
+  $$("[data-fr]").forEach(b => b.onclick = () => { const r = rows[+b.dataset.fr], l = live(r.s.id); l.length ? openReels(l, 0) : go(`/v/m/${r.s.slug}`); });
+  $$("[data-fb]").forEach(b => b.onclick = async () => { if (await toggleFollow(rows[+b.dataset.fb].s) != null) pageFollows(); });
 }
 
 async function pageProfile() {
