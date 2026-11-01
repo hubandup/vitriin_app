@@ -20,6 +20,10 @@ Repères :
 
 ## 2026-11-01
 
+### MOD-063 · Bouton « Suivre » / « Ne plus suivre »
+- Page Commerces et fiche commerce : le bouton d'un commerce suivi affiche l'action « Ne plus suivre » (au lieu de l'état « Suivi »). Sur la page Commerces, il bascule sur place : la rangée reste, le bouton redevient « Suivre » en rose.
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-062 · Page des commerces suivis façon Instagram
 - `/v/suivies` : titre « Commerces », onglets « N suivis » / « Suggestions » soulignés, recherche, « Trier par » (Par défaut, Distance, Promos en cours), rangées sans cadre avec avatar rond à anneau dégradé quand le commerce a des promos (toucher l'anneau ouvre ses promos en plein écran), nom + catégorie · distance · promos, bouton gris « Suivi » ou rose « Suivre ».
 - Onglet du menu renommé « Commerces » (cohérent avec le picto magasin). Styles `.fol` retirés.

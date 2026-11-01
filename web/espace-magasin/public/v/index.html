@@ -82,7 +82,7 @@ h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0}
 .frow .nm{flex:1;min-width:0;line-height:1.3}
 .frow .nm b{display:block;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .frow .nm span{display:block;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.frow .fbtn{min-width:92px;min-height:36px;border-radius:10px;background:#f1efeb;color:var(--ink);font-weight:700;font-size:13.5px}
+.frow .fbtn{min-width:92px;padding:0 14px;min-height:36px;border-radius:10px;background:#f1efeb;color:var(--ink);font-weight:700;font-size:13.5px}
 .frow .fbtn.go{background:var(--p);color:#fff}
 .fbtn{font-weight:600;font-size:12.5px;padding:0 15px;min-height:40px;border-radius:999px;flex:none}
 .box{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -701,7 +701,7 @@ async function pageFollows() {
     ${S.fTab === "follows" && F.length > 1 ? `<button class="fsort" id="fs" style="width:100%"><span>Trier par <b>${sortLbl}</b></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink)"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg></button>` : `<div style="height:8px"></div>`}
     ${rows.length ? rows.map((r, k) => `<div class="frow"><button class="ring ${r.n ? "new" : ""}" data-fr="${k}" aria-label="Voir les promos de ${esc(r.s.name)}"><span class="av">${logo(r.s) ? `<img src="${esc(logo(r.s))}" alt="">` : init(r.s)}</span></button>
       <a class="nm" href="/v/m/${esc(r.s.slug)}" data-link><b>${esc(r.s.name)}</b><span>${esc([catLabel(r.s.category), km(r.d), r.n ? `${r.n} promo${r.n > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · "))}</span></a>
-      <button class="fbtn ${S.fTab === "sug" ? "go" : ""}" data-fb="${k}">${S.fTab === "sug" ? "Suivre" : "Suivi"}</button></div>`).join("")
+      <button class="fbtn ${isFollowing(r.s.id) ? "" : "go"}" data-fb="${k}">${isFollowing(r.s.id) ? "Ne plus suivre" : "Suivre"}</button></div>`).join("")
       : `<div class="pad" style="padding-top:20px">${emptyHtml(q ? "Aucun commerce ne correspond" : S.fTab === "follows" ? "Vous ne suivez aucun commerce" : "Pas de suggestion pour l'instant", q ? "Essayez un autre mot." : S.fTab === "follows" ? "Suivez un commerce : ses promos arrivent en premier dans votre fil." : "Choisissez une ville dans Découvrir pour voir les commerces autour de vous.")}</div>`}
     ${S.fTab === "follows" && !q ? `<div class="pad" style="padding-top:14px"><button class="btn soft" data-ft="sug">Voir les suggestions</button></div>` : ""}<div style="height:16px"></div>`);
   $$("[data-ft]").forEach(b => b.onclick = () => { S.fTab = b.dataset.ft; S.fq = ""; pageFollows(); });
@@ -709,7 +709,7 @@ async function pageFollows() {
   let t; $("#fq").oninput = () => { clearTimeout(t); t = setTimeout(() => { S.fq = $("#fq").value; const pos = $("#fq").selectionStart; pageFollows(); $("#fq").focus(); $("#fq").setSelectionRange(pos, pos); }, 250); };
   $("#fs") && ($("#fs").onclick = () => { const i = SORTS.findIndex(x => x[0] === S.fSort); S.fSort = SORTS[(i + 1) % SORTS.length][0]; pageFollows(); });
   $$("[data-fr]").forEach(b => b.onclick = () => { const r = rows[+b.dataset.fr], l = live(r.s.id); l.length ? openReels(l, 0) : go(`/v/m/${r.s.slug}`); });
-  $$("[data-fb]").forEach(b => b.onclick = async () => { if (await toggleFollow(rows[+b.dataset.fb].s) != null) pageFollows(); });
+  $$("[data-fb]").forEach(b => b.onclick = async () => { const on = await toggleFollow(rows[+b.dataset.fb].s); if (on != null) { b.textContent = on ? "Ne plus suivre" : "Suivre"; b.classList.toggle("go", !on); } });
 }
 
 async function pageProfile() {
@@ -810,7 +810,7 @@ async function pageStore(slug) {
     <div class="pad" style="padding-top:12px"><h1 style="font-size:23px">${esc(s.name)}</h1>
       <div style="font-size:13.5px;color:var(--muted);margin-top:4px">${esc([catLabel(s.category), s.city, km(dist(S.pos, s))].filter(Boolean).join(" · "))}</div>
       ${s.demo ? `<div style="margin-top:8px"><span class="pill" style="background:#fff4d6;color:#7a5600">Commerce de démonstration</span></div>` : ""}</div>
-    <div class="pad" style="display:flex;gap:10px;padding-top:16px"><button class="btn ${on ? "line" : "p"}" id="fl" style="flex:1">${on ? "Suivi" : "Suivre"}</button><a class="btn line" style="flex:1" href="${mapsUrl(s)}" target="_blank" rel="noopener">${IC.go} Itinéraire</a></div>
+    <div class="pad" style="display:flex;gap:10px;padding-top:16px"><button class="btn ${on ? "line" : "p"}" id="fl" style="flex:1">${on ? "Ne plus suivre" : "Suivre"}</button><a class="btn line" style="flex:1" href="${mapsUrl(s)}" target="_blank" rel="noopener">${IC.go} Itinéraire</a></div>
     ${s.description ? `<p class="pad" style="font-size:14.5px;line-height:1.55;margin:16px 0 0;white-space:pre-line">${esc(s.description)}</p>` : ""}
     ${infos.length ? `<div class="pad" style="padding-top:16px"><div class="box sinfo">${infos.join("")}</div></div>` : ""}
     ${bb ? `<div class="pad" style="padding-top:12px"><a class="smap" href="${mapsUrl(s)}" target="_blank" rel="noopener" aria-label="Ouvrir le plan"><iframe title="Plan : ${esc(s.name)}" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${bb}&amp;layer=mapnik&amp;marker=${s.lat},${s.lng}"></iframe><span>Ouvrir le plan</span></a></div>` : ""}
