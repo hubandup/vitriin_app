@@ -369,7 +369,8 @@ const geo = (timeout = 9000) => new Promise((ok) => {
 // renseignés ici, aucune invitation à installer n'est affichée : le web reste complet à lui seul.
 const STORES = { ios: "", android: "" };
 // Aperçu commerçant (/v/...?apercu=1, ouvert depuis l'espace magasin) : l'app telle que la voit un client,
-// sans compte et sans rien enregistrer (ni code affiché, ni suivi, ni favori).
+// sans compte et sans rien enregistrer : le vrai code s'affiche (vitrine_preview_code, réservé au commerce)
+// mais l'affichage n'est pas compté ; suivre, garder et se connecter sont désactivés.
 const APERCU = new URLSearchParams(location.search).has("apercu");
 const apercuNo = () => (toast("Aperçu : vos clients peuvent le faire ici."), true);
 const PLATFORM = /iphone|ipad|ipod/i.test(navigator.userAgent) ? "ios" : /android/i.test(navigator.userAgent) ? "android" : null;
@@ -963,7 +964,7 @@ async function coupon(x) {
   $("#show", ov).onclick = async () => {
     const btn = $("#show", ov); btn.disabled = true; btn.lastChild.textContent = "Un instant…";
     const pos = APERCU ? null : await geo(4000);
-    const { data, error } = APERCU ? { data: { code: "EXEMPLE" } }
+    const { data, error } = APERCU ? await sb.rpc("vitrine_preview_code", { p_id: p.id })
       : await sb.rpc("vitrine_reveal", { p_id: p.id, p_client_id: clientId(), p_lat: pos?.lat ?? null, p_lng: pos?.lng ?? null });
     if (error) { btn.disabled = false; btn.lastChild.textContent = "Afficher mon code"; return toast(errText(error)); }
     const code = data?.ean || data?.code, ean = !!(data?.ean && /^\d{13}$/.test(data.ean));

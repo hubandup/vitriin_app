@@ -20,6 +20,10 @@ Repères :
 
 ## 2026-11-01
 
+### MOD-066 · Aperçu commerçant : le vrai code de la promo
+- En aperçu (`/v/...?apercu=1`), « Afficher mon code » montre le vrai code de la promo via `vitrine_preview_code(p_id)` (SECURITY DEFINER, `authenticated` seulement, réservé aux membres du magasin, de sa centrale ou à l'équipe Vitriin). Aucun affichage n'est enregistré dans `code_reveals`. Migration `20261101000000_vitrine_preview_code.sql`. Vérifié : un compte particulier reçoit « Accès réservé au commerce ».
+- **Retour arrière** : `git revert` du commit ; `drop function public.vitrine_preview_code(uuid)` par migration.
+
 ### MOD-065 · Espace magasin : la vue client est l'app particulier elle-même
 - **Constat** : « Voir côté clients » (`/magasin/`) affichait une copie ancienne du feed (barres de progression, « Ouvert », cœur, « Itinéraire », « Enregistrer ») et enregistrait un affichage de code à chaque essai du commerçant, ce qui gonflait ses statistiques.
 - **Correction** : l'aperçu ouvre `/v/p/<id>?apercu=1` (ou `/v/m/<slug>?apercu=1` depuis le logo) dans un cadre plein écran. Même écran que les clients, donc toujours à jour. Bandeau « Aperçu : ce que voient vos clients · Fermer ».
