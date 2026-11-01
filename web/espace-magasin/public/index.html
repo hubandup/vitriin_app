@@ -169,6 +169,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// Retour d'une autorisation Facebook / Google lancée depuis l'app magasin : on y renvoie, avec le résultat.
+(() => { try { const back = sessionStorage.getItem("vitriin-oauth-back"), q = new URLSearchParams(location.search);
+  if (back && q.has("oauth") && /^\/magasin\/$/.test(back)) { sessionStorage.removeItem("vitriin-oauth-back"); location.replace(back + location.search); } } catch {} })();
 const SUPABASE_URL = "https://zjugauidrijghesgsmap.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU";
 const sb = supabase.createClient(SUPABASE_URL, ANON_KEY);

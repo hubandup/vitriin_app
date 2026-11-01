@@ -421,13 +421,15 @@ const HOUR = 36e5;
 // L'app lit et écrit dans la même base que l'Espace Centrale : une promo
 // envoyée par la centrale apparaît ici, et ce que fait le magasin (activer,
 // refuser, publier) remonte dans le suivi de la centrale.
-// Publication : SIMULÉE (RPC demo_publish), réservée aux réseaux de démo.
-// Aucun appel à Meta depuis cette page.
+// Publication : sur un réseau de démo, SIMULÉE (RPC demo_publish) ; sur un réseau réel,
+// vraie connexion (meta-oauth-start, google-oauth-start) et vraie publication (meta-publish).
+// Les tokens ne passent jamais par cette page : ils restent chiffrés côté serveur.
 const SUPABASE_URL = "https://zjugauidrijghesgsmap.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU";
 // Session propre à l'app magasin (distincte de la Centrale, même domaine).
 const sb = supabase.createClient(SUPABASE_URL, ANON_KEY, { auth: { storageKey: "vitriin-magasin-auth" } });
 const PREFS_KEY = "vitriin-app-prefs";
+const GBP_READY = false; // passe à true quand Google a ouvert l'accès à l'API Business Profile
 const prefs = Object.assign({ notifNet: true, notifFail: true }, store.get(PREFS_KEY) || {});
 delete prefs.liked; delete prefs.saved;
 const errText = (e) => (e && (e.message || e.error_description)) || String(e);
@@ -476,7 +478,7 @@ async function loadData() {
   if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
   const st = mem[0].stores;
   await sb.rpc("demo_tick", { p_store_id: st.id }); // fait avancer la démo ; sans effet ailleurs
-  const [net, acc, rows, rev, tk, lk] = await Promise.all([
+  const [net, acc, rows, rev, tk, lk, dm] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status, enabled").eq("store_id", st.id),
     sb.from("store_promotions").select("id, status, overrides, suspended, hidden, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
@@ -485,6 +487,7 @@ async function loadData() {
     sb.rpc("support_mine"),
     // « J'aime » des clients sur l'app Vitriin.
     sb.from("promo_likes").select("store_promotion_id, created_at").eq("store_id", st.id).range(0, 9999),
+    sb.rpc("my_store_is_demo", { p_store_id: st.id }),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
   // Un code affiché loin du magasin ou hors des heures d'ouverture, et non confirmé, ne compte pas comme utilisé.
@@ -499,18 +502,19 @@ async function loadData() {
   S.likes7 = likes.filter(r => Date.now() - new Date(r.created_at) < 7 * DAY).length;
   S.codes7By = reveals.filter(r => Date.now() - new Date(r.revealed_at) < 7 * DAY).reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
   const n = net.data?.[0];
-  const fb = acc.data.find(a => a.channel === "facebook"), ig = acc.data.find(a => a.channel === "instagram");
+  const fb = acc.data.find(a => a.channel === "facebook"), ig = acc.data.find(a => a.channel === "instagram"), gb = acc.data.find(a => a.channel === "google_business");
+  STORE.demo = dm.error ? true : dm.data !== false; // en cas de doute, on reste en simulation
   Object.assign(STORE, {
     id: st.id, slug: st.slug || "", name: st.name, city: st.city || "", address: st.address || "", autoAccept: st.auto_accept !== false, hasNet: !!n,
     // Logo du magasin, sinon celui de l'enseigne (même règle que la Centrale).
     logo: st.logo_url || n?.logo_url || null, canEdit: !!n?.store_edit, canDelete: !!n?.store_delete, support: n?.support_email || "", phone: n?.phone || "", cgv: n?.cgv_url || "",
     net: n?.network_name || "votre centrale", netFull: n ? `${n.network_name} · ${st.city || ""}` : "Magasin indépendant",
-    page: fb?.display_name || "Non connectée", insta: ig?.display_name || "Non connecté",
+    page: fb?.display_name || "Non connectée", insta: ig?.display_name || "Non connecté", gbp: gb?.display_name || "Non connectée",
     postal: st.postal_code || "", contact: { first: st.contact_first_name || "", last: st.contact_last_name || "", phone: st.contact_phone || "", email: st.contact_email || "", web: st.website || "" },
     pub: { desc: st.description || "", cover: st.cover_url || "", phone: st.public_phone || "", email: st.public_email || "" },
   });
   const chState = (a) => !a ? "none" : a.enabled === false ? "off" : a.status === "active" ? "ok" : "broken";
-  S.fb = chState(fb); S.ig = chState(ig);
+  S.fb = chState(fb); S.ig = chState(ig); S.gb = chState(gb);
   const all = rows.data.filter(r => r.promotions).map(r => mapRow(r, acc.data));
   S.promos = all.filter(p => !p.hidden); S.trash = all.filter(p => p.hidden); // corbeille : onglet « Supprimées »
 }
@@ -562,6 +566,61 @@ function showWelcome(email) {
     history.replaceState(null, "", location.pathname); boot();
   };
 }
+/* ---- Réseau réel : connexions et publication ---- */
+async function fn(name, body) {
+  const { data: { session } } = await sb.auth.getSession();
+  const r = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
+    method: "POST", headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify(body),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || data.message || `Erreur ${r.status}`);
+  return data;
+}
+// Ouvre l'autorisation Facebook / Instagram ou Google. Le retour arrive sur la page racine,
+// qui renvoie ici grâce à la clé de session « vitriin-oauth-back ».
+async function connectAccount(kind) {
+  try {
+    const { authorize_url } = await fn(kind === "google" ? "google-oauth-start" : "meta-oauth-start", { store_id: STORE.id });
+    try { sessionStorage.setItem("vitriin-oauth-back", "/magasin/"); } catch {}
+    location.href = authorize_url;
+  } catch (e) { toast(e.message); }
+}
+// Google : le compte gère plusieurs fiches, le commerçant choisit celle du magasin.
+async function sheetGbpPick() {
+  const { data, error } = await sb.rpc("google_pending_locations", { p_store_id: STORE.id });
+  if (error || !data?.length) return toast("Le choix a expiré. Relancez la connexion Google.");
+  sheet(`<div class="grab"></div><h2>Quelle fiche Google ?</h2><p class="small" style="font-size:14px;margin-top:4px">Votre compte Google gère plusieurs établissements. Choisissez celui de ce magasin.</p>
+    <div class="box" style="margin-top:14px">${data.map((l, k) => `<button class="li" data-gl="${k}" style="width:100%;text-align:left;border:none;background:none;font:inherit;color:inherit"><span class="sp"><b style="display:block;font-size:15px">${esc(l.title)}</b><span style="font-size:13px;color:var(--muted)">${esc(l.address || "")}</span></span></button>`).join("")}</div>
+    <button class="txt-btn" data-close>Annuler</button>`);
+  $$("[data-gl]").forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    try { const r = await fn("google-pick", { store_id: STORE.id, location: data[+b.dataset.gl].name }); await loadData(); closeLayer(); render(true); toast(`Fiche Google connectée : ${r.display_name}`); }
+    catch (e) { b.disabled = false; toast(e.message); }
+  });
+}
+// Statistiques Meta : relues au plus toutes les 6 heures, en arrière-plan.
+async function refreshInsights(force) {
+  if (STORE.demo || (S.fb !== "ok" && S.ig !== "ok")) return;
+  const k = "vitriin-insights-" + STORE.id;
+  if (!force && Date.now() - (+localStorage.getItem(k) || 0) < 6 * HOUR) return;
+  try { await fn("meta-insights", { store_id: STORE.id }); localStorage.setItem(k, String(Date.now())); await loadData(); render(true); }
+  catch (e) { if (force) toast(e.message); }
+}
+async function realPublish(p, chans) {
+  const name = { fb: "Facebook", ig: "Instagram" };
+  sheet(`<div class="pub" id="pubbox"><div class="spin"></div><h2>Publication en cours…</h2><p class="small" style="font-size:14px">« ${esc(p.title)} »</p></div>`);
+  try {
+    const res = await fn("meta-publish", { store_promotion_id: p.spId, channels: chans.map(c => c === "fb" ? "facebook" : "instagram") });
+    delete p._chans;
+    try { await loadData(); } catch {}
+    const rows = (res.results || []).map(r => { const c = r.channel === "facebook" ? "fb" : "ig", ok = r.status === "published";
+      return `<div><span class="ch ${c}">${c === "fb" ? I.fbs : I.igs}</span>${name[c]}<em style="color:${ok ? "var(--teal)" : r.status === "skipped" ? "var(--muted)" : "var(--red)"}">${ok ? "Publiée ✓" : esc(r.error || "Échec")}</em></div>`; }).join("");
+    $("#pubbox").innerHTML = `<div class="done">${I.check.replace('width="16" height="16"', 'width="30" height="30"')}</div><h2>${res.published ? "C'est publié !" : "Rien n'a été publié"}</h2>
+      <div class="lines">${rows || `<p class="small">${esc(res.message || "")}</p>`}</div><button class="big-btn" id="pub-ok">${res.published ? "Parfait" : "Fermer"}</button>`;
+    $("#pub-ok").onclick = () => { closeLayer(); if (res.published) UI.tab = "home"; render(); };
+  } catch (e) { closeLayer(); toast(e.message); }
+}
+
 async function boot() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return showLogin();
@@ -571,6 +630,14 @@ async function boot() {
   catch (e) { return showLogin(errText(e)); }
   $("#nav").classList.remove("hidden");
   render(); introOnce();
+  // Retour de l'autorisation Facebook / Instagram ou Google.
+  const oq = new URLSearchParams(location.search), oa = oq.get("oauth");
+  if (oa) {
+    history.replaceState(null, "", location.pathname);
+    if (oa === "gbp-pick") sheetGbpPick();
+    else toast(oa === "ok" ? "Comptes connectés à Vitriin." : (oq.get("message") || "La connexion a échoué."));
+  }
+  refreshInsights();
   // Lien « Voir la conversation » des emails du support.
   const qs = new URLSearchParams(location.search), tk = qs.get("support"), pid = qs.get("promo");
   if (tk && /^[0-9a-f-]{36}$/i.test(tk)) { history.replaceState(null, "", location.pathname); sheetTicket(tk); }
@@ -766,10 +833,12 @@ function viewSettings() {
   const C = STORE.contact, who = [C.first, C.last].filter(Boolean).join(" ");
   const line = (ic, txt) => txt ? `<div class="info-l">${ic}<span>${esc(txt)}</span></div>` : "";
   const acc = (key, name, ic, sub) => {
-    const st = key === "fb" ? S.fb : S.ig;
+    const st = key === "fb" ? S.fb : key === "ig" ? S.ig : S.gb;
+    // Réseau réel : bouton de connexion (ou reconnexion) qui ouvre l'autorisation officielle.
+    const cnx = !STORE.demo && (st === "none" || st === "broken") ? `<button class="edit-btn" data-act="${key === "gb" ? "connect-google" : "connect-meta"}" style="margin-top:8px;padding:0 14px;min-height:36px">${st === "broken" ? "Reconnecter" : "Connecter"}</button>` : "";
     const on = st === "ok" || st === "broken";
     const pill = st === "ok" ? '<span class="pill p-ok">Connecté</span>' : st === "broken" ? '<span class="pill p-ko">À reconnecter</span>' : st === "off" ? '<span class="pill p-off">Désactivé</span>' : '<span class="pill p-off">Non connecté</span>';
-    return `<div class="li">${ic}<div class="sp"><b style="display:block;font-size:15.5px">${name}</b><span style="font-size:13px;color:var(--muted)">${esc(sub)}</span><div style="margin-top:5px">${pill}</div></div><button class="tg ${on ? "on" : ""}" data-chan-t="${key}" aria-label="${on ? "Désactiver" : "Activer"} ${name}"></button></div>`;
+    return `<div class="li">${ic}<div class="sp"><b style="display:block;font-size:15.5px">${name}</b><span style="font-size:13px;color:var(--muted)">${esc(sub)}</span><div style="margin-top:5px">${pill}</div>${cnx}</div><button class="tg ${on ? "on" : ""}" data-chan-t="${key}" aria-label="${on ? "Désactiver" : "Activer"} ${name}"></button></div>`;
   };
   const soon = (name, ic) => `<div class="li soon">${ic}<div class="sp"><b style="display:block;font-size:15.5px">${name}</b><i style="font-size:13px;color:var(--muted)">Bientôt disponible</i><div style="margin-top:5px"><span class="pill p-off">Non connecté</span></div></div><button class="tg" disabled aria-label="${name} : bientôt disponible"></button></div>`;
   const mono = (t, bg) => `<span class="ch" style="width:44px;height:44px;border-radius:12px;background:${bg};color:#fff;font-weight:700;font-size:15px">${t}</span>`;
@@ -801,7 +870,7 @@ function viewSettings() {
       ${acc("fb", "Facebook", `<span class="ch fb" style="width:44px;height:44px">${I.fb}</span>`, STORE.page)}
       ${acc("ig", "Instagram", `<span class="ch ig" style="width:44px;height:44px;border-radius:12px">${I.ig}</span>`, STORE.insta)}
       ${soon("TikTok", mono("TT", "#111"))}
-      ${soon("Google Business Profile", mono("G", "#4285f4"))}
+      ${/* Bouton Google affiché quand l'accès à l'API Google est obtenu et les fonctions déployées (MOD-068). */ GBP_READY && !STORE.demo ? acc("gb", "Google Business Profile", mono("G", "#4285f4"), STORE.gbp) : soon("Google Business Profile", mono("G", "#4285f4"))}
       ${soon("Pinterest", mono("P", "#e60023"))}
     </div>
 
@@ -932,13 +1001,14 @@ async function sheetTicket(id) {
 }
 // Activer / désactiver un compte : désactivé = connecté, mais on n'y publie plus.
 async function toggleChannel(key) {
-  const st = key === "fb" ? S.fb : S.ig, ch = key === "fb" ? "facebook" : "instagram";
-  if (st === "none") return toast("Connectez d'abord ce compte depuis votre espace (bientôt depuis l'app).");
+  const st = key === "fb" ? S.fb : key === "ig" ? S.ig : S.gb, ch = { fb: "facebook", ig: "instagram", gb: "google_business" }[key];
+  const label = { fb: "Facebook", ig: "Instagram", gb: "Google Business Profile" }[key];
+  if (st === "none") return STORE.demo ? toast("Compte non connecté sur ce magasin de démonstration.") : connectAccount(key === "gb" ? "google" : "meta");
   const on = st === "off";
   const { data, error } = await sb.from("social_accounts").update({ enabled: on }).eq("store_id", STORE.id).eq("channel", ch).select("channel");
   if (error || !data?.length) return toast(error ? errText(error) : "Modification refusée.");
   await loadData(); render(true);
-  toast(on ? `${key === "fb" ? "Facebook" : "Instagram"} réactivé.` : `${key === "fb" ? "Facebook" : "Instagram"} désactivé : vos promos n'y seront plus publiées.`);
+  toast(on ? `${label} réactivé.` : `${label} désactivé : vos promos n'y seront plus publiées.`);
 }
 
 // Toutes les statistiques d'une promo : par réseau, engagement, codes utilisés.
@@ -999,6 +1069,8 @@ document.addEventListener("click", (e) => {
   else if (ds.card) openPromo(find(ds.card));
   else if (ds.stat) statsPromo(find(ds.stat));
   else if (ds.act === "reconnect") reconnect();
+  else if (ds.act === "connect-meta") connectAccount("meta");
+  else if (ds.act === "connect-google") connectAccount("google");
   else if (ds.act === "store-edit") sheetStore();
   else if (ds.act === "support") sheetSupport();
   else if (ds.chanT) toggleChannel(ds.chanT);
@@ -1144,6 +1216,7 @@ async function setStatus(p, status, msg) {
   p.status = status; render(true); toast(msg(p)); refresh();
 }
 function reconnect() {
+  if (!STORE.demo) return connectAccount("meta");
   sheet(`<div class="pub"><div class="spin"></div><h2>Connexion à Instagram…</h2><p class="small" style="font-size:14px">Via votre Page Facebook ${esc(STORE.page)}</p></div>`);
   const failed = S.promos.filter(p => p.ch?.ig === "ko");
   Promise.all([sb.rpc("demo_reconnect", { p_store_id: STORE.id, p_channel: "instagram" }), new Promise(r => setTimeout(r, 1300))]).then(async ([{ error }]) => {
@@ -1155,6 +1228,7 @@ function reconnect() {
 function publish(p, retryOnly) {
   const chans = p._chans || (retryOnly ? ["ig"] : ["fb", "ig"].filter(c => (c === "fb" ? S.fb : S.ig) === "ok"));
   if (!chans.length) return toast("Connectez d'abord Facebook ou Instagram dans les Réglages.");
+  if (!STORE.demo) return realPublish(p, chans);
   sheet(`<div class="pub" id="pubbox"><div class="spin"></div><h2>Publication en cours…</h2><p class="small" style="font-size:14px">« ${esc(p.title)} » sur ${chans.includes("fb") ? "votre Page Facebook" : ""}${chans.length > 1 ? " et " : ""}${chans.includes("ig") ? "votre compte Instagram" : ""}</p>
     <div class="lines">${chans.map(c => `<div><span class="ch ${c === "fb" ? "fb" : "ig"}">${c === "fb" ? I.fbs : I.igs}</span>${c === "fb" ? "Facebook" : "Instagram"}<em id="pl-${c}" style="color:var(--muted)">En cours…</em></div>`).join("")}</div></div>`);
   // Publication simulée côté base (réseau de démo) : la centrale la voit aussitôt.
@@ -1180,6 +1254,7 @@ function publish(p, retryOnly) {
   step();
 }
 function sheetSchedule(p) {
+  if (!STORE.demo) return toast("La programmation arrive bientôt : vous pouvez publier dès maintenant.");
   const last = p.deadline ? new Date(p.deadline.getTime ? p.deadline.getTime() - DAY : new Date(p.deadline).getTime() - DAY) : d(14);
   const days = []; for (let k = 0; k < 9; k++) days.push(d(k));
   let sel = 1, time = "09:00";
@@ -1271,6 +1346,7 @@ function createForm(kind, draft) {
     $("#f-add", layer) && ($("#f-add").onclick = () => { const v = $("#f-code").value.trim().toUpperCase(); if (v.length < 3) return toast("Saisissez un code d'au moins 3 caractères."); F.codes.push(v); keepScroll(draw); });
     $$("[data-rmcode]", layer).forEach(b => b.onclick = (e) => { e.stopPropagation(); F.codes.splice(+b.dataset.rmcode, 1); keepScroll(draw); });
     $$("[data-chan]", layer).forEach(b => b.onclick = (e) => {
+      if (e.target.id === "f-reco" && !STORE.demo) return connectAccount("meta");
       if (e.target.id === "f-reco") { sb.rpc("demo_reconnect", { p_store_id: STORE.id, p_channel: "instagram" }).then(({ error }) => { if (error) return toast(errText(error)); S.ig = "ok"; F.ig = true; toast("Instagram reconnecté"); keepScroll(draw); }); return; }
       const c = b.dataset.chan; if (c === "ig" && S.ig !== "ok") return toast("Reconnectez d'abord Instagram.");
       F[c] = !F[c]; keepScroll(draw);

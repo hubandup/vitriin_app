@@ -20,6 +20,18 @@ Repères :
 
 ## 2026-11-01
 
+### MOD-070 · Espace magasin : vraie connexion Facebook / Instagram et vraie publication
+- **Constat (audit du 01/11)** : `/magasin` ne faisait que simuler (`demo_publish`, `demo_reconnect`) ; le vrai circuit Meta n'était branché que sur la page racine.
+- **Correction** : `/magasin` sait s'il tourne sur un réseau de démo (`my_store_is_demo`, membres du magasin seulement ; en cas de doute, simulation). Réseau de démo : rien ne change. Réseau réel :
+  - Réglages : bouton « Connecter » / « Reconnecter » sur Facebook et Instagram → `meta-oauth-start`. Le retour Meta arrive sur la page racine, qui renvoie vers `/magasin/` (clé de session `vitriin-oauth-back`) avec le résultat.
+  - Publier → `meta-publish`, résultat réel par réseau (publiée, échec avec la raison, déjà publiée).
+  - Statistiques Meta relues en arrière-plan au plus toutes les 6 h (`meta-insights`).
+  - Programmation : « arrive bientôt » (pas encore de publication différée réelle).
+  - Google Business Profile : code prêt (connexion, choix de fiche `google-pick`), masqué derrière `GBP_READY = false` tant que Google n'a pas ouvert l'accès.
+- **Limites connues** : tant que Meta n'a pas validé l'app, seuls les comptes testeurs de l'app Meta peuvent se connecter et publier. Le renvoi après autorisation suppose que `APP_RETURN_URL` pointe sur la page racine (comportement actuel de la page racine). Aucun magasin réel n'existe encore pour tester de bout en bout.
+- Migration `20261101030000_store_is_demo_member.sql`.
+- **Retour arrière** : `git revert` du commit ; `drop function public.my_store_is_demo(uuid)`.
+
 ### MOD-069 · Aperçu commerçant : vu comme un client connecté
 - `/magasin` ouvre `/v/...?apercu=1&s=<slug>`. En aperçu, `/v/` construit en mémoire un client fictif (« Camille Martin ») qui suit le commerce, a gardé deux de ses promos et en a utilisé une : Mes promos, Commerces et Profil s'affichent comme chez un vrai client. Rien n'est écrit en base : garder, suivre, aimer, modifier le profil, changer la photo, se déconnecter et supprimer le compte affichent « Aperçu : vos clients peuvent le faire ici ».
 - **Retour arrière** : `git revert` du commit.
