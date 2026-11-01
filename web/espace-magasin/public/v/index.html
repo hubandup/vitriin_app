@@ -126,6 +126,9 @@ nav.tabs a.on{color:var(--p)}
 .side{position:absolute;right:12px;bottom:calc(var(--sab) + 150px);display:flex;flex-direction:column;gap:16px;align-items:center}
 .side button,.side a{display:flex;flex-direction:column;align-items:center;gap:5px;color:#fff;font-size:11px;font-weight:600}
 .side i{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.side button,.side a{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.side button.pop i{animation:pop .32s ease}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.25)}100%{transform:scale(1)}}
 .rinfo{position:absolute;left:0;right:76px;bottom:0;padding:0 16px calc(var(--sab) + 22px);color:#fff}
 .rinfo small{color:rgba(255,255,255,.6);font-size:12px}
 .rinfo h3{font-size:22px;letter-spacing:-.01em;margin:6px 0 0}
@@ -359,13 +362,16 @@ function dist(a, s) {
 // « J'aime » : une fois par appareil, sans compte ; l'état est gardé sur l'appareil.
 const likedSet = () => { try { return new Set(JSON.parse(ls.get("vt-liked") || "[]")); } catch { return new Set(); } };
 const isLiked = (id) => likedSet().has(id);
-async function toggleLike(promo) {
+// Un seul toucher : le cœur change tout de suite, le serveur suit ; on revient en arrière s'il refuse.
+async function toggleLike(promo, paint) {
   if (APERCU) return apercuNo() && null;
-  const set = likedSet(), on = !set.has(promo.id);
+  const set = likedSet(), on = !set.has(promo.id), before = promo.likes || 0;
+  const store = () => ls.set("vt-liked", JSON.stringify([...set].slice(-500)));
+  on ? set.add(promo.id) : set.delete(promo.id); store();
+  promo.likes = Math.max(0, before + (on ? 1 : -1)); paint(on);
   const { data, error } = await sb.rpc("vitrine_like", { p_id: promo.id, p_client_id: clientId(), p_on: on });
-  if (error) { toast(errText(error)); return null; }
-  on ? set.add(promo.id) : set.delete(promo.id); ls.set("vt-liked", JSON.stringify([...set].slice(-500)));
-  promo.likes = data; return on;
+  if (error) { on ? set.delete(promo.id) : set.add(promo.id); store(); promo.likes = before; paint(!on); toast(errText(error)); return null; }
+  promo.likes = data; paint(on); return on;
 }
 const likeIn = (p) => `<i class="gl">${IC.heart(isLiked(p.id))}</i><span>${p.likes ? nfmt(p.likes) : "J'aime"}</span>`;
 const likeBtn = (p, k) => `<button data-lk="${k}" aria-pressed="${isLiked(p.id)}" aria-label="J'aime">${likeIn(p)}</button>`;
@@ -957,7 +963,10 @@ function openReels(list, start, direct, home) {
   $$("[data-sv]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.sv]; if (!S.session) { if (APERCU) return apercuNo(); el.remove(); document.body.style.overflow = ""; needLogin({ save: x.promo.id, back: `/v/p/${x.promo.id}` }); return; } const on = await toggleSave(x.promo, x.store); if (on != null) { b.innerHTML = `<i class="gl">${IC.save(on)}</i><span>${on ? "Gardée" : "Garder"}</span>`; b.setAttribute("aria-pressed", on); } });
   $$("[data-fo]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.fo]; if (!S.session) { if (APERCU) return apercuNo(); el.remove(); document.body.style.overflow = ""; needLogin({ follow: x.store.id, back: `/v/m/${x.store.slug}` }); return; } if (await toggleFollow(x.store)) $$(`[data-fo]`, el).forEach(o => list[+o.dataset.fo].store.id === x.store.id && o.remove()); });
   $$("[data-cp]", el).forEach(b => b.onclick = () => coupon(list[+b.dataset.cp]));
-  $$("[data-lk]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.lk]; const on = await toggleLike(x.promo); if (on != null) { b.innerHTML = likeIn(x.promo); b.setAttribute("aria-pressed", on); } });
+  $$("[data-lk]", el).forEach(b => b.onclick = () => {
+    const x = list[+b.dataset.lk];
+    toggleLike(x.promo, (on) => { b.innerHTML = likeIn(x.promo); b.setAttribute("aria-pressed", on); if (on) { b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); } });
+  });
   $$("[data-sh]", el).forEach(b => b.onclick = () => { const x = list[+b.dataset.sh]; share(x.promo.title, `${x.promo.title} chez ${x.store.name}`, `${location.origin}/v/p/${x.promo.id}`); });
   $$("[data-inst]", el).forEach(b => b.onclick = installSheet);
   $$("[data-ibx]", el).forEach(b => b.onclick = () => { ls.set("vt-noinstall", "1"); $$(".ibar", el).forEach(x => x.remove()); $$(".reel.wb", el).forEach(x => x.classList.remove("wb")); });

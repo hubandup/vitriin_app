@@ -20,6 +20,11 @@ Repères :
 
 ## 2026-11-01
 
+### BUG-010 · Cœur « J'aime » : il fallait toucher deux fois
+- **Constat** : sur iPhone, un toucher sur le cœur semblait sans effet (le cœur ne changeait qu'au retour du serveur, et Safari attendait un éventuel double-toucher de zoom).
+- **Correction** (`/v/`) : le cœur change dès le toucher (mise à jour immédiate, le serveur confirme ensuite, retour arrière s'il refuse) ; `touch-action: manipulation` sur les boutons du plein écran ; petite animation au « J'aime ». Vérifié : un seul toucher suffit.
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-070 · Espace magasin : vraie connexion Facebook / Instagram et vraie publication
 - **Constat (audit du 01/11)** : `/magasin` ne faisait que simuler (`demo_publish`, `demo_reconnect`) ; le vrai circuit Meta n'était branché que sur la page racine.
 - **Correction** : `/magasin` sait s'il tourne sur un réseau de démo (`my_store_is_demo`, membres du magasin seulement ; en cas de doute, simulation). Réseau de démo : rien ne change. Réseau réel :
