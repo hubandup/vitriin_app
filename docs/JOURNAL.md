@@ -20,6 +20,11 @@ Repères :
 
 ## 2026-11-01
 
+### MOD-064 · Profil façon Instagram, pictos monochromes
+- Bandeau rose retiré : titre « Profil » comme les autres pages, puis photo à gauche (badge « + » noir) avec nom et compteurs à droite (utilisées, économisés, gardées), « Membre depuis », boutons gris « Modifier » (ouvre Mon compte) et « Partager Vitriin ».
+- Pictos des centres d'intérêt : emojis remplacés par des icônes au trait, couleur du texte (aussi dans l'onboarding).
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-063 · Bouton « Suivre » / « Ne plus suivre »
 - Page Commerces et fiche commerce : le bouton d'un commerce suivi affiche l'action « Ne plus suivre » (au lieu de l'état « Suivi »). Sur la page Commerces, il bascule sur place : la rangée reste, le bouton redevient « Suivre » en rose.
 - **Retour arrière** : `git revert` du commit.
