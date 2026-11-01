@@ -18,6 +18,15 @@ Repères :
 
 ---
 
+## 2026-11-01
+
+### MOD-061 · Ouverture sur le feed plein écran, swipe vers Découvrir
+- **Ouverture de `/v/`** : le feed plein écran s'ouvre par défaut (commerces suivis, puis affinités, puis le reste), par-dessus Découvrir. Une seule fois par session de navigation (`S.booted`) : revenir sur l'onglet Découvrir ne le rouvre pas. Arrivée par un lien promo inchangée.
+- **Swipe vers la droite** sur n'importe quel feed plein écran : il glisse hors de l'écran et laisse Découvrir. Indice affiché à la première ouverture (« Glissez vers la droite pour tout découvrir »).
+- Un changement de lieu pendant le feed ne le ferme plus ; Découvrir se recharge à la fermeture.
+- **Menu du bas** : picto « Suivies » remplacé par une devanture de magasin.
+- **Retour arrière** : `git revert` du commit.
+
 ## 2026-10-31
 
 ### MOD-060 · Profil particulier aligné sur le reste de l'app
