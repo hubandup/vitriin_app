@@ -20,6 +20,13 @@ Repères :
 
 ## 2026-11-01
 
+### MOD-065 · Espace magasin : la vue client est l'app particulier elle-même
+- **Constat** : « Voir côté clients » (`/magasin/`) affichait une copie ancienne du feed (barres de progression, « Ouvert », cœur, « Itinéraire », « Enregistrer ») et enregistrait un affichage de code à chaque essai du commerçant, ce qui gonflait ses statistiques.
+- **Correction** : l'aperçu ouvre `/v/p/<id>?apercu=1` (ou `/v/m/<slug>?apercu=1` depuis le logo) dans un cadre plein écran. Même écran que les clients, donc toujours à jour. Bandeau « Aperçu : ce que voient vos clients · Fermer ».
+- **Mode aperçu de `/v/`** (`APERCU`) : vu comme un visiteur sans compte ; aucun appel `vitrine_reveal` ni `vitrine_confirm_use` (code d'exemple « EXEMPLE »), suivre / garder / connexion désactivés (message), pas d'onboarding, pas de géolocalisation automatique, pas d'ouverture du feed d'accueil.
+- **Code retiré de `/magasin/`** : ancienne vue reels, boîte à code, `countReveal`, styles associés, pictos et préférences « liked / saved » devenus inutiles.
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-064 · Profil façon Instagram, pictos monochromes
 - Bandeau rose retiré : titre « Profil » comme les autres pages, puis photo à gauche (badge « + » noir) avec nom et compteurs à droite (utilisées, économisés, gardées), « Membre depuis », boutons gris « Modifier » (ouvre Mon compte) et « Partager Vitriin ».
 - Pictos des centres d'intérêt : emojis remplacés par des icônes au trait, couleur du texte (aussi dans l'onboarding).

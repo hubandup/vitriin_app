@@ -111,6 +111,8 @@ nav.tabs a.on{color:var(--p)}
 /* Reels */
 .reels{position:fixed;inset:0;z-index:40;background:#000;overflow-y:scroll;scroll-snap-type:y mandatory}
 .reels.out{transition:transform .25s ease-out}
+.apb{position:fixed;top:0;left:0;right:0;z-index:90;height:calc(env(safe-area-inset-top, 0px) + 38px);padding:env(safe-area-inset-top, 0px) 8px 0 16px;display:flex;align-items:center;justify-content:space-between;background:var(--ink);color:#fff;font-size:13px;font-weight:600}
+.apb button{color:#fff;font-weight:700;font-size:13px;padding:0 12px;min-height:30px;border-radius:999px;background:rgba(255,255,255,.16)}
 .swh{position:fixed;left:50%;top:calc(var(--sat) + 74px);transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.55);color:#fff;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);white-space:nowrap;animation:swh 3.6s ease forwards;pointer-events:none}
 @keyframes swh{0%,8%{opacity:0;transform:translate(-50%,-6px)}14%,82%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
 @media (min-width:560px){.reels{max-width:430px;margin:0 auto}}
@@ -366,6 +368,10 @@ const geo = (timeout = 9000) => new Promise((ok) => {
 // Vitriin sera une application mobile (App Store, Google Play). Tant que les liens des stores ne sont pas
 // renseignés ici, aucune invitation à installer n'est affichée : le web reste complet à lui seul.
 const STORES = { ios: "", android: "" };
+// Aperçu commerçant (/v/...?apercu=1, ouvert depuis l'espace magasin) : l'app telle que la voit un client,
+// sans compte et sans rien enregistrer (ni code affiché, ni suivi, ni favori).
+const APERCU = new URLSearchParams(location.search).has("apercu");
+const apercuNo = () => (toast("Aperçu : vos clients peuvent le faire ici."), true);
 const PLATFORM = /iphone|ipad|ipod/i.test(navigator.userAgent) ? "ios" : /android/i.test(navigator.userAgent) ? "android" : null;
 const storeUrl = () => STORES[PLATFORM] || "";
 const showInstall = () => !!storeUrl() && ls.get("vt-noinstall") !== "1";
@@ -375,13 +381,14 @@ const showInstall = () => !!storeUrl() && ls.get("vt-noinstall") !== "1";
 { const d = new URLSearchParams(location.search).get("demo"); if (d != null) ls.set("vt-demo", d === "0" ? null : "1"); }
 let DEMO = ls.get("vt-demo") === "1";
 const S = {
-  session: null, me: null,
+  session: null, me: null, booted: APERCU,
   pos: (() => { try { return JSON.parse(ls.get("vt-pos")); } catch { return null; } })(),
   items: null, filter: "Tout", q: "", wide: false,
 };
 const isSaved = (id) => !!S.me?.saves?.some(x => x.promo.id === id);
 const isFollowing = (id) => !!S.me?.follows?.some(f => f.id === id);
 async function refreshMe() {
+  if (APERCU) { S.session = null; S.me = null; return; }
   const { data } = await sb.auth.getSession(); S.session = data.session;
   if (!S.session) { S.me = null; return; }
   const r = await sb.rpc("customer_me"); S.me = r.error ? null : r.data;
@@ -449,6 +456,7 @@ const GATE = {
   any: ["Bienvenue sur Vitriin", "Vos promos gardées, vos commerces et vos économies, sur le web comme dans l'application."],
 };
 function gateSheet(pending) {
+  if (APERCU) return apercuNo();
   if (pending) ss.set("vt-pending", JSON.stringify(pending));
   const [h, t] = GATE[pending?.save ? "save" : pending?.follow ? "follow" : "any"];
   const ov = document.createElement("div"); ov.className = "ov sh"; ov.id = "gate";
@@ -910,8 +918,8 @@ function openReels(list, start, direct, home) {
   $$("[data-x]", el).forEach(b => b.onclick = (e) => { e.preventDefault(); close(); });
   $$("[data-close]", el).forEach(b => b.onclick = (e) => { e.preventDefault(); close("/v/"); });
   $$("[data-store]", el).forEach(a => a.onclick = (e) => { e.preventDefault(); el.remove(); document.body.style.overflow = ""; go(`/v/m/${list[+a.dataset.store].store.slug}`); });
-  $$("[data-sv]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.sv]; if (!S.session) { el.remove(); document.body.style.overflow = ""; needLogin({ save: x.promo.id, back: `/v/p/${x.promo.id}` }); return; } const on = await toggleSave(x.promo, x.store); if (on != null) { b.innerHTML = `<i class="gl">${IC.save(on)}</i><span>${on ? "Gardée" : "Garder"}</span>`; b.setAttribute("aria-pressed", on); } });
-  $$("[data-fo]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.fo]; if (!S.session) { el.remove(); document.body.style.overflow = ""; needLogin({ follow: x.store.id, back: `/v/m/${x.store.slug}` }); return; } if (await toggleFollow(x.store)) $$(`[data-fo]`, el).forEach(o => list[+o.dataset.fo].store.id === x.store.id && o.remove()); });
+  $$("[data-sv]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.sv]; if (!S.session) { if (APERCU) return apercuNo(); el.remove(); document.body.style.overflow = ""; needLogin({ save: x.promo.id, back: `/v/p/${x.promo.id}` }); return; } const on = await toggleSave(x.promo, x.store); if (on != null) { b.innerHTML = `<i class="gl">${IC.save(on)}</i><span>${on ? "Gardée" : "Garder"}</span>`; b.setAttribute("aria-pressed", on); } });
+  $$("[data-fo]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.fo]; if (!S.session) { if (APERCU) return apercuNo(); el.remove(); document.body.style.overflow = ""; needLogin({ follow: x.store.id, back: `/v/m/${x.store.slug}` }); return; } if (await toggleFollow(x.store)) $$(`[data-fo]`, el).forEach(o => list[+o.dataset.fo].store.id === x.store.id && o.remove()); });
   $$("[data-cp]", el).forEach(b => b.onclick = () => coupon(list[+b.dataset.cp]));
   $$("[data-sh]", el).forEach(b => b.onclick = () => { const x = list[+b.dataset.sh]; share(x.promo.title, `${x.promo.title} chez ${x.store.name}`, `${location.origin}/v/p/${x.promo.id}`); });
   $$("[data-inst]", el).forEach(b => b.onclick = installSheet);
@@ -945,7 +953,7 @@ async function coupon(x) {
   document.body.appendChild(ov);
   $("#c-sh", ov).onclick = () => share(p.title, `${p.title} chez ${s.name}`, `${location.origin}/v/p/${p.id}`);
   $("#keep", ov) && ($("#keep", ov).onclick = async () => {
-    if (!S.session) { shut(); $("#reels")?.remove(); document.body.style.overflow = ""; needLogin({ save: p.id, back: `/v/p/${p.id}` }); return; }
+    if (!S.session) { if (APERCU) return apercuNo(); shut(); $("#reels")?.remove(); document.body.style.overflow = ""; needLogin({ save: p.id, back: `/v/p/${p.id}` }); return; }
     if (await toggleSave(p, s)) $("#keep", ov)?.remove();
   });
   const blur = () => {
@@ -954,8 +962,9 @@ async function coupon(x) {
   };
   $("#show", ov).onclick = async () => {
     const btn = $("#show", ov); btn.disabled = true; btn.lastChild.textContent = "Un instant…";
-    const pos = await geo(4000);
-    const { data, error } = await sb.rpc("vitrine_reveal", { p_id: p.id, p_client_id: clientId(), p_lat: pos?.lat ?? null, p_lng: pos?.lng ?? null });
+    const pos = APERCU ? null : await geo(4000);
+    const { data, error } = APERCU ? { data: { code: "EXEMPLE" } }
+      : await sb.rpc("vitrine_reveal", { p_id: p.id, p_client_id: clientId(), p_lat: pos?.lat ?? null, p_lng: pos?.lng ?? null });
     if (error) { btn.disabled = false; btn.lastChild.textContent = "Afficher mon code"; return toast(errText(error)); }
     const code = data?.ean || data?.code, ean = !!(data?.ean && /^\d{13}$/.test(data.ean));
     $("#cbody", ov).innerHTML = code ? `<svg id="bc"></svg><div class="code">${esc(code)}</div>`
@@ -972,6 +981,7 @@ async function coupon(x) {
   $("#used", ov).onclick = async () => {
     if (!shown) return;
     $("#used", ov).disabled = true;
+    if (APERCU) { shut(); return apercuNo(); }
     await sb.rpc("vitrine_confirm_use", { p_id: p.id, p_client_id: clientId() });
     shut(); done(x);
   };
@@ -999,7 +1009,7 @@ function done(x) {
   $$("a[data-link]", el).forEach(a => a.addEventListener("click", shut));
   $("#d-sh", el).onclick = () => share(p.title, `Bon plan : ${p.title} chez ${s.name}`, `${location.origin}/v/p/${p.id}`);
   $("#d-fo", el) && ($("#d-fo", el).onclick = async () => {
-    if (!S.session) { shut(); needLogin({ follow: s.id, back: `/v/m/${s.slug}` }); return; }
+    if (!S.session) { if (APERCU) return apercuNo(); shut(); needLogin({ follow: s.id, back: `/v/m/${s.slug}` }); return; }
     if (await toggleFollow(s)) { shut(); go(`/v/m/${s.slug}`); }
   });
 }
@@ -1078,7 +1088,14 @@ document.addEventListener("click", (e) => {
 });
 addEventListener("popstate", route);
 sb.auth.onAuthStateChange(async (ev) => { if (ev === "SIGNED_IN" || ev === "SIGNED_OUT") { await refreshMe(); if (ev === "SIGNED_IN") { $("#gate")?.remove(); await runPending(); route(); maybeOnboard(); } } });
-(async () => { await refreshMe(); await runPending(); route(); maybeOnboard(); autoLocate(); })();
+if (APERCU) {
+  document.documentElement.style.setProperty("--sat", "calc(env(safe-area-inset-top, 0px) + 38px)");
+  const b = document.createElement("div"); b.className = "apb";
+  b.innerHTML = `<span>Aperçu : ce que voient vos clients</span><button>Fermer</button>`;
+  b.querySelector("button").onclick = () => parent.postMessage("vitriin:apercu-close", location.origin);
+  document.body.appendChild(b);
+}
+(async () => { await refreshMe(); if (!APERCU) await runPending(); route(); if (!APERCU) { maybeOnboard(); autoLocate(); } })();
 </script>
 </body>
 </html>

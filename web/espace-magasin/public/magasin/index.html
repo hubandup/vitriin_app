@@ -329,46 +329,10 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .pub .lines div+div{border-top:1px solid var(--line)}
 .pub .lines em{margin-left:auto;font-style:normal;font-size:13.5px;font-weight:700}
 
-/* ---- Vue client (reels) ---- */
-.reels{position:fixed;inset:0;background:#000;z-index:35;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch}
-@media (min-width:560px){.reels{max-width:430px;margin:0 auto}}
-.reel{position:relative;height:100dvh;scroll-snap-align:start;overflow:hidden}
-.reel>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.reel .shade{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.2) 45%,rgba(0,0,0,.1) 70%,rgba(0,0,0,.35) 100%)}
-.reel .prog{position:absolute;top:calc(var(--sat) + 10px);left:14px;right:14px;display:flex;gap:5px}
-.reel .prog i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.32)}
-.reel .prog i.on{background:#fff}
-.reel .rh{position:absolute;top:calc(var(--sat) + 22px);left:14px;right:14px;display:flex;align-items:center;gap:10px;color:#fff}
-.glass{background:rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.reel .rav{width:40px;height:40px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;overflow:hidden}
-.reel .rh b{display:block;font-size:15.5px}
-.reel .rh span{font-size:12.5px;opacity:.75}
-.reel .open{margin-left:auto;font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:999px;display:flex;align-items:center;gap:5px}
-.reel .side{position:absolute;right:12px;bottom:calc(var(--sab) + 140px);display:flex;flex-direction:column;gap:16px;align-items:center}
-.reel .side button{display:flex;flex-direction:column;align-items:center;gap:5px;color:#fff;font-size:12px;font-weight:700}
-.reel .side i{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.reel .info{position:absolute;left:0;right:76px;bottom:calc(var(--sab) + 92px);padding:0 16px;color:#fff}
-.reel .info small{font-size:12.5px;opacity:.6}
-.reel .info h3{font-size:26px;margin:6px 0 4px}
-.reel .info p{margin:0;font-size:14px;opacity:.8}
-.reel .info .pr{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}.reel .info .pr>*{white-space:nowrap}
-.reel .info .pr b{font-size:32px;letter-spacing:-.02em}
-.reel .info .pr s{font-size:18px;opacity:.4}
-.reel .info .pr em{font-style:normal;background:var(--p);font-weight:700;padding:4px 10px;border-radius:9px;font-size:15px}
-.reel .cta{position:absolute;left:16px;right:16px;bottom:calc(var(--sab) + 22px);background:var(--grad);color:#fff;font-weight:700;font-size:17px;padding:16px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 10px 26px rgba(229,8,126,.45)}
-.codebox{position:fixed;inset:0;z-index:45;background:rgba(15,12,10,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;animation:fade .18s}
-.codebox .in2{background:#fff;border-radius:26px;width:100%;max-width:380px;padding:24px 22px 22px;text-align:center}
-.codebox small{font-size:12.5px;font-weight:700;letter-spacing:.07em;color:var(--muted)}
-.codebox h3{font-size:22px;margin:4px 0 16px}
-.bars{position:relative;display:flex;justify-content:center;align-items:stretch;height:110px;gap:0}
-.bars.mask{filter:blur(6px);opacity:.6}
-.lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
-.lock i{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.12)}
-.lock span{background:#fff;font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px}
-.digits{font-weight:700;letter-spacing:.18em;font-size:16px;margin-top:10px}
-.mask-d{filter:blur(5px)}
-.used{background:#e8f5ee;color:var(--teal);border-radius:14px;padding:12px;font-weight:700;font-size:14.5px;margin-top:14px;display:flex;gap:8px;align-items:center;justify-content:center;text-align:left}
-.dark-btn{width:100%;margin-top:14px;background:#16130f;color:#fff;font-weight:700;font-size:16px;padding:15px;border-radius:15px}
+/* ---- Vue client : la vraie app particulier (/v/) en aperçu, même design partout ---- */
+.apercu{position:fixed;inset:0;z-index:35;background:#000}
+.apercu iframe{display:block;width:100%;height:100%;border:0}
+@media (min-width:560px){.apercu iframe{max-width:430px;margin:0 auto}}
 
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav) + var(--sab) + 86px);background:#2D2D2D;color:#fff;font-size:14.5px;font-weight:600;padding:12px 18px;border-radius:14px;z-index:60;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgba(0,0,0,.25);animation:fade .2s;text-align:center}
 @keyframes fade{from{opacity:0}to{opacity:1}}
@@ -425,7 +389,6 @@ const I = {
   trash: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>',
   eye: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
   net: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.4"/><circle cx="5.5" cy="18" r="2.4"/><circle cx="18.5" cy="18" r="2.4"/><path d="M12 7.4V11l-5 5M12 11l5 5"/></svg>',
-  clock: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
   chev: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
   back: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
   x: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
@@ -440,10 +403,6 @@ const I = {
   vid: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="m16 10 5-3v10l-5-3Z"/></svg>',
   send: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-4-9-9-4 20-5Z"/></svg>',
   check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.3 4.3L19 7"/></svg>',
-  heart: (on) => `<svg width="23" height="23" viewBox="0 0 24 24" fill="${on ? "#e5087e" : "none"}" stroke="${on ? "#e5087e" : "#fff"}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z"/></svg>`,
-  pin: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg>',
-  share: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-4-9-9-4 20-5Z"/></svg>',
-  save: (on) => `<svg width="22" height="22" viewBox="0 0 24 24" fill="${on ? "#fff" : "none"}" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4V4Z"/></svg>`,
   lock: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2D2D2D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
   cal: (c) => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>`,
 };
@@ -469,7 +428,8 @@ const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 // Session propre à l'app magasin (distincte de la Centrale, même domaine).
 const sb = supabase.createClient(SUPABASE_URL, ANON_KEY, { auth: { storageKey: "vitriin-magasin-auth" } });
 const PREFS_KEY = "vitriin-app-prefs";
-const prefs = Object.assign({ notifNet: true, notifFail: true, liked: {}, saved: {} }, store.get(PREFS_KEY) || {});
+const prefs = Object.assign({ notifNet: true, notifFail: true }, store.get(PREFS_KEY) || {});
+delete prefs.liked; delete prefs.saved;
 const errText = (e) => (e && (e.message || e.error_description)) || String(e);
 
 function mapRow(row, accounts) {
@@ -507,8 +467,6 @@ function mapRow(row, accounts) {
     pubAt: done.length ? Math.max(...done.map(x => new Date(x.published_at).getTime())) : null,
     schedAt: sched ? new Date(sched.getFullYear(), sched.getMonth(), sched.getDate()).getTime() : null,
     schedTime: sched ? sched.toTimeString().slice(0, 5) : null,
-    fav: stats ? (stats.fb?.[2] || 0) + (stats.ig?.[2] || 0) : 0,
-    liked: !!prefs.liked[row.id], saved: !!prefs.saved[row.id],
   };
 }
 
@@ -620,7 +578,6 @@ const notifySupport = (id) => sb.functions.invoke("support-notify", { body: { ti
 let S = { ig: "none", fb: "none", notifNet: prefs.notifNet, notifFail: prefs.notifFail, promos: [] };
 const save = () => {
   prefs.notifNet = S.notifNet; prefs.notifFail = S.notifFail;
-  S.promos.forEach(p => { if (p.liked) prefs.liked[p.id] = 1; else delete prefs.liked[p.id]; if (p.saved) prefs.saved[p.id] = 1; else delete prefs.saved[p.id]; });
   store.set(PREFS_KEY, prefs);
 };
 const UI = { tab: "home", cat: "todo" };
@@ -1407,70 +1364,17 @@ function pickMedia(src, done) {
 }
 
 /* ===================== Vue client ===================== */
+// Aperçu côté clients : on ouvre l'app particulier elle-même (/v/ en mode aperçu), jamais une copie.
+// En aperçu, rien n'est enregistré (ni code affiché, ni suivi, ni favori) : les statistiques restent justes.
 function clients(startId) {
-  const list = S.promos.filter(p => p.status === "published" && p.img && p.kind !== "post");
-  if (!list.length) return toast("Publiez une promo pour la voir côté clients.");
-  const idx = Math.max(0, list.findIndex(p => p.id === startId));
-  const layer = $("#layer");
-  layer.innerHTML = `<div class="reels" id="reels">${list.map((p, k) => { const pr = pricing(p); return `<section class="reel">
-    <img onerror="this.style.visibility='hidden'" src="${esc(p.img)}" alt=""><div class="shade"></div>
-    <div class="prog">${list.map((_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("")}</div>
-    <div class="rh"><button class="rav" data-close aria-label="Revenir à l'espace magasin">${avatar()}</button><div><b>${esc(STORE.name)}</b><span>${esc(STORE.city)} · À 1,2 km</span></div><span class="open glass">${I.clock.replace('width="20" height="20"', 'width="13" height="13"')}Ouvert</span></div>
-    <div class="side"><button data-fav="${p.id}"><i class="glass">${I.heart(p.liked)}</i><span id="fav-${p.id}">${(p.fav || 0) + (p.liked ? 1 : 0)}</span></button><button data-tip="Itinéraire vers ${esc(STORE.address)}"><i class="glass">${I.pin}</i>Itinéraire</button><button data-tip="Lien de la promo copié"><i class="glass">${I.share}</i>Partager</button><button data-savep="${p.id}"><i class="glass">${I.save(p.saved)}</i>${p.saved ? "Enregistré" : "Enregistrer"}</button></div>
-    <div class="info"><small>${esc(STORE.name)} · Jusqu'au ${fmtShort(p.end)}</small><h3>${esc(p.title)}</h3><p>${esc(p.sub || `Valable du ${fmtShort(p.start)} au ${fmtShort(p.end)}`)}</p>
-      <div class="pr">${pr.price != null ? `<b>${eur(pr.price)}</b>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}` : ""}<em>${esc(pr.badge)}</em></div></div>
-    <button class="cta" data-code="${p.id}">${I.bar.replace('width="14" height="14"', 'width="20" height="20"')}J'en profite</button>
-  </section>`; }).join("")}</div>`;
-  const r = $("#reels"); r.scrollTop = idx * window.innerHeight;
+  if (!STORE.slug) return toast("Votre vitrine n'a pas encore d'adresse.");
+  const p = startId ? find(startId) : null;
+  const live = p && p.spId && p.status === "published" && p.start <= Date.now() && p.end >= Date.now();
+  const url = live ? `/v/p/${p.spId}?apercu=1` : `/v/m/${encodeURIComponent(STORE.slug)}?apercu=1`;
+  $("#layer").innerHTML = `<div class="apercu"><iframe src="${url}" title="Votre vitrine vue par vos clients" allow="geolocation; clipboard-write; web-share"></iframe></div>`;
   document.body.style.overflow = "hidden";
-  $$("[data-close]", layer).forEach(b => b.onclick = closeLayer);
-  $$("[data-tip]", layer).forEach(b => b.onclick = () => toast(b.dataset.tip));
-  $$("[data-fav]", layer).forEach(b => b.onclick = () => { const p = find(b.dataset.fav); p.liked = !p.liked; save(); b.querySelector("i").innerHTML = I.heart(p.liked); $("#fav-" + p.id).textContent = (p.fav || 0) + (p.liked ? 1 : 0); });
-  $$("[data-savep]", layer).forEach(b => b.onclick = () => { const p = find(b.dataset.savep); p.saved = !p.saved; save(); b.innerHTML = `<i class="glass">${I.save(p.saved)}</i>${p.saved ? "Enregistré" : "Enregistrer"}`; });
-  $$("[data-code]", layer).forEach(b => b.onclick = () => codeBox(find(b.dataset.code)));
 }
-function barcode(code) {
-  const digits = (code || "9901230000017").replace(/\D/g, "").padEnd(13, "0");
-  let bars = ""; const add = (w, on) => bars += `<span style="width:${w * 2.2}px;background:${on ? "#16130f" : "transparent"}"></span>`;
-  add(1, 1); add(1, 0); add(1, 1);
-  for (const ch of digits) { const n = +ch; add((n % 3) + 1, 1); add(((n + 1) % 3) + 1, 0); add(((n + 2) % 2) + 1, 1); add((n % 2) + 1, 0); }
-  add(1, 1); add(1, 0); add(1, 1);
-  return bars;
-}
-// Identifiant anonyme de l'appareil : un client compte une fois par promo et par jour.
-const newId = () => (crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join(""));
-function clientId() {
-  try { let id = localStorage.getItem("vitriin-client"); if (!id) { id = newId(); localStorage.setItem("vitriin-client", id); } return id; }
-  catch { return newId(); }
-}
-// Code révélé : on demande la position (une fois, le client peut refuser) pour
-// rattacher l'utilisation au magasin le plus proche. La position n'est pas
-// conservée : le serveur ne garde que le magasin trouvé.
-const herePos = () => new Promise((ok) => {
-  if (!navigator.geolocation) return ok(null);
-  navigator.geolocation.getCurrentPosition((x) => ok(x.coords), () => ok(null), { enableHighAccuracy: false, timeout: 6000, maximumAge: 600000 });
-});
-async function countReveal(p) {
-  try {
-    const c = await herePos();
-    await sb.rpc("record_code_reveal_at", { p_store_promotion_id: p.spId, p_client_id: clientId(), p_lat: c ? c.latitude : null, p_lng: c ? c.longitude : null });
-    await loadData();
-  } catch {}
-}
-function codeBox(p) {
-  const el = document.createElement("div"); el.className = "codebox";
-  const draw = (shown) => {
-    el.innerHTML = `<div class="in2"><small>${esc(p.title.toUpperCase())}</small><h3>Code de réduction</h3>
-      <div style="position:relative"><div class="bars ${shown ? "" : "mask"}">${barcode(p.code)}</div>${shown ? "" : `<div class="lock"><i>${I.lock}</i><span>Code masqué</span></div>`}</div>
-      <div class="digits ${shown ? "" : "mask-d"}">${esc(p.code || "9 901230 000017")}</div>
-      ${shown ? `<div class="used">${I.check}Promotion activée · présentez ce code en caisse</div><button class="dark-btn" id="cb-x">Terminé</button>` :
-      `<p class="small" style="font-size:14px;margin:14px 0 0;line-height:1.45">Révélez le code pour le scanner en caisse : on compte ainsi chaque promo réellement utilisée.</p><button class="big-btn" id="cb-go">${I.eye}Utiliser cette promotion</button>`}</div>`;
-    $("#cb-go", el) && ($("#cb-go", el).onclick = () => { draw(true); countReveal(p); });
-    $("#cb-x", el) && ($("#cb-x", el).onclick = () => el.remove());
-  };
-  el.onclick = (e) => { if (e.target === el) el.remove(); };
-  draw(false); document.body.appendChild(el);
-}
+addEventListener("message", (e) => { if (e.origin === location.origin && e.data === "vitriin:apercu-close") closeLayer(); });
 
 /* ===================== Couches ===================== */
 function sheet(html, keepUnder) {
