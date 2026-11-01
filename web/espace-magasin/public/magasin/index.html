@@ -476,13 +476,15 @@ async function loadData() {
   if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
   const st = mem[0].stores;
   await sb.rpc("demo_tick", { p_store_id: st.id }); // fait avancer la démo ; sans effet ailleurs
-  const [net, acc, rows, rev, tk] = await Promise.all([
+  const [net, acc, rows, rev, tk, lk] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status, enabled").eq("store_id", st.id),
     sb.from("store_promotions").select("id, status, overrides, suspended, hidden, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
     // Codes révélés par les clients (drive to store), lisibles par le magasin seulement.
     sb.from("code_reveals").select("store_promotion_id, revealed_at, confidence, used_at").eq("store_id", st.id).order("revealed_at", { ascending: false }).range(0, 9999),
     sb.rpc("support_mine"),
+    // « J'aime » des clients sur l'app Vitriin.
+    sb.from("promo_likes").select("store_promotion_id, created_at").eq("store_id", st.id).range(0, 9999),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
   // Un code affiché loin du magasin ou hors des heures d'ouverture, et non confirmé, ne compte pas comme utilisé.
@@ -492,6 +494,9 @@ async function loadData() {
   S.tickets = (!tk.error && tk.data) || [];
   S.codes7 = reveals.filter(r => Date.now() - new Date(r.revealed_at) < 7 * DAY).length;
   S.codesBy = reveals.reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
+  const likes = (!lk.error && lk.data) || [];
+  S.likesBy = likes.reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
+  S.likes7 = likes.filter(r => Date.now() - new Date(r.created_at) < 7 * DAY).length;
   S.codes7By = reveals.filter(r => Date.now() - new Date(r.revealed_at) < 7 * DAY).reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
   const n = net.data?.[0];
   const fb = acc.data.find(a => a.channel === "facebook"), ig = acc.data.find(a => a.channel === "instagram");
@@ -747,6 +752,7 @@ function viewStats() {
     <div class="sec"><h2 style="font-size:16px">Résultats Facebook &amp; Instagram</h2><span style="font-size:13px;color:var(--muted);white-space:nowrap">7 derniers jours</span></div>
     <div class="sk" style="margin-top:0">${card("Portée", 0, "personnes touchées")}${card("Vues", 1, "affichages")}${card("Interactions", 2, "réactions, partages, enregistrements")}${card("Commentaires", 3, "sur vos publications")}</div>
     <div class="eng"><span>Taux d'engagement</span><span class="num">${eng} %</span></div>
+    <div class="eng"><span>J'aime sur l'app Vitriin · 7 j</span><span class="num" style="color:var(--p)">${nf(S.likes7 || 0)}</span></div>
     <div class="legend"><span class="f">Facebook</span><span class="i">Instagram</span><span>· source : Meta</span></div>
     ${fails.length ? `<div class="sec" style="margin-bottom:0"><h2 style="font-size:17px;color:var(--red)">À résoudre</h2></div>${fails.map(p => `<div class="resolve"><p class="sp"><b>« ${esc(p.title)} »</b>Échec Instagram : reconnecter le compte</p>${S.ig === "broken" ? '<button class="btn-red" data-act="reconnect">Reconnecter</button>' : `<button class="btn-red" data-retry="${p.id}">Republier</button>`}</div>`).join("")}` : ""}
     <div class="sec"><h2 style="font-size:17px">Statut par promo</h2></div>
@@ -951,6 +957,7 @@ function statsPromo(p) {
       <tbody>${M.map(([l, i]) => `<tr><td>${l}</td><td>${cell("fb", i)}</td><td>${cell("ig", i)}</td></tr>`).join("")}
       <tr><td>Publication</td><td class="sm">${pubAt("fb")}</td><td class="sm">${pubAt("ig")}</td></tr></tbody></table>
     <div class="st-line"><span>Taux d'engagement</span><b>${eng}</b></div>
+    <div class="st-line"><span>J'aime sur l'app Vitriin</span><b style="color:var(--p)">${nf((S.likesBy || {})[p.spId] || 0)}</b></div>
     <div class="st-line"><span>Codes utilisés en magasin</span><b style="color:var(--v)">${nf((S.codesBy || {})[p.spId] || 0)}<small> · ${nf((S.codes7By || {})[p.spId] || 0)} sur 7 j</small></b></div>
     ${(() => { const d = (S.codesDetail || {})[p.spId]; return d ? `<p class="small" style="margin-top:6px">${d.used ? `${nf(d.used)} confirmé${d.used > 1 ? "s" : ""} par le client · ` : ""}${nf(d.probable)} au magasin · ${nf(d.incertain)} sans position · ${nf(d.distance)} à distance (non comptés)</p>` : ""; })()}
     ${p.stats ? "" : `<p class="small" style="margin-top:10px">Les statistiques arrivent quelques heures après la publication.</p>`}

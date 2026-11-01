@@ -318,6 +318,7 @@ const IC = {
   go: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>',
   share: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-4-9-9-4 20-5Z"/></svg>',
   save: (on) => `<svg width="22" height="22" viewBox="0 0 24 24" fill="${on ? "var(--p)" : "none"}" stroke="${on ? "var(--p)" : "#fff"}" stroke-width="1.9" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4V4Z"/></svg>`,
+  heart: (on) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="${on ? "var(--p)" : "none"}" stroke="${on ? "var(--p)" : "#fff"}" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z"/></svg>`,
   clock: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
 };
 
@@ -355,6 +356,20 @@ function dist(a, s) {
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(s.lat)) * Math.sin(dLng / 2) ** 2;
   return 2 * 6371 * Math.asin(Math.sqrt(h));
 }
+// « J'aime » : une fois par appareil, sans compte ; l'état est gardé sur l'appareil.
+const likedSet = () => { try { return new Set(JSON.parse(ls.get("vt-liked") || "[]")); } catch { return new Set(); } };
+const isLiked = (id) => likedSet().has(id);
+async function toggleLike(promo) {
+  if (APERCU) return apercuNo() && null;
+  const set = likedSet(), on = !set.has(promo.id);
+  const { data, error } = await sb.rpc("vitrine_like", { p_id: promo.id, p_client_id: clientId(), p_on: on });
+  if (error) { toast(errText(error)); return null; }
+  on ? set.add(promo.id) : set.delete(promo.id); ls.set("vt-liked", JSON.stringify([...set].slice(-500)));
+  promo.likes = data; return on;
+}
+const likeIn = (p) => `<i class="gl">${IC.heart(isLiked(p.id))}</i><span>${p.likes ? nfmt(p.likes) : "J'aime"}</span>`;
+const likeBtn = (p, k) => `<button data-lk="${k}" aria-pressed="${isLiked(p.id)}" aria-label="J'aime">${likeIn(p)}</button>`;
+const nfmt = (n) => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + " k" : String(n);
 function clientId() {
   let id = ls.get("vitriin-client");
   if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join(""); ls.set("vitriin-client", id); }
@@ -877,7 +892,7 @@ function openReels(list, start, direct, home) {
     <div class="rh"><button class="rb gl" data-x aria-label="Fermer">${IC.back}</button><a class="av" href="/v/m/${esc(s.slug)}" data-store="${k}">${logo(s) ? `<img src="${esc(logo(s))}" alt="">` : init(s)}</a>
       <a href="/v/m/${esc(s.slug)}" data-store="${k}" style="flex:1;min-width:0;line-height:1.25"><b>${esc(s.name)}</b><span>${esc([s.city, km(x.d)].filter(Boolean).join(" · "))}</span></a>
       ${fo ? "" : `<button class="fol-rh" data-fo="${k}">Suivre</button>`}</div>
-    <div class="side">${p.soon ? "" : `<button data-sv="${k}" aria-pressed="${sv}"><i class="gl">${IC.save(sv)}</i><span>${sv ? "Gardée" : "Garder"}</span></button>`}
+    <div class="side">${p.soon ? "" : likeBtn(p, k)}${p.soon ? "" : `<button data-sv="${k}" aria-pressed="${sv}"><i class="gl">${IC.save(sv)}</i><span>${sv ? "Gardée" : "Garder"}</span></button>`}
       <a href="${mapsUrl(s)}" target="_blank" rel="noopener"><i class="gl">${IC.go.replace('width="19" height="19"', 'width="21" height="21"')}</i>Y aller</a>
       <button data-sh="${k}"><i class="gl">${IC.share}</i>Partager</button></div>
     <div class="rinfo"><small>${esc(catLabel(s.category))} · ${p.soon ? `À partir du ${day(p.starts_at)}` : `Jusqu'au ${day(p.ends_at)}`}</small><h3>${esc(p.title)}</h3>${p.text || p.sub || (pr.full && pr.full !== pr.badge) ? `<p>${esc(p.text || p.sub || pr.full)}</p>` : ""}
@@ -922,6 +937,7 @@ function openReels(list, start, direct, home) {
   $$("[data-sv]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.sv]; if (!S.session) { if (APERCU) return apercuNo(); el.remove(); document.body.style.overflow = ""; needLogin({ save: x.promo.id, back: `/v/p/${x.promo.id}` }); return; } const on = await toggleSave(x.promo, x.store); if (on != null) { b.innerHTML = `<i class="gl">${IC.save(on)}</i><span>${on ? "Gardée" : "Garder"}</span>`; b.setAttribute("aria-pressed", on); } });
   $$("[data-fo]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.fo]; if (!S.session) { if (APERCU) return apercuNo(); el.remove(); document.body.style.overflow = ""; needLogin({ follow: x.store.id, back: `/v/m/${x.store.slug}` }); return; } if (await toggleFollow(x.store)) $$(`[data-fo]`, el).forEach(o => list[+o.dataset.fo].store.id === x.store.id && o.remove()); });
   $$("[data-cp]", el).forEach(b => b.onclick = () => coupon(list[+b.dataset.cp]));
+  $$("[data-lk]", el).forEach(b => b.onclick = async () => { const x = list[+b.dataset.lk]; const on = await toggleLike(x.promo); if (on != null) { b.innerHTML = likeIn(x.promo); b.setAttribute("aria-pressed", on); } });
   $$("[data-sh]", el).forEach(b => b.onclick = () => { const x = list[+b.dataset.sh]; share(x.promo.title, `${x.promo.title} chez ${x.store.name}`, `${location.origin}/v/p/${x.promo.id}`); });
   $$("[data-inst]", el).forEach(b => b.onclick = installSheet);
   $$("[data-ibx]", el).forEach(b => b.onclick = () => { ls.set("vt-noinstall", "1"); $$(".ibar", el).forEach(x => x.remove()); $$(".reel.wb", el).forEach(x => x.classList.remove("wb")); });

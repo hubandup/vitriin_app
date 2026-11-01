@@ -20,6 +20,13 @@ Repères :
 
 ## 2026-11-01
 
+### MOD-067 · « J'aime » sur les promos, remonté au magasin et à la centrale
+- **App `/v/`** : cœur en tête de la colonne d'actions du plein écran, sans compte, une fois par appareil (identifiant anonyme déjà utilisé pour les codes) ; total affiché sous le cœur ; désactivé en aperçu commerçant et sur les promos à venir.
+- **Base** (`20261101010000_promo_likes.sql`) : table `promo_likes` (RLS, lecture réservée aux membres du magasin et de sa centrale, aucune écriture directe) ; `vitrine_like(p_id, p_client_id, p_on)` seule porte d'écriture (promo visible uniquement, renvoie le total) ; `vitrine_live` renvoie `likes` ; `network_vitrine_stats(p_network_id)` (membres de la centrale) agrège j'aime et codes par magasin et campagne. Vérifié en anonyme : like, doublon ignoré, retrait.
+- **Magasin** : « J'aime sur l'app Vitriin » dans Stats (7 jours) et dans le détail d'une promo.
+- **Centrale** : « App Vitriin : j'aime · codes » dans le détail d'une campagne et d'un magasin.
+- **Retour arrière** : `git revert` du commit ; migration inverse (drop `promo_likes`, `vitrine_like`, `network_vitrine_stats`, `vitrine_live` sans `likes`).
+
 ### MOD-066 · Aperçu commerçant : le vrai code de la promo
 - En aperçu (`/v/...?apercu=1`), « Afficher mon code » montre le vrai code de la promo via `vitrine_preview_code(p_id)` (SECURITY DEFINER, `authenticated` seulement, réservé aux membres du magasin, de sa centrale ou à l'équipe Vitriin). Aucun affichage n'est enregistré dans `code_reveals`. Migration `20261101000000_vitrine_preview_code.sql`. Vérifié : un compte particulier reçoit « Accès réservé au commerce ».
 - **Retour arrière** : `git revert` du commit ; `drop function public.vitrine_preview_code(uuid)` par migration.

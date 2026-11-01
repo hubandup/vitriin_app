@@ -662,6 +662,7 @@ const tplText = (k) => (NS().email_templates || {})[k] || TPL[k].def;
 const fillTpl = (k, v) => tplText(k).replace(/\{(\w+)\}/g, (m, x) => v[x] ?? m);
 
 /* ---------- Données dérivées ---------- */
+const vsum = (rows, key, id, f) => (rows || []).reduce((t, r) => t + (r[key] === id ? Number(r[f]) || 0 : 0), 0);
 const metric = (p, k) => (p.metrics && !p.metrics.hidden && Number(p.metrics[k])) || 0;
 function derive() {
   const now = Date.now();
@@ -687,6 +688,7 @@ function derive() {
       pubCount: sp.length,
       views30: sp.filter(p => p.published_at && now - new Date(p.published_at) < 30 * DAY).reduce((t, p) => t + views(p), 0),
       viewsAll: sp.reduce((t, p) => t + views(p), 0),
+      vlikes: vsum(S.vstats, "store_id", s.id, "likes"), vcodes: vsum(S.vstats, "store_id", s.id, "codes"),
     };
   });
   const byId = Object.fromEntries(stores.map(s => [s.id, s]));
@@ -698,6 +700,7 @@ function derive() {
     const regs = [...new Set(acts.map(a => byId[a.store_id]?.region).filter(Boolean))];
     return {
       ...p, i, st, acts, target: acts.length, relayed: relayedActs.length,
+      vlikes: vsum(S.vstats, "promotion_id", p.id, "likes"), vcodes: vsum(S.vstats, "promotion_id", p.id, "codes"),
       activated: acts.filter(a => a.status === "active").length,
       declined: acts.filter(a => a.status === "declined").length,
       pending: acts.filter(a => a.status === "pending").length,
@@ -992,6 +995,7 @@ function viewPromoDw(D, p) {
     <div class="mini"><div class="lbl">Publiées · relais</div><div class="val" style="color:var(--teal)">${nf.format(p.relayed)} <span style="font-size:13px;color:var(--muted)">· ${pct(p.relayed, p.target)}%</span></div></div>
     <div class="mini"><div class="lbl">Vues</div><div class="val" style="color:var(--c-indigo)">${compact(p.views)}</div></div>
     <div class="mini"><div class="lbl">Refusées</div><div class="val" style="color:var(--err)">${nf.format(p.declined)}</div></div>
+    <div class="mini" style="grid-column:1/-1"><div class="lbl">App Vitriin : j'aime · codes</div><div class="val" style="color:var(--p)">${nf.format(p.vlikes)} <span style="font-size:13px;color:var(--muted)">· ${nf.format(p.vcodes)}</span></div></div>
   </div>
 
   <label class="fl">Publication</label>
@@ -1115,6 +1119,7 @@ function viewStoreDw(D, s) {
     <div class="mini"><div class="lbl">Refusées</div><div class="val" style="color:var(--err)">${nf.format(declined)}</div></div>
     <div class="mini"><div class="lbl">Vues 30 j · total</div><div class="val">${compact(s.views30)} <span style="font-size:13px;color:var(--muted)">· ${compact(s.viewsAll)}</span></div></div>
     <div class="mini"><div class="lbl">Portée · interactions</div><div class="val">${compact(reach)} <span style="font-size:13px;color:var(--muted)">· ${compact(inter)}</span></div></div>
+    <div class="mini" style="grid-column:1/-1"><div class="lbl">App Vitriin : j'aime · codes</div><div class="val" style="color:var(--p)">${nf.format(s.vlikes)} <span style="font-size:13px;color:var(--muted)">· ${nf.format(s.vcodes)}</span></div></div>
   </div>
   <div class="kv"><span>Publications</span><b>${nf.format(s.pubCount)}</b><span>Dernière publication</span><b>${last ? dshort(last) : "—"}</b><span>Dans le réseau depuis</span><b>${dshort(s.created_at)}</b></div>
 
@@ -1904,14 +1909,17 @@ $("f-send").onclick = async () => {
 /* ---------- Chargement ---------- */
 async function load() {
   const id = S.net.id;
-  const [st, ac, pr, sp] = await Promise.all([
+  const [st, ac, pr, sp, vs] = await Promise.all([
     sb.from("stores").select("id, name, address, city, postal_code, auto_accept, logo_url, created_at, invited_at").eq("network_id", id).order("name").range(0, 4999),
     sb.from("social_accounts").select("store_id, channel, status, display_name, stores!inner(network_id)").eq("stores.network_id", id).range(0, 9999),
     sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
     sb.from("store_promotions").select("id, promotion_id, store_id, status, hidden, suspended, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),
+    // App Vitriin : « J'aime » et codes affichés par les clients, par magasin et par campagne.
+    sb.rpc("network_vitrine_stats", { p_network_id: id }),
   ]);
   const e = st.error || ac.error || pr.error || sp.error; if (e) throw e;
   S.stores = st.data; S.accounts = ac.data; S.promos = pr.data; S.acts = sp.data;
+  S.vstats = (!vs.error && vs.data) || [];
 }
 
 /* ---------- Authentification ---------- */
