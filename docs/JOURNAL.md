@@ -20,6 +20,18 @@ Repères :
 
 ## 2026-11-01
 
+### MOD-069 · Aperçu commerçant : vu comme un client connecté
+- `/magasin` ouvre `/v/...?apercu=1&s=<slug>`. En aperçu, `/v/` construit en mémoire un client fictif (« Camille Martin ») qui suit le commerce, a gardé deux de ses promos et en a utilisé une : Mes promos, Commerces et Profil s'affichent comme chez un vrai client. Rien n'est écrit en base : garder, suivre, aimer, modifier le profil, changer la photo, se déconnecter et supprimer le compte affichent « Aperçu : vos clients peuvent le faire ici ».
+- **Retour arrière** : `git revert` du commit.
+
+### MOD-068 · Google Business Profile : branchement préparé (non déployé)
+- **En attente de Google** : accès à l'API Business Profile et client OAuth (secrets `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`). Les fonctions ne sont PAS déployées tant que ces secrets n'existent pas.
+- **Fonctions** : `google-oauth-start` (JWT, membre du magasin, state signé + nonce), `google-oauth-callback` (publique, choisit la fiche au code postal du magasin ou la seule fiche ; sinon met le refresh token de côté chiffré 15 min), `google-pick` (choix de la fiche par le commerçant), `_shared/google.ts` (OAuth, liste des fiches, post « Offre » avec code, dates, visuel et lien vers la promo). `meta-publish` gère désormais aussi `google_business` (jeton d'accès d'une heure redemandé à chaque publication, jamais stocké).
+- **Sécurité** : seul le refresh token est stocké, chiffré AES-256-GCM avec la clé des tokens Meta, lié à la fiche par l'AAD, dans `private.social_account_secrets`. Choix en attente dans `private.google_pending` (hors API), RPC `google_pending_put/take` réservées au service, `google_pending_locations` réservée aux membres du magasin (noms et adresses seulement).
+- Migration `20261101020000_google_business.sql` appliquée. Typage vérifié (`deno check`).
+- **Reste à faire** : bouton « Connecter Google » dans `/magasin` (en même temps que la connexion Meta réelle), déploiement des fonctions.
+- **Retour arrière** : `git revert` du commit ; migration inverse (drop `private.google_pending` et des trois fonctions).
+
 ### MOD-067 · « J'aime » sur les promos, remonté au magasin et à la centrale
 - **App `/v/`** : cœur en tête de la colonne d'actions du plein écran, sans compte, une fois par appareil (identifiant anonyme déjà utilisé pour les codes) ; total affiché sous le cœur ; désactivé en aperçu commerçant et sur les promos à venir.
 - **Base** (`20261101010000_promo_likes.sql`) : table `promo_likes` (RLS, lecture réservée aux membres du magasin et de sa centrale, aucune écriture directe) ; `vitrine_like(p_id, p_client_id, p_on)` seule porte d'écriture (promo visible uniquement, renvoie le total) ; `vitrine_live` renvoie `likes` ; `network_vitrine_stats(p_network_id)` (membres de la centrale) agrège j'aime et codes par magasin et campagne. Vérifié en anonyme : like, doublon ignoré, retrait.

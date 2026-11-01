@@ -416,3 +416,15 @@ verify_jwt = true
 
 [functions.campaign-notify]
 verify_jwt = true
+
+[functions.google-oauth-start]
+# JWT du commerçant : membre du magasin vérifié dans la fonction.
+verify_jwt = true
+
+[functions.google-oauth-callback]
+# PUBLIQUE : c'est Google qui redirige ici le navigateur. Confiance = state signé + nonce consommé.
+verify_jwt = false
+
+[functions.google-pick]
+# JWT du commerçant : choix de la fiche quand le compte Google en gère plusieurs.
+verify_jwt = true

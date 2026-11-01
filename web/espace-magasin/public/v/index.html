@@ -383,10 +383,25 @@ const geo = (timeout = 9000) => new Promise((ok) => {
 // Vitriin sera une application mobile (App Store, Google Play). Tant que les liens des stores ne sont pas
 // renseignés ici, aucune invitation à installer n'est affichée : le web reste complet à lui seul.
 const STORES = { ios: "", android: "" };
-// Aperçu commerçant (/v/...?apercu=1, ouvert depuis l'espace magasin) : l'app telle que la voit un client,
-// sans compte et sans rien enregistrer : le vrai code s'affiche (vitrine_preview_code, réservé au commerce)
-// mais l'affichage n'est pas compté ; suivre, garder et se connecter sont désactivés.
+// Aperçu commerçant (/v/...?apercu=1&s=<slug>, ouvert depuis l'espace magasin) : l'app telle que la voit
+// un client connecté qui suit ce commerce (profil fictif construit en mémoire, rien n'est écrit en base).
+// Le vrai code s'affiche (vitrine_preview_code, réservé au commerce) sans être compté ;
+// suivre, garder, aimer, modifier le profil et se déconnecter sont désactivés.
 const APERCU = new URLSearchParams(location.search).has("apercu");
+// Client fictif de l'aperçu : suit le commerce, a gardé deux promos, en a utilisé une.
+async function apercuMe() {
+  const slug = new URLSearchParams(location.search).get("s");
+  const r = slug ? await sb.rpc("vitrine_store", { p_slug: slug }) : { data: null };
+  const st = r.data?.store, promos = r.data?.promos || [];
+  const list = promos.map(p => ({ promo: p, store: st }));
+  const u = promos[promos.length - 1];
+  return {
+    email: "client@exemple.fr", created_at: new Date(Date.now() - 90 * 864e5).toISOString(),
+    prefs: { first_name: "Camille", last_name: "Martin", interests: st?.category ? [st.category] : [], alerts: true, geo: true, newsletter: false },
+    follows: st ? [{ ...st, live: promos.length }] : [], feed: list, saves: list.slice(0, 2),
+    uses: u ? [{ id: u.id, at: new Date(Date.now() - 5 * 864e5).toISOString(), title: u.title, img: u.img, type: u.type, orig: u.orig, val: u.val, store: st.name }] : [],
+  };
+}
 const apercuNo = () => (toast("Aperçu : vos clients peuvent le faire ici."), true);
 const PLATFORM = /iphone|ipad|ipod/i.test(navigator.userAgent) ? "ios" : /android/i.test(navigator.userAgent) ? "android" : null;
 const storeUrl = () => STORES[PLATFORM] || "";
@@ -404,7 +419,7 @@ const S = {
 const isSaved = (id) => !!S.me?.saves?.some(x => x.promo.id === id);
 const isFollowing = (id) => !!S.me?.follows?.some(f => f.id === id);
 async function refreshMe() {
-  if (APERCU) { S.session = null; S.me = null; return; }
+  if (APERCU) { if (!S.me) S.me = await apercuMe(); S.session = { user: { id: "apercu" } }; return; }
   const { data } = await sb.auth.getSession(); S.session = data.session;
   if (!S.session) { S.me = null; return; }
   const r = await sb.rpc("customer_me"); S.me = r.error ? null : r.data;
@@ -513,6 +528,7 @@ function authForm(root, back) {
   };
 }
 async function toggleSave(promo, store) {
+  if (APERCU) return apercuNo() && null;
   if (needLogin({ save: promo.id, back: location.pathname })) return;
   const on = !isSaved(promo.id);
   const q = on ? sb.from("customer_saves").upsert({ store_promotion_id: promo.id }, { onConflict: "user_id,store_promotion_id", ignoreDuplicates: true })
@@ -523,6 +539,7 @@ async function toggleSave(promo, store) {
   return on;
 }
 async function toggleFollow(store) {
+  if (APERCU) return apercuNo() && null;
   if (needLogin({ follow: store.id, back: location.pathname })) return;
   const on = !isFollowing(store.id);
   const q = on ? sb.from("customer_follows").upsert({ store_id: store.id }, { onConflict: "user_id,store_id", ignoreDuplicates: true })
@@ -532,6 +549,7 @@ async function toggleFollow(store) {
   return on;
 }
 async function savePrefs(ch) {
+  if (APERCU) return !apercuNo();
   const p = { ...(S.me?.prefs || {}), ...ch, updated_at: new Date().toISOString() };
   const row = { first_name: p.first_name || null, last_name: p.last_name || null, phone: p.phone || null, interests: p.interests || [],
     alerts: p.alerts !== false, newsletter: p.newsletter === true, geo: p.geo !== false, avatar_url: p.avatar_url || null, updated_at: p.updated_at };
@@ -556,6 +574,7 @@ async function runPending() {
 const meAv = () => { const P = S.me?.prefs || {}; return P.avatar_url ? `<img src="${esc(P.avatar_url)}" alt="">` : esc((P.first_name || S.me?.email || "?")[0].toUpperCase()); };
 // Photo de profil : recadrée en carré 320 px (JPEG), rangée dans avatars/<uid>/, l'ancienne est supprimée.
 async function pickAvatar() {
+  if (APERCU) return apercuNo();
   const inp = Object.assign(document.createElement("input"), { type: "file", accept: "image/*" });
   inp.onchange = async () => {
     const f = inp.files?.[0]; if (!f) return;
@@ -792,6 +811,7 @@ async function pageProfile() {
   $("#acc").oninput = () => $("#a-ok").classList.remove("hidden");
   $("#acc").onsubmit = async (e) => {
     e.preventDefault();
+    if (APERCU) return apercuNo();
     const ph = $("#a-ph").value.trim(), em = $("#a-em").value.trim().toLowerCase();
     if (ph && !/^[0-9 +().-]{6,20}$/.test(ph)) return toast("Numéro de téléphone invalide.");
     if (em && em !== M.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return toast("Adresse email invalide.");
@@ -811,8 +831,8 @@ async function pageProfile() {
     if (!(await savePrefs({ geo: on }))) return;
     if (on) locate(false); else { if (S.pos?.label === "Autour de moi") usePlace(null); pageProfile(); }
   };
-  $("#out").onclick = async () => { await sb.auth.signOut(); await refreshMe(); go("/v/"); };
-  $("#del").onclick = async () => {
+  $("#out").onclick = async () => { if (APERCU) return apercuNo(); await sb.auth.signOut(); await refreshMe(); go("/v/"); };
+  $("#del").onclick = async () => { if (APERCU) return apercuNo();
     const b = $("#del"); if (b.dataset.c !== "1") { b.dataset.c = "1"; b.textContent = "Confirmer : tout supprimer définitivement"; return; }
     const k = P.avatar_url?.split("/avatars/")[1]; if (k) await sb.storage.from("avatars").remove([k]);
     const { error } = await sb.rpc("customer_delete_account"); if (error) return toast(errText(error));

@@ -1,4 +1,5 @@
-// meta-publish — publie une activation de promo sur les comptes connectés.
+// meta-publish — publie une activation de promo sur les comptes connectés
+// (Facebook, Instagram et, depuis MOD-068, Google Business Profile).
 //
 // Entrée : { store_promotion_id, channels? }, avec le JWT du commerçant.
 // Sortie : un rapport par canal. Toujours 200 si la demande est valide, même
@@ -22,6 +23,7 @@ import {
   serviceClient,
 } from "../_shared/supabase.ts";
 import type { SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { accessFromRefresh, createOfferPost, GoogleError } from "../_shared/google.ts";
 
 const FN = "meta-publish";
 
@@ -29,7 +31,7 @@ const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 /** Les canaux que cette fonction sait traiter. L'enum en porte d'autres. */
-const META_CHANNELS = ["facebook", "instagram"] as const;
+const META_CHANNELS = ["facebook", "instagram", "google_business"] as const;
 type MetaChannel = (typeof META_CHANNELS)[number];
 
 /** Limite de légende Instagram. Facebook est très au-dessus. */
@@ -149,7 +151,7 @@ Deno.serve(async (req) => {
   // --- Le contenu ----------------------------------------------------------
   const { data: promotion, error: promotionError } = await service
     .from("promotions")
-    .select("title, description, mechanic, media_url, discount_code, created_by_store_id")
+    .select("title, description, mechanic, media_url, discount_code, created_by_store_id, starts_at, ends_at")
     .eq("id", activation.promotion_id)
     .maybeSingle();
 
@@ -214,6 +216,13 @@ Deno.serve(async (req) => {
           ? `${caption}\n\nEn profiter en magasin : ${VITRINE_URL}/p/${storePromotionId}`
           : caption,
         mediaUrl,
+        offer: {
+          title: String(promotion.title ?? "Promotion"),
+          startsAt: promotion.starts_at as string,
+          endsAt: promotion.ends_at as string,
+          couponCode: typeof promotion.discount_code === "string" ? promotion.discount_code : null,
+          url: `${VITRINE_URL}/p/${storePromotionId}`,
+        },
       })
     ),
   );
@@ -261,9 +270,10 @@ async function publishToAccount(
     storePromotionId: string;
     caption: string;
     mediaUrl: string | null;
+    offer: { title: string; startsAt: string; endsAt: string; couponCode: string | null; url: string };
   },
 ): Promise<ChannelReport> {
-  const { account, storePromotionId, caption, mediaUrl } = args;
+  const { account, storePromotionId, caption, mediaUrl, offer } = args;
   const base = { channel: account.channel, account: account.display_name };
 
   // Idempotence : un canal déjà publié n'est pas republié.
@@ -282,6 +292,10 @@ async function publishToAccount(
   try {
     const externalPostId = account.channel === "facebook"
       ? await publishToFacebook(service, account, caption, mediaUrl)
+      : account.channel === "google_business"
+      // Google : le refresh token chiffré donne un jeton d'une heure, jamais stocké.
+      ? await createOfferPost(await accessFromRefresh(await loadAccessToken(service, account)), account.external_account_id,
+        { ...offer, summary: caption, imageUrl: mediaUrl })
       : await publishToInstagram(service, account, caption, mediaUrl);
 
     await service
@@ -306,7 +320,7 @@ async function publishToAccount(
     // qu'ici, par le code d'erreur. On marque le compte DANS LA TABLE, pour
     // que la centrale lise « ce point de vente n'est plus connecté » sans
     // avoir à déduire quoi que ce soit d'un échec de campagne.
-    const kind = classify(cause);
+    const kind = cause instanceof GoogleError ? cause.kind : classify(cause);
     if (kind === "revoked") {
       await service.rpc("social_account_set_status", {
         p_account_id: account.id,

@@ -1377,7 +1377,8 @@ function clients(startId) {
   if (!STORE.slug) return toast("Votre vitrine n'a pas encore d'adresse.");
   const p = startId ? find(startId) : null;
   const live = p && p.spId && p.status === "published" && p.start <= Date.now() && p.end >= Date.now();
-  const url = live ? `/v/p/${p.spId}?apercu=1` : `/v/m/${encodeURIComponent(STORE.slug)}?apercu=1`;
+  const q = `?apercu=1&s=${encodeURIComponent(STORE.slug)}`;
+  const url = live ? `/v/p/${p.spId}${q}` : `/v/m/${encodeURIComponent(STORE.slug)}${q}`;
   $("#layer").innerHTML = `<div class="apercu"><iframe src="${url}" title="Votre vitrine vue par vos clients" allow="geolocation; clipboard-write; web-share"></iframe></div>`;
   document.body.style.overflow = "hidden";
 }
