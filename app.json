@@ -1,28 +1,56 @@
 {
   "expo": {
-    "name": "vitriin_app",
-    "slug": "vitriin_app",
+    "name": "Vitriin",
+    "slug": "vitriin",
+    "scheme": "vitriin",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "co.vitriin.app",
+      "supportsTablet": false,
+      "associatedDomains": ["applinks:app.vitriin.co"],
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "Vitriin utilise votre position pour afficher d'abord les promos des commerces proches de vous.",
+        "NSCameraUsageDescription": "Vitriin utilise l'appareil photo pour ajouter une photo à vos promotions et à votre profil.",
+        "NSPhotoLibraryUsageDescription": "Vitriin accède à vos photos pour ajouter un visuel à vos promotions et à votre profil."
+      }
     },
     "android": {
+      "package": "co.vitriin.app",
+      "softwareKeyboardLayoutMode": "resize",
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "CAMERA"],
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#e5087e",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      "predictiveBackGestureEnabled": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "app.vitriin.co", "pathPrefix": "/v" },
+            { "scheme": "https", "host": "app.vitriin.co", "pathPrefix": "/magasin" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-splash-screen",
+        { "image": "./assets/splash-icon.png", "imageWidth": 160, "backgroundColor": "#e5087e" }
+      ],
+      [
+        "expo-notifications",
+        { "icon": "./assets/android-icon-monochrome.png", "color": "#e5087e" }
+      ]
     ]
   }
 }

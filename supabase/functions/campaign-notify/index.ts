@@ -10,6 +10,7 @@
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { APP, emailReady, esc, layout, para, sendEmail } from "../_shared/email.ts";
+import { sendPush } from "../_shared/push.ts";
 
 const URL_ = Deno.env.get("SUPABASE_URL")!;
 const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -86,5 +87,19 @@ Deno.serve(async (req) => {
     }));
   }
   if (failed.length) await admin.rpc("campaign_notify_release", { p_ids: failed });
+
+  // Notification sur l'app mobile : en plus de l'email, sans jamais le bloquer.
+  try {
+    const { data: devices } = await admin.rpc("campaign_push_tokens", { p_ids: list.map((r) => r.sp_id) });
+    const status = new Map(list.map((r) => [r.sp_id, r.status]));
+    await sendPush(admin, ((devices ?? []) as { token: string; sp_id: string }[]).map((d) => ({
+      to: d.token,
+      title: status.get(d.sp_id) === "pending" ? "Nouvelle campagne à activer" : "Nouvelle campagne prête à publier",
+      body: `${netName} : ${p.title}`,
+      data: { url: `${APP}/magasin/?promo=${d.sp_id}` },
+    })));
+  } catch (e) {
+    console.error("campaign-notify push", (e as Error).message);
+  }
   return json(req, { ok: true, sent, failed: failed.length });
 });

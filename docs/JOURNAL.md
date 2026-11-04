@@ -18,6 +18,19 @@ Repères :
 
 ---
 
+## 2026-11-04
+
+### MOD-071 · App mobile : coquille Expo, une seule application (branche `feat/app-mobile`, non fusionnée)
+- **Décision** : une seule app « Vitriin » avec les espaces client et magasin. Les écrans restent ceux de app.vitriin.co, affichés dans une coquille native ; on passera en natif, un par un, ceux qui le méritent.
+- **Coquille** (`App.tsx`, `src/shell/`) : choix de l'espace au premier lancement (le client entre sans compte), barre d'onglets native, écran hors connexion, partage natif, liens `vitriin://` et liens universels, notifications, bouton retour Android. La page de démonstration du design system (ancien `App.tsx`) est retirée, les composants restent.
+- **Expo** : passage de SDK 54 à 58 (le 54 ne servait qu'à Expo Go). Identifiant `co.vitriin.app`. Icônes refaites à partir du V de `icon-512.png`.
+- **Web** : `public/shell.js` (pont avec l'app, sans effet dans un navigateur, ni dans l'aperçu en iframe). `/magasin` et `/v` le chargent, masquent leur menu et affichent un lien de changement d'espace dans l'app seulement. Le menu web et la barre native ont la même hauteur : aucun écran ne change de mise en page.
+- **Connexion Facebook / Google dans l'app** : navigateur système, jamais l'écran web intégré. Aller par `/retour-app/?to=` (hôtes Facebook et Google seulement), retour par la page racine puis `vitriin://oauth`. Aucun changement dans les Edge Functions Meta ni dans le dossier App Review.
+- **Notifications** : migration `20261104100000_device_tokens.sql` (table fermée, `register_device`, `unregister_device`, `campaign_push_tokens`), `_shared/push.ts`, `campaign-notify` envoie aussi une notification aux gérants. Sans effet tant qu'aucun appareil n'est inscrit.
+- **Correction au passage** : `/magasin` n'affiche plus « Démo : les publications sont simulées » sur un réseau réel.
+- **Vérifié** : `npm test` (5 suites sur les règles de navigation, de liens et de pont), `tsc`, export des bundles iOS et Android, `expo prebuild` (Info.plist, AndroidManifest), parcours web en mode app et en navigateur avec Playwright (Supabase simulé). **Pas encore testé sur un vrai téléphone.**
+- **Retour arrière** : avant fusion, supprimer la branche. Après fusion, `git revert` du commit ; `drop function public.campaign_push_tokens(uuid[]), public.unregister_device(text, text), public.register_device(text, text, text); drop table public.device_tokens;` par migration.
+
 ## 2026-11-01
 
 ### BUG-010 · Cœur « J'aime » : il fallait toucher deux fois

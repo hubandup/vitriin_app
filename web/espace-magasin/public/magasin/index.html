@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Vitriin</title>
+<script src="/shell.js"></script>
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -534,10 +535,11 @@ function showLogin(msg) {
   $("#nav").classList.add("hidden"); $("#fab").classList.add("hidden");
   $("#view").innerHTML = `<div class="screen" style="padding-top:60px">
     <div style="text-align:center;margin-bottom:28px"><img src="/icon-512.png" alt="" style="width:72px;height:72px;border-radius:18px"><h1 class="title" style="margin-top:14px">Vitriin</h1><div class="sub">Espace magasin</div></div>
-    <span class="label">Email</span><input class="in" id="l-email" type="email" autocomplete="username" value="magasin.demo@vitriin.co">
+    <span class="label">Email</span><input class="in" id="l-email" type="email" autocomplete="username" value="${window.VitriinNative?.inApp ? "" : "magasin.demo@vitriin.co"}">
     <span class="label">Mot de passe</span><input class="in" id="l-pass" type="password" autocomplete="current-password">
     ${msg ? `<p class="small" style="color:var(--red);margin-top:10px">${esc(msg)}</p>` : ""}
-    <button class="big-btn" id="l-go" style="margin-top:18px">Se connecter</button></div>`;
+    <button class="big-btn" id="l-go" style="margin-top:18px">Se connecter</button>
+    ${window.VitriinNative?.inApp ? `<button class="out" data-space="client" style="color:var(--ink)">Voir les promos près de chez moi</button>` : ""}</div>`;
   const go = async () => {
     $("#l-go").disabled = true;
     const { error } = await sb.auth.signInWithPassword({ email: $("#l-email").value.trim(), password: $("#l-pass").value });
@@ -581,6 +583,7 @@ async function fn(name, body) {
 async function connectAccount(kind) {
   try {
     const { authorize_url } = await fn(kind === "google" ? "google-oauth-start" : "meta-oauth-start", { store_id: STORE.id });
+    if (window.VitriinNative?.inApp) return VitriinNative.openAuth(authorize_url);
     try { sessionStorage.setItem("vitriin-oauth-back", "/magasin/"); } catch {}
     location.href = authorize_url;
   } catch (e) { toast(e.message); }
@@ -885,8 +888,9 @@ function viewSettings() {
       ${/^https:\/\//.test(STORE.cgv) ? `<a class="li" href="${esc(STORE.cgv)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span class="sp" style="font-size:15.5px">Conditions générales de vente</span></a>` : ""}
     </div>
 
+    ${window.VitriinNative?.inApp ? `<button class="out" data-space="client" style="color:var(--ink)">Voir l'espace client</button>` : ""}
     <button class="out" data-act="logout">Se déconnecter</button>
-    <p class="small" style="text-align:center;margin-top:18px">Démo : les publications Facebook et Instagram sont simulées.</p>
+    ${STORE.demo ? `<p class="small" style="text-align:center;margin-top:18px">Démo : les publications Facebook et Instagram sont simulées.</p>` : ""}
   </div>`;
 }
 // Fiche du magasin : coordonnées et contact principal.

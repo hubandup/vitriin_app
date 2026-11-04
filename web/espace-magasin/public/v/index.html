@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vitriin · Les promos près de chez vous</title>
+<script src="/shell.js"></script>
 <meta name="description" content="Les promos de vos commerces, près de chez vous. Présentez le coupon en caisse.">
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -411,7 +412,9 @@ async function apercuMe() {
 const apercuNo = () => (toast("Aperçu : vos clients peuvent le faire ici."), true);
 const PLATFORM = /iphone|ipad|ipod/i.test(navigator.userAgent) ? "ios" : /android/i.test(navigator.userAgent) ? "android" : null;
 const storeUrl = () => STORES[PLATFORM] || "";
-const showInstall = () => !!storeUrl() && ls.get("vt-noinstall") !== "1";
+const IN_APP = !!window.VitriinNative?.inApp;
+const showInstall = () => !IN_APP && !!storeUrl() && ls.get("vt-noinstall") !== "1";
+const spaceBtn = () => IN_APP ? `<button class="btn" data-space="magasin" style="font-weight:600;min-height:44px">Je suis commerçant</button>` : "";
 
 /* ---------- État ---------- */
 // Mode démo (commerces de démonstration visibles) : mémorisé sur l'appareil, ?demo=0 pour le quitter.
@@ -808,6 +811,7 @@ async function pageProfile() {
       ${sw("p-al", P.alerts !== false, "Alertes nouvelles promos", "Pour les commerces que vous suivez")}
       ${sw("p-nl", P.newsletter === true, "Newsletter Vitriin", "Les meilleurs bons plans, une fois par mois")}</div></div>
     <div class="pad" style="padding-top:26px;display:flex;flex-direction:column;gap:10px">
+      ${spaceBtn()}
       <button class="btn line" id="out">Se déconnecter</button>
       <button class="btn" id="del" style="color:#b3261e;font-weight:600;min-height:44px">Supprimer mon compte</button>
       <p style="font-size:12px;color:var(--muted);text-align:center;margin:4px 0 0"><a href="https://www.vitriin.fr/cgu" target="_blank" rel="noopener" style="color:var(--p)">CGU</a> · <a href="https://www.vitriin.fr/confidentialite" target="_blank" rel="noopener" style="color:var(--p)">Confidentialité</a></p></div>`);
@@ -852,6 +856,7 @@ function pageAuth(why) {
   app().innerHTML = `<div class="auth"><div><button class="back" id="bk" aria-label="Retour">${IC.back}</button></div>
     <div style="padding-top:34px;text-align:center"><span class="wm" style="font-size:40px">vitriin</span><h2>Bienvenue sur Vitriin</h2><p>${esc(why || "Vos promos gardées, vos commerces et vos économies.")}</p></div>
     <div id="ab" style="flex:1;display:flex;flex-direction:column;justify-content:center"></div>
+    ${spaceBtn()}
     <div class="legal">En continuant, vous acceptez nos <a href="https://www.vitriin.fr/cgu" target="_blank" rel="noopener">CGU</a> et notre <a href="https://www.vitriin.fr/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>.</div></div>`;
   $("#bk").onclick = () => history.length > 1 ? history.back() : go("/v/");
   authForm($("#ab"), location.pathname);
