@@ -3,7 +3,9 @@
 # activité. Pendant l'examen Meta (et tant qu'on reste en gratuit), une
 # requête tous les 3 jours suffit à l'éviter.
 # La clé utilisée est la clé publique « anon », déjà visible dans
-# app.vitriin.co : aucun secret ici. La lecture est filtrée par RLS.
+# app.vitriin.co : aucun secret ici. Le ping appelle la fonction
+# public.keepalive() (renvoie now(), aucune table lue) : anon n'a plus
+# d'accès direct aux tables depuis la migration vitrine_publique (30/10/2026).
 name: Supabase keep-alive
 
 on:
@@ -20,8 +22,8 @@ jobs:
           SUPABASE_URL: https://zjugauidrijghesgsmap.supabase.co
           SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWdhdWlkcmlqZ2hlc2dzbWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjQ4NjIsImV4cCI6MjA5OTgwMDg2Mn0.my-aiIKcse_2N98x1xV0l-mvyXuXlZ34DqnFFTYHWpU
         run: |
-          code=$(curl -s -o /dev/null -w "%{http_code}" \
-            "$SUPABASE_URL/rest/v1/stores?select=id&limit=1" \
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            "$SUPABASE_URL/rest/v1/rpc/keepalive" \
             -H "apikey: $SUPABASE_ANON_KEY" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY")
           echo "HTTP $code"

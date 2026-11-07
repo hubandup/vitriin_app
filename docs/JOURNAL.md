@@ -18,6 +18,16 @@ Repères :
 
 ---
 
+## 2026-11-07
+
+### MOD-071 · Keep-alive Supabase : le ping échouait en 401
+- **Constat** : le workflow GitHub « Supabase keep-alive » échouait (« All jobs have failed »). Il lisait `stores` avec la clé anon, or anon n'a plus de `SELECT` direct sur `stores` depuis la migration `vitrine_publique` (30/10). Postgres répondait `permission denied for table stores` (42501), donc HTTP 401. Le projet, lui, restait actif.
+- **Correction** : fonction `public.keepalive()` (renvoie `now()`, aucune table lue, `security invoker`, exécution pour anon et authenticated). Le workflow appelle `POST /rest/v1/rpc/keepalive`. Anon ne retrouve aucun accès aux tables.
+- Migration `20261107131644_keepalive_rpc.sql` (déjà appliquée en base).
+- **Retour arrière** : `git revert` du commit ; `drop function public.keepalive();`
+
+---
+
 ## 2026-11-01
 
 ### BUG-010 · Cœur « J'aime » : il fallait toucher deux fois
