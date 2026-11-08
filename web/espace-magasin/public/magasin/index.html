@@ -81,12 +81,6 @@ h1.title{font-size:32px;font-weight:800;letter-spacing:-.03em;margin:0;line-heig
 .kpi3 b{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi3 span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
 /* Carrousel « En ce moment » : petites cartes */
-.hm{flex:none;width:200px;text-align:left;scroll-snap-align:start}
-.hm .im{height:150px;border-radius:22px;background:linear-gradient(135deg,#F5ECD3,#FBE3EF);position:relative;overflow:hidden}
-.hm .im img{width:100%;height:100%;object-fit:cover}
-.hm .pb{position:absolute;left:10px;top:10px;background:var(--p);color:#fff;font-family:'Racing Sans One',sans-serif;font-size:22px;line-height:1;padding:6px 10px 5px;border-radius:12px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hm b{display:block;font-size:15px;font-weight:700;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hm>span{display:block;font-size:13px;color:var(--muted)}
 .week b{display:block;font-size:15px}.week .sp>span{display:block;font-size:13.5px;color:var(--muted);margin-top:2px}
 .btn-red{background:var(--red);color:#fff;font-weight:700;font-size:13.5px;padding:10px 15px;border-radius:999px;white-space:nowrap;flex:none}
 
@@ -97,6 +91,41 @@ h1.title{font-size:32px;font-weight:800;letter-spacing:-.03em;margin:0;line-heig
 .carousel{display:flex;gap:12px;overflow-x:auto;margin:0 -20px;padding:0 20px 4px;scroll-padding:0 20px;scroll-snap-type:x mandatory;scrollbar-width:none}
 .carousel::-webkit-scrollbar{display:none}
 .carousel .slide{flex:none;width:84%;scroll-snap-align:start}
+/* Cartes promo grand format (v2, MOD-081) : la photo d'abord, peu de texte, actions nettes */
+.pc{margin-bottom:26px}
+.pc .pim{position:relative;aspect-ratio:4/3;border-radius:26px;overflow:hidden;background:linear-gradient(135deg,#F5ECD3,#FBE3EF)}
+.pc .pim img{width:100%;height:100%;object-fit:cover;display:block}
+.pc .pb,.hm .pb{position:absolute;left:14px;bottom:14px;background:var(--p);color:#fff;font-family:'Racing Sans One',sans-serif;font-size:30px;line-height:1;padding:8px 13px 7px;border-radius:15px;max-width:calc(100% - 28px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc .stp{position:absolute;left:14px;top:14px;display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.95);color:var(--ink);font-size:14px;font-weight:700;padding:8px 13px;border-radius:999px;max-width:calc(100% - 110px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc .stp::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--cc);flex:none}
+.pc .nets{position:absolute;right:14px;top:14px;display:flex;gap:6px}
+.pc .nets .ch{width:34px;height:34px;border-radius:50%;background:#fff!important;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.pc .nets .ch.ig{padding:6px}.pc .nets .ch.ig svg{border-radius:7px;background:var(--ig);padding:3px;width:100%;height:100%}
+.pc .pt{padding:14px 4px 0}
+.pc h3{font-size:21px;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pc .d{font-size:15px;color:var(--muted);margin-top:4px}
+.pc .btns{margin-top:14px}.pc .btns button{min-height:54px;font-size:16px;border-radius:18px}
+.pc .b-ghost{background:var(--surf);border:none!important}
+.hm{flex:none;width:78%;text-align:left;scroll-snap-align:start}
+.hm .im{position:relative;aspect-ratio:4/3;border-radius:26px;overflow:hidden;background:linear-gradient(135deg,#F5ECD3,#FBE3EF)}
+.hm .im img{width:100%;height:100%;object-fit:cover;display:block}
+.hm b{display:block;font-size:18px;font-weight:800;letter-spacing:-.01em;margin-top:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm>span{display:block;font-size:14px;color:var(--muted);margin-top:2px}
+/* Onglet Magasin : en-tête photo + tuiles */
+.shero{position:relative;margin-top:16px}
+.shero .cov{height:150px;border-radius:26px;background:linear-gradient(135deg,#F5ECD3,#FBE3EF) center/cover no-repeat}
+.shero .av{position:absolute;left:18px;bottom:-34px;width:84px;height:84px;font-size:32px;border:4px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.sname{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:46px 0 0}
+.saddr{font-size:15px;color:var(--muted);margin:4px 0 0}
+.sinfos{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.pill-btn{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:var(--surf);color:var(--ink);font-weight:700;font-size:15px;min-height:46px;padding:0 18px;border-radius:999px}
+.tiles2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile2{display:flex;flex-direction:column;align-items:flex-start;gap:10px;background:var(--surf);border-radius:24px;padding:16px;text-align:left;color:inherit;text-decoration:none;min-height:150px}
+.tile2 .ti{width:56px;height:56px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--p)}
+.tile2 .ti svg{width:26px;height:26px}
+.tile2 b{font-size:17px;font-weight:800;letter-spacing:-.01em}.tile2 span.s{font-size:13.5px;color:var(--muted);margin-top:-6px}
+/* Zone de la barre d'état : fond blanc, le contenu ne passe plus dessous */
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--sat);background:#fff;z-index:25}
 .carousel .big{margin-bottom:0}
 .rav{border:none;padding:0;cursor:pointer}
 .price{display:flex;align-items:baseline;gap:7px;margin-top:5px;flex-wrap:wrap}
@@ -138,18 +167,6 @@ h1.title{font-size:32px;font-weight:800;letter-spacing:-.03em;margin:0;line-heig
 .sec-h h2{font-size:17px;margin:0}.sec-h span{font-size:13px;color:var(--muted)}
 .big{border:1.5px solid var(--line);border-radius:24px;overflow:hidden;margin-bottom:12px}
 /* Carte promo en ligne (liste Promos) : vignette 88 px + statut + méthode de validation */
-.rowc{display:flex;gap:14px;align-items:center;border:1.5px solid var(--line);border-radius:24px;padding:10px 14px 10px 10px;margin-bottom:12px;flex-wrap:wrap}
-.rowc .th{width:88px;height:88px;border-radius:18px;background:linear-gradient(135deg,#F5ECD3,#FBE3EF);position:relative;flex:none;overflow:hidden}
-.rowc .th img{width:100%;height:100%;object-fit:cover}
-.rowc .th .pb{position:absolute;left:6px;bottom:6px;background:var(--p);color:#fff;font-family:'Racing Sans One',sans-serif;font-size:19px;line-height:1;padding:4px 7px 3px;border-radius:9px;max-width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rowc .th .pb.l{font-size:14px;line-height:1.05;padding:5px 7px 4px;white-space:normal}
-.rowc .st2{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--cc)}
-.rowc .st2::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cc);flex:none}
-.rowc h3{font-size:16px;font-weight:700;margin:3px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
-.rowc .d{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rowc .ft{display:flex;align-items:center;gap:6px;margin-top:8px}.rowc .ft .chans{gap:6px}.rowc .ft .ch{width:22px;height:22px}.rowc .ft .ch.ig{border-radius:7px}
-.rowc .ft small{font-size:13px;color:var(--muted);margin-left:auto;white-space:nowrap}
-.rowc .btns{flex-basis:100%;margin:2px 0 2px 4px}.rowc .btns button{padding:11px 8px;font-size:14.5px;border-radius:16px}
 .net-card{display:flex;align-items:center;gap:12px;border-radius:24px;background:var(--pink);padding:14px 16px;margin:4px 0 12px}
 .net-card .ic{width:40px;height:40px;border-radius:14px;background:#fff;color:var(--v);display:flex;align-items:center;justify-content:center;flex:none}
 .net-card .ic svg{width:20px;height:20px}
@@ -274,11 +291,9 @@ h1.title{font-size:32px;font-weight:800;letter-spacing:-.03em;margin:0;line-heig
 .p-ok{background:#e3f3ec;color:var(--teal)}.p-ko{background:var(--redbg);color:var(--red)}.p-off{background:#f0eeec;color:var(--muted)}
 .tg:disabled{opacity:.45}
 .li.soon .ch{opacity:.45}
-.store-card{padding-bottom:12px}
-.store-card .infos{padding:0 0 4px 68px;display:flex;flex-direction:column;gap:6px}
 .info-l{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink)}.info-l svg{color:var(--muted);flex:none}
 .edit-btn{margin:10px 0 0 68px;color:var(--p);font-weight:700;font-size:14.5px;padding:6px 0}
-.qr-th{width:52px;height:52px;border-radius:14px;background:var(--surf);padding:6px;flex:none;display:block}.qr-th svg{width:100%;height:100%;display:block}
+.qr-th{width:56px;height:56px;border-radius:18px;background:#fff;padding:7px;flex:none;display:block}.qr-th svg{width:100%;height:100%;display:block}
 .qr-prev{display:flex;justify-content:center;background:var(--surf);border-radius:24px;padding:16px;margin-top:14px}
 .qph{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -18px;padding:2px 18px}
 .qph button{flex:none;width:64px;height:64px;border-radius:16px;overflow:hidden;border:2px solid transparent;background:var(--surf);display:flex;align-items:center;justify-content:center;color:var(--p)}
@@ -937,7 +952,7 @@ function promoState(p) {
 }
 const offerTxt = (p) => { const pr = pricing(p); return pr.badge || ""; };
 const dateTxt = (p) => p.start > Date.now() ? `Dès le ${fmtShort(p.start)}` : isOver(p) ? `Terminée le ${fmtShort(p.end)}` : `Jusqu'au ${fmtShort(p.end)}`;
-// Carte promo (liste Promos) : vignette, statut en couleur, titre, date + validation, réseaux, vues et validations.
+// Carte promo (liste Promos, MOD-081) : grande photo, statut et offre posés dessus, titre, date + validation.
 const VAL_SHORT = { qr: "QR code", pin: "Code vendeur", ean: "Code-barres", web: "Code promo web", none: "Sans validation" };
 // Le mode de validation d'une promo, un seul à la fois (même règle que promo_check en base, BUG-013).
 function modeOf(p) {
@@ -948,6 +963,8 @@ function modeOf(p) {
   return k;
 }
 const modeShort = (p) => { const k = modeOf(p); return k === "ean" && !p.ean ? "Code en caisse" : VAL_SHORT[k]; };
+// Réseaux où la promo est publiée (ou en échec) : rien quand elle n'y est pas.
+const netsOn = (p) => ["fb", "ig"].filter(c => p.ch?.[c] === "ok" || p.ch?.[c] === "ko").map(c => `<span class="ch ${c} ${p.ch[c] === "ko" ? "ko" : ""}" title="${c === "fb" ? "Facebook" : "Instagram"}">${c === "fb" ? I.fbs : I.igs}</span>`).join("");
 function cardRow(p) {
   const st = promoState(p), off = offerTxt(p), k = catOf(p);
   const cd = S.codesDetail?.[p.id], views = (p.stats?.fb?.[1] || 0) + (p.stats?.ig?.[1] || 0);
@@ -957,12 +974,11 @@ function cardRow(p) {
   if (k === "todo" && p.status !== "draft") acts = p.status === "received" && !p.mandatory
     ? `<div class="btns"><button class="b-ghost" data-decline="${p.id}">Refuser</button><button class="b-grad" data-activate="${p.id}">Activer</button></div>`
     : `<div class="btns"><button class="b-ghost" data-sched="${p.id}">Programmer</button><button class="b-grad" data-pub="${p.id}">Publier</button></div>`;
-  return `<div class="card rowc" data-card="${p.id}" style="--cc:${k === "live" ? "var(--tealt)" : st.c}">
-    <div class="th">${p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}${off ? `<span class="pb ${off.length > 5 ? "l" : ""}">${esc(off)}</span>` : ""}</div>
-    <div class="sp"><div class="st2">${esc(st.l)}</div><h3>${esc(p.title)}</h3><div class="d">${esc([dateTxt(p), how].filter(Boolean).join(" · "))}</div>
-      <div class="ft">${chanIcons(p)}${res ? `<small>${res}</small>` : ""}</div></div>${acts}</div>`;
+  return `<div class="card pc" data-card="${p.id}" style="--cc:${k === "live" ? "var(--teal)" : st.c}">
+    <div class="pim">${p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}<span class="stp">${esc(st.l)}</span><span class="nets">${netsOn(p)}</span>${off ? `<span class="pb">${esc(off)}</span>` : ""}</div>
+    <div class="pt"><h3>${esc(p.title)}</h3><div class="d">${esc([dateTxt(p), how].filter(Boolean).join(" · "))}</div>${res ? `<div class="d">${res}</div>` : ""}</div>${acts}</div>`;
 }
-// Carte du carrousel « En ce moment » (accueil).
+// Carte du carrousel « En ce moment » (accueil) : grande photo, titre, date.
 function cardHome(p) {
   const off = offerTxt(p), views = (p.stats?.fb?.[1] || 0) + (p.stats?.ig?.[1] || 0);
   return `<button class="hm" data-card="${p.id}"><div class="im">${p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}${off ? `<span class="pb">${esc(off)}</span>` : ""}</div>
@@ -1013,19 +1029,18 @@ function viewSettings() {
   return `<div class="screen">
     <h1 class="title">Magasin</h1>
 
-    <div class="box store-card">
-      <div class="li" style="border-bottom:none"><span class="av" style="width:56px;height:56px;font-size:23px">${avatar()}</span><div class="sp"><b style="display:block;font-size:17px">${esc(STORE.name)}</b><span style="font-size:13.5px;color:var(--muted)">${esc(STORE.postal && STORE.address.includes(STORE.postal) ? STORE.address : [STORE.address, [STORE.postal, STORE.city].filter(Boolean).join(" ")].filter(Boolean).join(", "))}</span></div></div>
-      <div class="infos">${line(I.user, who)}${line(I.phone, C.phone)}${line(I.mail, C.email)}${line(I.globe, C.web.replace(/^https?:\/\//, ""))}
-        ${who || C.phone || C.email || C.web ? "" : `<p class="small" style="margin:0">Ajoutez le contact principal, le téléphone, l'email et le site du magasin.</p>`}</div>
-      <button class="edit-btn" data-act="store-edit">${who || C.phone ? "Modifier les informations" : "Compléter les informations"}</button>
-    </div>
+    <div class="shero"><div class="cov" style="${STORE.pub?.cover ? `background-image:url('${esc(STORE.pub.cover)}')` : ""}"></div><span class="av">${avatar()}</span></div>
+    <h2 class="sname">${esc(STORE.name)}</h2>
+    <p class="saddr">${esc(STORE.postal && STORE.address.includes(STORE.postal) ? STORE.address : [STORE.address, [STORE.postal, STORE.city].filter(Boolean).join(" ")].filter(Boolean).join(", "))}</p>
+    ${who || C.phone || C.email || C.web ? `<div class="sinfos">${line(I.user, who)}${line(I.phone, C.phone)}${line(I.mail, C.email)}${line(I.globe, C.web.replace(/^https?:\/\//, ""))}</div>` : ""}
+    <button class="pill-btn" data-act="store-edit">${who || C.phone ? "Modifier les informations" : "Compléter les informations"}</button>
 
     ${STORE.hasNet ? `<p class="affil">${I.net}<span>Affilié à la centrale <b>${esc(STORE.net)}</b></span></p>` : ""}
 
     ${STORE.slug ? `<div class="lbl">MA VITRINE</div>
-    <div class="box">
-      <button class="li" data-act="qr-vitrine" style="width:100%;text-align:left"><span class="qr-th" id="qr-th" aria-hidden="true"></span><span class="sp"><b style="display:block;font-size:15.5px">QR code de ma vitrine</b><span style="font-size:13px;color:var(--muted)">Affiche à vos couleurs ou QR seul, reçus par email : ils mènent à toutes vos promos.</span></span><span class="chev">${I.chev}</span></button>
-      <a class="li" href="${esc(vitrineUrl())}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span class="sp"><b style="display:block;font-size:15.5px">Voir ma vitrine publique</b><span style="font-size:13px;color:var(--muted)">${esc(vitrineUrl().replace(/^https?:\/\//, ""))}</span></span><span class="chev">${I.chev}</span></a>
+    <div class="tiles2">
+      <button class="tile2" data-act="qr-vitrine"><span class="qr-th" id="qr-th" aria-hidden="true"></span><b>QR code</b><span class="s">Affiche ou QR seul, par email</span></button>
+      <a class="tile2" href="${esc(vitrineUrl())}" target="_blank" rel="noopener"><span class="ti">${I.eye}</span><b>Ma vitrine</b><span class="s">Voir ce que voient vos clients</span></a>
     </div>` : ""}
 
     ${STORE.hasNet ? `<div class="lbl">PROMOS DE LA CENTRALE</div>

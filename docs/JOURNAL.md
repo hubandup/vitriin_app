@@ -20,6 +20,18 @@ Repères :
 
 ## 2026-11-08
 
+### MOD-081 · Espace magasin plus simple : grandes photos, moins d'éléments
+- **Constat (Charles, captures iPhone)** : design pas assez moderne, trop d'éléments, photos trop petites.
+- **Promos** : cartes grand format, photo en 4:3 sur toute la largeur ; statut en pastille blanche et offre en
+  Racing posés sur la photo ; logos des réseaux seulement là où la promo est publiée (plus de logos grisés) ;
+  titre 21 px, une ligne date + validation ; boutons plus hauts, secondaire en gris plein.
+- **Accueil** : carrousel « En ce moment » avec les mêmes grandes photos (78 % de la largeur).
+- **Onglet Magasin** : en-tête avec la photo de couverture et le logo, nom en grand, adresse, bouton
+  « Compléter les informations » ; « Ma vitrine » en deux tuiles (QR code, Ma vitrine).
+- **iPhone** : fond blanc sous la barre d'état, le contenu ne glisse plus dessous en floutant le titre.
+- **Où** : `public/magasin`. Front uniquement.
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-080 · QR code de la vitrine et affiche, envoyés par email depuis l'onglet Magasin
 - **Quoi (demande Charles)** : bloc « Ma vitrine » remonté en haut de l'onglet Magasin, avec « QR code de ma
   vitrine ». Le QR mène à la fiche du magasin dans l'app client (`/v/m/<adresse>`), donc à toutes ses promos en
