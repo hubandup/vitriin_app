@@ -20,6 +20,16 @@ Repères :
 
 ## 2026-11-08
 
+### MOD-080 · QR code de la vitrine à éditer depuis l'onglet Magasin
+- **Quoi (demande Charles)** : bloc « Ma vitrine » remonté en haut de l'onglet Magasin, avec « QR code de ma
+  vitrine ». Le QR mène à la fiche du magasin dans l'app client (`/v/m/<adresse>`), donc à toutes ses promos en
+  cours ; il ne change jamais, une affiche imprimée reste valable.
+- **Éditer** : trois formats (affiche A4/A5, carré pour les réseaux, QR seul), titre de l'affiche modifiable, aperçu
+  en direct ; « Télécharger » (feuille de partage sur téléphone : enregistrer, imprimer, envoyer ; fichier PNG sur
+  ordinateur), « Imprimer », « Copier le lien de ma vitrine ». Image dessinée sur le téléphone, rien n'est stocké.
+- **Où** : `public/magasin` (onglet Magasin, `sheetQrVitrine`, `drawQrImage`). Front uniquement.
+- **Retour arrière** : `git revert` du commit.
+
 ### BUG-013 · Un seul mode de validation par promo · MOD-079 · Code promo pour le site internet
 - **Constat (Charles)** : l'écran client pouvait montrer deux modes à la fois (QR + code vendeur en secours, ou
   code de réduction + QR depuis MOD-078). Règle : **soit QR, soit code-barres, soit code vendeur, soit rien**.
