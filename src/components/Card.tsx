@@ -8,7 +8,7 @@
  */
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
-import { colors, radius, shadows, spacing } from '../theme';
+import { colors, radius, spacing } from '../theme';
 
 type Props = {
   children: ReactNode;
@@ -41,17 +41,16 @@ export function Card({ children, variant = 'standard', onPress, style }: Props) 
 const styles = StyleSheet.create({
   base: {
     backgroundColor: colors.surface,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.line,
   },
   standard: {
     borderRadius: radius.xl,
     padding: spacing.l,
-    ...shadows.cardSoft,
   },
   compact: {
-    borderRadius: 16,
-    padding: 11,
+    borderRadius: radius.lg,
+    padding: 12,
   },
   pressed: { backgroundColor: colors.neutralSurface },
 });

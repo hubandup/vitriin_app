@@ -22,7 +22,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, gradients, radius, shadows, spacing, text } from '../theme';
+import { colors, fonts, gradients, radius, shadows, spacing, text } from '../theme';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
@@ -82,7 +82,7 @@ export function Button({
             <LinearGradient
               colors={[...(pressed ? gradients.brandPressed : gradients.brand)]}
               start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
+              end={{ x: 1, y: 1 }}
               style={[styles.base, pad]}
             >
               {inner(pressed)}
@@ -121,14 +121,14 @@ const TEXT_COLOR: Record<Variant, string> = {
 
 const SURFACE: Record<Variant, ViewStyle> = {
   primary: {},
-  secondary: { backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.line },
+  secondary: { backgroundColor: colors.neutralSurface }, // MOD-077 : bouton gris plein (« Brouillon », « Terminer »)
   ghost: { backgroundColor: 'transparent' },
   danger: { backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.line },
 };
 
 const PRESSED: Record<Variant, ViewStyle> = {
   primary: {},
-  secondary: { backgroundColor: colors.neutralSurface },
+  secondary: { backgroundColor: colors.line },
   ghost: { backgroundColor: colors.neutralSurface },
   danger: { backgroundColor: colors.dangerSurface },
 };
@@ -141,10 +141,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   glowWrap: { borderRadius: radius.lg },
-  padMd: { paddingVertical: 16, paddingHorizontal: spacing.xxl },
-  padSm: { paddingVertical: 11, paddingHorizontal: spacing.l },
+  padMd: { minHeight: 58, paddingHorizontal: spacing.xxl },
+  padSm: { minHeight: 44, paddingHorizontal: spacing.l },
   fullWidth: { alignSelf: 'stretch' },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.s },
-  labelSm: { fontSize: 14 },
+  labelSm: { fontFamily: fonts.bold, fontSize: 15 },
   disabled: { opacity: 0.45 },
 });

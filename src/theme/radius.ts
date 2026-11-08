@@ -1,24 +1,26 @@
 /**
- * Vitriin — rayons de bordure
+ * Vitriin — rayons de bordure (nouveau design, MOD-077)
  *
- * Extraits de la maquette. Correspondances :
- *  xs 6   → tags de statut / mécanique inline
- *  sm 10  → petites pastilles
- *  md 13  → champs de saisie, barre de recherche
- *  lg 15  → boutons principaux
- *  xl 18  → cartes standard
- *  xxl 22 → cartes fortes (choix de rôle, carte e-mail)
- *  xxxl 24→ modales
- *  pill   → pastilles, avatars, interrupteurs (999)
+ * Formes plus généreuses, comme l'espace magasin et l'app client web :
+ *  xs 9    → pastilles de prix sur vignette
+ *  sm 14   → tuiles d'icône (40 px)
+ *  md 18   → champs de saisie, boutons secondaires, vignettes
+ *  lg 20   → bouton principal (58 px), lignes « À faire », tuiles KPI
+ *  xl 24   → cartes promo, boîtes de réglages
+ *  xxl 26  → carte d'action noire
+ *  xxxl 30 → feuilles et cartes de résultat
+ *  dock 34 → barre de navigation flottante (68 px de haut)
+ *  pill    → pastilles, avatars, boutons ronds, interrupteurs (999)
  */
 export const radius = {
-  xs: 6,
-  sm: 10,
-  md: 13,
-  lg: 15,
-  xl: 18,
-  xxl: 22,
-  xxxl: 24,
+  xs: 9,
+  sm: 14,
+  md: 18,
+  lg: 20,
+  xl: 24,
+  xxl: 26,
+  xxxl: 30,
+  dock: 34,
   pill: 999,
 } as const;
 

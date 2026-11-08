@@ -13,6 +13,7 @@ import {
   DMSans_500Medium,
   DMSans_600SemiBold,
   DMSans_700Bold,
+  DMSans_800ExtraBold,
 } from '@expo-google-fonts/dm-sans';
 import { RacingSansOne_400Regular } from '@expo-google-fonts/racing-sans-one';
 
@@ -24,6 +25,8 @@ import {
   Badge,
   Avatar,
   ChannelIcon,
+  Dock,
+  dockIcons,
 } from './src/components';
 import { colors, fonts, gradients, radius, shadows, spacing, text } from './src/theme';
 
@@ -33,9 +36,11 @@ export default function App() {
     DMSans_500Medium,
     DMSans_600SemiBold,
     DMSans_700Bold,
+    DMSans_800ExtraBold,
     RacingSansOne_400Regular,
   });
 
+  const [tab, setTab] = useState('home');
   const [phone, setPhone] = useState('6 12 34 56 78');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -209,6 +214,23 @@ export default function App() {
         </View>
       </Section>
 
+      {/* Dock flottant */}
+      <Section title="Navigation" eyebrow="dock flottant · « + » central côté magasin">
+        <View style={styles.dockDemo}>
+          <Dock
+            tabs={[
+              { key: 'home', label: 'Accueil', icon: dockIcons.home },
+              { key: 'promos', label: 'Promos', icon: dockIcons.promos },
+              { key: 'stats', label: 'Stats', icon: dockIcons.stats },
+              { key: 'store', label: 'Magasin', icon: dockIcons.store },
+            ]}
+            active={tab}
+            onChange={setTab}
+            onCreate={() => setTab('home')}
+          />
+        </View>
+      </Section>
+
       <Text style={[text.caption, styles.muted, styles.footer]}>
         Vitriin · fin de la démonstration
       </Text>
@@ -228,7 +250,7 @@ function Section({
   return (
     <View style={styles.section}>
       <Text style={[text.eyebrow, styles.sectionEyebrow]}>{eyebrow}</Text>
-      <Text style={[text.h1, styles.sectionTitle]}>{title}</Text>
+      <Text style={[text.h2, styles.sectionTitle]}>{title}</Text>
       {children}
     </View>
   );
@@ -255,6 +277,7 @@ function Swatch({
 }
 
 const styles = StyleSheet.create({
+  dockDemo: { height: 110, marginHorizontal: -20 },
   header: { alignItems: 'center', paddingTop: spacing.xxl, paddingBottom: spacing.s },
   logo: {
     width: 62,

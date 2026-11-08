@@ -20,6 +20,34 @@ Repères :
 
 ## 2026-11-08
 
+### MOD-077 · Nouveau design : espace magasin, app client et app mobile
+- **Quoi** : le design validé par Charles (maquette « Vitriin espace magasin, nouveau design ») remplace l'ancien.
+  Fond blanc, surfaces #F6F5F3, texte secondaire #6F6A63 (contraste AA, l'ancien #7b766f/#888 était trop pâle),
+  titres 30-32 px en 800, formes arrondies (18 à 30), Racing Sans One réservée aux chiffres promo.
+- **Espace magasin** (`public/magasin`) :
+  - Navigation : barre du bas remplacée par un **dock flottant** (Accueil · Promos · « + » central · Stats ·
+    Magasin). Le « + » est visible sur tous les onglets ; l'onglet « Réglages » s'appelle désormais **Magasin**
+    (textes et e-mails du manager mis à jour).
+  - Accueil : « Bonjour » + nom, carte noire « Valider la promo d'un client », 3 chiffres sur 7 jours (vues, promos
+    utilisées, j'aime), « À faire » en lignes, carrousel « En ce moment » en petites cartes.
+  - Promos : filtres en pastilles (active en noir), carte rose quand la centrale envoie une promo, cartes promo en
+    ligne (vignette, statut, date + méthode de validation, logos réseaux, vues et validations).
+  - Création : barre de progression en 4 segments, titres d'étape 28 px, validation en **tuiles 2×2** (QR
+    « Recommandé ») avec encadré d'explication, Diffusion avec **aperçu du post**, réseaux en lignes et « Vitrine
+    Vitriin · toujours incluse », boutons « Brouillon » + « Publier ».
+  - Scanner : **plein écran sombre** avec viseur, ligne de scan, lampe (si le téléphone la gère), résultat en
+    carte blanche en bas (« Terminer » / « Scanner un autre client »).
+- **App client** (`public/v`) : mêmes jetons, même dock flottant (4 onglets, sans « + »), titres 30 px, pastilles,
+  boutons 54-58 px arrondis, boîtes et feuilles arrondies, compteur d'économies en carte noire, onglets
+  « suivis / suggestions » en segmenté. Règle inchangée : promos en fil ou carrousel, jamais en liste.
+- **App mobile Expo** (`src/theme`, `src/components`, `App.tsx`) : jetons alignés (muted #6F6A63, surfaces, rayons
+  9 à 34, titres 800 avec DM Sans ExtraBold, ombre du dock), bouton principal 58 px en dégradé diagonal, bouton
+  secondaire gris plein, cartes bordées sans ombre, nouveau composant **Dock**. Logos Facebook et Instagram
+  officiels via `react-native-svg` (nouvelle dépendance, version 15.12.1 compatible Expo 54).
+  `.cursor/rules/vitriin-brand.mdc` : muted passe à #6F6A63.
+- **Sans changement** : base de données, droits (RLS), fonctions. Front uniquement.
+- **Retour arrière** : `git revert` du commit.
+
 ### BUG-011 · Logos Facebook et Instagram non conformes (espace magasin)
 - **Constat (Charles)** : à l'étape 4 « Diffusion », logos mal rendus. Deux causes : le style des cases à cocher
   (`.chk span { display:block }`) écrasait le centrage des logos, collés en haut à gauche, et grisait les titres ;

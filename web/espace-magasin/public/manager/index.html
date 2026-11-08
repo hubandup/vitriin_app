@@ -265,7 +265,7 @@ function todoItems() {
 }
 const mailto = (to, subject, body) => `mailto:${encodeURIComponent(to || "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 const SIGN = "\n\nL'équipe Vitriin\nsupport@vitriin.co";
-const RECONNECT = (ch) => `Bonjour,\n\nVotre compte ${CH(ch)} n'est plus relié à Vitriin : vos promotions ne peuvent plus y être publiées.\n\nPour le reconnecter (1 minute) :\n1. Ouvrez l'app Vitriin (app.vitriin.co/magasin).\n2. Allez dans Réglages > Comptes connectés.\n3. Touchez « Reconnecter » à côté de ${CH(ch)} et validez avec votre compte Facebook.\n\nSi votre mot de passe Facebook a changé ou si vous n'êtes plus administrateur de la Page, c'est la cause la plus fréquente.` + SIGN;
+const RECONNECT = (ch) => `Bonjour,\n\nVotre compte ${CH(ch)} n'est plus relié à Vitriin : vos promotions ne peuvent plus y être publiées.\n\nPour le reconnecter (1 minute) :\n1. Ouvrez l'app Vitriin (app.vitriin.co/magasin).\n2. Allez dans l’onglet Magasin > Comptes connectés.\n3. Touchez « Reconnecter » à côté de ${CH(ch)} et validez avec votre compte Facebook.\n\nSi votre mot de passe Facebook a changé ou si vous n'êtes plus administrateur de la Page, c'est la cause la plus fréquente.` + SIGN;
 // Ce qu'il faut faire, élément par élément.
 function todoGuide(i) {
   const x = i.x, to = x.owner || x.contact_email, fiche = x.network_id ? `<button class="btn-s" data-goto-net="${x.network_id}">Voir la fiche ${esc(x.network || "client")}</button>` : "";
@@ -275,7 +275,7 @@ function todoGuide(i) {
   if (i.type === "account" || (i.type === "failure" && x.account_issue)) return {
     h: `${x.store} : ${CH(x.channel)} à reconnecter`,
     why: `Meta a refusé l'accès au compte ${CH(x.channel)} de ce magasin${x.last_error || x.error_message ? ` (« ${esc(x.last_error || x.error_message)} »)` : ""}. Causes habituelles : mot de passe Facebook changé, droits d'administration de la Page perdus, ou autorisation Vitriin retirée. Tant qu'il n'est pas reconnecté, ses promos ne partent pas sur ${CH(x.channel)}.`,
-    steps: ["Prévenir le gérant avec le mode d'emploi ci-dessous.", "Il reconnecte depuis l'app : Réglages > Comptes connectés > Reconnecter.", "Les promos en échec se republient ensuite depuis Stats > À résoudre."],
+    steps: ["Prévenir le gérant avec le mode d'emploi ci-dessous.", "Il reconnecte depuis l’app : onglet Magasin > Comptes connectés > Reconnecter.", "Les promos en échec se republient ensuite depuis Stats > À résoudre."],
     acts: mail(`Vitriin : reconnectez votre compte ${CH(x.channel)}`, RECONNECT(x.channel)) + reset + fiche };
   if (i.type === "failure") return {
     h: `Publication refusée par ${CH(x.channel)}`,
@@ -286,7 +286,7 @@ function todoGuide(i) {
     h: `${x.store} n'a connecté aucun réseau`,
     why: `Le gérant a activé son compte mais n'a relié ni Facebook ni Instagram : les promos de la centrale ne peuvent pas être publiées pour ce magasin.`,
     steps: ["Envoyer le mode d'emploi de connexion.", "Proposer un appel de 5 minutes si besoin : la connexion se fait avec le compte Facebook administrateur de la Page du magasin."],
-    acts: mail("Vitriin : connectez votre Page Facebook et Instagram", `Bonjour,\n\nVotre espace Vitriin est prêt, il ne manque que la connexion à vos réseaux :\n1. Ouvrez l'app Vitriin (app.vitriin.co/magasin).\n2. Réglages > Comptes connectés > Connecter Facebook.\n3. Choisissez la Page de votre magasin (et son compte Instagram).\n\nC'est tout : les promos de votre centrale seront publiées automatiquement sur vos réseaux.` + SIGN) + reset + fiche } : {
+    acts: mail("Vitriin : connectez votre Page Facebook et Instagram", `Bonjour,\n\nVotre espace Vitriin est prêt, il ne manque que la connexion à vos réseaux :\n1. Ouvrez l'app Vitriin (app.vitriin.co/magasin).\n2. Onglet Magasin > Comptes connectés > Connecter Facebook.\n3. Choisissez la Page de votre magasin (et son compte Instagram).\n\nC'est tout : les promos de votre centrale seront publiées automatiquement sur vos réseaux.` + SIGN) + reset + fiche } : {
     h: `${x.store} n'a pas activé son compte`,
     why: `Invitation envoyée le ${day(x.invited_at)} à ${esc(x.contact_email || "?")}, jamais ouverte. L'email a pu arriver en indésirables, ou l'adresse n'est pas la bonne.`,
     steps: ["Vérifier l'adresse avec la centrale.", "Renvoyer l'invitation.", "Demander au gérant de regarder dans ses courriers indésirables."],

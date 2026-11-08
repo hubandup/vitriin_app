@@ -2,7 +2,7 @@
  * Vitriin — thème. Point d'import unique.
  *   import { colors, text, spacing, radius, shadows } from '../theme';
  */
-export { colors, palette, gradients, channelColors, statusColors } from './colors';
+export { colors, palette, gradients, channelColors, channelPaths, statusColors } from './colors';
 export type { StatusKey } from './colors';
 export { fonts, text } from './typography';
 export type { TextVariant } from './typography';

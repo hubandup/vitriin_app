@@ -6,3 +6,5 @@ export { Card } from './Card';
 export { Badge } from './Badge';
 export { Avatar } from './Avatar';
 export { ChannelIcon } from './ChannelIcon';
+export { Dock, dockIcons } from './Dock';
+export type { DockTab } from './Dock';

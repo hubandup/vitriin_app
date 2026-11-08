@@ -5,18 +5,19 @@
  *  • variant `solid`   : tuile pleine couleur de marque, glyphe blanc (compte connecté).
  *  • variant `outline` : tuile blanche, bordure + glyphe couleur de marque (non connecté).
  *
- * Note : pas de react-native-svg (dépendance non autorisée). Les glyphes sont
- * composés en Views/Text — reconnaissables, mais approximatifs. Pour des logos
- * officiels au pixel près, ajouter react-native-svg. Les COULEURS, elles, sont
- * exactes.
+ * Facebook et Instagram : tracés OFFICIELS (channelPaths, Simple Icons) dessinés
+ * avec react-native-svg, comme sur l'app web (BUG-011, MOD-077). Facebook = logo
+ * rond bleu sans tuile ; Instagram = glyphe blanc sur tuile en dégradé.
+ * TikTok, WhatsApp, Google : glyphes composés en attendant leurs tracés.
  *
  * ⚠️ Google Business : la maquette ne contient que le logo Google Sign-in
  * (multicolore), pas de mark « Business » dédié. Rendu ici en 'G' Google-blue,
  * à confirmer.
  */
-import { Platform, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { channelColors } from '../theme';
+import Svg, { Circle, Path } from 'react-native-svg';
+import { channelColors, channelPaths, colors } from '../theme';
 
 type Channel = 'facebook' | 'instagram' | 'tiktok' | 'whatsapp' | 'google';
 
@@ -44,6 +45,16 @@ export function ChannelIcon({ channel, size = 46, variant = 'solid' }: Props) {
     alignItems: 'center',
     justifyContent: 'center',
   };
+
+  // Facebook : le logo rond officiel EST l'icône (pas de tuile). Gris quand non connecté.
+  if (channel === 'facebook') {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 24 24" accessibilityLabel="Facebook">
+        <Circle cx={12} cy={12} r={11.4} fill="#FFFFFF" />
+        <Path d={channelPaths.facebook} fill={variant === 'solid' ? brand : colors.faint} />
+      </Svg>
+    );
+  }
 
   const content = <Glyph channel={channel} color={glyphColor} size={size} />;
 
@@ -73,8 +84,6 @@ export function ChannelIcon({ channel, size = 46, variant = 'solid' }: Props) {
 function Glyph({ channel, color, size }: { channel: Channel; color: string; size: number }) {
   const s = size;
   switch (channel) {
-    case 'facebook':
-      return <Text style={[styles.serif, { color, fontSize: s * 0.6 }]}>f</Text>;
     case 'tiktok':
       return <Text style={{ color, fontSize: s * 0.5 }}>♪</Text>;
     case 'google':
@@ -94,48 +103,14 @@ function Glyph({ channel, color, size }: { channel: Channel; color: string; size
         />
       );
     case 'instagram':
-      // Objectif : carré arrondi + cercle + point en haut à droite.
       return (
-        <View
-          style={{
-            width: s * 0.52,
-            height: s * 0.52,
-            borderRadius: s * 0.17,
-            borderWidth: Math.max(2, s * 0.06),
-            borderColor: color,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <View
-            style={{
-              width: s * 0.24,
-              height: s * 0.24,
-              borderRadius: s * 0.12,
-              borderWidth: Math.max(2, s * 0.06),
-              borderColor: color,
-            }}
-          />
-          <View
-            style={{
-              position: 'absolute',
-              top: s * 0.03,
-              right: s * 0.03,
-              width: s * 0.06,
-              height: s * 0.06,
-              borderRadius: s * 0.03,
-              backgroundColor: color,
-            }}
-          />
-        </View>
+        <Svg width={s * 0.58} height={s * 0.58} viewBox="0 0 24 24" accessibilityLabel="Instagram">
+          <Path d={channelPaths.instagram} fill={color} />
+        </Svg>
       );
   }
 }
 
 const styles = StyleSheet.create({
-  serif: {
-    fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', default: 'serif' }),
-    fontWeight: '700',
-  },
   sansBold: { fontWeight: '700' },
 });

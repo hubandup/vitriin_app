@@ -19,6 +19,7 @@ export const fonts = {
   medium: 'DMSans_500Medium',
   semibold: 'DMSans_600SemiBold',
   bold: 'DMSans_700Bold',
+  extrabold: 'DMSans_800ExtraBold',
   /** Logo + chiffres promo uniquement. */
   promo: 'RacingSansOne_400Regular',
 } as const;
@@ -27,15 +28,21 @@ export const text = {
   /** Chiffres promo (`-30%`, `29€`) — Racing Sans One. Rien d'autre. */
   promo: { fontFamily: fonts.promo, fontSize: 34, letterSpacing: -1, lineHeight: 38 },
 
-  /** Titre d'écran auth/onboarding — 27 / 700 / -.03em */
-  titleXL: { fontFamily: fonts.bold, fontSize: 27, letterSpacing: -0.8, lineHeight: 32 },
-  /** Titre de page — 22 / 700 / -.02em */
-  h1: { fontFamily: fonts.bold, fontSize: 22, letterSpacing: -0.44, lineHeight: 27 },
-  /** En-tête de section / titre de carte — 17 / 700 / -.01em */
-  h2: { fontFamily: fonts.bold, fontSize: 17, letterSpacing: -0.17, lineHeight: 22 },
+  /** Titre d'étape (création, onboarding) — 28 / 800 / -.03em */
+  titleXL: { fontFamily: fonts.extrabold, fontSize: 28, letterSpacing: -0.84, lineHeight: 32 },
+  /** Titre de page — 32 / 800 / -.03em */
+  h1: { fontFamily: fonts.extrabold, fontSize: 32, letterSpacing: -0.96, lineHeight: 36 },
+  /** En-tête de section — 20 / 800 / -.02em */
+  h2: { fontFamily: fonts.extrabold, fontSize: 20, letterSpacing: -0.4, lineHeight: 25 },
+  /** Titre de carte — 16 / 700 */
+  h3: { fontFamily: fonts.bold, fontSize: 16, letterSpacing: -0.16, lineHeight: 21 },
+  /** Chiffre clé (tuiles KPI) — 24 / 800 / -.02em */
+  kpi: { fontFamily: fonts.extrabold, fontSize: 24, letterSpacing: -0.48, lineHeight: 28 },
 
-  /** Libellé de bouton — 16 / 700 */
-  button: { fontFamily: fonts.bold, fontSize: 16, letterSpacing: 0 },
+  /** Libellé du bouton principal — 17 / 800 */
+  button: { fontFamily: fonts.extrabold, fontSize: 17, letterSpacing: 0 },
+  /** Libellé de bouton secondaire — 15 / 700 */
+  buttonSm: { fontFamily: fonts.bold, fontSize: 15, letterSpacing: 0 },
 
   /** Corps accentué — 15 / 600 */
   bodyStrong: { fontFamily: fonts.semibold, fontSize: 15, lineHeight: 21 },
@@ -56,8 +63,8 @@ export const text = {
     lineHeight: 14,
     textTransform: 'uppercase',
   },
-  /** Libellé de barre d'onglets — 10.5 / 600 */
-  nav: { fontFamily: fonts.semibold, fontSize: 10.5, lineHeight: 13 },
+  /** Libellé du dock — 11 / 600 (700 pour l'onglet actif) */
+  nav: { fontFamily: fonts.semibold, fontSize: 11, lineHeight: 14 },
 } satisfies Record<string, TextStyle>;
 
 export type TextVariant = keyof typeof text;

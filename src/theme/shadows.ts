@@ -44,6 +44,11 @@ export const shadows = {
   /** Surface surélevée (carte e-mail, modale). */
   raised: shadow(ios('#3C2D28', 10, 0.09, 26), 6),
 
+  /** Dock de navigation flottant — 0 10 30 rgba(45,45,45,.14). */
+  dock: shadow(ios('#2D2D2D', 10, 0.14, 30), 10),
+  /** « + » central du dock — glow magenta. */
+  fab: shadow(ios(palette.magenta, 8, 0.35, 20), 8),
+
   /** Bouton d'interrupteur (knob). */
   knob: shadow(ios('#000000', 1, 0.25, 3), 2),
 } as const;

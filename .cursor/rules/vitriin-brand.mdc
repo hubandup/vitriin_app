@@ -20,8 +20,12 @@ violet     #951b81
 gradient   linear-gradient(to right, #e5087e, #951b81)   ← signature
 cream      #f5ecd3
 teal       #0c9875   ·  teal-light #5ebca3
-ink        #2D2D2D   ·  muted #888888   ·  line #EEECE8
+ink        #2D2D2D   ·  muted #6F6A63   ·  line #EEECE8
+surface    #F6F5F3   (tuiles, boutons ronds, lignes de canal)
 ```
+
+MOD-077 : muted passe de #888888 à #6F6A63 (contraste AA sur blanc, 5,3:1),
+validé avec le nouveau design de l'espace magasin.
 
 ## Polices
 
