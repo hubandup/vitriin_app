@@ -460,7 +460,9 @@ function vNet() {
     ${kpi(`${S.length ? Math.round(conn / S.length * 100) : 0} %`, "connectés à un réseau", `<small style="color:var(--muted)">${conn} / ${S.length}</small>`)}
     ${kpi(nf(P.length), "promos envoyées")}${kpi(nf(S.reduce((t, s) => t + s.pub30, 0)), "publications 30 j")}
   </div>
-  <div class="card" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Contact de la centrale</h3><button class="btn-s sm" data-ntab="users">Gérer les utilisateurs</button></div><p class="sub" style="margin-top:8px">${esc(n.support_email || "—")} · ${esc(n.phone || "—")}</p</p></div>` : ""}
+  <div class="card" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Contact de la centrale</h3><button class="btn-s sm" data-ntab="users">Gérer les utilisateurs</button></div><p class="sub" style="margin-top:8px">${esc(n.support_email || "—")} · ${esc(n.phone || "—")}</p</p></div>
+  <div class="card" style="margin-top:14px"><h3 style="margin:0">Code vendeur en caisse</h3><p class="sub" style="margin-top:6px">Réglage du set-up. La centrale peut aussi le changer dans ses réglages.</p>
+    <div class="chips" style="margin-top:10px">${[["required", "Obligatoire"], ["optional", "Au choix des magasins"], ["off", "Désactivé"]].map(([k, l]) => `<button class="chip ${(["required", "optional", "off"].includes(n.settings?.pin_mode) ? n.settings.pin_mode : "optional") === k ? "on" : ""}" data-pinm="${k}">${l}</button>`).join("")}</div></div>` : ""}
   ${tab === "promos" ? `<div class="card"><h3>Promos de la centrale</h3>${P.length ? `<ul class="list">${P.map(p => `<li><span><b>${esc(p.title)}</b>${p.is_mandatory ? ' <span class="pill p">Obligatoire</span>' : ""}<br><small style="color:var(--muted)">${day(p.starts_at)} → ${day(p.ends_at)} · ${p.active}/${p.sent} activées · ${p.relayed} relayées</small></span><b>${cnum(p.views)} vues</b></li>`).join("")}</ul>` : `<p class="empty">Aucune promo envoyée.</p>`}</div>` : ""}
   ${tab === "users" ? usersHtml(C.netUsers, n) : ""}
   ${tab === "onb" ? onbHtml(O).replace('style="margin-top:14px"', "") : ""}
@@ -634,6 +636,11 @@ function bind() {
   // Intégration
   v.querySelectorAll("[data-onb]").forEach(c => c.onclick = () => act(null, async () => { const done = c.dataset.done !== "1"; C.netOnb = await rpc("manager_onboarding_toggle", { p_net: UI.net, p_step: c.dataset.onb, p_done: done }); $("view").innerHTML = vNet(); bind(); return done ? "Étape validée." : "Étape remise à faire."; }));
   v.querySelectorAll("[data-inv]").forEach(b => b.onclick = () => act(b, async () => { const m = await invite([b.dataset.inv], C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }));
+  // Code vendeur de la centrale (MOD-074).
+  v.querySelectorAll("[data-pinm]").forEach(b => b.onclick = () => act(b, async () => {
+    C.net.network.settings = await rpc("manager_network_pin_mode", { p_id: C.net.network.id, p_mode: b.dataset.pinm });
+    $("view").innerHTML = vNet(); bind(); return "Code vendeur : réglage enregistré.";
+  }));
   if ($("inv-all")) $("inv-all").onclick = () => { const ids = C.net.stores.filter(s => !s.activated && s.contact_email).map(s => s.id); if (!confirm(`Envoyer l'invitation à ${ids.length} gérant(s) ?`)) return; act($("inv-all"), async () => { const m = await invite(ids.slice(0, 200), C.net.network.id); await need("net"); $("view").innerHTML = vNet(); bind(); return m; }); };
   v.querySelectorAll("[data-use]").forEach(b => b.onclick = () => act(b, async () => { await rpc("manager_activate_demo", { p_network_id: b.dataset.use }); await need("demos"); $("view").innerHTML = vDemos(); bind(); return "Démo activée. Rechargez la centrale et l'app magasin si elles sont ouvertes."; }));
   if ($("pd-go")) $("pd-go").onclick = () => {

@@ -464,7 +464,7 @@ function mapRow(row, accounts) {
     netMedia: pr.created_by_network_id ? (Array.isArray(det.media) && det.media.length ? det.media : (pr.media_url ? [pr.media_url] : [])) : [],
     formats: Array.isArray(det.formats) ? det.formats : [], mech: pr.mechanic, text: row.overrides?.text || pr.description || "",
     type: pr.promo_type, orig: det.orig ?? null, val: det.val ?? null, xy: det.xy || [2, 1], sub: det.sub || "", cond: det.sub || "",
-    start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, deadline: start > Date.now() ? start : end,
+    start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, pinSp: !!row.pin_required, pinNet: !!pr.pin_required, deadline: start > Date.now() ? start : end,
     status, ch, chAt, stats,
     pubAt: done.length ? Math.max(...done.map(x => new Date(x.published_at).getTime())) : null,
     schedAt: sched ? new Date(sched.getFullYear(), sched.getMonth(), sched.getDate()).getTime() : null,
@@ -481,21 +481,21 @@ async function loadData() {
   const [net, acc, rows, rev, tk, lk, dm, pn] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status, enabled").eq("store_id", st.id),
-    sb.from("store_promotions").select("id, status, overrides, suspended, hidden, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
+    sb.from("store_promotions").select("id, status, overrides, suspended, hidden, pin_required, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, pin_required, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
     // Codes révélés par les clients (drive to store), lisibles par le magasin seulement.
-    sb.from("code_reveals").select("store_promotion_id, revealed_at, confidence, used_at").eq("store_id", st.id).order("revealed_at", { ascending: false }).range(0, 9999),
+    sb.from("code_reveals").select("store_promotion_id, revealed_at, confidence, used_at, validated_by").eq("store_id", st.id).order("revealed_at", { ascending: false }).range(0, 9999),
     sb.rpc("support_mine"),
     // « J'aime » des clients sur l'app Vitriin.
     sb.from("promo_likes").select("store_promotion_id, created_at").eq("store_id", st.id).range(0, 9999),
     sb.rpc("my_store_is_demo", { p_store_id: st.id }),
-    // Code vendeur : à taper sur le téléphone du client pour valider une promo en caisse.
-    sb.from("store_pins").select("pin").eq("store_id", st.id).maybeSingle(),
+    // Code vendeur : le code, le réglage de la centrale et celui du magasin (MOD-074).
+    sb.rpc("store_pin_settings", { p_store_id: st.id }),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
   // Un code affiché loin du magasin ou hors des heures d'ouverture, et non confirmé, ne compte pas comme utilisé.
   const allRev = (!rev.error && rev.data) || [];
   const reveals = allRev.filter(r => r.confidence !== "distance" || r.used_at);
-  S.codesDetail = allRev.reduce((m, r) => { const d = m[r.store_promotion_id] ||= { probable: 0, incertain: 0, distance: 0, used: 0 }; if (r.used_at) d.used++; else d[r.confidence || "incertain"]++; return m; }, {});
+  S.codesDetail = allRev.reduce((m, r) => { const d = m[r.store_promotion_id] ||= { probable: 0, incertain: 0, distance: 0, used: 0, decl: 0 }; if (r.used_at) d[r.validated_by === "client" ? "decl" : "used"]++; else d[r.confidence || "incertain"]++; return m; }, {});
   S.tickets = (!tk.error && tk.data) || [];
   S.codes7 = reveals.filter(r => Date.now() - new Date(r.revealed_at) < 7 * DAY).length;
   S.codesBy = reveals.reduce((m, r) => (m[r.store_promotion_id] = (m[r.store_promotion_id] || 0) + 1, m), {});
@@ -514,7 +514,7 @@ async function loadData() {
     page: fb?.display_name || "Non connectée", insta: ig?.display_name || "Non connecté", gbp: gb?.display_name || "Non connectée",
     postal: st.postal_code || "", contact: { first: st.contact_first_name || "", last: st.contact_last_name || "", phone: st.contact_phone || "", email: st.contact_email || "", web: st.website || "" },
     pub: { desc: st.description || "", cover: st.cover_url || "", phone: st.public_phone || "", email: st.public_email || "" },
-    pin: (!pn.error && pn.data?.pin) || "",
+    pin: (!pn.error && pn.data?.pin) || "", pinMode: (!pn.error && pn.data?.mode) || "optional", pinScope: (!pn.error && pn.data?.scope) || "inherit",
   });
   const chState = (a) => !a ? "none" : a.enabled === false ? "off" : a.status === "active" ? "ok" : "broken";
   S.fb = chState(fb); S.ig = chState(ig); S.gb = chState(gb);
@@ -661,6 +661,15 @@ async function setAutoAccept(on) {
   const { data, error } = await sb.from("stores").update({ auto_accept: on }).eq("id", STORE.id).select("id");
   if (error || !data?.length) { STORE.autoAccept = !on; render(true); return toast("Réglage non enregistré. Réessayez."); }
   toast(on ? "Les promos de la centrale seront activées dès réception." : "Vous validerez chaque promo de la centrale.");
+}
+// Code vendeur, quand la centrale laisse le choix (ou magasin indépendant) : MOD-074.
+const PIN_SCOPES = () => [["inherit", STORE.hasNet ? "Si la centrale le demande" : "Jamais"], ["all", "Toujours"], ["per_promo", "Promo par promo"]];
+async function setPinScope(scope) {
+  const old = STORE.pinScope; if (scope === old) return;
+  STORE.pinScope = scope; render(true);
+  const { data, error } = await sb.from("stores").update({ pin_scope: scope }).eq("id", STORE.id).select("id");
+  if (error || !data?.length) { STORE.pinScope = old; render(true); return toast("Réglage non enregistré. Réessayez."); }
+  toast(scope === "all" ? "Le code vendeur sera demandé pour toutes vos promos." : scope === "per_promo" ? "Choisissez dans chaque promo si le code vendeur est demandé." : "Réglage enregistré.");
 }
 const STORE = { id: null, name: "", net: "", city: "", address: "", netFull: "", page: "", insta: "", logo: null, support: "", phone: "", cgv: "" };
 const initial = () => (STORE.city || STORE.name || "?").trim()[0].toUpperCase();
@@ -880,8 +889,12 @@ function viewSettings() {
     ${STORE.slug ? `<div class="lbl">MA VITRINE</div>
     <div class="box"><a class="li" href="/v/m/${encodeURIComponent(STORE.slug)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">Ce que voient vos clients, avec le code en caisse</span><b style="font-size:15.5px">Voir ma vitrine publique</b></span><span class="chev">${I.chev}</span></a></div>` : ""}
 
-    <div class="lbl">CODE VENDEUR</div>
-    <div class="box"><div class="li"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">À taper sur le téléphone du client pour valider sa promo en caisse. Gardez-le pour l'équipe.</span><b style="font-size:24px;letter-spacing:.3em">${esc(STORE.pin || "····")}</b></span><button class="edit-btn" data-act="pin-renew" style="padding:0 14px;min-height:36px">Changer</button></div></div>
+    ${STORE.pinMode === "off" ? "" : `<div class="lbl">CODE VENDEUR</div>
+    <div class="box"><div class="li"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">À taper sur le téléphone du client pour valider sa promo en caisse. Gardez-le pour l'équipe.</span><b style="font-size:24px;letter-spacing:.3em">${esc(STORE.pin || "····")}</b></span><button class="edit-btn" data-act="pin-renew" style="padding:0 14px;min-height:36px">Changer</button></div>
+      <div class="li" style="display:block"><span style="font-size:15.5px;display:block">Quand le demander ?</span>
+        ${STORE.pinMode === "required" ? `<span style="font-size:13px;color:var(--muted)">Pour toutes les promos : c'est le choix de votre centrale.</span>`
+        : `<div class="seg" style="margin-top:10px">${PIN_SCOPES().map(([k, l]) => `<button data-pinscope="${k}" class="${STORE.pinScope === k ? "on" : ""}">${l}</button>`).join("")}</div>
+        <span style="font-size:13px;color:var(--muted);display:block;margin-top:8px">${{ inherit: STORE.hasNet ? "Seulement sur les campagnes où votre centrale le demande. Sinon, le client confirme lui-même." : "Le client confirme lui-même qu'il a utilisé sa promo.", all: "Le vendeur tape le code pour chaque promo utilisée.", per_promo: "Activez-le dans chaque promo, en bas de sa fiche." }[STORE.pinScope]}</span>`}</div></div>`}
 
     <div class="lbl">SUPPORT</div>
     <div class="box">
@@ -1035,7 +1048,7 @@ function statsPromo(p) {
     <div class="st-line"><span>Taux d'engagement</span><b>${eng}</b></div>
     <div class="st-line"><span>J'aime sur l'app Vitriin</span><b style="color:var(--p)">${nf((S.likesBy || {})[p.spId] || 0)}</b></div>
     <div class="st-line"><span>Codes utilisés en magasin</span><b style="color:var(--v)">${nf((S.codesBy || {})[p.spId] || 0)}<small> · ${nf((S.codes7By || {})[p.spId] || 0)} sur 7 j</small></b></div>
-    ${(() => { const d = (S.codesDetail || {})[p.spId]; return d ? `<p class="small" style="margin-top:6px">${d.used ? `${nf(d.used)} validé${d.used > 1 ? "s" : ""} en caisse · ` : ""}${nf(d.probable)} au magasin · ${nf(d.incertain)} sans position · ${nf(d.distance)} à distance (non comptés)</p>` : ""; })()}
+    ${(() => { const d = (S.codesDetail || {})[p.spId]; return d ? `<p class="small" style="margin-top:6px">${d.used ? `${nf(d.used)} validé${d.used > 1 ? "s" : ""} par le vendeur · ` : ""}${d.decl ? `${nf(d.decl)} déclaré${d.decl > 1 ? "s" : ""} par le client · ` : ""}${nf(d.probable)} au magasin · ${nf(d.incertain)} sans position · ${nf(d.distance)} à distance (non comptés)</p>` : ""; })()}
     ${p.stats ? "" : `<p class="small" style="margin-top:10px">Les statistiques arrivent quelques heures après la publication.</p>`}
     <button class="big-btn" id="sp-open">Ouvrir la promo</button><button class="txt-btn" data-close>Fermer</button>`);
   $("#sp-open").onclick = () => { closeLayer(); openPromo(p); };
@@ -1057,7 +1070,7 @@ $$("#nav button").forEach(b => b.onclick = () => go(b.dataset.tab));
 $("#fab").onclick = () => sheetChoose();
 
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-act],[data-chan-t],[data-stat],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-cat],[data-card]");
+  const t = e.target.closest("[data-go],[data-act],[data-chan-t],[data-stat],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-cat],[data-card],[data-pinscope]");
   if (!t || t.closest("#layer")) return;
   const ds = t.dataset;
   if (ds.go) { const [a, b] = ds.go.split(":"); go(a, b); }
@@ -1067,6 +1080,7 @@ document.addEventListener("click", (e) => {
   else if (ds.sched) sheetSchedule(find(ds.sched));
   else if (ds.retry) { const p = find(ds.retry); publish(p, true); }
   else if (ds.toggle === "autoAccept") setAutoAccept(!STORE.autoAccept);
+  else if (ds.pinscope) setPinScope(ds.pinscope);
   else if (ds.toggle) { S[ds.toggle] = !S[ds.toggle]; save(); render(true); }
   else if (ds.open) clients(ds.open);
   else if (ds.edit) createForm("promo", find(ds.edit));
@@ -1143,9 +1157,19 @@ function openPromo(p) {
   if (!p) return;
   const k = catOf(p), st = promoState(p), pr = pricing(p);
   const editable = !p.hidden && !isOver(p) && (p.src === "own" || STORE.canEdit);
-  const F = { title: p.title, text: p.src === "own" ? (p.text || "") : p.text, img: p.img, start: p.start, end: p.end };
+  const F = { title: p.title, text: p.src === "own" ? (p.text || "") : p.text, img: p.img, start: p.start, end: p.end, pin: p.pinSp };
   const sum = (i) => (p.stats?.fb?.[i] || 0) + (p.stats?.ig?.[i] || 0);
   const layer = $("#layer");
+  // Code vendeur pour cette promo (MOD-074) : interrupteur seulement en réglage « promo par promo ».
+  const pinLine = () => {
+    if (STORE.pinMode === "off" || p.kind === "post" || p.hidden || isOver(p)) return "";
+    const ro = (t) => `<div class="fl">CODE VENDEUR EN CAISSE</div><div class="ro-line">${t}</div>`;
+    if (STORE.pinMode === "required") return ro("Demandé pour toutes les promos : choix de votre centrale.");
+    if (p.pinNet && p.src === "net") return ro("Demandé sur cette campagne par votre centrale.");
+    if (STORE.pinScope === "all") return ro("Demandé pour toutes vos promos (réglage dans Réglages).");
+    if (STORE.pinScope !== "per_promo") return "";
+    return `<div style="display:flex;align-items:center;gap:12px;margin-top:18px"><div class="sp"><span style="font-size:15.5px;display:block">Code vendeur en caisse</span><span style="font-size:13px;color:var(--muted)">Le vendeur tape son code sur le téléphone du client pour valider la promo.</span></div><button class="tg ${F.pin ? "on" : ""}" data-fx="pin" aria-label="Code vendeur en caisse" aria-pressed="${F.pin}"></button></div>`;
+  };
   const draw = () => {
     const fixed = [pr.price != null ? `${eur(pr.price)}${pr.old ? ` au lieu de ${eur(pr.old)}` : ""}` : pr.badge, p.code && `Code ${p.code}`, p.ean && `EAN ${p.ean}`, p.src === "net" && `Du ${fmtShort(p.start)} au ${fmtShort(p.end)}`].filter(Boolean);
     layer.innerHTML = `<div class="full fiche" style="--cc:${st.c}">
@@ -1165,6 +1189,7 @@ function openPromo(p) {
           ${fixed.length ? `<div class="fl">${p.src === "net" ? "FIXÉ PAR LA CENTRALE" : "OFFRE"}</div><div class="ro-line">${fixed.map(esc).join(" · ")}</div>` : ""}
           ${p.src === "own" && p.kind !== "post" && editable ? `<button class="txt-btn" data-fx="offer" style="color:var(--p);font-weight:700;text-align:left;padding-left:0">Modifier l'offre, le type ou les codes</button>` : ""}
         </div>
+        ${pinLine()}
       </div>
       <div class="actions"><div class="acts">
         ${canSuspend(p) ? `<button class="b-ghost" data-fx="susp" style="color:var(--blue)">Suspendre</button>` : canDelete(p) ? `<button class="b-ghost" data-fx="del" style="color:var(--red)">Supprimer</button>` : ""}
@@ -1207,6 +1232,7 @@ function openPromo(p) {
           if (JSON.stringify(ov) !== JSON.stringify(p.ov || {})) { const { error } = await sb.from("store_promotions").update({ overrides: ov }).eq("id", p.spId); if (error) throw error; }
         }
       }
+      if (F.pin !== p.pinSp) { const { error } = await sb.from("store_promotions").update({ pin_required: F.pin }).eq("id", p.spId); if (error) throw error; }
       // « Valider » sur une promo reçue : elle est aussi acceptée.
       if (p.status === "received" && !p.hidden && !isOver(p)) { const { error } = await sb.from("store_promotions").update({ status: "active" }).eq("id", p.spId); if (error) throw error; }
       closeLayer(); await loadData(); render(true); toast("Enregistré.");
@@ -1216,6 +1242,7 @@ function openPromo(p) {
     close: closeLayer, photo: photoMenu, lib: () => pickMedia("lib", setImg), ok: save, clients: () => { closeLayer(); clients(p.id); },
     susp: () => askSuspend(p), del: () => askDelete(p), resume: () => askResume(p),
     offer: () => { closeLayer(); createForm(p.kind, p); },
+    pin: () => { F.pin = !F.pin; draw(); },
   };
   draw();
 }

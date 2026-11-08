@@ -1005,7 +1005,7 @@ async function coupon(x) {
       <div class="ctime hidden" id="ctime"><i class="live"></i><span id="cleft">2:00</span><span>· luminosité au maximum</span></div></div>
     <div class="g2"><a class="btn line" href="${mapsUrl(s)}" target="_blank" rel="noopener">${IC.go}Y aller${x.d != null ? ` · ${km(x.d)}` : ""}</a><button class="btn line" id="c-sh"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-4-9-9-4 20-5Z"/></svg>Envoyer à un ami</button></div>
     ${isSaved(p.id) ? "" : `<button class="keep" id="keep"><i>${IC.bookmark(true)}</i><span><b>Garder ce code</b><br><em>Retrouvez-le dans Mes promos</em></span>${IC.chev}</button>`}
-    <button class="btn dark full" id="used" disabled>Faire valider par le vendeur</button>
+    <button class="btn dark full" id="used" disabled>${p.pin ? "Faire valider par le vendeur" : "C'est fait, je l'ai utilisé"}</button>
     <div class="pinz hidden" id="pinz"><b>Vendeur : tapez le code du magasin</b>
       <input class="pin" id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Code vendeur à 4 chiffres">
       <span class="t2" id="pinmsg">Il se trouve dans l'espace magasin Vitriin.</span></div></div>`;
@@ -1039,11 +1039,21 @@ async function coupon(x) {
     timer = setInterval(() => { left--; if (!$("#cleft", ov)) return stop(); $("#cleft", ov).textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`; if (left <= 0) blur(); }, 1000);
     if (S.session) refreshMe();
   };
-  // Validation en caisse : le vendeur tape le code à 4 chiffres de son magasin sur ce téléphone.
-  $("#used", ov).onclick = () => {
+  // Code vendeur demandé (réglage centrale / magasin / promo, MOD-074) : le vendeur tape le code
+  // à 4 chiffres de son magasin sur ce téléphone. Sinon, le client confirme lui-même.
+  const askPin = (msg) => {
+    $("#used", ov).classList.add("hidden"); $("#pinz", ov).classList.remove("hidden"); $("#pin", ov).focus();
+    if (msg) $("#pinmsg", ov).textContent = msg;
+  };
+  $("#used", ov).onclick = async () => {
     if (!shown) return;
     if (APERCU) { shut(); return apercuNo(); }
-    $("#used", ov).classList.add("hidden"); $("#pinz", ov).classList.remove("hidden"); $("#pin", ov).focus();
+    if (p.pin) return askPin();
+    $("#used", ov).disabled = true;
+    const { data } = await sb.rpc("vitrine_confirm_use", { p_id: p.id, p_client_id: clientId() });
+    if (data === true) { shut(); return done(x); }
+    // Refusé : le réglage a changé depuis l'affichage, le code vendeur est désormais demandé.
+    askPin("Ce magasin demande la validation du vendeur.");
   };
   $("#pin", ov).oninput = async () => {
     const f = $("#pin", ov); f.value = f.value.replace(/\D/g, "").slice(0, 4); f.classList.remove("err");

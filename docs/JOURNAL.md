@@ -20,6 +20,33 @@ Repères :
 
 ## 2026-11-08
 
+### MOD-074 · Code vendeur configurable : centrale, magasin, promo
+- **Décisions de Charles** : le code vendeur se règle à trois niveaux, avec ou sans EAN.
+  - **Centrale** (`networks.settings.pin_mode`, réglé au set-up, modifiable par la centrale dans Réglages →
+    Codes en caisse et par le Manager dans la fiche du client) : *Obligatoire*, *Au choix des magasins*
+    (valeur par défaut) ou *Désactivé*.
+  - **Magasin**, si la centrale laisse le choix, ou magasin indépendant (`stores.pin_scope`, Réglages →
+    Code vendeur) : *Si la centrale le demande* (indépendant : *Jamais*), valeur par défaut, donc inactif ;
+    *Toujours* ; *Promo par promo* (interrupteur en bas de la fiche de chaque promo, `store_promotions.pin_required`).
+  - **Campagne** : la centrale peut l'imposer sur une campagne (case « Code vendeur en caisse » à la création et
+    dans la fiche, `promotions.pin_required`), visible seulement en mode *Au choix des magasins*.
+- **Règle unique** : `promo_pin_required(store_promotion)`. Obligatoire → oui ; désactivé → non ; sinon : campagne
+  imposée, ou magasin *Toujours*, ou magasin *Promo par promo* avec la promo cochée.
+- **Côté client** : le fil indique `pin` pour chaque promo. Code vendeur demandé : « Faire valider par le vendeur ».
+  Sinon : « C'est fait, je l'ai utilisé » (`vitrine_confirm_use` rétablie, refusée par le serveur quand le code
+  vendeur est demandé ; dans ce cas l'écran bascule sur la saisie du code).
+- **Statistiques** : `code_reveals.validated_by` = `pin` ou `client`. Fiche promo du magasin : « validés par le
+  vendeur » et « déclarés par le client ». Les 16 utilisations antérieures au 08/11 sont marquées `client`.
+- **Conséquence** : par défaut (centrale *Au choix des magasins*, magasin *Si la centrale le demande*), plus aucun
+  code vendeur n'est demandé tant que personne ne l'active, comme décidé.
+- **QR code de validation** (le vendeur scanne le téléphone du client depuis son espace) : prochaine étape.
+- **Où** : migration `20261108140000_pin_settings.sql` (testée sur un Postgres 16 local : les 7 cas de la règle,
+  le fil, la confirmation refusée ou acceptée, `validated_by`, droits magasin, non-membre et Manager),
+  `public/v`, `public/magasin`, `public/centrale`, `public/manager`.
+- **Retour arrière** : `git revert` ; migration qui remet `vitrine_live` et `vitrine_validate_use` de MOD-072,
+  supprime `vitrine_confirm_use`, `promo_pin_required`, `store_pin_settings`, `manager_network_pin_mode` et les
+  colonnes `pin_scope`, `pin_required` (×2), `validated_by`.
+
 ### MOD-073 · Lien vers une promo terminée : les promos en cours du même commerce
 - **Avant** : `/v/p/<id>` d'une promo terminée affichait « Cette promo est terminée ou n'existe plus » et un
   bouton vers le fil général.

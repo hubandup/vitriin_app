@@ -491,6 +491,7 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 
           <label class="fl">Règle</label>
           <label class="sw"><input type="checkbox" id="f-mand"><span class="k"></span><span><b>Promo obligatoire<i class="info" data-tip="Vos magasins ne peuvent pas la refuser. Ils la publient eux-mêmes, depuis leur espace.">i</i></b></span></label>
+          <label class="sw" id="f-pin-w"><input type="checkbox" id="f-pin"><span class="k"></span><span><b>Code vendeur en caisse<i class="info" data-tip="Pour cette campagne, le vendeur tape le code de son magasin sur le téléphone du client pour valider la promo.">i</i></b></span></label>
 
           <label class="fl">Magasins</label>
           <div class="seg" id="f-target"><button data-t="all" class="on">Tout le réseau</button><button data-t="pick">Sélection</button></div>
@@ -977,7 +978,7 @@ function promoDraft(p) {
     media: det.media && det.media.length ? [...det.media] : p.media_url ? [p.media_url] : [],
     title: p.title || "", type: p.promo_type || "percent", mech: p.mechanic || "", desc: stripCode(p.description),
     start: isoDay(p.starts_at), end: isoDay(p.ends_at), code: p.discount_code || "", ean: p.ean_code || "",
-    mand: !!p.is_mandatory, formats: new Set(det.formats || []) };
+    mand: !!p.is_mandatory, pin: !!p.pin_required, formats: new Set(det.formats || []) };
 }
 function viewPromoDw(D, p) {
   if (!E || E.id !== p.id) E = promoDraft(p);
@@ -1019,6 +1020,7 @@ function viewPromoDw(D, p) {
   ${E.kind === "promo" && showEan ? `<label class="fl" for="e-ean">Code EAN en caisse</label><input class="in" id="e-ean" data-e="ean" maxlength="13" inputmode="numeric" value="${esc(E.ean)}">` : ""}
   <label class="fl">Règle</label>
   <label class="sw"><input type="checkbox" id="e-mand" ${E.mand ? "checked" : ""}><span class="k"></span><span><b>Promo obligatoire<i class="info" data-tip="Vos magasins ne peuvent pas la refuser. Ils la publient eux-mêmes, depuis leur espace.">i</i></b></span></label>
+  ${pinMode() === "optional" ? `<label class="sw"><input type="checkbox" id="e-pin" ${E.pin ? "checked" : ""}><span class="k"></span><span><b>Code vendeur en caisse<i class="info" data-tip="Pour cette campagne, le vendeur tape le code de son magasin sur le téléphone du client pour valider la promo.">i</i></b></span></label>` : ""}
   <label class="fl">Formats de publication</label>
   <div id="e-formats">${formatsHtml(E.formats, E.media.length, E.kind, "data-ef")}</div>
   <div class="err hidden" id="e-err"></div>
@@ -1063,7 +1065,7 @@ function promoRow(v) {
     description: [v.desc.trim(), code ? `Code en caisse : ${code}` : ""].filter(Boolean).join("\n\n") || null,
     promo_type: v.kind === "promo" ? v.type : null, discount_code: code || null, ean_code: ean || null,
     media_url: v.media[0], details: { kind: v.kind, media: v.media, formats: [...v.formats] },
-    starts_at: start.toISOString(), ends_at: end.toISOString(), is_mandatory: v.mand,
+    starts_at: start.toISOString(), ends_at: end.toISOString(), is_mandatory: v.mand, pin_required: !!v.pin,
   };
 }
 function bindPromoDw(D) {
@@ -1074,6 +1076,7 @@ function bindPromoDw(D) {
   b.querySelectorAll("[data-rm]").forEach(x => x.onclick = () => { E.media.splice(+x.dataset.rm, 1); markDirty(); render(); });
   b.querySelectorAll("[data-ef]").forEach(x => x.onchange = () => { x.checked ? E.formats.add(x.dataset.ef) : E.formats.delete(x.dataset.ef); markDirty(); $("dw-save").disabled = false; });
   $("e-mand").onchange = () => { E.mand = $("e-mand").checked; markDirty(); };
+  $("e-pin") && ($("e-pin").onchange = () => { E.pin = $("e-pin").checked; markDirty(); });
   $("e-add").onclick = () => $("e-file").click();
   $("e-file").onchange = async () => {
     const files = [...$("e-file").files]; if (!files.length) return;
@@ -1241,6 +1244,9 @@ function viewAudience() {
 /* ---------- Paramètres ---------- */
 const STABS = [["prefs", "Préférences"], ["users", "Utilisateurs"], ["account", "Enseigne"], ["comms", "Communication"]];
 const ROLE_L = { owner: "Propriétaire", admin: "Administrateur", member: "Éditeur" };
+// Code vendeur en caisse (MOD-074) : réglage du réseau, « au choix des magasins » par défaut.
+const PIN_MODES = [["required", "Obligatoire"], ["optional", "Au choix des magasins"], ["off", "Désactivé"]];
+const pinMode = () => ["required", "optional", "off"].includes(NS().pin_mode) ? NS().pin_mode : "optional";
 const swHtml = (id, on, title, sub, dis) => `<label class="sw ${dis ? "ro" : ""}"><input type="checkbox" id="${id}" ${on ? "checked" : ""} ${dis ? "disabled" : ""}><span class="k"></span><span><b>${title}</b><span>${sub}</span></span></label>`;
 function viewSettings() {
   const tabs = `<div class="stabs">${STABS.map(([k, l]) => `<button data-stab="${k}" class="${S.stab === k ? "on" : ""}">${l}</button>`).join("")}</div>`;
@@ -1263,6 +1269,9 @@ function setPrefs(note) {
     <div class="card"><h3>Codes en caisse</h3><div class="sub">Champs proposés dans les promos.</div>
       ${swHtml("p-code", feat("discount_code"), "Code de réduction en caisse", "Un code alphanumérique affiché dans le post (ex. BLACK25).", ad)}
       ${swHtml("p-ean", feat("ean_code"), "Code EAN en caisse", "Un code-barres EAN-8 ou EAN-13 à scanner en caisse.", ad)}
+      <div style="margin-top:16px"><b>Code vendeur en caisse</b><div class="sub" style="margin-top:2px">Le vendeur tape le code de son magasin sur le téléphone du client pour valider la promo.</div>
+        <div class="seg" id="p-pin" style="margin-top:10px">${PIN_MODES.map(([k, l]) => `<button data-pinm="${k}" class="${pinMode() === k ? "on" : ""}" ${ad ? "disabled" : ""}>${l}</button>`).join("")}</div>
+        <div class="sub" style="margin-top:8px">${{ required: "Demandé pour toutes les promos de tous les magasins.", optional: "Chaque magasin décide (désactivé par défaut). Vous pouvez aussi l'imposer sur une campagne.", off: "Pas de code vendeur : le client confirme lui-même qu'il a utilisé la promo." }[pinMode()]}</div></div>
     </div>
     <div class="card"><h3>Types de promotion</h3><div class="sub">Les types standards, plus les vôtres.</div>
       <div class="chips" style="margin-top:12px">${TYPES.map(x => `<span class="badge ${TYPE_PILL[x.k]}">${esc(x.label)}</span>`).join("")}
@@ -1370,6 +1379,8 @@ function bindSettings() {
     q("#p-sedit").onchange = (e) => saveSettings({ store_edit: e.target.checked }, e.target.checked ? "Les magasins peuvent personnaliser vos promos." : "Vos promos ne sont plus modifiables par les magasins.");
     q("#p-sdel").onchange = (e) => saveSettings({ store_delete: e.target.checked }, e.target.checked ? "Les magasins peuvent suspendre vos promos non obligatoires." : "Les magasins ne peuvent plus suspendre vos promos.");
     q("#p-ean").onchange = (e) => saveSettings({ ean_code: e.target.checked });
+    c.querySelectorAll("[data-pinm]").forEach(b => b.onclick = () => b.dataset.pinm !== pinMode() && saveSettings({ pin_mode: b.dataset.pinm },
+      { required: "Code vendeur demandé pour toutes les promos.", optional: "Chaque magasin choisit s'il demande le code vendeur.", off: "Code vendeur désactivé pour le réseau." }[b.dataset.pinm]));
     q("#p-addtype").onclick = () => {
       const label = q("#p-newtype").value.trim(); if (label.length < 2) return toast("Nommez le type (2 caractères minimum).");
       const k = "c_" + label.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/(^_|_$)/g, "").slice(0, 36);
@@ -1849,7 +1860,7 @@ function openPromo(resendId = null) {
   if (!isResend) {
     F.kind = "promo"; F.type = "percent"; F.media = []; F.formats = new Set(); F.pv = null; F.target = "all";
     ["f-title", "f-mech", "f-desc", "f-code", "f-ean"].forEach(id => $(id).value = "");
-    $("f-mand").checked = false;
+    $("f-mand").checked = false; $("f-pin").checked = false; show("f-pin-w", pinMode() === "optional");
     const t = new Date(); $("f-start").value = iso(t); $("f-end").value = iso(new Date(t.getTime() + 14 * DAY));
     syncTypes(); syncMedia();
   } else F.target = "pick";
@@ -1890,7 +1901,7 @@ $("f-send").onclick = async () => {
     if (!promoId) {
       const row = promoRow({ kind: F.kind, media: F.media, title: $("f-title").value, type: F.type, mech: $("f-mech").value,
         desc: $("f-desc").value, start: $("f-start").value, end: $("f-end").value,
-        code: feat("discount_code") ? $("f-code").value : "", ean: feat("ean_code") ? $("f-ean").value : "", mand: $("f-mand").checked, formats: F.formats });
+        code: feat("discount_code") ? $("f-code").value : "", ean: feat("ean_code") ? $("f-ean").value : "", mand: $("f-mand").checked, pin: pinMode() === "optional" && $("f-pin").checked, formats: F.formats });
       const { data, error } = await sb.from("promotions").insert({ ...row, created_by_network_id: S.net.id, status: "draft" }).select("id").single();
       if (error) throw error;
       promoId = data.id;
@@ -1912,7 +1923,7 @@ async function load() {
   const [st, ac, pr, sp, vs] = await Promise.all([
     sb.from("stores").select("id, name, address, city, postal_code, auto_accept, logo_url, created_at, invited_at").eq("network_id", id).order("name").range(0, 4999),
     sb.from("social_accounts").select("store_id, channel, status, display_name, stores!inner(network_id)").eq("stores.network_id", id).range(0, 9999),
-    sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
+    sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, pin_required, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
     sb.from("store_promotions").select("id, promotion_id, store_id, status, hidden, suspended, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),
     // App Vitriin : « J'aime » et codes affichés par les clients, par magasin et par campagne.
     sb.rpc("network_vitrine_stats", { p_network_id: id }),
