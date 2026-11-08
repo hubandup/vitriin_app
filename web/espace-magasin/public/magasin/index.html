@@ -321,6 +321,11 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 
 /* ---- Publication en cours ---- */
 .pub{text-align:center;padding:10px 4px 6px}
+/* Scanner de QR client (MOD-075) */
+.scanbox{position:relative;margin-top:14px;border-radius:18px;overflow:hidden;background:#111;aspect-ratio:1}
+.scanbox video{width:100%;height:100%;object-fit:cover;display:block}
+.scanbox i{position:absolute;inset:16%;border:3px solid #fff;border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.pub .done.ko{background:#fbebeb;color:var(--red);font-size:30px;font-weight:800}
 .pub .spin{width:56px;height:56px;border-radius:50%;border:4px solid var(--rose2);border-top-color:var(--p);margin:6px auto 16px;animation:rot .8s linear infinite}
 .pub .done{width:62px;height:62px;border-radius:50%;background:#e3f3ec;color:var(--teal);display:flex;align-items:center;justify-content:center;margin:2px auto 14px}
 .pub h2{font-size:21px}
@@ -625,6 +630,9 @@ async function realPublish(p, chans) {
 }
 
 async function boot() {
+  // QR scanné avec l'appareil photo : on garde le jeton le temps de la connexion (MOD-075).
+  const vq = new URL(location.href);
+  if (vq.searchParams.has("v")) { try { sessionStorage.setItem("vitriin-qr", vq.searchParams.get("v")); } catch {} vq.searchParams.delete("v"); history.replaceState(null, "", vq.pathname + vq.search); }
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return showLogin();
   if (new URLSearchParams(location.search).has("bienvenue")) return showWelcome(session.user.email);
@@ -633,6 +641,8 @@ async function boot() {
   catch (e) { return showLogin(errText(e)); }
   $("#nav").classList.remove("hidden");
   render(); introOnce();
+  let qrTok = null; try { qrTok = sessionStorage.getItem("vitriin-qr"); sessionStorage.removeItem("vitriin-qr"); } catch {}
+  if (qrTok && /^[A-Za-z0-9_-]{22,64}$/.test(qrTok)) validateQr(qrTok);
   // Retour de l'autorisation Facebook / Instagram ou Google.
   const oq = new URLSearchParams(location.search), oa = oq.get("oauth");
   if (oa) {
@@ -729,6 +739,7 @@ function viewHome() {
   ].filter(Boolean);
   return `<div class="screen">
     <div class="head"><button class="logo-sw" data-act="clients" aria-label="Voir côté clients"><span class="av" style="width:52px;height:52px">${avatar()}</span><i class="eyeb">${I.eye}</i></button><div class="sp"><b>${esc(STORE.name)}</b><span>${STORE.hasNet ? `Centrale ${esc(STORE.net)} · ` : ""}${esc(STORE.city)}</span></div></div>
+    ${STORE.pinMode === "off" ? "" : `<button class="week" data-act="scan" style="margin:0 0 18px"><span class="sp"><b>Valider la promo d'un client</b><span>Scannez le QR affiché sur son téléphone</span></span><span class="chev">${I.chev}</span></button>`}
     <div class="sec"><h2>À faire maintenant</h2>${rows.length ? `<span class="cnt">${rows.length}</span>` : ""}</div>
     <div class="todo-box">${rows.join("") || `<div class="all-ok">${I.check}<span>Rien à faire : tout est à jour.</span></div>`}</div>
     <div class="sec"><h2>En ce moment</h2><button class="link" data-go="promos:live">Tout voir ${I.chev}</button></div>
@@ -1094,11 +1105,70 @@ document.addEventListener("click", (e) => {
   else if (ds.act === "store-edit") sheetStore();
   else if (ds.act === "support") sheetSupport();
   else if (ds.act === "pin-renew") askPinRenew();
+  else if (ds.act === "scan") scanClient();
   else if (ds.chanT) toggleChannel(ds.chanT);
   else if (ds.act === "disconnect") toast("Gardez Instagram connecté pour que vos promos y paraissent.");
   else if (ds.act === "logout") sb.auth.signOut().then(() => location.reload());
 });
 const find = (id) => S.promos.find(p => p.id === id) || (S.trash || []).find(p => p.id === id);
+
+// Validation par QR (MOD-075) : le vendeur scanne le téléphone du client depuis son espace,
+// ou l'appareil photo ouvre /magasin/?v=<jeton>, gardé le temps de la connexion.
+const loadLib = (src) => document.querySelector(`script[src="${src}"]`)?.dataset.ok ? Promise.resolve() : new Promise((ok, ko) => {
+  const s = document.querySelector(`script[src="${src}"]`) || Object.assign(document.createElement("script"), { src });
+  s.addEventListener("load", () => { s.dataset.ok = "1"; ok(); }); s.addEventListener("error", () => ko(new Error("Chargement impossible.")));
+  if (!s.isConnected) document.head.appendChild(s);
+});
+const qrToken = (txt) => { try { const u = new URL(txt); const t = u.searchParams.get("v") || ""; return u.pathname.startsWith("/magasin") && /^[A-Za-z0-9_-]{22,64}$/.test(t) ? t : null; } catch { return null; } };
+async function scanClient() {
+  sheet(`<div class="grab"></div><h2>Scanner le QR du client</h2><p class="small" style="font-size:14px;margin-top:4px">Visez le QR code affiché sur son téléphone, dans « Faire valider par le vendeur ».</p>
+    <div class="scanbox"><video id="sc-v" playsinline muted></video><i></i></div><p class="small" id="sc-msg" style="text-align:center;margin-top:10px"></p>
+    <button class="txt-btn" data-close>Annuler</button>`);
+  const v = $("#sc-v"); let stream = null, raf = 0, det = null;
+  const stop = () => { cancelAnimationFrame(raf); stream?.getTracks().forEach(t => t.stop()); };
+  try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false }); }
+  catch { $("#sc-msg") && ($("#sc-msg").textContent = "Autorisez l'appareil photo pour scanner. Sinon, tapez votre code vendeur sur le téléphone du client."); return; }
+  if (!v.isConnected) return stop();
+  v.srcObject = stream; await v.play().catch(() => {});
+  if ("BarcodeDetector" in window) { try { det = new BarcodeDetector({ formats: ["qr_code"] }); } catch {} }
+  if (!det) await loadLib("/lib/jsQR.min.js").catch(() => { $("#sc-msg").textContent = "Lecteur indisponible : tapez votre code vendeur sur le téléphone du client."; });
+  const cv = document.createElement("canvas"), cx = cv.getContext("2d", { willReadFrequently: true });
+  const tick = async () => {
+    if (!v.isConnected) return stop();
+    let txt = null;
+    if (v.readyState >= 2 && v.videoWidth) {
+      if (det) { try { txt = (await det.detect(v))[0]?.rawValue || null; } catch {} }
+      else if (window.jsQR) {
+        const w = cv.width = Math.min(640, v.videoWidth), h = cv.height = Math.round(v.videoHeight * w / v.videoWidth);
+        cx.drawImage(v, 0, 0, w, h); txt = jsQR(cx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "dontInvert" })?.data || null;
+      }
+    }
+    const tok = txt && qrToken(txt);
+    if (tok) { stop(); closeLayer(); return validateQr(tok); }
+    if (txt) $("#sc-msg").textContent = "Ce QR n'est pas un QR de validation Vitriin.";
+    raf = requestAnimationFrame(tick);
+  };
+  tick();
+}
+async function validateQr(token) {
+  sheet(`<div class="pub"><div class="spin"></div><h2>Validation…</h2></div>`);
+  const { data, error } = await sb.rpc("store_validate_qr", { p_token: token, p_store_id: STORE.id });
+  const st = error ? "error" : data?.status || "unknown", ok = st === "ok" || st === "already";
+  const [h, sub] = {
+    ok: ["Promo validée", "Le téléphone du client affiche la confirmation."],
+    already: ["Déjà validée", "Vous aviez déjà validé cette promo."],
+    used: ["QR déjà utilisé", "Cette promo a déjà été validée dans un autre magasin."],
+    expired: ["QR expiré", "Demandez au client de fermer puis rouvrir « Faire valider par le vendeur »."],
+    not_allowed: ["Promo d'un autre magasin", `Elle vaut chez ${data?.store || "un autre magasin"}, hors de votre réseau.`],
+    unknown: ["QR non reconnu", "Ce n'est pas un QR de validation Vitriin."],
+    error: ["Validation impossible", errText(error || {})],
+  }[st] || ["QR non reconnu", ""];
+  sheet(`<div class="pub"><div class="done ${ok ? "" : "ko"}">${ok ? I.check.replace('width="16" height="16"', 'width="30" height="30"') : "!"}</div><h2>${h}</h2>
+    ${data?.title ? `<p class="small" style="font-size:15px;margin-top:6px">« ${esc(data.title)} »</p>` : ""}<p class="small" style="font-size:14px;margin-top:6px">${esc(sub)}</p>
+    <button class="big-btn" id="qr-again">Scanner un autre client</button><button class="txt-btn" data-close>Fermer</button></div>`);
+  $("#qr-again").onclick = () => { closeLayer(); scanClient(); };
+  if (st === "ok") loadData().then(() => render(true)).catch(() => {});
+}
 
 // Nouveau code vendeur : l'ancien ne valide plus rien.
 function askPinRenew() {

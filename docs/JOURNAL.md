@@ -20,6 +20,30 @@ Repères :
 
 ## 2026-11-08
 
+### MOD-075 · Validation en caisse par QR code
+- **Quoi** : quand le code vendeur est demandé (MOD-074), le téléphone du client affiche « Montrez cet écran
+  au vendeur » avec un QR code et, dessous, la saisie du code vendeur. Le vendeur scanne le QR :
+  - depuis son espace magasin : bouton « Valider la promo d'un client » en haut de l'accueil (caméra du
+    téléphone, lecteur natif `BarcodeDetector` si disponible, sinon `public/lib/jsQR.min.js`) ;
+  - ou avec l'appareil photo du téléphone : le QR ouvre `/magasin/?v=<jeton>` ; si le vendeur doit se
+    connecter, le jeton est gardé le temps de la connexion (sessionStorage).
+  Le téléphone du client vérifie toutes les 2,5 s et passe tout seul à l'écran « Profité ».
+- **Règles** : jeton aléatoire de 32 octets, à usage unique, valable 10 min, renouvelé toutes les 9 min tant que
+  l'écran reste ouvert (le précédent est annulé). Accepté par le magasin de la promo ou tout magasin du même
+  réseau, comme le code vendeur ; la promo est comptée au magasin qui scanne (`validated_by = 'qr'`).
+  Réponses au vendeur : validée, déjà validée, QR déjà utilisé ailleurs, QR expiré, promo d'un autre magasin
+  hors réseau, QR non reconnu.
+- **Librairies** : `public/lib/qrcode.min.js` (qrcode-generator 1.4.4, MIT) et `public/lib/jsQR.min.js`
+  (jsQR 1.4.0, Apache-2.0), servies par Vitriin et chargées seulement quand on en a besoin.
+- **Où** : migration `20261108170000_qr_validation.sql` (testée sur un Postgres 16 local : jeton sans affichage
+  refusé, jeton précédent annulé, hors réseau refusé, non-membre refusé, validation, re-scan, statut client,
+  jeton expiré, droits anon), `public/v`, `public/magasin`, `public/lib`. Génération et lecture d'un QR
+  vérifiées en simulation navigateur (aller-retour réussi).
+- **Limite** : sur iPhone, si l'espace magasin est installé sur l'écran d'accueil, l'appareil photo ouvre Safari,
+  où il faut être connecté ; le bouton de l'espace magasin évite ce détour.
+- **Retour arrière** : `git revert` ; `drop function vitrine_use_token, vitrine_use_status, store_validate_qr` ;
+  `drop table use_tokens` ; contrainte `validated_by` remise à ('client', 'pin').
+
 ### MOD-074 · Code vendeur configurable : centrale, magasin, promo
 - **Décisions de Charles** : le code vendeur se règle à trois niveaux, avec ou sans EAN.
   - **Centrale** (`networks.settings.pin_mode`, réglé au set-up, modifiable par la centrale dans Réglages →

@@ -175,7 +175,9 @@ nav.tabs a.on{color:var(--p)}
 .keep{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:16px;background:var(--rose);text-align:left;width:100%}
 .keep i{width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:none}
 .keep span{flex:1;font-size:13.5px;line-height:1.35}.keep em{font-style:normal;color:var(--muted)}
-/* Validation en caisse par code vendeur */
+/* Validation en caisse par code vendeur ou QR */
+.qrb{width:min(220px,62vw);aspect-ratio:1;border-radius:16px;overflow:hidden;border:1.5px solid var(--line);background:#fff}
+.qrb svg{display:block;width:100%;height:100%}
 .pinz{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:4px 0 2px}
 .pin{width:190px;text-align:center;font-family:inherit;font-weight:800;font-size:32px;line-height:1;letter-spacing:.45em;padding:12px 0 12px .45em;border:2px solid var(--line);border-radius:16px;color:var(--ink);background:#fff}
 .pin:focus{outline:none;border-color:var(--p)}
@@ -297,6 +299,12 @@ const day = (t) => new Date(t).toLocaleDateString("fr-FR", { day: "numeric", mon
 const km = (d) => d == null ? "" : d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1).replace(".", ",")} km`;
 const ls = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} } };
 const ss = { get(k) { try { return sessionStorage.getItem(k); } catch { return null; } }, set(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch {} } };
+// Charge une seule fois un script local (librairies QR, MOD-075).
+const loadLib = (src) => document.querySelector(`script[src="${src}"]`)?.dataset.ok ? Promise.resolve() : new Promise((ok, ko) => {
+  const s = document.querySelector(`script[src="${src}"]`) || Object.assign(document.createElement("script"), { src });
+  s.addEventListener("load", () => { s.dataset.ok = "1"; ok(); }); s.addEventListener("error", () => ko(new Error("Chargement impossible.")));
+  if (!s.isConnected) document.head.appendChild(s);
+});
 function toast(t) { $(".toast")?.remove(); const d = document.createElement("div"); d.className = "toast"; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2600); }
 const errText = (e) => (e && (e.message || e.error_description)) || "Une erreur est survenue.";
 const CAT = { fleuriste: "Fleuriste", chaussures: "Chaussures", jardinerie: "Jardinerie", cheminees: "Cheminées", boulangerie: "Boulangerie", patisserie: "Pâtisserie", optique: "Optique", mode: "Mode", velo: "Vélo" };
@@ -1006,10 +1014,32 @@ async function coupon(x) {
     <div class="g2"><a class="btn line" href="${mapsUrl(s)}" target="_blank" rel="noopener">${IC.go}Y aller${x.d != null ? ` · ${km(x.d)}` : ""}</a><button class="btn line" id="c-sh"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-4-9-9-4 20-5Z"/></svg>Envoyer à un ami</button></div>
     ${isSaved(p.id) ? "" : `<button class="keep" id="keep"><i>${IC.bookmark(true)}</i><span><b>Garder ce code</b><br><em>Retrouvez-le dans Mes promos</em></span>${IC.chev}</button>`}
     <button class="btn dark full" id="used" disabled>${p.pin ? "Faire valider par le vendeur" : "C'est fait, je l'ai utilisé"}</button>
-    <div class="pinz hidden" id="pinz"><b>Vendeur : tapez le code du magasin</b>
+    <div class="pinz hidden" id="pinz"><b>Montrez cet écran au vendeur</b>
+      <div class="qrb hidden" id="qrbox" aria-label="QR code de validation"></div>
+      <span class="t2" id="qrhint">Il scanne ce QR depuis son espace Vitriin, ou tape le code du magasin :</span>
       <input class="pin" id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Code vendeur à 4 chiffres">
-      <span class="t2" id="pinmsg">Il se trouve dans l'espace magasin Vitriin.</span></div></div>`;
-  const shut = () => { stop(); ov.remove(); };
+      <span class="t2" id="pinmsg"></span></div></div>`;
+  // QR de validation (MOD-075) : à usage unique, renouvelé toutes les 9 minutes ; on surveille la validation.
+  let qrPoll = null, qrRenew = null;
+  const stopQr = () => { clearInterval(qrPoll); clearTimeout(qrRenew); qrPoll = qrRenew = null; };
+  const shut = () => { stop(); stopQr(); ov.remove(); };
+  const startQr = async () => {
+    stopQr();
+    const box = $("#qrbox", ov); if (!box) return;
+    try {
+      await loadLib("/lib/qrcode.min.js");
+      const { data: tok } = await sb.rpc("vitrine_use_token", { p_id: p.id, p_client_id: clientId() });
+      if (!tok || !ov.isConnected) throw new Error("no token");
+      const q = qrcode(0, "M"); q.addData(`${location.origin}/magasin/?v=${tok}`); q.make();
+      box.innerHTML = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); box.classList.remove("hidden");
+    } catch { box.classList.add("hidden"); $("#qrhint", ov).textContent = "Le vendeur tape le code du magasin :"; }
+    qrPoll = setInterval(async () => {
+      if (!ov.isConnected) return stopQr();
+      const { data } = await sb.rpc("vitrine_use_status", { p_id: p.id, p_client_id: clientId() });
+      if (data === true) { shut(); done(x); }
+    }, 2500);
+    qrRenew = setTimeout(startQr, 9 * 60 * 1000);
+  };
   ov.onclick = (e) => { if (e.target === ov || e.target.closest("[data-x]")) shut(); };
   document.body.appendChild(ov);
   $("#c-sh", ov).onclick = () => share(p.title, `${p.title} chez ${s.name}`, `${location.origin}/v/p/${p.id}`);
@@ -1042,8 +1072,9 @@ async function coupon(x) {
   // Code vendeur demandé (réglage centrale / magasin / promo, MOD-074) : le vendeur tape le code
   // à 4 chiffres de son magasin sur ce téléphone. Sinon, le client confirme lui-même.
   const askPin = (msg) => {
-    $("#used", ov).classList.add("hidden"); $("#pinz", ov).classList.remove("hidden"); $("#pin", ov).focus();
+    $("#used", ov).classList.add("hidden"); $("#pinz", ov).classList.remove("hidden");
     if (msg) $("#pinmsg", ov).textContent = msg;
+    startQr();
   };
   $("#used", ov).onclick = async () => {
     if (!shown) return;
