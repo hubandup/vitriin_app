@@ -165,6 +165,7 @@ nav.tabs a.on{color:var(--ink);font-weight:700}nav.tabs a.on::after{background:v
 .cbody{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;transition:filter .3s}
 .cbody.blur{filter:blur(9px);user-select:none;pointer-events:none}
 .cbody svg{max-width:100%;height:96px}
+.cbody .qrb svg{height:100%}.cbody .g2{margin-top:6px}
 .cbody .code{font-size:20px;font-weight:700;letter-spacing:.16em;word-break:break-all;text-align:center}
 .cveil{position:absolute;inset:34px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px}
 .cveil span{font-size:12.5px;color:var(--muted);background:rgba(255,255,255,.88);padding:3px 9px;border-radius:7px}
@@ -181,7 +182,6 @@ nav.tabs a.on{color:var(--ink);font-weight:700}nav.tabs a.on::after{background:v
 /* Validation en caisse par code vendeur ou QR */
 .qrb{width:min(220px,62vw);aspect-ratio:1;border-radius:22px;overflow:hidden;border:1.5px solid var(--line);background:#fff}
 .qrb svg{display:block;width:100%;height:100%}
-.pinz{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:4px 0 2px}
 .pin{width:190px;text-align:center;font-family:inherit;font-weight:800;font-size:32px;line-height:1;letter-spacing:.45em;padding:12px 0 12px .45em;border:2px solid var(--line);border-radius:20px;color:var(--ink);background:var(--surf)}
 .pin:focus{outline:none;border-color:var(--p)}
 .pin.err{border-color:#e5087e;animation:shk .32s}
@@ -1002,9 +1002,17 @@ const SHOW_SECONDS = 120;
 const fakeBars = () => `<svg viewBox="0 0 290 96" preserveAspectRatio="none" aria-hidden="true">${[3,1,1,2,1,3,2,1,1,1,3,2,1,2,2,1,3,1,1,2,1,1,3,2,2,1,1,3,1,2,1,2,3,1,1,2,1,3,2,1].reduce((a, w, i) => { if (i % 2 === 0) a.h += `<rect x="${a.x}" y="0" width="${w * 3}" height="96" fill="#2D2D2D"/>`; a.x += w * 3 + 1; return a; }, { x: 0, h: "" }).h}</svg>`;
 async function coupon(x) {
   const p = x.promo, s = x.store, pr = pricing(p);
-  // Validation choisie pour la promo (MOD-076) : qr, pin, vendor (les deux), ean ou none (le client confirme).
-  // « vendor » (QR ou code vendeur) se présente comme le QR : le code vendeur reste en secours sous le QR (MOD-078).
-  const chk = ((c) => c === "vendor" ? "qr" : c)(p.check || (p.pin ? "vendor" : "none")), byVendor = ["qr", "pin"].includes(chk);
+  // UN seul mode de validation par promo (BUG-013) : qr (le vendeur scanne le QR), pin (le vendeur tape son code),
+  // ean (code-barres ou code en caisse), web (code promo sur le site internet) ou none (le client confirme).
+  const chk = ["qr", "pin", "ean", "web", "none"].includes(p.check) ? p.check : p.check === "vendor" ? "qr" : p.pin ? "pin" : "none";
+  const byVendor = chk === "qr" || chk === "pin";
+  const M = {
+    qr: ["Votre QR code est prêt", "Afficher mon QR code", "Montrez ce QR au vendeur"],
+    pin: ["Validation par le vendeur", "Faire valider par le vendeur", "Le vendeur tape son code"],
+    ean: ["Votre code est prêt", "Afficher mon code", "Scannez en caisse"],
+    web: ["Votre code promo", "Afficher le code promo", "Code promo · site internet"],
+    none: ["Votre promo", "J'en profite", "Promo active"],
+  }[chk];
   const ov = document.createElement("div"); ov.className = "ov sh";
   let timer = null, lock = null, shown = false;
   const stop = () => { clearInterval(timer); timer = null; try { lock?.release(); } catch {} lock = null; };
@@ -1013,44 +1021,57 @@ async function coupon(x) {
     <div class="row" style="gap:12px"><span class="av" style="background:var(--p);color:#fff">${logo(s) ? `<img src="${esc(logo(s))}" alt="">` : init(s)}</span>
       <div style="flex:1;min-width:0"><b class="t1">${esc(p.title)}</b><div class="t2">${esc(s.name)} · jusqu'au ${day(p.ends_at)}</div></div>
       <button class="xb" data-x aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-    <div class="cbox"><small id="clab">Votre code est prêt</small>
+    <div class="cbox"><small id="clab">${M[0]}</small>
       <div class="cbody blur" id="cbody">${fakeBars()}<div class="code">0 000000 000000</div></div>
-      <div class="cveil" id="cveil"><button class="btn dark" id="show"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Afficher mon code</button><span>À faire devant la caisse</span></div>
+      <div class="cveil" id="cveil"><button class="btn dark" id="show"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>${M[1]}</button><span>${chk === "web" ? "À utiliser sur le site du magasin" : "À faire devant la caisse"}</span></div>
       <div class="ctime hidden" id="ctime"><i class="live"></i><span id="cleft">2:00</span><span>· luminosité au maximum</span></div></div>
-    <div class="pinz hidden" id="pinz"><b>Montrez cet écran au vendeur</b>
-      <div class="qrb hidden" id="qrbox" aria-label="QR code de validation"></div>
-      <span class="t2" id="qrhint">${chk === "pin" ? "Il tape le code du magasin :" : chk === "qr" ? "Il scanne ce QR depuis son espace Vitriin." : "Il scanne ce QR depuis son espace Vitriin, ou tape le code du magasin :"}</span>
-      ${chk === "qr" ? `<button class="lnk" id="pinalt" style="font-size:13.5px;color:var(--muted);text-decoration:underline">Le QR ne passe pas ? Le vendeur tape son code</button>` : ""}
-      <input class="pin ${chk === "qr" ? "hidden" : ""}" id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Code vendeur à 4 chiffres">
-      <span class="t2" id="pinmsg"></span></div>
     <div class="g2"><a class="btn line" href="${mapsUrl(s)}" target="_blank" rel="noopener">${IC.go}Y aller${x.d != null ? ` · ${km(x.d)}` : ""}</a><button class="btn line" id="c-sh"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-4-9-9-4 20-5Z"/></svg>Envoyer à un ami</button></div>
     ${isSaved(p.id) ? "" : `<button class="keep" id="keep"><i>${IC.bookmark(true)}</i><span><b>Garder ce code</b><br><em>Retrouvez-le dans Mes promos</em></span>${IC.chev}</button>`}
-    <button class="btn dark full" id="used" disabled>${byVendor ? "Faire valider par le vendeur" : "C'est fait, je l'ai utilisé"}</button></div>`;
+    <button class="btn dark full ${byVendor ? "hidden" : ""}" id="used" disabled>C'est fait, je l'ai utilisé</button></div>`;
   // QR de validation (MOD-075) : à usage unique, renouvelé toutes les 9 minutes ; on surveille la validation.
   let qrPoll = null, qrRenew = null;
   const stopQr = () => { clearInterval(qrPoll); clearTimeout(qrRenew); qrPoll = qrRenew = null; };
   const shut = () => { stop(); stopQr(); ov.remove(); };
   const startQr = async () => {
     stopQr();
-    const box = $("#qrbox", ov); if (!box) return;
+    const box = $("#qrbox", ov), hint = $("#qrhint", ov); if (!box) return;
     try {
       await loadLib("/lib/qrcode.min.js");
-      if (APERCU) { // aperçu depuis l'espace magasin : QR d'exemple, non valide
-        const q = qrcode(0, "M"); q.addData(`${location.origin}/magasin/`); q.make();
-        box.innerHTML = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); box.classList.remove("hidden");
-        $("#qrhint", ov).textContent = "Aperçu : chez le client, ce QR est unique et le vendeur le scanne."; $("#pinalt", ov)?.remove(); return;
-      }
-      const { data: tok } = await sb.rpc("vitrine_use_token", { p_id: p.id, p_client_id: clientId() });
-      if (!tok || !ov.isConnected) throw new Error("no token");
-      const q = qrcode(0, "M"); q.addData(`${location.origin}/magasin/?v=${tok}`); q.make();
-      box.innerHTML = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); box.classList.remove("hidden");
-    } catch { box.classList.add("hidden"); $("#qrhint", ov).textContent = "Le vendeur tape le code du magasin :"; $("#pinalt", ov)?.remove(); $("#pin", ov).classList.remove("hidden"); }
+      // Aperçu depuis l'espace magasin : QR d'exemple, non valable.
+      const tok = APERCU ? null : (await sb.rpc("vitrine_use_token", { p_id: p.id, p_client_id: clientId() })).data;
+      if (!APERCU && (!tok || !ov.isConnected)) throw new Error("no token");
+      const q = qrcode(0, "M"); q.addData(APERCU ? `${location.origin}/magasin/` : `${location.origin}/magasin/?v=${tok}`); q.make();
+      box.innerHTML = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+      hint.textContent = APERCU ? "Aperçu : chez le client, ce QR est unique." : "Le vendeur le scanne depuis son espace Vitriin.";
+      if (APERCU) return;
+    } catch {
+      box.innerHTML = ""; hint.textContent = "QR indisponible pour l'instant. Nouvel essai dans quelques secondes…";
+      qrRenew = setTimeout(startQr, 5000); return;
+    }
     qrPoll = setInterval(async () => {
       if (!ov.isConnected) return stopQr();
       const { data } = await sb.rpc("vitrine_use_status", { p_id: p.id, p_client_id: clientId() });
       if (data === true) { shut(); done(x); }
     }, 2500);
     qrRenew = setTimeout(startQr, 9 * 60 * 1000);
+  };
+  // Code vendeur (mode pin) : le vendeur tape le code à 4 chiffres de son magasin sur ce téléphone.
+  const bindPin = () => {
+    const f = $("#pin", ov); if (!f) return;
+    f.oninput = async () => {
+      f.value = f.value.replace(/\D/g, "").slice(0, 4); f.classList.remove("err");
+      if (f.value.length < 4) return;
+      if (APERCU) { f.value = ""; return apercuNo(); }
+      f.disabled = true;
+      const { data, error } = await sb.rpc("vitrine_validate_use", { p_id: p.id, p_client_id: clientId(), p_pin: f.value });
+      if (!error && data === "ok") { shut(); return done(x); }
+      f.disabled = false; f.value = ""; void f.offsetWidth; f.classList.add("err"); f.focus();
+      $("#pinmsg", ov).textContent = error ? errText(error)
+        : data === "locked" ? "Trop d'essais. Réessayez dans 15 minutes."
+        : data === "no_reveal" ? "Rouvrez la promo, puis faites valider."
+        : data === "wrong_mode" ? "Cette promo ne se valide plus par code vendeur : rouvrez-la."
+        : "Code incorrect. Il se trouve dans l'espace magasin Vitriin.";
+    };
   };
   ov.onclick = (e) => { if (e.target === ov || e.target.closest("[data-x]")) shut(); };
   document.body.appendChild(ov);
@@ -1068,50 +1089,42 @@ async function coupon(x) {
     const pos = APERCU ? null : await geo(4000);
     const { data, error } = APERCU ? await sb.rpc("vitrine_preview_code", { p_id: p.id })
       : await sb.rpc("vitrine_reveal", { p_id: p.id, p_client_id: clientId(), p_lat: pos?.lat ?? null, p_lng: pos?.lng ?? null });
-    if (error) { btn.disabled = false; btn.lastChild.textContent = "Afficher mon code"; return toast(errText(error)); }
+    if (error) { btn.disabled = false; btn.lastChild.textContent = M[1]; return toast(errText(error)); }
     const code = data?.ean || data?.code, ean = !!(data?.ean && /^\d{13}$/.test(data.ean));
-    $("#cbody", ov).innerHTML = code ? `<svg id="bc"></svg><div class="code">${esc(code)}</div>`
-      : `<p style="font-size:14.5px;line-height:1.5;margin:6px 0;color:var(--ink)">${chk === "pin" ? "Le vendeur tape le code du magasin ci-dessous pour valider la promo." : byVendor ? "Le vendeur scanne le QR ci-dessous pour valider la promo." : `Pas de code à scanner : la promo s'applique directement en caisse chez ${esc(s.name)}.<br>Montrez cet écran au vendeur.`}</p>`;
-    if (code && window.JsBarcode) { try { JsBarcode($("#bc", ov), ean ? data.ean : code, { format: ean ? "EAN13" : "CODE128", displayValue: false, height: 96, margin: 0, width: 2.2 }); } catch { $("#bc", ov)?.remove(); } }
-    $("#cbody", ov).classList.remove("blur"); $("#cveil", ov).classList.add("hidden"); $("#ctime", ov).classList.remove("hidden");
-    $("#clab", ov).textContent = code ? "Scannez en caisse" : "Promo active";
+    const msg = (t) => `<p style="font-size:14.5px;line-height:1.5;margin:6px 0;color:var(--ink)">${t}</p>`;
+    const body = $("#cbody", ov);
+    if (chk === "qr") body.innerHTML = `<div class="qrb" id="qrbox" aria-label="QR code de validation"></div><span class="t2" id="qrhint">Un instant…</span>`;
+    else if (chk === "pin") body.innerHTML = `<span class="t2" style="text-align:center">Montrez cet écran au vendeur : il tape le code du magasin.</span>
+      <input class="pin" id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Code vendeur à 4 chiffres"><span class="t2" id="pinmsg"></span>`;
+    else if (chk === "web") body.innerHTML = code ? `<div class="code">${esc(code)}</div>
+      <div class="g2" style="width:100%"><button class="btn line" id="c-copy">Copier le code</button>${s.website ? `<a class="btn p" style="min-height:54px;font-size:15.5px" href="${esc(s.website)}" target="_blank" rel="noopener">Aller sur le site</a>` : ""}</div>`
+      : msg(`Code promo indisponible : contactez ${esc(s.name)}.`);
+    else if (code) body.innerHTML = `<svg id="bc"></svg><div class="code">${esc(code)}</div>`;
+    else body.innerHTML = msg(`La promo s'applique directement en caisse chez ${esc(s.name)}.<br>Montrez cet écran au vendeur.`);
+    if (chk === "ean" && code && window.JsBarcode) { try { JsBarcode($("#bc", ov), ean ? data.ean : code, { format: ean ? "EAN13" : "CODE128", displayValue: false, height: 96, margin: 0, width: 2.2 }); } catch { $("#bc", ov)?.remove(); } }
+    $("#c-copy", ov) && ($("#c-copy", ov).onclick = () => navigator.clipboard?.writeText(code).then(() => toast("Code copié"), () => toast(code)));
+    body.classList.remove("blur"); $("#cveil", ov).classList.add("hidden");
+    $("#clab", ov).textContent = M[2];
     $("#used", ov).disabled = false; shown = true;
     try { lock = await navigator.wakeLock?.request("screen"); } catch {}
-    let left = SHOW_SECONDS; $("#cleft", ov).textContent = "2:00";
-    timer = setInterval(() => { left--; if (!$("#cleft", ov)) return stop(); $("#cleft", ov).textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`; if (left <= 0) blur(); }, 1000);
+    if (chk === "qr") startQr();
+    else if (chk === "pin") bindPin();
+    else if (chk !== "web") { // code et promo en caisse : affichés 2 minutes
+      $("#ctime", ov).classList.remove("hidden");
+      let left = SHOW_SECONDS; $("#cleft", ov).textContent = "2:00";
+      timer = setInterval(() => { left--; if (!$("#cleft", ov)) return stop(); $("#cleft", ov).textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`; if (left <= 0) blur(); }, 1000);
+    }
     if (S.session) refreshMe();
-    // Validation par le vendeur : le QR (ou la saisie du code) s'affiche tout de suite, sans second bouton.
-    if (byVendor && !$("#pinz", ov).offsetParent) askPin(null, true);
   };
-  // Code vendeur demandé (réglage centrale / magasin / promo, MOD-074) : le vendeur tape le code
-  // à 4 chiffres de son magasin sur ce téléphone. Sinon, le client confirme lui-même.
-  const askPin = (msg, auto) => {
-    $("#used", ov).classList.add("hidden"); $("#pinz", ov).classList.remove("hidden");
-    if (msg) $("#pinmsg", ov).textContent = msg;
-    if (chk !== "pin") startQr(); else if (!auto) $("#pin", ov).focus();
-    $("#pinalt", ov) && ($("#pinalt", ov).onclick = () => { $("#pinalt", ov).remove(); $("#pin", ov).classList.remove("hidden"); $("#pin", ov).focus(); });
-  };
+  // Le client confirme lui-même (code-barres, code promo, sans validation).
   $("#used", ov).onclick = async () => {
     if (!shown) return;
-    if (byVendor) return askPin();
     if (APERCU) { shut(); return apercuNo(); }
     $("#used", ov).disabled = true;
     const { data } = await sb.rpc("vitrine_confirm_use", { p_id: p.id, p_client_id: clientId() });
     if (data === true) { shut(); return done(x); }
-    // Refusé : le réglage a changé depuis l'affichage, le code vendeur est désormais demandé.
-    askPin("Ce magasin demande la validation du vendeur.");
-  };
-  $("#pin", ov).oninput = async () => {
-    const f = $("#pin", ov); f.value = f.value.replace(/\D/g, "").slice(0, 4); f.classList.remove("err");
-    if (f.value.length < 4) return;
-    f.disabled = true;
-    const { data, error } = await sb.rpc("vitrine_validate_use", { p_id: p.id, p_client_id: clientId(), p_pin: f.value });
-    if (!error && data === "ok") { shut(); return done(x); }
-    f.disabled = false; f.value = ""; void f.offsetWidth; f.classList.add("err"); f.focus();
-    $("#pinmsg", ov).textContent = error ? errText(error)
-      : data === "locked" ? "Trop d'essais. Réessayez dans 15 minutes."
-      : data === "no_reveal" ? "Affichez d'abord le code, puis faites valider."
-      : "Code incorrect. Il se trouve dans l'espace magasin Vitriin.";
+    // Refusé : la validation de la promo a changé depuis l'affichage.
+    toast("Cette promo se valide désormais avec le vendeur : rouvrez-la."); shut();
   };
 }
 

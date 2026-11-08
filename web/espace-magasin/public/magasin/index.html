@@ -375,6 +375,7 @@ h1.title{font-size:32px;font-weight:800;letter-spacing:-.03em;margin:0;line-heig
 .vt button{position:relative;border:1.5px solid var(--line);border-radius:22px;background:#fff;padding:14px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:150px}
 .vt button.on{border:2px solid var(--p);padding:13.5px;background:var(--rose)}
 .vt button:disabled{opacity:.4}
+.vt button:last-child:nth-child(odd){grid-column:1/-1;min-height:0;flex-direction:row;align-items:center}
 .vt .vi{width:44px;height:44px;border-radius:15px;background:var(--surf);color:var(--ink);display:flex;align-items:center;justify-content:center}
 .vt .vi svg{width:22px;height:22px}
 .vt button.on .vi{background:linear-gradient(135deg,#E5087E,#951B81);color:#fff}
@@ -931,12 +932,21 @@ function promoState(p) {
 const offerTxt = (p) => { const pr = pricing(p); return pr.badge || ""; };
 const dateTxt = (p) => p.start > Date.now() ? `Dès le ${fmtShort(p.start)}` : isOver(p) ? `Terminée le ${fmtShort(p.end)}` : `Jusqu'au ${fmtShort(p.end)}`;
 // Carte promo (liste Promos) : vignette, statut en couleur, titre, date + validation, réseaux, vues et validations.
-const VAL_SHORT = { qr: "QR code", pin: "Code vendeur", ean: "Code-barres", none: "Sans validation" };
+const VAL_SHORT = { qr: "QR code", pin: "Code vendeur", ean: "Code-barres", web: "Code promo web", none: "Sans validation" };
+// Le mode de validation d'une promo, un seul à la fois (même règle que promo_check en base, BUG-013).
+function modeOf(p) {
+  const has = !!(p.ean || p.code);
+  let k = p.validation || (has ? "ean" : p.pinNet || STORE.pinScope === "all" || (STORE.pinScope === "per_promo" && p.pinSp) ? "pin" : "qr");
+  if (STORE.pinMode === "off" && (k === "qr" || k === "pin")) k = has ? "ean" : "none";
+  if (STORE.pinMode === "required" && k === "none") k = "qr";
+  return k;
+}
+const modeShort = (p) => { const k = modeOf(p); return k === "ean" && !p.ean ? "Code en caisse" : VAL_SHORT[k]; };
 function cardRow(p) {
   const st = promoState(p), off = offerTxt(p), k = catOf(p);
   const cd = S.codesDetail?.[p.id], views = (p.stats?.fb?.[1] || 0) + (p.stats?.ig?.[1] || 0);
   const res = [views ? `${nf(views)} vues` : "", cd?.used ? `${nf(cd.used)} validée${cd.used > 1 ? "s" : ""}` : cd?.decl ? `${nf(cd.decl)} déclarée${cd.decl > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ");
-  const how = p.kind === "post" ? "Post" : STORE.pinMode === "off" ? (p.ean ? "Code-barres" : "") : p.validation ? VAL_SHORT[p.validation] : p.ean ? "Code-barres" : "QR code";
+  const how = p.kind === "post" ? "Post" : modeShort(p);
   let acts = "";
   if (k === "todo" && p.status !== "draft") acts = p.status === "received" && !p.mandatory
     ? `<div class="btns"><button class="b-ghost" data-decline="${p.id}">Refuser</button><button class="b-grad" data-activate="${p.id}">Activer</button></div>`
@@ -1378,16 +1388,13 @@ function openPromo(p) {
   const sum = (i) => (p.stats?.fb?.[i] || 0) + (p.stats?.ig?.[i] || 0);
   const layer = $("#layer");
   // Code vendeur pour cette promo (MOD-074) : interrupteur seulement en réglage « promo par promo ».
+  // Une seule validation par promo (BUG-013) : on affiche celle qui s'applique. Seul cas réglable ici :
+  // promo sans choix ni code, magasin en « par promo » → interrupteur code vendeur (sinon QR).
   const pinLine = () => {
-    if (STORE.pinMode === "off" || p.kind === "post" || p.hidden || isOver(p)) return "";
-    const ro = (t) => `<div class="fl">CODE VENDEUR EN CAISSE</div><div class="ro-line">${t}</div>`;
-    if (p.src === "own" && p.validation) return `<div class="fl">VALIDATION EN CAISSE</div><div class="ro-line">${esc(VAL_LABEL[p.validation])}${STORE.pinMode === "required" && !["qr", "pin"].includes(p.validation) ? " · votre centrale demande le code vendeur" : ""}</div>`;
-    if (STORE.pinMode === "required") return ro("Demandé pour toutes les promos : choix de votre centrale.");
-    // Sans choix explicite ni code EAN : QR scanné par le vendeur, par défaut (MOD-078).
-    if (!p.validation && !p.ean) return `<div class="fl">VALIDATION EN CAISSE</div><div class="ro-line">${esc(VAL_LABEL.qr)}, par défaut. Le code vendeur reste possible en secours.</div>`;
-    if (p.pinNet && p.src === "net") return ro("Demandé sur cette campagne par votre centrale.");
-    if (STORE.pinScope === "all") return ro("Demandé pour toutes vos promos (réglage dans l’onglet Magasin).");
-    if (STORE.pinScope !== "per_promo") return "";
+    if (p.kind === "post" || p.hidden || isOver(p)) return "";
+    const k = modeOf(p), has = !!(p.ean || p.code);
+    if (p.validation || has || STORE.pinMode !== "optional" || STORE.pinScope !== "per_promo" || (p.pinNet && p.src === "net"))
+      return `<div class="fl">VALIDATION</div><div class="ro-line">${esc(k === "ean" && !p.ean ? "Code à présenter en caisse" : VAL_LABEL[k])}${!p.validation && k === "qr" ? ", par défaut" : ""}${k === "web" && p.code ? ` : ${esc(p.code)}` : ""}</div>`;
     return `<div style="display:flex;align-items:center;gap:12px;margin-top:18px"><div class="sp"><span style="font-size:15.5px;display:block">Code vendeur en caisse</span><span style="font-size:13px;color:var(--muted)">Le vendeur tape son code sur le téléphone du client pour valider la promo.</span></div><button class="tg ${F.pin ? "on" : ""}" data-fx="pin" aria-label="Code vendeur en caisse" aria-pressed="${F.pin}"></button></div>`;
   };
   const draw = () => {
@@ -1564,10 +1571,13 @@ const VALIDATIONS = [
   ["qr", "QR code", "Le vendeur scanne le QR du client", "La plus fiable : chaque passage en caisse est compté automatiquement."],
   ["pin", "Code vendeur", "Tapé sur le téléphone du client", "Le vendeur tape le code du magasin sur le téléphone du client."],
   ["ean", "Code-barres", "Scanné par votre caisse", "Votre caisse scanne le code-barres. Vitriin ne voit pas le passage en caisse : le client confirme lui-même."],
+  ["web", "Code promo web", "À saisir sur votre site", "Pour la vente en ligne : le client copie le code et l'utilise sur votre site internet. Il confirme lui-même l'avoir utilisé."],
   ["none", "Sans validation", "Le client montre la promo", "Le client montre la promo en caisse et confirme lui-même l'avoir utilisée."],
 ];
-const VAL_LABEL = { qr: "QR code scanné par le vendeur", pin: "Code vendeur sur le téléphone du client", ean: "Code-barres EAN scanné en caisse", none: "Sans validation" };
-const valAllowed = (k) => STORE.pinMode === "required" ? ["qr", "pin"].includes(k) : STORE.pinMode === "off" ? ["ean", "none"].includes(k) : true;
+const VAL_LABEL = { qr: "QR code scanné par le vendeur", pin: "Code vendeur sur le téléphone du client", ean: "Code-barres EAN scanné en caisse", web: "Code promo sur votre site internet", none: "Sans validation" };
+const webOk = (v) => /^[A-Z0-9][A-Z0-9_-]{2,23}$/.test(v);
+const newWebCode = () => (STORE.name.normalize("NFD").replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 5) || "PROMO") + Array.from(crypto.getRandomValues(new Uint8Array(3)), x => x % 10).join("");
+const valAllowed = (k) => STORE.pinMode === "required" ? ["qr", "pin"].includes(k) : STORE.pinMode === "off" ? ["ean", "web", "none"].includes(k) : true;
 // EAN-13 « magasin » : préfixe 2 (réservé à l'usage interne), clé de contrôle calculée.
 const eanKey = (d12) => (10 - d12.split("").reduce((t, c, i) => t + (+c) * (i % 2 ? 3 : 1), 0) % 10) % 10;
 const newEan = () => { const b = "2" + Array.from(crypto.getRandomValues(new Uint8Array(11)), x => x % 10).join(""); return b + eanKey(b); };
@@ -1579,6 +1589,7 @@ function createForm(kind, draft) {
     { kind, title: "", img: null, type: "percent", orig: 129, val: 30, xy: [2, 1], cond: "", text: "", start: d(0), end: d(13), fb: true, ig: S.ig === "ok" };
   F.check = valAllowed(defVal) ? defVal : (STORE.pinMode === "required" ? "qr" : "none");
   F.ean = draft?.ean || legacyEan || "";
+  F.web = draft?.validation === "web" ? draft.code || "" : "";
   F.step = 0;
   const layer = $("#layer");
   const editLive = !!draft && draft.status !== "draft"; // promo déjà publiée ou programmée : on enregistre sans republier
@@ -1586,10 +1597,10 @@ function createForm(kind, draft) {
   const stepName = () => steps()[F.step];
   const stepOk = () => ({
     Visuel: !!F.img, Texte: !!F.text.trim(), Offre: !!F.title.trim() && new Date(F.end) >= new Date(F.start),
-    Validation: valAllowed(F.check) && (F.check !== "ean" || eanOk(F.ean)), Diffusion: F.fb || F.ig,
+    Validation: valAllowed(F.check) && (F.check !== "ean" || eanOk(F.ean)) && (F.check !== "web" || webOk(F.web)), Diffusion: F.fb || F.ig,
   })[stepName()];
   const hint = () => ({ Visuel: "Ajoutez une photo ou une vidéo.", Texte: "Écrivez le texte du post.", Offre: !F.title.trim() ? "Donnez un titre à la promo." : "La fin doit suivre le début.",
-    Validation: F.check === "ean" ? "Générez ou saisissez un code EAN valide (8 ou 13 chiffres)." : "Choisissez une validation.", Diffusion: "Choisissez au moins un réseau." })[stepName()];
+    Validation: F.check === "ean" ? "Générez ou saisissez un code EAN valide (8 ou 13 chiffres)." : F.check === "web" ? "Saisissez le code promo de votre site (3 à 24 lettres ou chiffres)." : "Choisissez une validation.", Diffusion: "Choisissez au moins un réseau." })[stepName()];
   const opt = (on, attrs, title, sub, dis) => `<button class="chk ${on ? "on" : ""}" ${attrs} ${dis ? 'disabled style="opacity:.45"' : ""}><span class="bx">${on ? `<span style="color:#fff">${I.check}</span>` : ""}</span><span class="sp"><b>${title}</b><span>${sub}</span></span></button>`;
   const body = () => {
     const pr = pricing(F);
@@ -1606,17 +1617,20 @@ function createForm(kind, draft) {
         ${pr.price != null ? `<div class="calc"><span class="badge" style="font-size:15px;padding:3px 9px">${esc(pr.badge)}</span><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}</div>` : ""}
         <span class="label">Période de validité</span>
         <div class="two"><div class="date">${I.cal("#0c9875")}<input type="date" id="f-start" value="${iso(F.start)}"></div><div class="date">${I.cal("#e5087e")}<input type="date" id="f-end" value="${iso(F.end)}"></div></div>`;
-      case "Validation": return `<h2 class="wz-h">Comment valider la promo en caisse ?</h2>
+      case "Validation": return `<h2 class="wz-h">Comment valider la promo ?</h2>
         <p class="small wz-p">${STORE.pinMode === "required" ? "Votre centrale demande une validation par le vendeur." : STORE.pinMode === "off" ? "Votre centrale n'utilise pas la validation par le vendeur." : "Une validation par le vendeur vous dit exactement combien de promos ont servi."}</p>
         <div class="vt">${VALIDATIONS.map(([k, t, s]) => `<button class="${F.check === k ? "on" : ""}" data-check="${k}" aria-pressed="${F.check === k}" ${valAllowed(k) ? "" : "disabled"}>
-          <span class="vi">${{ qr: I.scan.replace('width="26" height="26"', 'width="22" height="22"'), pin: I.keypad, ean: I.barcode, none: I.hand }[k]}</span>
+          <span class="vi">${{ qr: I.scan.replace('width="26" height="26"', 'width="22" height="22"'), pin: I.keypad, ean: I.barcode, web: I.globe, none: I.hand }[k]}</span>
           ${F.check === k ? `<span class="ok">${I.check}</span>` : k === "qr" && valAllowed("qr") ? '<span class="reco">Recommandé</span>' : ""}
           <span><b>${t}</b><span class="s">${s}</span></span></button>`).join("")}</div>
         <div class="infob">${I.info}<span>${esc(VALIDATIONS.find(v => v[0] === F.check)?.[3] || "")}${F.check === "pin" && STORE.pin ? ` Votre code : <b>${esc(STORE.pin)}</b>.` : ""}</span></div>
         ${F.check === "ean" ? `<div style="margin-top:14px">${F.ean ? `<div class="codechip">${I.bar}${esc(F.ean)}<button id="f-ean-rm" aria-label="Retirer">×</button></div>
           <p class="small" style="color:#8a6a3a;margin-top:8px">${/^2/.test(F.ean) && F.ean.length === 13 ? "Code créé par Vitriin : à déclarer dans votre logiciel de caisse avant le début de la promo." : "Vérifiez que votre caisse reconnaît ce code."}</p>`
           : `<button class="gen" id="f-gen">${I.bar}Créer un code EAN</button>
-          <div class="addrow"><input class="in" id="f-ean" inputmode="numeric" maxlength="13" placeholder="Ou saisir le code EAN de votre caisse"><button id="f-ean-add">Ajouter</button></div>`}</div>` : ""}`;
+          <div class="addrow"><input class="in" id="f-ean" inputmode="numeric" maxlength="13" placeholder="Ou saisir le code EAN de votre caisse"><button id="f-ean-add">Ajouter</button></div>`}</div>` : ""}
+        ${F.check === "web" ? `<div style="margin-top:14px"><span class="label" style="margin-top:0">Code promo de votre site <span class="req">*</span></span>
+          <div class="addrow"><input class="in" id="f-web" maxlength="24" autocapitalize="characters" placeholder="Ex : NOEL20" value="${esc(F.web)}" style="text-transform:uppercase;font-weight:700;letter-spacing:.06em"><button id="f-web-gen">Générer</button></div>
+          <p class="small" style="margin-top:8px">Créez ce même code dans votre boutique en ligne.${STORE.contact.web ? ` Vos clients auront un bouton vers ${esc(STORE.contact.web.replace(/^https?:\/\//, ""))}.` : " Ajoutez l'adresse de votre site dans l'onglet Magasin : vos clients auront un bouton pour y aller."}</p></div>` : ""}`;
       case "Diffusion": return `<h2 class="wz-h">Où la diffuser ?</h2><p class="small wz-p">Voici l'aperçu de votre publication.</p>
         <div class="post"><div class="ph"><span class="av">${avatar()}</span><div class="sp"><b>${esc(STORE.name)}</b><span>${F.kind === "post" ? "Post" : `Du ${fmtShort(F.start)} au ${fmtShort(F.end)}`}</span></div></div>
           <div class="pim">${F.img ? `<img src="${esc(F.img)}" alt="" onerror="this.style.visibility='hidden'">` : ""}${F.kind !== "post" && pr.badge ? `<span class="pb">${esc(pr.badge)}</span>` : ""}${F.kind !== "post" ? `<span class="dt">Jusqu'au ${fmtShort(F.end)}</span>` : ""}</div>
@@ -1662,6 +1676,8 @@ function createForm(kind, draft) {
     $("#f-gen", layer) && ($("#f-gen").onclick = () => { F.ean = newEan(); keepScroll(draw); });
     $("#f-ean-rm", layer) && ($("#f-ean-rm").onclick = () => { F.ean = ""; keepScroll(draw); });
     $("#f-ean-add", layer) && ($("#f-ean-add").onclick = () => { const v = $("#f-ean").value.replace(/\D/g, ""); if (!eanOk(v)) return toast("Code EAN invalide : 8 ou 13 chiffres, clé de contrôle comprise."); F.ean = v; keepScroll(draw); });
+    $("#f-web", layer) && ($("#f-web").oninput = (e) => { F.web = e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ""); if (e.target.value !== F.web) e.target.value = F.web; refreshFoot(); });
+    $("#f-web-gen", layer) && ($("#f-web-gen").onclick = () => { F.web = newWebCode(); keepScroll(draw); });
     $$("[data-chan]", layer).forEach(b => b.onclick = (e) => {
       if (e.target.id === "f-reco" && !STORE.demo) return connectAccount("meta");
       if (e.target.id === "f-reco") { sb.rpc("demo_reconnect", { p_store_id: STORE.id, p_channel: "instagram" }).then(({ error }) => { if (error) return toast(errText(error)); S.ig = "ok"; F.ig = true; toast("Instagram reconnecté"); keepScroll(draw); }); return; }
@@ -1685,6 +1701,7 @@ function createForm(kind, draft) {
       const start = new Date(F.start); start.setHours(0, 0, 0, 0);
       const end = new Date(F.end); end.setHours(23, 59, 0, 0);
       const ean = !isPost && F.check === "ean" && eanOk(F.ean) ? F.ean : null;
+      const web = !isPost && F.check === "web" && webOk(F.web) ? F.web : null;
       const row = {
         created_by_store_id: STORE.id, title, media_url: media,
         mechanic: isPost ? null : (F.type === "free_with_condition" ? (F.cond || "Offert") : pr.price != null ? `${eur(pr.price)}${pr.old ? " au lieu de " + eur(pr.old) : ""}` : pr.badge),
@@ -1694,7 +1711,7 @@ function createForm(kind, draft) {
         starts_at: start.toISOString(), ends_at: end.toISOString(), status: asDraft ? "draft" : "active",
       };
       // Ancien code de réduction : remplacé par l'EAN s'il en tenait lieu, sinon conservé.
-      if (!draft || legacyEan) row.discount_code = null;
+      if (web) row.discount_code = web; else if (!draft || legacyEan || draft.validation === "web") row.discount_code = null;
       let spId = draft?.spId;
       if (draft) {
         const { created_by_store_id, ...changes } = row; // le magasin auteur ne change pas

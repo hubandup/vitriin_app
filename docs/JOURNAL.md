@@ -20,6 +20,26 @@ Repères :
 
 ## 2026-11-08
 
+### BUG-013 · Un seul mode de validation par promo · MOD-079 · Code promo pour le site internet
+- **Constat (Charles)** : l'écran client pouvait montrer deux modes à la fois (QR + code vendeur en secours, ou
+  code de réduction + QR depuis MOD-078). Règle : **soit QR, soit code-barres, soit code vendeur, soit rien**.
+- **Nouveau mode (MOD-079, demande Charles)** : **code promo web**, pour les commerçants qui vendent en ligne.
+  Le magasin le choisit à l'étape Validation (5e tuile), saisit ou génère le code ; le client voit le code,
+  « Copier le code » et « Aller sur le site » (adresse du site de la fiche magasin), puis confirme lui-même.
+- **Base** (migration `20261108233000_one_validation.sql`) : `promo_check(sp)` donne LE mode (qr, pin, ean, web,
+  none) : choix du magasin, sinon code-barres ou code en caisse ⇒ ean, anciens réglages code vendeur ⇒ pin,
+  sinon qr. Centrale « désactivé » : qr/pin deviennent ean ou none ; « obligatoire » : none devient qr.
+  Le serveur fait respecter le mode : QR délivré seulement en mode qr, code vendeur accepté seulement en mode
+  pin (`wrong_mode` sinon), code révélé seulement en mode ean ou web, confirmation par le client seulement en
+  mode ean, web ou none. Contrainte `promotions.validation` élargie à `web`. Fin du mode mixte « vendor ».
+  Conséquence : les promos de la centrale avec code de réduction (684 en cours) restent en code en caisse,
+  sans QR ; le QR par défaut (MOD-078) ne s'applique qu'aux promos sans code.
+- **Écrans** : app client, une seule zone par mode (QR, saisie du code vendeur, code-barres, code web, message) ;
+  espace magasin, tuile « Code promo web », ligne « Validation » de la fiche et cartes alignées sur le même calcul.
+- **Vérifié** : fonctions testées sur base locale pour chaque cas (5 modes, centrale désactivée / obligatoire) ;
+  écrans testés dans un navigateur.
+- **Retour arrière** : migration recréant les fonctions précédentes (voir en-tête du fichier), puis `git revert`.
+
 ### MOD-078 · Validation par QR par défaut
 - **Décision (Charles)** : 727 promos sur 729 n'avaient aucune validation choisie (promos de la centrale, promos
   antérieures à MOD-076), donc aucun QR côté client. Une promo sans choix explicite et sans code EAN est
