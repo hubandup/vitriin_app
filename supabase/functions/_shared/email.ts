@@ -31,7 +31,7 @@ ${o.cta ? `<tr><td style="padding:6px 28px 8px"><a href="${esc(o.cta[1])}" style
 </td></tr></table></body></html>`;
 }
 
-export async function sendEmail(o: { to: string[]; subject: string; html: string; replyTo?: string; tag: string }) {
+export async function sendEmail(o: { to: string[]; subject: string; html: string; replyTo?: string; tag: string; attachment?: { name: string; content: string }[] }) {
   const r = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "api-key": BREVO, "Content-Type": "application/json", accept: "application/json" },
@@ -39,6 +39,7 @@ export async function sendEmail(o: { to: string[]; subject: string; html: string
       sender: { name: "Vitriin", email: SENDER }, to: o.to.map((email) => ({ email })),
       ...(o.replyTo ? { replyTo: { email: o.replyTo } } : {}),
       subject: o.subject.replace(/[\r\n]+/g, " "), htmlContent: o.html, tags: [o.tag],
+      ...(o.attachment?.length ? { attachment: o.attachment } : {}), // pièces jointes en base64
     }),
   });
   if (!r.ok) throw new Error(`Brevo ${r.status} ${(await r.text()).slice(0, 200)}`);

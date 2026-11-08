@@ -20,15 +20,22 @@ Repères :
 
 ## 2026-11-08
 
-### MOD-080 · QR code de la vitrine à éditer depuis l'onglet Magasin
+### MOD-080 · QR code de la vitrine et affiche, envoyés par email depuis l'onglet Magasin
 - **Quoi (demande Charles)** : bloc « Ma vitrine » remonté en haut de l'onglet Magasin, avec « QR code de ma
   vitrine ». Le QR mène à la fiche du magasin dans l'app client (`/v/m/<adresse>`), donc à toutes ses promos en
   cours ; il ne change jamais, une affiche imprimée reste valable.
-- **Éditer** : trois formats (affiche A4/A5, carré pour les réseaux, QR seul), titre de l'affiche modifiable, aperçu
-  en direct ; « Télécharger » (feuille de partage sur téléphone : enregistrer, imprimer, envoyer ; fichier PNG sur
-  ordinateur), « Imprimer », « Copier le lien de ma vitrine ». Image dessinée sur le téléphone, rien n'est stocké.
-- **Où** : `public/magasin` (onglet Magasin, `sheetQrVitrine`, `drawQrImage`). Front uniquement.
-- **Retour arrière** : `git revert` du commit.
+- **Deux supports** (pas de format réseaux sociaux : un QR n'a pas de sens sur un écran) :
+  - **QR code seul** : image PNG ;
+  - **Affiche A4** (imprimable en A5) composée avec les images du magasin : photo en tête (couverture de la
+    vitrine, visuels des promos en ligne ou photo du téléphone), logo, nom, titre et texte modifiables, carte QR
+    « Scannez-moi », adresse et bandeau Vitriin. Fichier PDF.
+- **Envoi par email** plutôt que téléchargement ou impression depuis le téléphone : fonction `store-print-email`
+  (JWT requis). Elle vérifie que l'appelant est membre du magasin, n'envoie qu'à l'adresse de son propre compte
+  (pas de relais possible), contrôle le fichier (en-tête PNG ou PDF, 6 Mo max) et ne le conserve pas.
+  `_shared/email.ts` accepte désormais des pièces jointes.
+- **Où** : `public/magasin` (`sheetQrVitrine`, `drawPoster`, `drawQrOnly`, `jpegToPdf`),
+  `supabase/functions/store-print-email`, `supabase/config.toml`.
+- **Retour arrière** : `git revert` du commit, puis suppression de la fonction `store-print-email`.
 
 ### BUG-013 · Un seul mode de validation par promo · MOD-079 · Code promo pour le site internet
 - **Constat (Charles)** : l'écran client pouvait montrer deux modes à la fois (QR + code vendeur en secours, ou

@@ -280,6 +280,9 @@ h1.title{font-size:32px;font-weight:800;letter-spacing:-.03em;margin:0;line-heig
 .edit-btn{margin:10px 0 0 68px;color:var(--p);font-weight:700;font-size:14.5px;padding:6px 0}
 .qr-th{width:52px;height:52px;border-radius:14px;background:var(--surf);padding:6px;flex:none;display:block}.qr-th svg{width:100%;height:100%;display:block}
 .qr-prev{display:flex;justify-content:center;background:var(--surf);border-radius:24px;padding:16px;margin-top:14px}
+.qph{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -18px;padding:2px 18px}
+.qph button{flex:none;width:64px;height:64px;border-radius:16px;overflow:hidden;border:2px solid transparent;background:var(--surf);display:flex;align-items:center;justify-content:center;color:var(--p)}
+.qph button.on{border-color:var(--p)}.qph img{width:100%;height:100%;object-fit:cover}
 .qr-prev img{max-width:100%;max-height:300px;border-radius:10px;box-shadow:0 6px 22px rgba(45,45,45,.12);background:#fff}
 .affil{display:flex;align-items:center;gap:8px;margin:14px 2px 0;font-size:14px;color:var(--muted)}.affil svg{width:18px;height:18px;color:var(--v);flex:none}.affil b{color:var(--ink)}
 .tg{width:48px;height:28px;border-radius:999px;background:#dcd8d1;position:relative;flex:none;transition:.15s}
@@ -1021,7 +1024,7 @@ function viewSettings() {
 
     ${STORE.slug ? `<div class="lbl">MA VITRINE</div>
     <div class="box">
-      <button class="li" data-act="qr-vitrine" style="width:100%;text-align:left"><span class="qr-th" id="qr-th" aria-hidden="true"></span><span class="sp"><b style="display:block;font-size:15.5px">QR code de ma vitrine</b><span style="font-size:13px;color:var(--muted)">Affiche à imprimer, image pour vos réseaux : il mène à toutes vos promos.</span></span><span class="chev">${I.chev}</span></button>
+      <button class="li" data-act="qr-vitrine" style="width:100%;text-align:left"><span class="qr-th" id="qr-th" aria-hidden="true"></span><span class="sp"><b style="display:block;font-size:15.5px">QR code de ma vitrine</b><span style="font-size:13px;color:var(--muted)">Affiche à vos couleurs ou QR seul, reçus par email : ils mènent à toutes vos promos.</span></span><span class="chev">${I.chev}</span></button>
       <a class="li" href="${esc(vitrineUrl())}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span class="sp"><b style="display:block;font-size:15.5px">Voir ma vitrine publique</b><span style="font-size:13px;color:var(--muted)">${esc(vitrineUrl().replace(/^https?:\/\//, ""))}</span></span><span class="chev">${I.chev}</span></a>
     </div>` : ""}
 
@@ -1338,71 +1341,129 @@ async function validateQr(token) {
 
 /* ===================== QR code de la vitrine ===================== */
 // Le QR mène à la fiche du magasin dans l'app client (toutes ses promos en cours). Il ne change jamais :
-// l'adresse de la vitrine est fixe, l'affiche imprimée reste valable quelles que soient les promos.
+// l'adresse de la vitrine est fixe, une affiche imprimée reste valable quelles que soient les promos.
+// Deux supports : le QR seul et l'affiche A4 composée avec les images du magasin. Les deux partent par email
+// (au compte connecté), plus simple que télécharger ou imprimer depuis un téléphone.
 const vitrineUrl = () => `${location.origin}/v/m/${encodeURIComponent(STORE.slug)}`;
 async function qrMatrix(text) { await loadLib("/lib/qrcode.min.js"); const q = qrcode(0, "M"); q.addData(text); q.make(); return q; }
 const qrSvg = async (text) => (await qrMatrix(text)).createSvgTag({ cellSize: 4, margin: 0, scalable: true });
-const QR_FORMATS = { poster: ["Affiche A4 / A5", 1240, 1754], square: ["Carré réseaux", 1080, 1080], qr: ["QR seul", 1000, 1000] };
-// Dessine l'image demandée (affiche, carré pour les réseaux ou QR seul) dans un canvas.
-async function drawQrImage(fmt, title) {
-  const [, W, H] = QR_FORMATS[fmt], q = await qrMatrix(vitrineUrl());
-  await Promise.all(["800 80px 'DM Sans'", "600 40px 'DM Sans'", "60px 'Racing Sans One'"].map(f => document.fonts?.load(f).catch(() => {})));
+// Image chargée pour le canvas ; null si elle ne se charge pas (le canvas ne doit jamais être « sali »).
+const loadImg = (src) => new Promise((ok) => { if (!src) return ok(null); const i = new Image(); if (!/^data:/.test(src)) i.crossOrigin = "anonymous"; i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+const fontsReady = () => Promise.all(["800 80px 'DM Sans'", "600 40px 'DM Sans'", "60px 'Racing Sans One'"].map(f => document.fonts?.load(f).catch(() => {})));
+function drawQr(c, q, x, y, size, color = "#2D2D2D") {
+  const n = q.getModuleCount(), m = size / n; c.fillStyle = color;
+  for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (q.isDark(r, k)) c.fillRect(Math.floor(x + k * m), Math.floor(y + r * m), Math.ceil(m), Math.ceil(m));
+}
+function rrect(c, x, y, w, h, r) { c.beginPath(); c.roundRect ? c.roundRect(x, y, w, h, r) : c.rect(x, y, w, h); }
+// Texte centré sur plusieurs lignes ; renvoie la position sous le bloc.
+function textBlock(c, txt, { font, size, color, x, y, maxW, lh = 1.15, max = 2, align = "center" }) {
+  c.font = `${font} ${size}px 'DM Sans', sans-serif`; c.fillStyle = color; c.textAlign = align;
+  const lines = []; let l = "";
+  String(txt || "").split(/\s+/).filter(Boolean).forEach(w => { const t = l ? l + " " + w : w; if (c.measureText(t).width > maxW && l) { lines.push(l); l = w; } else l = t; });
+  if (l) lines.push(l);
+  lines.slice(0, max).forEach((s, i) => c.fillText(s, x, y + size + i * size * lh));
+  return y + Math.min(lines.length, max) * size * lh;
+}
+async function drawQrOnly() {
+  const q = await qrMatrix(vitrineUrl()), cv = document.createElement("canvas"); cv.width = cv.height = 1000;
+  const c = cv.getContext("2d"); c.fillStyle = "#fff"; c.fillRect(0, 0, 1000, 1000); drawQr(c, q, 60, 60, 880); return cv;
+}
+// Affiche A4 (1240 × 1754, 150 dpi) : photo du magasin, logo, nom, titre, texte, QR, adresse, signature Vitriin.
+async function drawPoster(o) {
+  const W = 1240, H = 1754, cx = W / 2;
+  const [q, hero, logo] = await Promise.all([qrMatrix(vitrineUrl()), loadImg(o.photo), loadImg(STORE.logo), fontsReady()]);
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const c = cv.getContext("2d"); c.fillStyle = "#fff"; c.fillRect(0, 0, W, H);
-  const qrAt = (x, y, size) => { const n = q.getModuleCount(), m = size / n; c.fillStyle = "#2D2D2D";
-    for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (q.isDark(r, k)) c.fillRect(Math.floor(x + k * m), Math.floor(y + r * m), Math.ceil(m), Math.ceil(m)); };
-  if (fmt === "qr") { qrAt(60, 60, W - 120); return cv; }
-  const g = c.createLinearGradient(0, 0, W, 0); g.addColorStop(0, "#E5087E"); g.addColorStop(1, "#951B81");
-  const band = Math.round(H * 0.012); c.fillStyle = g; c.fillRect(0, 0, W, band); c.fillRect(0, H - band, W, band);
-  const k = W / 1240, cx = W / 2; c.textAlign = "center"; c.textBaseline = "alphabetic";
-  const wrap = (txt, font, size, maxW, y, color, lh) => { c.font = `${font} ${size}px 'DM Sans', sans-serif`; c.fillStyle = color;
-    const words = String(txt).split(/\s+/), lines = []; let l = "";
-    words.forEach(w => { const t = l ? l + " " + w : w; if (c.measureText(t).width > maxW && l) { lines.push(l); l = w; } else l = t; }); if (l) lines.push(l);
-    lines.slice(0, 3).forEach((x, i) => c.fillText(x, cx, y + i * size * lh)); return y + (Math.min(lines.length, 3) - 1) * size * lh; };
-  const sq = fmt === "square";
-  c.font = `${Math.round(64 * k)}px 'Racing Sans One', sans-serif`; c.fillStyle = "#E5087E"; c.fillText("vitriin", cx, (sq ? 120 : 170) * k);
-  let y = wrap(title || "Toutes nos promos en direct", 800, Math.round((sq ? 70 : 84) * k), W - 160 * k, (sq ? 220 : 330) * k, "#2D2D2D", 1.12);
-  y = wrap(STORE.name, 600, Math.round(44 * k), W - 160 * k, y + 76 * k, "#6F6A63", 1.2);
-  const qs = sq ? Math.round(W * 0.48) : Math.round(W * 0.58), qy = y + 80 * k;
-  c.fillStyle = "#F6F5F3"; const pad = 36 * k, rr = 48 * k, bx = cx - qs / 2 - pad, by = qy - pad, bw = qs + pad * 2;
-  c.beginPath(); c.roundRect ? c.roundRect(bx, by, bw, bw, rr) : c.rect(bx, by, bw, bw); c.fill();
-  const qz = 2 * qs / q.getModuleCount(); c.fillStyle = "#fff"; c.fillRect(cx - qs / 2 - qz, qy - qz, qs + 2 * qz, qs + 2 * qz); // zone blanche autour du QR
-  qrAt(cx - qs / 2, qy, qs);
-  const ty = qy + qs + pad + 70 * k;
-  c.font = `600 ${Math.round(40 * k)}px 'DM Sans', sans-serif`; c.fillStyle = "#2D2D2D"; c.fillText("Scannez avec l'appareil photo de votre téléphone", cx, ty);
-  if (!sq) { c.font = `500 ${Math.round(32 * k)}px 'DM Sans', sans-serif`; c.fillStyle = "#6F6A63"; c.fillText(vitrineUrl().replace(/^https?:\/\//, ""), cx, ty + 56 * k); }
+  // Photo en tête, recadrée pour remplir.
+  const HH = 660;
+  if (hero) { const s = Math.max(W / hero.width, HH / hero.height), w = hero.width * s, h = hero.height * s; c.drawImage(hero, (W - w) / 2, (HH - h) / 2, w, h); }
+  else { const g = c.createLinearGradient(0, 0, W, HH); g.addColorStop(0, "#F5ECD3"); g.addColorStop(1, "#FBE3EF"); c.fillStyle = g; c.fillRect(0, 0, W, HH); }
+  const sh = c.createLinearGradient(0, HH - 220, 0, HH); sh.addColorStop(0, "rgba(45,45,45,0)"); sh.addColorStop(1, "rgba(45,45,45,.35)"); c.fillStyle = sh; c.fillRect(0, HH - 220, W, 220);
+  // Logo rond qui chevauche la photo.
+  const R = 104, ly = HH;
+  c.save(); c.beginPath(); c.arc(cx, ly, R + 12, 0, Math.PI * 2); c.fillStyle = "#fff"; c.fill(); c.beginPath(); c.arc(cx, ly, R, 0, Math.PI * 2); c.clip();
+  if (logo) { c.fillStyle = "#fff"; c.fillRect(cx - R, ly - R, 2 * R, 2 * R); const s = Math.min(2 * R / logo.width, 2 * R / logo.height) * .86; c.drawImage(logo, cx - logo.width * s / 2, ly - logo.height * s / 2, logo.width * s, logo.height * s); }
+  else { const g = c.createLinearGradient(cx - R, ly - R, cx + R, ly + R); g.addColorStop(0, "#E5087E"); g.addColorStop(1, "#951B81"); c.fillStyle = g; c.fillRect(cx - R, ly - R, 2 * R, 2 * R);
+    c.fillStyle = "#fff"; c.font = "800 96px 'DM Sans', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText((STORE.name.trim()[0] || "V").toUpperCase(), cx, ly + 4); c.textBaseline = "alphabetic"; }
+  c.restore();
+  let y = ly + R + 30;
+  y = textBlock(c, STORE.name, { font: 700, size: 44, color: "#6F6A63", x: cx, y, maxW: W - 200, max: 1 });
+  y = textBlock(c, o.title, { font: 800, size: 88, color: "#2D2D2D", x: cx, y: y + 18, maxW: W - 180, lh: 1.08, max: 2 });
+  if (o.text) y = textBlock(c, o.text, { font: 500, size: 40, color: "#6F6A63", x: cx, y: y + 20, maxW: W - 240, lh: 1.3, max: 2 });
+  // Carte QR : QR à gauche, invitation à droite.
+  const FH = 96, cardY = Math.max(y + 46, H - FH - 520), cardH = H - FH - 56 - cardY, cardX = 110, cardW = W - 220;
+  c.fillStyle = "#F6F5F3"; rrect(c, cardX, cardY, cardW, cardH, 48); c.fill();
+  const qs = Math.min(cardH - 80, 400), qx = cardX + 40, qy = cardY + (cardH - qs) / 2, qz = 2 * qs / q.getModuleCount();
+  c.fillStyle = "#fff"; rrect(c, qx - qz, qy - qz, qs + 2 * qz, qs + 2 * qz, 18); c.fill(); drawQr(c, q, qx, qy, qs);
+  const tx = qx + qs + qz + 44, tw = cardX + cardW - 40 - tx;
+  let ty = cardY + cardH / 2 - 120;
+  ty = textBlock(c, "Scannez-moi", { font: 800, size: 58, color: "#E5087E", x: tx, y: ty, maxW: tw, max: 1, align: "left" });
+  ty = textBlock(c, "Toutes nos promos en cours, sur votre téléphone. Sans application à installer.", { font: 500, size: 34, color: "#2D2D2D", x: tx, y: ty + 14, maxW: tw, lh: 1.3, max: 4, align: "left" });
+  const addr = [STORE.address, STORE.postal && !STORE.address.includes(STORE.postal) ? `${STORE.postal} ${STORE.city}` : ""].filter(Boolean).join(", ");
+  // Bandeau Vitriin.
+  const g = c.createLinearGradient(0, 0, W, 0); g.addColorStop(0, "#E5087E"); g.addColorStop(1, "#951B81"); c.fillStyle = g; c.fillRect(0, H - FH, W, FH);
+  c.textAlign = "left"; c.fillStyle = "#fff"; c.font = "54px 'Racing Sans One', sans-serif"; c.fillText("vitriin", 70, H - FH / 2 + 18);
+  c.textAlign = "right"; c.font = "600 30px 'DM Sans', sans-serif"; c.fillText(addr.length > 60 ? addr.slice(0, 58) + "…" : addr, W - 70, H - FH / 2 + 11);
   return cv;
 }
+// PDF A4 d'une page contenant l'image JPEG de l'affiche (format lu par toutes les imprimantes).
+function jpegToPdf(bytes, w, h) {
+  const enc = new TextEncoder(), parts = [], offs = []; let len = 0;
+  const add = (x) => { const b = typeof x === "string" ? enc.encode(x) : x; parts.push(b); len += b.length; };
+  const obj = (n, body) => { offs[n] = len; add(`${n} 0 obj\n`); body(); add("\nendobj\n"); };
+  const PW = 595.28, PH = 841.89, draw = `q ${PW} 0 0 ${PH} 0 0 cm /Im0 Do Q`;
+  add("%PDF-1.4\n%\xC7\xEC\x8F\xA2\n");
+  obj(1, () => add("<< /Type /Catalog /Pages 2 0 R >>"));
+  obj(2, () => add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"));
+  obj(3, () => add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`));
+  obj(4, () => { add(`<< /Type /XObject /Subtype /Image /Width ${w} /Height ${h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${bytes.length} >>\nstream\n`); add(bytes); add("\nendstream"); });
+  obj(5, () => add(`<< /Length ${draw.length} >>\nstream\n${draw}\nendstream`));
+  const xref = len;
+  add(`xref\n0 6\n0000000000 65535 f \n${offs.slice(1).map(o => String(o).padStart(10, "0") + " 00000 n \n").join("")}trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  const out = new Uint8Array(len); let p = 0; parts.forEach(b => { out.set(b, p); p += b.length; }); return out;
+}
+const b64 = (bytes) => { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); };
+const canvasBytes = async (cv, type, q) => new Uint8Array(await (await new Promise(ok => cv.toBlob(ok, type, q))).arrayBuffer());
 function sheetQrVitrine() {
   if (!STORE.slug) return toast("Votre vitrine n'a pas encore d'adresse.");
-  const st = { fmt: "poster", title: "Toutes nos promos en direct" };
-  const fileName = () => `vitriin-${STORE.slug}-${st.fmt === "poster" ? "affiche" : st.fmt === "square" ? "reseaux" : "qr"}.png`;
-  sheet(`<div class="grab"></div><h2>QR code de ma vitrine</h2>
-    <p class="small" style="font-size:14px;margin-top:4px">Il mène à toutes vos promos en cours. Il ne change jamais : imprimez-le une fois, il reste valable.</p>
-    <div class="cats" id="qf" style="margin:14px 0 0;padding:0">${Object.entries(QR_FORMATS).map(([k, [l]]) => `<button data-qf="${k}" class="${k === st.fmt ? "on" : ""}">${l}</button>`).join("")}</div>
-    <div id="qt-w"><div class="fl">TITRE DE L'AFFICHE</div><input class="in" id="qt" maxlength="60" value="${esc(st.title)}"></div>
-    <div class="qr-prev"><img id="qimg" alt="Aperçu du QR code de votre vitrine"></div>
-    <div class="acts2" style="margin-top:14px"><button class="gry" id="q-print">Imprimer</button><button class="big-btn" id="q-dl" style="flex:1">Télécharger</button></div>
-    <button class="txt-btn" id="q-copy">Copier le lien de ma vitrine</button>`);
-  let cv = null, n = 0;
-  const redraw = async () => { const my = ++n; const c2 = await drawQrImage(st.fmt, st.title.trim()); if (my !== n) return; cv = c2; const img = $("#qimg"); if (img) img.src = cv.toDataURL("image/png"); };
-  $$("[data-qf]").forEach(b => b.onclick = () => { st.fmt = b.dataset.qf; $$("[data-qf]").forEach(x => x.classList.toggle("on", x === b)); $("#qt-w").classList.toggle("hidden", st.fmt === "qr"); redraw(); });
-  let t; $("#qt").oninput = (e) => { st.title = e.target.value; clearTimeout(t); t = setTimeout(redraw, 250); };
-  $("#q-dl").onclick = async () => {
-    if (!cv) return;
-    const blob = await new Promise(ok => cv.toBlob(ok, "image/png")), file = new File([blob], fileName(), { type: "image/png" });
-    // Sur téléphone : feuille de partage (enregistrer, imprimer, envoyer) ; sinon téléchargement.
-    if (navigator.canShare?.({ files: [file] })) { try { await navigator.share({ files: [file], title: `QR code ${STORE.name}` }); return; } catch (e) { if (e.name === "AbortError") return; } }
-    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: fileName() }); document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  // Photos proposées : couverture de la vitrine, puis visuels des promos en ligne.
+  const photos = [...new Set([STORE.pub?.cover, ...S.promos.filter(p => catOf(p) === "live").map(p => p.img)].filter(u => u && /^(https:|data:)/.test(u)))].slice(0, 8);
+  const st = { kind: "poster", title: "Nos promos en direct", text: "Profitez de nos offres du moment en magasin.", photo: photos[0] || null };
+  const draw = () => {
+    sheet(`<div class="grab"></div><h2>QR code de ma vitrine</h2>
+      <p class="small" style="font-size:14px;margin-top:4px">Il mène à toutes vos promos en cours et ne change jamais : imprimé une fois, il reste valable.</p>
+      <div class="cats" style="margin:14px 0 0;padding:0">${[["poster", "Affiche A4"], ["qr", "QR code seul"]].map(([k, l]) => `<button data-qk="${k}" class="${st.kind === k ? "on" : ""}">${l}</button>`).join("")}</div>
+      ${st.kind === "poster" ? `<div class="fl">PHOTO</div><div class="qph">${photos.map((u, k) => `<button data-ph="${k}" class="${u === st.photo ? "on" : ""}" aria-label="Photo ${k + 1}"><img src="${esc(u)}" alt=""></button>`).join("")}<button data-ph="add" aria-label="Ajouter une photo">${I.cam}</button></div>
+        <div class="fl">TITRE</div><input class="in" id="qt" maxlength="40" value="${esc(st.title)}">
+        <div class="fl">TEXTE</div><input class="in" id="qx" maxlength="80" value="${esc(st.text)}" placeholder="Facultatif">` : ""}
+      <div class="qr-prev"><img id="qimg" alt="Aperçu"></div>
+      <button class="big-btn" id="q-mail">${I.mail}Recevoir ${st.kind === "poster" ? "l'affiche" : "le QR code"} par email</button>
+      <p class="small" style="text-align:center;margin-top:8px" id="q-to">${st.kind === "poster" ? "Une affiche A4 en PDF, à imprimer depuis un ordinateur ou chez votre imprimeur." : "Une image à placer sur vos supports : vitrine, comptoir, flyers, cartes."}</p>
+      <button class="txt-btn" id="q-copy">Copier le lien de ma vitrine</button>`);
+    bind(); redraw();
   };
-  $("#q-print").onclick = () => {
-    if (!cv) return;
-    const w = window.open("", "_blank"); if (!w) return toast("Autorisez les fenêtres pour imprimer, ou téléchargez l'image.");
-    w.document.write(`<!doctype html><title>${esc(fileName())}</title><style>@page{margin:10mm}html,body{margin:0;height:100%}body{display:flex;align-items:center;justify-content:center}img{max-width:100%;max-height:100vh}</style><img src="${cv.toDataURL("image/png")}" onload="setTimeout(()=>print(),200)">`);
-    w.document.close();
+  let cv = null, n = 0, t;
+  const redraw = async () => { const my = ++n; const c2 = st.kind === "poster" ? await drawPoster(st) : await drawQrOnly(); if (my !== n) return; cv = c2; const img = $("#qimg"); if (img) img.src = cv.toDataURL("image/jpeg", .85); };
+  const bind = () => {
+    $$("[data-qk]").forEach(b => b.onclick = () => { st.kind = b.dataset.qk; draw(); });
+    $$("[data-ph]").forEach(b => b.onclick = () => {
+      if (b.dataset.ph === "add") return pickMedia("file", (src) => { photos.unshift(src); st.photo = src; draw(); });
+      st.photo = photos[+b.dataset.ph]; $$("[data-ph]").forEach(x => x.classList.toggle("on", x === b)); redraw();
+    });
+    const live = (id, k) => $(id) && ($(id).oninput = (e) => { st[k] = e.target.value; clearTimeout(t); t = setTimeout(redraw, 250); });
+    live("#qt", "title"); live("#qx", "text");
+    $("#q-copy").onclick = () => navigator.clipboard?.writeText(vitrineUrl()).then(() => toast("Lien copié"), () => toast(vitrineUrl()));
+    $("#q-mail").onclick = async () => {
+      const btn = $("#q-mail"); if (!cv) return; btn.disabled = true;
+      try {
+        const file = st.kind === "poster" ? b64(jpegToPdf(await canvasBytes(cv, "image/jpeg", .9), cv.width, cv.height)) : b64(await canvasBytes(cv, "image/png"));
+        const r = await fn("store-print-email", { store_id: STORE.id, kind: st.kind, file });
+        toast(`Envoyé à ${r.to}`); $("#q-to").textContent = `Envoyé à ${r.to}. Pensez à regarder dans les indésirables.`;
+      } catch (e) { toast(errText(e)); }
+      btn.disabled = false;
+    };
   };
-  $("#q-copy").onclick = () => navigator.clipboard?.writeText(vitrineUrl()).then(() => toast("Lien copié"), () => toast(vitrineUrl()));
-  redraw();
+  draw();
 }
 
 // Nouveau code vendeur : l'ancien ne valide plus rien.
