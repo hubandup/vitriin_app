@@ -999,6 +999,8 @@ const SHOW_SECONDS = 120;
 const fakeBars = () => `<svg viewBox="0 0 290 96" preserveAspectRatio="none" aria-hidden="true">${[3,1,1,2,1,3,2,1,1,1,3,2,1,2,2,1,3,1,1,2,1,1,3,2,2,1,1,3,1,2,1,2,3,1,1,2,1,3,2,1].reduce((a, w, i) => { if (i % 2 === 0) a.h += `<rect x="${a.x}" y="0" width="${w * 3}" height="96" fill="#2D2D2D"/>`; a.x += w * 3 + 1; return a; }, { x: 0, h: "" }).h}</svg>`;
 async function coupon(x) {
   const p = x.promo, s = x.store, pr = pricing(p);
+  // Validation choisie pour la promo (MOD-076) : qr, pin, vendor (les deux), ean ou none (le client confirme).
+  const chk = p.check || (p.pin ? "vendor" : "none"), byVendor = ["qr", "pin", "vendor"].includes(chk);
   const ov = document.createElement("div"); ov.className = "ov sh";
   let timer = null, lock = null, shown = false;
   const stop = () => { clearInterval(timer); timer = null; try { lock?.release(); } catch {} lock = null; };
@@ -1013,11 +1015,12 @@ async function coupon(x) {
       <div class="ctime hidden" id="ctime"><i class="live"></i><span id="cleft">2:00</span><span>· luminosité au maximum</span></div></div>
     <div class="g2"><a class="btn line" href="${mapsUrl(s)}" target="_blank" rel="noopener">${IC.go}Y aller${x.d != null ? ` · ${km(x.d)}` : ""}</a><button class="btn line" id="c-sh"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-4-9-9-4 20-5Z"/></svg>Envoyer à un ami</button></div>
     ${isSaved(p.id) ? "" : `<button class="keep" id="keep"><i>${IC.bookmark(true)}</i><span><b>Garder ce code</b><br><em>Retrouvez-le dans Mes promos</em></span>${IC.chev}</button>`}
-    <button class="btn dark full" id="used" disabled>${p.pin ? "Faire valider par le vendeur" : "C'est fait, je l'ai utilisé"}</button>
+    <button class="btn dark full" id="used" disabled>${byVendor ? "Faire valider par le vendeur" : "C'est fait, je l'ai utilisé"}</button>
     <div class="pinz hidden" id="pinz"><b>Montrez cet écran au vendeur</b>
       <div class="qrb hidden" id="qrbox" aria-label="QR code de validation"></div>
-      <span class="t2" id="qrhint">Il scanne ce QR depuis son espace Vitriin, ou tape le code du magasin :</span>
-      <input class="pin" id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Code vendeur à 4 chiffres">
+      <span class="t2" id="qrhint">${chk === "pin" ? "Il tape le code du magasin :" : chk === "qr" ? "Il scanne ce QR depuis son espace Vitriin." : "Il scanne ce QR depuis son espace Vitriin, ou tape le code du magasin :"}</span>
+      ${chk === "qr" ? `<button class="lnk" id="pinalt" style="font-size:13.5px;color:var(--muted);text-decoration:underline">Le QR ne passe pas ? Le vendeur tape son code</button>` : ""}
+      <input class="pin ${chk === "qr" ? "hidden" : ""}" id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Code vendeur à 4 chiffres">
       <span class="t2" id="pinmsg"></span></div></div>`;
   // QR de validation (MOD-075) : à usage unique, renouvelé toutes les 9 minutes ; on surveille la validation.
   let qrPoll = null, qrRenew = null;
@@ -1032,7 +1035,7 @@ async function coupon(x) {
       if (!tok || !ov.isConnected) throw new Error("no token");
       const q = qrcode(0, "M"); q.addData(`${location.origin}/magasin/?v=${tok}`); q.make();
       box.innerHTML = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); box.classList.remove("hidden");
-    } catch { box.classList.add("hidden"); $("#qrhint", ov).textContent = "Le vendeur tape le code du magasin :"; }
+    } catch { box.classList.add("hidden"); $("#qrhint", ov).textContent = "Le vendeur tape le code du magasin :"; $("#pinalt", ov)?.remove(); $("#pin", ov).classList.remove("hidden"); }
     qrPoll = setInterval(async () => {
       if (!ov.isConnected) return stopQr();
       const { data } = await sb.rpc("vitrine_use_status", { p_id: p.id, p_client_id: clientId() });
@@ -1074,12 +1077,13 @@ async function coupon(x) {
   const askPin = (msg) => {
     $("#used", ov).classList.add("hidden"); $("#pinz", ov).classList.remove("hidden");
     if (msg) $("#pinmsg", ov).textContent = msg;
-    startQr();
+    if (chk !== "pin") startQr(); else $("#pin", ov).focus();
+    $("#pinalt", ov) && ($("#pinalt", ov).onclick = () => { $("#pinalt", ov).remove(); $("#pin", ov).classList.remove("hidden"); $("#pin", ov).focus(); });
   };
   $("#used", ov).onclick = async () => {
     if (!shown) return;
     if (APERCU) { shut(); return apercuNo(); }
-    if (p.pin) return askPin();
+    if (byVendor) return askPin();
     $("#used", ov).disabled = true;
     const { data } = await sb.rpc("vitrine_confirm_use", { p_id: p.id, p_client_id: clientId() });
     if (data === true) { shut(); return done(x); }

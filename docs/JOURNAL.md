@@ -20,6 +20,34 @@ Repères :
 
 ## 2026-11-08
 
+### MOD-076 · Création de promo écran par écran, avec choix de la validation
+- **Quoi** : le formulaire unique de l'espace magasin est remplacé par un parcours en étapes, avec barre de
+  progression, « Continuer » qui ne s'active que quand l'étape est complète (et dit ce qui manque), retour à
+  l'étape précédente et fermeture à tout moment.
+  - Promo : **1 Visuel · 2 Offre** (titre, type, prix, dates) **· 3 Validation · 4 Diffusion** (récapitulatif,
+    réseaux, Publier ou Enregistrer en brouillon).
+  - Post : 1 Visuel · 2 Texte · 3 Diffusion.
+- **Validation choisie par le magasin** (`promotions.validation`) : *QR code* (le vendeur scanne, code vendeur en
+  secours derrière un lien), *Code vendeur* (saisie seule, le code du magasin est rappelé), *Code-barres EAN*
+  (créé par Vitriin ou saisi, scanné par la caisse, le client confirme lui-même), *Pas de validation* (le client
+  confirme). Par défaut : *Pas de validation*. La centrale garde la main : *Obligatoire* ne laisse que QR et code
+  vendeur (QR présélectionné), *Désactivé* ne laisse que EAN et aucune.
+- **EAN créé par Vitriin** : EAN-13 à préfixe 2 (réservé à l'usage interne des magasins), clé de contrôle
+  calculée ; un EAN saisi est vérifié (8 ou 13 chiffres, clé comprise). Le code n'est plus ajouté au texte du
+  post : il vit dans l'app. L'ancien « code de réduction » des promos magasin disparaît de la création ; une
+  ancienne promo dont le code était un EAN le récupère comme EAN, les autres codes restent tels quels.
+- **Ailleurs** : la fiche d'une promo du magasin affiche sa validation ; dans Réglages, le choix « quand demander
+  le code vendeur » ne concerne plus que les promos de la centrale (masqué pour un magasin indépendant).
+  Le fil client reçoit `check` (`qr`, `pin`, `vendor`, `ean`, `none`) et affiche l'écran correspondant.
+- **Corrigé au passage** : l'écran rejouait son animation d'entrée à chaque toucher ; le champ « date de fin »
+  débordait sur mobile.
+- **Où** : migration `20261108190000_promo_validation.sql` (testée sur un Postgres 16 local : les 4 méthodes et
+  l'ancien fonctionnement, en mode au choix, obligatoire et désactivé), `public/magasin` (`createForm`),
+  `public/v`. Écrans vérifiés en navigateur (Chrome sans interface, données fictives, mode au choix et
+  obligatoire) ; génération et contrôle EAN testés sur 2 000 codes et des EAN réels.
+- **Retour arrière** : `git revert` ; migration qui remet `promo_pin_required` et `vitrine_live` de MOD-074 et
+  supprime la colonne `promotions.validation`.
+
 ### MOD-075 · Validation en caisse par QR code
 - **Quoi** : quand le code vendeur est demandé (MOD-074), le téléphone du client affiche « Montrez cet écran
   au vendeur » avec un QR code et, dessous, la saisie du code vendeur. Le vendeur scanne le QR :

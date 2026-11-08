@@ -294,7 +294,7 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .types{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .types button{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:14px;padding:13px 12px;font-weight:700;font-size:14.5px;text-align:left}
 .types button.on{border-color:var(--p);background:var(--rose);color:var(--p)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .two label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
 .two label.pk{color:var(--p);font-weight:700}
 .in.pk{border-color:var(--p);background:var(--rose);color:var(--p);font-weight:700}
@@ -302,7 +302,7 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 .calc .num{font-size:24px;color:var(--p)}
 .calc s{color:var(--faint);font-size:14px}
 .date{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;position:relative}
-.date input{border:none;outline:none;font-size:15px;font-weight:700;padding:13px 0;width:100%;background:transparent}
+.date input{border:none;outline:none;font-size:15px;font-weight:700;padding:13px 0;width:100%;min-width:0;background:transparent}
 .gen{width:100%;border:1.5px dashed #f2a9c9;background:var(--rose);color:var(--p);font-weight:700;font-size:15px;padding:14px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:9px}
 .codes{display:flex;flex-direction:column;gap:7px;margin-top:9px}
 .codechip{display:flex;align-items:center;gap:9px;background:#f6f4f0;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14.5px;letter-spacing:.04em}
@@ -321,6 +321,17 @@ h1.title{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:0}
 
 /* ---- Publication en cours ---- */
 .pub{text-align:center;padding:10px 4px 6px}
+/* Création écran par écran (MOD-076) */
+.full.still{animation:none}
+.wz-top{flex:none;padding:10px 16px 2px}
+.wz-top span{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-top:7px}
+.wz-bar{height:5px;border-radius:5px;background:#efece7;overflow:hidden}
+.wz-bar i{display:block;height:100%;border-radius:5px;background:var(--grad);transition:width .25s}
+.wz-h{font-size:21px;margin:14px 0 4px;letter-spacing:-.01em}
+.wz-p{font-size:14px;margin:0 0 10px}
+.wz-sum{display:flex;gap:12px;align-items:center;border:1.5px solid var(--line);border-radius:16px;padding:10px;margin-top:12px}
+.wz-sum img{width:64px;height:64px;border-radius:12px;object-fit:cover;flex:none}
+.wz-sum b{display:block;font-size:15.5px}.wz-sum span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
 /* Scanner de QR client (MOD-075) */
 .scanbox{position:relative;margin-top:14px;border-radius:18px;overflow:hidden;background:#111;aspect-ratio:1}
 .scanbox video{width:100%;height:100%;object-fit:cover;display:block}
@@ -469,7 +480,7 @@ function mapRow(row, accounts) {
     netMedia: pr.created_by_network_id ? (Array.isArray(det.media) && det.media.length ? det.media : (pr.media_url ? [pr.media_url] : [])) : [],
     formats: Array.isArray(det.formats) ? det.formats : [], mech: pr.mechanic, text: row.overrides?.text || pr.description || "",
     type: pr.promo_type, orig: det.orig ?? null, val: det.val ?? null, xy: det.xy || [2, 1], sub: det.sub || "", cond: det.sub || "",
-    start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, pinSp: !!row.pin_required, pinNet: !!pr.pin_required, deadline: start > Date.now() ? start : end,
+    start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, pinSp: !!row.pin_required, pinNet: !!pr.pin_required, validation: pr.validation || null, deadline: start > Date.now() ? start : end,
     status, ch, chAt, stats,
     pubAt: done.length ? Math.max(...done.map(x => new Date(x.published_at).getTime())) : null,
     schedAt: sched ? new Date(sched.getFullYear(), sched.getMonth(), sched.getDate()).getTime() : null,
@@ -486,7 +497,7 @@ async function loadData() {
   const [net, acc, rows, rev, tk, lk, dm, pn] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status, enabled").eq("store_id", st.id),
-    sb.from("store_promotions").select("id, status, overrides, suspended, hidden, pin_required, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, pin_required, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
+    sb.from("store_promotions").select("id, status, overrides, suspended, hidden, pin_required, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, pin_required, validation, status, details, created_by_network_id, created_by_store_id), publications(channel, status, published_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
     // Codes révélés par les clients (drive to store), lisibles par le magasin seulement.
     sb.from("code_reveals").select("store_promotion_id, revealed_at, confidence, used_at, validated_by").eq("store_id", st.id).order("revealed_at", { ascending: false }).range(0, 9999),
     sb.rpc("support_mine"),
@@ -902,10 +913,11 @@ function viewSettings() {
 
     ${STORE.pinMode === "off" ? "" : `<div class="lbl">CODE VENDEUR</div>
     <div class="box"><div class="li"><span class="sp"><span style="font-size:13px;color:var(--muted);display:block">À taper sur le téléphone du client pour valider sa promo en caisse. Gardez-le pour l'équipe.</span><b style="font-size:24px;letter-spacing:.3em">${esc(STORE.pin || "····")}</b></span><button class="edit-btn" data-act="pin-renew" style="padding:0 14px;min-height:36px">Changer</button></div>
-      <div class="li" style="display:block"><span style="font-size:15.5px;display:block">Quand le demander ?</span>
-        ${STORE.pinMode === "required" ? `<span style="font-size:13px;color:var(--muted)">Pour toutes les promos : c'est le choix de votre centrale.</span>`
+      ${STORE.hasNet ? `<div class="li" style="display:block"><span style="font-size:15.5px;display:block">Pour les promos de votre centrale</span>
+        ${STORE.pinMode === "required" ? `<span style="font-size:13px;color:var(--muted)">Toujours demandé : c'est le choix de votre centrale.</span>`
         : `<div class="seg" style="margin-top:10px">${PIN_SCOPES().map(([k, l]) => `<button data-pinscope="${k}" class="${STORE.pinScope === k ? "on" : ""}">${l}</button>`).join("")}</div>
-        <span style="font-size:13px;color:var(--muted);display:block;margin-top:8px">${{ inherit: STORE.hasNet ? "Seulement sur les campagnes où votre centrale le demande. Sinon, le client confirme lui-même." : "Le client confirme lui-même qu'il a utilisé sa promo.", all: "Le vendeur tape le code pour chaque promo utilisée.", per_promo: "Activez-le dans chaque promo, en bas de sa fiche." }[STORE.pinScope]}</span>`}</div></div>`}
+        <span style="font-size:13px;color:var(--muted);display:block;margin-top:8px">${{ inherit: STORE.hasNet ? "Seulement sur les campagnes où votre centrale le demande. Sinon, le client confirme lui-même." : "Le client confirme lui-même qu'il a utilisé sa promo.", all: "Le vendeur tape le code pour chaque promo utilisée.", per_promo: "Activez-le dans chaque promo, en bas de sa fiche." }[STORE.pinScope]}</span>`}</div>` : ""}
+      <div class="li" style="display:block"><span style="font-size:13px;color:var(--muted)">Pour vos propres promos, vous choisissez la validation à la création : QR code, code vendeur, code-barres EAN ou aucune.</span></div></div>`}
 
     <div class="lbl">SUPPORT</div>
     <div class="box">
@@ -1234,6 +1246,7 @@ function openPromo(p) {
   const pinLine = () => {
     if (STORE.pinMode === "off" || p.kind === "post" || p.hidden || isOver(p)) return "";
     const ro = (t) => `<div class="fl">CODE VENDEUR EN CAISSE</div><div class="ro-line">${t}</div>`;
+    if (p.src === "own" && p.validation) return `<div class="fl">VALIDATION EN CAISSE</div><div class="ro-line">${esc(VAL_LABEL[p.validation])}${STORE.pinMode === "required" && !["qr", "pin"].includes(p.validation) ? " · votre centrale demande le code vendeur" : ""}</div>`;
     if (STORE.pinMode === "required") return ro("Demandé pour toutes les promos : choix de votre centrale.");
     if (p.pinNet && p.src === "net") return ro("Demandé sur cette campagne par votre centrale.");
     if (STORE.pinScope === "all") return ro("Demandé pour toutes vos promos (réglage dans Réglages).");
@@ -1407,72 +1420,115 @@ function sheetChoose() {
 }
 
 /* ===================== Création ===================== */
+// Création d'une promo ou d'un post, écran par écran (MOD-076) :
+// promo : 1 Visuel · 2 Offre · 3 Validation · 4 Diffusion ; post : 1 Visuel · 2 Texte · 3 Diffusion.
+// La validation est choisie ici pour chaque promo du magasin ; la centrale peut l'imposer ou l'interdire.
+const VALIDATIONS = [
+  ["qr", "QR code", "Le vendeur scanne le QR affiché sur le téléphone du client. Validation automatique, la plus fiable."],
+  ["pin", "Code vendeur", "Le vendeur tape le code du magasin sur le téléphone du client."],
+  ["ean", "Code-barres EAN", "Votre caisse scanne le code-barres. Vitriin ne voit pas le passage en caisse : le client confirme lui-même."],
+  ["none", "Pas de validation", "Le client montre la promo en caisse et confirme lui-même l'avoir utilisée."],
+];
+const VAL_LABEL = { qr: "QR code scanné par le vendeur", pin: "Code vendeur sur le téléphone du client", ean: "Code-barres EAN scanné en caisse", none: "Sans validation" };
+const valAllowed = (k) => STORE.pinMode === "required" ? ["qr", "pin"].includes(k) : STORE.pinMode === "off" ? ["ean", "none"].includes(k) : true;
+// EAN-13 « magasin » : préfixe 2 (réservé à l'usage interne), clé de contrôle calculée.
+const eanKey = (d12) => (10 - d12.split("").reduce((t, c, i) => t + (+c) * (i % 2 ? 3 : 1), 0) % 10) % 10;
+const newEan = () => { const b = "2" + Array.from(crypto.getRandomValues(new Uint8Array(11)), x => x % 10).join(""); return b + eanKey(b); };
+const eanOk = (v) => /^\d{8}$|^\d{13}$/.test(v) && (v.length === 8 ? (10 - v.slice(0, 7).split("").reduce((t, c, i) => t + (+c) * (i % 2 ? 1 : 3), 0) % 10) % 10 === +v[7] : eanKey(v.slice(0, 12)) === +v[12]);
 function createForm(kind, draft) {
-  const F = draft ? { kind: "promo", xy: [2, 1], cond: "", text: "", ...draft, codes: draft.code ? [draft.code] : [], fb: true, ig: S.ig === "ok" } :
-    { kind, title: "", img: null, type: "percent", orig: 129, val: 30, xy: [2, 1], cond: "", text: "", start: d(0), end: d(13), codes: [], fb: true, ig: S.ig === "ok" };
+  const legacyEan = draft && /^\d{13}$/.test(String(draft.code || "").replace(/\s+/g, "")) ? String(draft.code).replace(/\s+/g, "") : "";
+  const defVal = draft?.validation || (draft?.ean || legacyEan ? "ean" : STORE.pinMode === "required" ? "qr" : "none");
+  const F = draft ? { kind: "promo", xy: [2, 1], cond: "", text: "", ...draft, fb: true, ig: S.ig === "ok" } :
+    { kind, title: "", img: null, type: "percent", orig: 129, val: 30, xy: [2, 1], cond: "", text: "", start: d(0), end: d(13), fb: true, ig: S.ig === "ok" };
+  F.check = valAllowed(defVal) ? defVal : (STORE.pinMode === "required" ? "qr" : "none");
+  F.ean = draft?.ean || legacyEan || "";
+  F.step = 0;
   const layer = $("#layer");
-  // Promo déjà publiée ou programmée : on enregistre sans republier.
-  const editLive = !!draft && draft.status !== "draft";
-  const draw = () => {
-    const isPost = F.kind === "post";
-    const missing = [!F.img && "photo", !isPost && !F.title.trim() && "titre", isPost && !F.text.trim() && "texte", !F.fb && !F.ig && "canal"].filter(Boolean);
+  const editLive = !!draft && draft.status !== "draft"; // promo déjà publiée ou programmée : on enregistre sans republier
+  const steps = () => F.kind === "post" ? ["Visuel", "Texte", "Diffusion"] : ["Visuel", "Offre", "Validation", "Diffusion"];
+  const stepName = () => steps()[F.step];
+  const stepOk = () => ({
+    Visuel: !!F.img, Texte: !!F.text.trim(), Offre: !!F.title.trim() && new Date(F.end) >= new Date(F.start),
+    Validation: valAllowed(F.check) && (F.check !== "ean" || eanOk(F.ean)), Diffusion: F.fb || F.ig,
+  })[stepName()];
+  const hint = () => ({ Visuel: "Ajoutez une photo ou une vidéo.", Texte: "Écrivez le texte du post.", Offre: !F.title.trim() ? "Donnez un titre à la promo." : "La fin doit suivre le début.",
+    Validation: F.check === "ean" ? "Générez ou saisissez un code EAN valide (8 ou 13 chiffres)." : "Choisissez une validation.", Diffusion: "Choisissez au moins un réseau." })[stepName()];
+  const opt = (on, attrs, title, sub, dis) => `<button class="chk ${on ? "on" : ""}" ${attrs} ${dis ? 'disabled style="opacity:.45"' : ""}><span class="bx">${on ? `<span style="color:#fff">${I.check}</span>` : ""}</span><span class="sp"><b>${title}</b><span>${sub}</span></span></button>`;
+  const body = () => {
     const pr = pricing(F);
-    layer.innerHTML = `<div class="full">
-      <div class="bar"><button class="x" data-close aria-label="Fermer">${I.x}</button><b>${draft ? (isPost ? "Modifier le post" : "Modifier la promo") : isPost ? "Nouveau post" : "Nouvelle promo"}</b></div>
-      <div class="scroll">
-        <span class="label">Photo ou vidéo <span class="req">*</span></span>
+    switch (stepName()) {
+      case "Visuel": return `<h2 class="wz-h">${F.kind === "post" ? "Votre photo ou vidéo" : "Le visuel de la promo"}</h2><p class="small wz-p">Une image nette du produit ou du magasin : c'est elle qu'on voit en premier sur les réseaux.</p>
         ${F.img ? `<div class="preview-img"><img onerror="this.style.visibility='hidden'" src="${esc(F.img)}" alt=""><button id="f-rm">Changer</button></div>` :
-        `<div class="media"><button data-src="cam"><span style="color:var(--p)">${I.cam}</span>Photo</button><button data-src="file"><span style="color:var(--p)">${I.vid}</span>Vidéo</button><button data-src="file"><span style="color:var(--p)">${I.img}</span>Galerie</button><button class="net" data-src="lib"><span style="color:var(--v)">${I.net}</span>Médiathèque de la centrale</button></div>`}
-        ${isPost ? `<span class="label">Texte <span class="req">*</span></span><textarea class="in" id="f-text" rows="5" placeholder="Ex : Nouvelle collection trail en magasin, venez l'essayer !">${esc(F.text)}</textarea>` : `
+        `<div class="media"><button data-src="cam"><span style="color:var(--p)">${I.cam}</span>Photo</button><button data-src="file"><span style="color:var(--p)">${I.vid}</span>Vidéo</button><button data-src="file"><span style="color:var(--p)">${I.img}</span>Galerie</button>${STORE.hasNet ? `<button class="net" data-src="lib"><span style="color:var(--v)">${I.net}</span>Médiathèque de la centrale</button>` : ""}</div>`}`;
+      case "Texte": return `<h2 class="wz-h">Le texte du post</h2><textarea class="in" id="f-text" rows="6" placeholder="Ex : Nouvelle collection trail en magasin, venez l'essayer !">${esc(F.text)}</textarea>`;
+      case "Offre": return `<h2 class="wz-h">L'offre</h2>
         <span class="label">Titre <span class="req">*</span></span><input class="in" id="f-title" placeholder="Ex : Air Runner 95" value="${esc(F.title)}" maxlength="60">
         <span class="label">Type de promo</span>
         <div class="types">${TYPES.map(t => `<button class="${F.type === t.k ? "on" : ""}" data-type="${t.k}">${t.i}${t.l}</button>`).join("")}</div>
         <div style="margin-top:14px">${typeFields(F)}</div>
         ${pr.price != null ? `<div class="calc"><span class="badge" style="font-size:15px;padding:3px 9px">${esc(pr.badge)}</span><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}</div>` : ""}
         <span class="label">Période de validité</span>
-        <div class="two"><div class="date">${I.cal("#0c9875")}<input type="date" id="f-start" value="${iso(F.start)}"></div><div class="date">${I.cal("#e5087e")}<input type="date" id="f-end" value="${iso(F.end)}"></div></div>
-        <div class="row" style="align-items:flex-start;margin-top:20px"><b style="font-size:15px" class="sp">Code de réduction en caisse</b><span style="font-size:12.5px;color:var(--muted);text-align:right">Facultatif · plusieurs<br>codes possibles</span></div>
-        <p class="small" style="margin:6px 0 10px">Le client présente ce code en caisse : la caisse le scanne et applique la remise.</p>
-        <button class="gen" id="f-gen">${I.bar}Générer un code de réduction</button>
-        <div class="codes">${F.codes.map((c, k) => `<div class="codechip">${I.bar}${esc(c)}<button data-rmcode="${k}" aria-label="Retirer">×</button></div>`).join("")}</div>
-        ${F.codes.length ? '<p class="small" style="color:#8a6a3a">À déclarer dans votre logiciel de caisse avant le début de la promo.</p>' : ""}
-        <div class="addrow"><input class="in" id="f-code" placeholder="Ou saisir un code de réduction existant"><button id="f-add">Ajouter</button></div>`}
-        <span class="label">Canaux <span class="req">*</span></span>
+        <div class="two"><div class="date">${I.cal("#0c9875")}<input type="date" id="f-start" value="${iso(F.start)}"></div><div class="date">${I.cal("#e5087e")}<input type="date" id="f-end" value="${iso(F.end)}"></div></div>`;
+      case "Validation": return `<h2 class="wz-h">Comment valider la promo en caisse ?</h2>
+        <p class="small wz-p">${STORE.pinMode === "required" ? "Votre centrale demande une validation par le vendeur." : STORE.pinMode === "off" ? "Votre centrale n'utilise pas la validation par le vendeur." : "Une validation par le vendeur vous dit exactement combien de promos ont servi."}</p>
+        ${VALIDATIONS.map(([k, t, s]) => opt(F.check === k, `data-check="${k}"`, t, k === "pin" && STORE.pin ? `${s} Le vôtre : ${esc(STORE.pin)}.` : s, !valAllowed(k))).join("")}
+        ${F.check === "ean" ? `<div style="margin-top:14px">${F.ean ? `<div class="codechip">${I.bar}${esc(F.ean)}<button id="f-ean-rm" aria-label="Retirer">×</button></div>
+          <p class="small" style="color:#8a6a3a;margin-top:8px">${/^2/.test(F.ean) && F.ean.length === 13 ? "Code créé par Vitriin : à déclarer dans votre logiciel de caisse avant le début de la promo." : "Vérifiez que votre caisse reconnaît ce code."}</p>`
+          : `<button class="gen" id="f-gen">${I.bar}Créer un code EAN</button>
+          <div class="addrow"><input class="in" id="f-ean" inputmode="numeric" maxlength="13" placeholder="Ou saisir le code EAN de votre caisse"><button id="f-ean-add">Ajouter</button></div>`}</div>` : ""}`;
+      case "Diffusion": return `<h2 class="wz-h">Où la diffuser ?</h2>
+        <div class="wz-sum">${F.img ? `<img src="${esc(F.img)}" alt="" onerror="this.style.visibility='hidden'">` : ""}<div class="sp"><b>${esc(F.kind === "post" ? (F.text.trim().split(/\n/)[0].slice(0, 60) || "Post") : F.title)}</b>
+          ${F.kind === "post" ? "" : `<span>${esc(pr.badge || "")} · du ${fmtShort(F.start)} au ${fmtShort(F.end)}</span><span>Validation : ${esc(VAL_LABEL[F.check])}</span>`}</div></div>
+        <span class="label">Réseaux <span class="req">*</span></span>
         <button class="chk ${F.fb ? "on" : ""}" data-chan="fb"><span class="bx">${F.fb ? `<span style="color:#fff">${I.check}</span>` : ""}</span><span class="ch fb" style="width:34px;height:34px">${I.fbs}</span><span class="sp"><b>Facebook</b><span>Page ${esc(STORE.page)}</span></span></button>
         <button class="chk ${F.ig ? "on" : ""}" data-chan="ig" ${S.ig !== "ok" ? 'style="background:#faf9f7"' : ""}><span class="bx">${F.ig ? `<span style="color:#fff">${I.check}</span>` : ""}</span><span class="ch ig" style="width:34px;height:34px">${I.igs}</span><span class="sp"><b>Instagram</b><span style="${S.ig !== "ok" ? "color:var(--red)" : ""}">${S.ig === "ok" ? esc(STORE.insta) : "À reconnecter"}</span></span>${S.ig !== "ok" ? '<span class="blue" id="f-reco">Reconnecter</span>' : ""}</button>
-        <p class="small" style="margin-top:10px">Google, TikTok et WhatsApp arrivent bientôt.</p>
-      </div>
+        <p class="small" style="margin-top:10px">Votre vitrine Vitriin la montre aussi. Google, TikTok et WhatsApp arrivent bientôt.</p>`;
+    }
+    return "";
+  };
+  const draw = () => {
+    const n = steps().length, last = F.step === n - 1, ok = stepOk();
+    layer.innerHTML = `<div class="full ${F.shown ? "still" : ""}">
+      <div class="bar">${F.step ? `<button class="x" id="f-back" aria-label="Étape précédente">${I.back}</button>` : `<button class="x" data-close aria-label="Fermer">${I.x}</button>`}<b ${F.step ? 'style="margin-right:0"' : ""}>${draft ? (F.kind === "post" ? "Modifier le post" : "Modifier la promo") : F.kind === "post" ? "Nouveau post" : "Nouvelle promo"}</b>${F.step ? `<button class="x" data-close aria-label="Fermer">${I.x}</button>` : ""}</div>
+      <div class="wz-top"><div class="wz-bar"><i style="width:${Math.round((F.step + 1) / n * 100)}%"></i></div><span>Étape ${F.step + 1} sur ${n} · ${stepName()}</span></div>
+      <div class="scroll">${body()}</div>
       <div class="actions">
-        ${missing.length ? `<div class="todo">À compléter : ${missing.join(" · ")}</div>` : ""}
-        <button class="big-btn" id="f-pub" ${missing.length ? "disabled" : ""} style="margin-top:8px">${editLive ? "Enregistrer les modifications" : `${I.send}Publier`}</button>
-        ${isPost || editLive ? "" : '<button class="txt-btn" id="f-draft" style="border:1.5px solid var(--line);border-radius:16px;color:var(--ink);font-weight:700">Enregistrer en brouillon</button>'}
+        <div class="todo" ${ok ? 'style="visibility:hidden"' : ""}>${ok ? "&nbsp;" : hint()}</div>
+        ${last ? `<button class="big-btn" id="f-pub" ${ok ? "" : "disabled"} style="margin-top:8px">${editLive ? "Enregistrer les modifications" : `${I.send}Publier`}</button>
+          ${F.kind === "post" || editLive ? "" : '<button class="txt-btn" id="f-draft" style="border:1.5px solid var(--line);border-radius:16px;color:var(--ink);font-weight:700">Enregistrer en brouillon</button>'}`
+        : `<button class="big-btn" id="f-next" ${ok ? "" : "disabled"} style="margin-top:8px">Continuer</button>`}
       </div></div>`;
+    F.shown = true; // l'écran n'entre en glissant qu'une fois
     bindForm();
   };
   const num = (v) => { const n = parseFloat(String(v).replace(",", ".").replace(/[^\d.]/g, "")); return isNaN(n) ? null : n; };
+  const go = (k) => { F.step = Math.max(0, Math.min(steps().length - 1, F.step + k)); draw(); $(".scroll", layer).scrollTop = 0; };
   const bindForm = () => {
     $$("[data-close]", layer).forEach(b => b.onclick = closeLayer);
+    $("#f-back", layer) && ($("#f-back").onclick = () => go(-1));
+    $("#f-next", layer) && ($("#f-next").onclick = () => stepOk() && go(1));
     $$("[data-src]", layer).forEach(b => b.onclick = () => pickMedia(b.dataset.src, (src) => { F.img = src; draw(); }));
     $("#f-rm", layer) && ($("#f-rm").onclick = () => { F.img = null; draw(); });
     $("#f-title", layer) && ($("#f-title").oninput = (e) => { F.title = e.target.value; refreshFoot(); });
     $("#f-text", layer) && ($("#f-text").oninput = (e) => { F.text = e.target.value; refreshFoot(); });
     $$("[data-type]", layer).forEach(b => b.onclick = () => { F.type = b.dataset.type; const def = { percent: [129, 30], amount: [90, 20], new_price: [129, 99], x_plus_y: [44.7, 29.8], cashback: [null, 10], free_with_condition: [null, 0] }[F.type]; [F.orig, F.val] = def; keepScroll(draw); });
     $$("[data-f]", layer).forEach(inp => inp.oninput = () => { const k = inp.dataset.f; if (k === "cond") F.cond = inp.value; else if (k === "x") F.xy[0] = num(inp.value) || 0; else if (k === "y") F.xy[1] = num(inp.value) || 0; else F[k] = num(inp.value); updCalc(); });
-    $("#f-start", layer) && ($("#f-start").onchange = (e) => { F.start = new Date(e.target.value + "T00:00"); });
-    $("#f-end", layer) && ($("#f-end").onchange = (e) => { F.end = new Date(e.target.value + "T00:00"); });
-    $("#f-gen", layer) && ($("#f-gen").onclick = () => { F.codes.push("9 901230 " + String(Math.floor(Math.random() * 1e6)).padStart(6, "0")); keepScroll(draw); });
-    $("#f-add", layer) && ($("#f-add").onclick = () => { const v = $("#f-code").value.trim().toUpperCase(); if (v.length < 3) return toast("Saisissez un code d'au moins 3 caractères."); F.codes.push(v); keepScroll(draw); });
-    $$("[data-rmcode]", layer).forEach(b => b.onclick = (e) => { e.stopPropagation(); F.codes.splice(+b.dataset.rmcode, 1); keepScroll(draw); });
+    $("#f-start", layer) && ($("#f-start").onchange = (e) => { F.start = new Date(e.target.value + "T00:00"); refreshFoot(); });
+    $("#f-end", layer) && ($("#f-end").onchange = (e) => { F.end = new Date(e.target.value + "T00:00"); refreshFoot(); });
+    $$("[data-check]", layer).forEach(b => b.onclick = () => { if (!valAllowed(b.dataset.check)) return; F.check = b.dataset.check; keepScroll(draw); });
+    $("#f-gen", layer) && ($("#f-gen").onclick = () => { F.ean = newEan(); keepScroll(draw); });
+    $("#f-ean-rm", layer) && ($("#f-ean-rm").onclick = () => { F.ean = ""; keepScroll(draw); });
+    $("#f-ean-add", layer) && ($("#f-ean-add").onclick = () => { const v = $("#f-ean").value.replace(/\D/g, ""); if (!eanOk(v)) return toast("Code EAN invalide : 8 ou 13 chiffres, clé de contrôle comprise."); F.ean = v; keepScroll(draw); });
     $$("[data-chan]", layer).forEach(b => b.onclick = (e) => {
       if (e.target.id === "f-reco" && !STORE.demo) return connectAccount("meta");
       if (e.target.id === "f-reco") { sb.rpc("demo_reconnect", { p_store_id: STORE.id, p_channel: "instagram" }).then(({ error }) => { if (error) return toast(errText(error)); S.ig = "ok"; F.ig = true; toast("Instagram reconnecté"); keepScroll(draw); }); return; }
       const c = b.dataset.chan; if (c === "ig" && S.ig !== "ok") return toast("Reconnectez d'abord Instagram.");
       F[c] = !F[c]; keepScroll(draw);
     });
-    $("#f-pub").onclick = () => submit(false);
+    $("#f-pub", layer) && ($("#f-pub").onclick = () => submit(false));
     $("#f-draft", layer) && ($("#f-draft").onclick = () => submit(true));
   };
-  const refreshFoot = () => { const isPost = F.kind === "post"; const missing = [!F.img && "photo", !isPost && !F.title.trim() && "titre", isPost && !F.text.trim() && "texte", !F.fb && !F.ig && "canal"].filter(Boolean); const todo = $(".todo", layer); if (missing.length) { if (todo) todo.textContent = "À compléter : " + missing.join(" · "); else $(".actions", layer).insertAdjacentHTML("afterbegin", `<div class="todo">À compléter : ${missing.join(" · ")}</div>`); } else todo?.remove(); $("#f-pub").disabled = !!missing.length; };
+  const refreshFoot = () => { const ok = stepOk(), t = $(".todo", layer), b = $("#f-next", layer) || $("#f-pub", layer); if (t) { t.style.visibility = ok ? "hidden" : ""; t.textContent = ok ? " " : hint(); } if (b) b.disabled = !ok; };
   const updCalc = () => { const pr = pricing(F); const c = $(".calc", layer); if (c && pr.price != null) c.innerHTML = `<span class="badge" style="font-size:15px;padding:3px 9px">${esc(pr.badge)}</span><span class="num">${eur(pr.price)}</span>${pr.old ? `<s>${eur(pr.old)}</s>` : ""}`; };
   const keepScroll = (fn) => { const sc = $(".scroll", layer)?.scrollTop || 0; fn(); const s2 = $(".scroll", layer); if (s2) s2.scrollTop = sc; };
   const submit = async (asDraft) => {
@@ -1482,18 +1538,20 @@ function createForm(kind, draft) {
       const media = await ensureUploaded(F.img);
       const pr = pricing({ ...F, mech: null });
       const sub = F.type === "free_with_condition" ? F.cond : F.type === "x_plus_y" ? `Les ${(F.xy[0] || 0) + (F.xy[1] || 0)} pour ${eur(F.val || 0)}` : "";
-      const code = (F.codes[0] || "").replace(/\s+/g, "").toUpperCase();
       const title = isPost ? (F.text.trim().split(/\n/)[0].slice(0, 40) || "Post") : F.title.trim() || "Sans titre";
       const start = new Date(F.start); start.setHours(0, 0, 0, 0);
       const end = new Date(F.end); end.setHours(23, 59, 0, 0);
+      const ean = !isPost && F.check === "ean" && eanOk(F.ean) ? F.ean : null;
       const row = {
         created_by_store_id: STORE.id, title, media_url: media,
         mechanic: isPost ? null : (F.type === "free_with_condition" ? (F.cond || "Offert") : pr.price != null ? `${eur(pr.price)}${pr.old ? " au lieu de " + eur(pr.old) : ""}` : pr.badge),
-        description: isPost ? F.text.trim() : [sub, code ? `Code en caisse : ${code}` : ""].filter(Boolean).join("\n\n") || null,
-        promo_type: isPost ? null : F.type, discount_code: code && /^[A-Z0-9-]{3,24}$/.test(code) ? code : null,
+        description: isPost ? F.text.trim() : sub || null,
+        promo_type: isPost ? null : F.type, validation: isPost ? null : F.check, ean_code: ean,
         details: isPost ? null : { orig: F.orig, val: F.val, xy: F.xy, sub },
         starts_at: start.toISOString(), ends_at: end.toISOString(), status: asDraft ? "draft" : "active",
       };
+      // Ancien code de réduction : remplacé par l'EAN s'il en tenait lieu, sinon conservé.
+      if (!draft || legacyEan) row.discount_code = null;
       let spId = draft?.spId;
       if (draft) {
         const { created_by_store_id, ...changes } = row; // le magasin auteur ne change pas
