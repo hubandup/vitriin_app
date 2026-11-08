@@ -20,6 +20,17 @@ Repères :
 
 ## 2026-11-08
 
+### BUG-012 · Le QR de validation ne s'affichait pas sur l'écran client
+- **Constat (Charles)** : pas de QR code sur l'écran client. Le QR n'apparaissait qu'après deux gestes
+  (« Afficher mon code » puis « Faire valider par le vendeur »), tout en bas de la feuille, et la carte du code
+  disait « Pas de code à scanner, montrez cet écran au vendeur ». Dans l'aperçu côté clients de l'espace
+  magasin, aucun QR ne s'affichait du tout.
+- **Correction** (`public/v`) : pour une promo validée par le vendeur (QR ou code vendeur), le QR s'affiche
+  **dès « Afficher mon code »**, juste sous la carte du code, avec le texte « Le vendeur scanne le QR ci-dessous ».
+  Dans l'aperçu, un QR d'exemple (non valable) est montré avec une mention « Aperçu ». La base fonctionnait
+  (jeton de validation vérifié en base), seul l'écran était en cause.
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-077 · Nouveau design : espace magasin, app client et app mobile
 - **Quoi** : le design validé par Charles (maquette « Vitriin espace magasin, nouveau design ») remplace l'ancien.
   Fond blanc, surfaces #F6F5F3, texte secondaire #6F6A63 (contraste AA, l'ancien #7b766f/#888 était trop pâle),
