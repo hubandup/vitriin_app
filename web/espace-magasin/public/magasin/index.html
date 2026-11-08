@@ -936,7 +936,7 @@ function cardRow(p) {
   const st = promoState(p), off = offerTxt(p), k = catOf(p);
   const cd = S.codesDetail?.[p.id], views = (p.stats?.fb?.[1] || 0) + (p.stats?.ig?.[1] || 0);
   const res = [views ? `${nf(views)} vues` : "", cd?.used ? `${nf(cd.used)} validée${cd.used > 1 ? "s" : ""}` : cd?.decl ? `${nf(cd.decl)} déclarée${cd.decl > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ");
-  const how = p.kind === "post" ? "Post" : p.validation ? VAL_SHORT[p.validation] : p.src === "net" ? "Centrale" : "";
+  const how = p.kind === "post" ? "Post" : STORE.pinMode === "off" ? (p.ean ? "Code-barres" : "") : p.validation ? VAL_SHORT[p.validation] : p.ean ? "Code-barres" : "QR code";
   let acts = "";
   if (k === "todo" && p.status !== "draft") acts = p.status === "received" && !p.mandatory
     ? `<div class="btns"><button class="b-ghost" data-decline="${p.id}">Refuser</button><button class="b-grad" data-activate="${p.id}">Activer</button></div>`
@@ -1383,6 +1383,8 @@ function openPromo(p) {
     const ro = (t) => `<div class="fl">CODE VENDEUR EN CAISSE</div><div class="ro-line">${t}</div>`;
     if (p.src === "own" && p.validation) return `<div class="fl">VALIDATION EN CAISSE</div><div class="ro-line">${esc(VAL_LABEL[p.validation])}${STORE.pinMode === "required" && !["qr", "pin"].includes(p.validation) ? " · votre centrale demande le code vendeur" : ""}</div>`;
     if (STORE.pinMode === "required") return ro("Demandé pour toutes les promos : choix de votre centrale.");
+    // Sans choix explicite ni code EAN : QR scanné par le vendeur, par défaut (MOD-078).
+    if (!p.validation && !p.ean) return `<div class="fl">VALIDATION EN CAISSE</div><div class="ro-line">${esc(VAL_LABEL.qr)}, par défaut. Le code vendeur reste possible en secours.</div>`;
     if (p.pinNet && p.src === "net") return ro("Demandé sur cette campagne par votre centrale.");
     if (STORE.pinScope === "all") return ro("Demandé pour toutes vos promos (réglage dans l’onglet Magasin).");
     if (STORE.pinScope !== "per_promo") return "";

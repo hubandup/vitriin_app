@@ -20,6 +20,19 @@ Repères :
 
 ## 2026-11-08
 
+### MOD-078 · Validation par QR par défaut
+- **Décision (Charles)** : 727 promos sur 729 n'avaient aucune validation choisie (promos de la centrale, promos
+  antérieures à MOD-076), donc aucun QR côté client. Une promo sans choix explicite et sans code EAN est
+  désormais validée par le vendeur avec le QR, le code vendeur restant en secours.
+- **Base** : `promo_pin_required` (migration `20261108220000_qr_default.sql`, appliquée sous le nom
+  `qr_default`). Après application : 533 promos en ligne passent en validation vendeur, 1 était déjà en QR.
+  Inchangés : réglage de la centrale (`required` / `off`), choix explicites du magasin, promos avec code EAN.
+- **Écrans** : l'app client présente « QR ou code vendeur » comme le QR (code vendeur derrière « Le QR ne passe
+  pas ? ») ; l'espace magasin affiche « QR code scanné par le vendeur, par défaut » sur la fiche et « QR code »
+  sur la carte promo.
+- **Sécurité** : fonction `security definer` à `search_path` vide, droits retirés au public comme avant.
+- **Retour arrière** : migration recréant la fonction de `20261108190000_promo_validation.sql`, puis `git revert`.
+
 ### BUG-012 · Le QR de validation ne s'affichait pas sur l'écran client
 - **Constat (Charles)** : pas de QR code sur l'écran client. Le QR n'apparaissait qu'après deux gestes
   (« Afficher mon code » puis « Faire valider par le vendeur »), tout en bas de la feuille, et la carte du code

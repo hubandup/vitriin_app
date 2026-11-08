@@ -1003,7 +1003,8 @@ const fakeBars = () => `<svg viewBox="0 0 290 96" preserveAspectRatio="none" ari
 async function coupon(x) {
   const p = x.promo, s = x.store, pr = pricing(p);
   // Validation choisie pour la promo (MOD-076) : qr, pin, vendor (les deux), ean ou none (le client confirme).
-  const chk = p.check || (p.pin ? "vendor" : "none"), byVendor = ["qr", "pin", "vendor"].includes(chk);
+  // « vendor » (QR ou code vendeur) se présente comme le QR : le code vendeur reste en secours sous le QR (MOD-078).
+  const chk = ((c) => c === "vendor" ? "qr" : c)(p.check || (p.pin ? "vendor" : "none")), byVendor = ["qr", "pin"].includes(chk);
   const ov = document.createElement("div"); ov.className = "ov sh";
   let timer = null, lock = null, shown = false;
   const stop = () => { clearInterval(timer); timer = null; try { lock?.release(); } catch {} lock = null; };
