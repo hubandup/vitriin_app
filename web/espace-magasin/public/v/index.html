@@ -175,6 +175,12 @@ nav.tabs a.on{color:var(--p)}
 .keep{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:16px;background:var(--rose);text-align:left;width:100%}
 .keep i{width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:none}
 .keep span{flex:1;font-size:13.5px;line-height:1.35}.keep em{font-style:normal;color:var(--muted)}
+/* Validation en caisse par code vendeur */
+.pinz{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:4px 0 2px}
+.pin{width:190px;text-align:center;font-family:inherit;font-weight:800;font-size:32px;line-height:1;letter-spacing:.45em;padding:12px 0 12px .45em;border:2px solid var(--line);border-radius:16px;color:var(--ink);background:#fff}
+.pin:focus{outline:none;border-color:var(--p)}
+.pin.err{border-color:#e5087e;animation:shk .32s}
+@keyframes shk{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 /* Écran « Profité » */
 .done{position:fixed;inset:0;z-index:70;background:#fff;overflow-y:auto;display:flex;flex-direction:column;align-items:center;text-align:center;padding:calc(var(--sat) + 18px) 22px calc(26px + var(--sab));gap:12px;animation:fade .2s}
 @media (min-width:560px){.done{max-width:430px;margin:0 auto}}
@@ -893,13 +899,19 @@ async function pageStore(slug) {
 
 // Arrivée par un lien (post, QR code, newsletter) : la promo s'ouvre tout de suite en plein écran,
 // suivie des autres promos du même commerce. En fermant, on arrive sur la fiche du commerce.
+// Promo terminée : on montre directement les promos en cours du même commerce, sinon sa fiche.
 async function pagePromo(id) {
   shell(null, `<div class="load">Chargement…</div>`);
   const { data, error } = await sb.rpc("vitrine_promo", { p_id: id });
-  if (error || !data) return notFound("Cette promo est terminée ou n'existe plus.");
+  if (error || !data?.store?.slug) return notFound("Cette promo est terminée ou n'existe plus.");
   const s = data.store; ls.set("vt-origin", s.slug);
   const r = await sb.rpc("vitrine_store", { p_slug: s.slug });
   const more = (!r.error && r.data?.promos || []).filter(p => p.id !== id).map(p => ({ promo: p, store: r.data.store, d: dist(S.pos, r.data.store) }));
+  if (data.ended) {
+    if (!more.length) { history.replaceState({}, "", `/v/m/${s.slug}`); route(); return toast(`Cette promo est terminée. Suivez ${s.name} pour ne pas rater la prochaine.`); }
+    toast(`Cette promo est terminée. Voici les promos en cours chez ${s.name}.`);
+    return openReels(more, 0, s.slug);
+  }
   openReels([{ promo: data.promo, store: s, d: dist(S.pos, s) }, ...more], 0, s.slug);
 }
 
@@ -993,7 +1005,10 @@ async function coupon(x) {
       <div class="ctime hidden" id="ctime"><i class="live"></i><span id="cleft">2:00</span><span>· luminosité au maximum</span></div></div>
     <div class="g2"><a class="btn line" href="${mapsUrl(s)}" target="_blank" rel="noopener">${IC.go}Y aller${x.d != null ? ` · ${km(x.d)}` : ""}</a><button class="btn line" id="c-sh"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-7 18-4-9-9-4 20-5Z"/></svg>Envoyer à un ami</button></div>
     ${isSaved(p.id) ? "" : `<button class="keep" id="keep"><i>${IC.bookmark(true)}</i><span><b>Garder ce code</b><br><em>Retrouvez-le dans Mes promos</em></span>${IC.chev}</button>`}
-    <button class="btn dark full" id="used" disabled>C'est fait, je l'ai utilisé</button></div>`;
+    <button class="btn dark full" id="used" disabled>Faire valider par le vendeur</button>
+    <div class="pinz hidden" id="pinz"><b>Vendeur : tapez le code du magasin</b>
+      <input class="pin" id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Code vendeur à 4 chiffres">
+      <span class="t2" id="pinmsg">Il se trouve dans l'espace magasin Vitriin.</span></div></div>`;
   const shut = () => { stop(); ov.remove(); };
   ov.onclick = (e) => { if (e.target === ov || e.target.closest("[data-x]")) shut(); };
   document.body.appendChild(ov);
@@ -1024,12 +1039,23 @@ async function coupon(x) {
     timer = setInterval(() => { left--; if (!$("#cleft", ov)) return stop(); $("#cleft", ov).textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`; if (left <= 0) blur(); }, 1000);
     if (S.session) refreshMe();
   };
-  $("#used", ov).onclick = async () => {
+  // Validation en caisse : le vendeur tape le code à 4 chiffres de son magasin sur ce téléphone.
+  $("#used", ov).onclick = () => {
     if (!shown) return;
-    $("#used", ov).disabled = true;
     if (APERCU) { shut(); return apercuNo(); }
-    await sb.rpc("vitrine_confirm_use", { p_id: p.id, p_client_id: clientId() });
-    shut(); done(x);
+    $("#used", ov).classList.add("hidden"); $("#pinz", ov).classList.remove("hidden"); $("#pin", ov).focus();
+  };
+  $("#pin", ov).oninput = async () => {
+    const f = $("#pin", ov); f.value = f.value.replace(/\D/g, "").slice(0, 4); f.classList.remove("err");
+    if (f.value.length < 4) return;
+    f.disabled = true;
+    const { data, error } = await sb.rpc("vitrine_validate_use", { p_id: p.id, p_client_id: clientId(), p_pin: f.value });
+    if (!error && data === "ok") { shut(); return done(x); }
+    f.disabled = false; f.value = ""; void f.offsetWidth; f.classList.add("err"); f.focus();
+    $("#pinmsg", ov).textContent = error ? errText(error)
+      : data === "locked" ? "Trop d'essais. Réessayez dans 15 minutes."
+      : data === "no_reveal" ? "Affichez d'abord le code, puis faites valider."
+      : "Code incorrect. Il se trouve dans l'espace magasin Vitriin.";
   };
 }
 

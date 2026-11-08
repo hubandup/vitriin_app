@@ -18,6 +18,49 @@ Repères :
 
 ---
 
+## 2026-11-08
+
+### MOD-073 · Lien vers une promo terminée : les promos en cours du même commerce
+- **Avant** : `/v/p/<id>` d'une promo terminée affichait « Cette promo est terminée ou n'existe plus » et un
+  bouton vers le fil général.
+- **Maintenant** : `vitrine_promo` renvoie `{ended: true, store}` pour une promo qui n'est plus en ligne. Le
+  plein écran s'ouvre sur les autres promos en cours du commerce (message « Cette promo est terminée. Voici
+  les promos en cours chez … »). S'il n'y en a aucune, on arrive sur la fiche du commerce avec une invitation
+  à le suivre. Lien inconnu : message inchangé.
+- **Où** : section 5 de la migration `20261108100000_store_redeem_pin.sql`, `pagePromo` dans `public/v/index.html`.
+- **Retour arrière** : `git revert` ; redéfinir `vitrine_promo` comme dans `20261030210000_vitrine_publique.sql`.
+
+### MOD-072 · Validation en caisse par code vendeur (niveau 1)
+- **Quoi** : chaque magasin a un code vendeur à 4 chiffres. Le client affiche son code promo, touche
+  « Faire valider par le vendeur », le vendeur tape le code du magasin sur le téléphone du client :
+  l'utilisation est confirmée (`code_reveals.used_at`, indice `probable`, magasin = celui qui a validé).
+  Remplace le bouton déclaratif « C'est fait, je l'ai utilisé » et la fonction `vitrine_confirm_use` (supprimée).
+- **Code accepté** (décision de Charles) : celui de n'importe quel magasin du réseau de la promo
+  (ou du seul magasin pour un indépendant). La promo est comptée au magasin qui a validé.
+  Les codes sont uniques dans un réseau ; un magasin qui rejoint un réseau où son code est déjà pris
+  en reçoit un nouveau.
+- **Sécurité** : table `store_pins` lisible par les seuls membres du magasin (RLS), jamais par le client ;
+  tirage par `gen_random_uuid()` sans codes évidents (0000, 1234…) ; blocage après 5 essais ratés en 15 min
+  par appareil et 60 en 1 h par magasin (`pin_attempts`, sans accès anon/authenticated). Revers assumés :
+  quelqu'un qui s'acharne peut bloquer la validation d'un magasin pendant 1 h ; dans un grand réseau, un code
+  tapé au hasard a plus de chances de tomber sur un magasin (environ 1 sur 20 pour 500 magasins), ce qui ne
+  fausse qu'une validation à la fois.
+- **Espace magasin** : bloc « Code vendeur » dans Réglages, bouton « Changer » (`store_pin_renew`, membres
+  du magasin uniquement). Le détail par promo dit « validés en caisse » au lieu de « confirmés par le client ».
+  Les anciennes confirmations déclaratives restent en base et comptent encore comme utilisées.
+- **Où** : migration `20261108100000_store_redeem_pin.sql` (testée sur un Postgres 16 local : code créé à
+  l'insertion d'un magasin et pour l'existant, codes uniques sur un réseau de 300 magasins, changement de
+  code en rejoignant un réseau, code d'un autre magasin du réseau accepté et hors réseau refusé, blocage,
+  droits anon et non-membre),
+  `public/v/index.html`, `public/magasin/index.html`.
+- **Ordre de mise en ligne** : appliquer la migration puis déployer le front le même jour (l'ancien front
+  appelle `vitrine_confirm_use`, qui n'existe plus).
+- **Retour arrière** : `git revert` du commit, puis une migration qui recrée `vitrine_confirm_use` (texte dans
+  `20261031030000_reveal_confidence.sql`) et supprime `vitrine_validate_use`, `store_pin_renew`,
+  `stores_add_pin` (et son trigger), `new_store_pin`, `pin_attempts`, `store_pins`.
+
+---
+
 ## 2026-11-07
 
 ### MOD-071 · Keep-alive Supabase : le ping échouait en 401
