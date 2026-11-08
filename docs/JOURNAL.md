@@ -20,6 +20,14 @@ Repères :
 
 ## 2026-11-08
 
+### BUG-014 · Aperçu flouté d'un code-barres sur une promo validée par QR
+- **Constat (Charles, capture iPhone)** : avant « Afficher mon QR code », la carte montrait un faux code-barres
+  flouté, alors que la promo se valide par QR.
+- **Correction** (`public/v`, `fakeFor`) : l'aperçu flouté reprend la forme du mode de la promo : QR code pour
+  le QR, case du code vendeur, code-barres pour le code en caisse, code et boutons pour le code promo web,
+  message pour une promo sans validation.
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-081 · Espace magasin plus simple : grandes photos, moins d'éléments
 - **Constat (Charles, captures iPhone)** : design pas assez moderne, trop d'éléments, photos trop petites.
 - **Promos** : cartes grand format, photo en 4:3 sur toute la largeur ; statut en pastille blanche et offre en
