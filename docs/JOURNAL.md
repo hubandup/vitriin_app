@@ -53,8 +53,10 @@ Repères :
   code en rejoignant un réseau, code d'un autre magasin du réseau accepté et hors réseau refusé, blocage,
   droits anon et non-membre),
   `public/v/index.html`, `public/magasin/index.html`.
-- **Ordre de mise en ligne** : appliquer la migration puis déployer le front le même jour (l'ancien front
-  appelle `vitrine_confirm_use`, qui n'existe plus).
+- **Mise en ligne (08/11)** : migration appliquée en base sous le nom `store_redeem_pin`, front déployé
+  (commit 641de52). Le front est parti quelques minutes avant la migration : pendant ce laps de temps, le
+  bouton de validation renvoyait une erreur. Vérifié après coup en base : 121 magasins, 121 codes, aucun
+  doublon dans un réseau, aucun code évident, `vitrine_confirm_use` supprimée, droits anon conformes.
 - **Retour arrière** : `git revert` du commit, puis une migration qui recrée `vitrine_confirm_use` (texte dans
   `20261031030000_reveal_confidence.sql`) et supprime `vitrine_validate_use`, `store_pin_renew`,
   `stores_add_pin` (et son trigger), `new_store_pin`, `pin_attempts`, `store_pins`.
