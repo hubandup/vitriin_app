@@ -20,6 +20,16 @@ Repères :
 
 ## 2026-11-08
 
+### BUG-011 · Logos Facebook et Instagram non conformes (espace magasin)
+- **Constat (Charles)** : à l'étape 4 « Diffusion », logos mal rendus. Deux causes : le style des cases à cocher
+  (`.chk span { display:block }`) écrasait le centrage des logos, collés en haut à gauche, et grisait les titres ;
+  les pictos étaient dessinés à la main (« f » tronqué, Instagram sans son point).
+- **Correction** (`public/magasin`) : tracés officiels des deux marques (Simple Icons 16.37, renvoyant aux chartes
+  Meta) ; Facebook = rond bleu #0866FF avec le « f » blanc, Instagram = glyphe blanc sur le dégradé de l'icône ;
+  logos centrés et titres en noir dans les cases ; logos grisés quand le compte est désactivé. Vérifié en
+  navigateur sur l'étape Diffusion et dans Réglages.
+- **Retour arrière** : `git revert` du commit.
+
 ### MOD-076 · Création de promo écran par écran, avec choix de la validation
 - **Quoi** : le formulaire unique de l'espace magasin est remplacé par un parcours en étapes, avec barre de
   progression, « Continuer » qui ne s'active que quand l'étape est complète (et dit ce qui manque), retour à
