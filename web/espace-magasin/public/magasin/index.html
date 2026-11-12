@@ -265,6 +265,23 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--sat);ba
 .wk button.on{background:var(--ink);color:#fff}.wk button.on small,.wk button.on.td b{color:#fff}.wk button.on i.on{background:#fff}
 .cal-sec{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:22px 0 2px}
 .vl{border:1.5px solid var(--line);border-radius:22px;padding:14px;margin-top:10px}
+/* Campagnes (MOD-083) */
+.cph{border-radius:22px;padding:16px 18px;color:#fff;background:linear-gradient(120deg,#E5087E,#951B81)}
+.cph span{display:block;font-size:12.5px;font-weight:600;opacity:.9}.cph b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:2px}.cph small{display:block;font-size:14px;opacity:.92;margin-top:2px}
+.cpp{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.cpp i{font-style:normal;background:rgba(255,255,255,.2);padding:5px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.cpd{display:flex;align-items:baseline;gap:8px;padding:16px 4px 6px}.cpd b{font-size:15px}.cpd span{margin-left:auto;font-size:12.5px;color:var(--muted)}
+.cpbox{background:var(--surf);border-radius:18px;padding:4px}
+.cpr{display:flex;align-items:center;gap:10px;padding:5px 4px 5px 10px;border-radius:14px}
+.cpr.mv{background:var(--pink)}
+.cpr .tm{width:38px;flex:none;font-weight:800;font-size:13px;color:var(--muted)}
+.cpr .tx{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cpr .sr{font-style:normal;color:var(--p)}
+.cpr em{font-style:normal;font-size:11.5px;font-weight:700;color:var(--v)}.cpr em.ok{color:var(--tealt)}.cpr em.ko{color:var(--red)}
+.cps{flex:none;width:40px;height:40px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center}.cps svg{width:18px;height:18px}
+.cpf{position:sticky;bottom:calc(-1 * (var(--sab) + 18px));background:#fff;margin:14px -18px 0;padding:12px 18px calc(var(--sab) + 18px);border-top:1px solid var(--line)}
+.cpok{display:flex;align-items:center;gap:12px;background:var(--mint);border-radius:18px;padding:12px 14px}
+.cpok>span{flex:none;width:34px;height:34px;border-radius:50%;background:#0c9875;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.cpok div{flex:1;min-width:0}.cpok b{display:block;font-size:15px}.cpok small{display:block;font-size:12.5px;color:#4b5d57;margin-top:2px}
+.cpok button{flex:none;color:#0c9875;font-weight:700;font-size:13.5px;padding:10px 4px}
 .vl h3{font-size:16px;margin:0}
 .vl .d{font-size:13px;color:var(--muted);margin-top:3px}
 .vl .lk{display:flex;gap:9px;align-items:flex-start;background:var(--surf);border-radius:14px;padding:11px 12px;margin-top:10px;font-size:13.5px;line-height:1.4}
@@ -648,6 +665,7 @@ function mapRow(row, accounts) {
     start, end, code: pr.discount_code, ean: pr.ean_code, mandatory: pr.is_mandatory, pinSp: !!row.pin_required, pinNet: !!pr.pin_required, validation: pr.validation || null,
     // Date de publication proposée par la centrale, ou imposée (promo obligatoire) : le magasin valide.
     pubAtNet, pubLock: !!pr.publish_at_locked && !!pubAtNet,
+    camp: pr.campaign_id || null, star: !!pr.is_featured,
     deadline: pr.publish_at_locked && pubAtNet ? pubAtNet : start > Date.now() ? start : end,
     status, ch, chAt, stats,
     pubAt: done.length ? Math.max(...done.map(x => new Date(x.published_at).getTime())) : null,
@@ -664,10 +682,10 @@ async function loadData() {
   if (!mem.length) throw new Error("Ce compte n'est rattaché à aucun magasin.");
   const st = mem[0].stores;
   await sb.rpc("demo_tick", { p_store_id: st.id }); // fait avancer la démo ; sans effet ailleurs
-  const [net, acc, rows, rev, tk, lk, dm, pn] = await Promise.all([
+  const [net, acc, rows, rev, tk, lk, dm, pn, cp] = await Promise.all([
     sb.rpc("get_store_network", { p_store_id: st.id }),
     sb.from("social_accounts").select("channel, display_name, status, enabled").eq("store_id", st.id),
-    sb.from("store_promotions").select("id, status, overrides, suspended, hidden, pin_required, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, pin_required, validation, status, details, created_by_network_id, created_by_store_id, publish_at, publish_at_locked), publications(channel, status, published_at, scheduled_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
+    sb.from("store_promotions").select("id, status, overrides, suspended, hidden, pin_required, created_at, activated_at, promotions(id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, starts_at, ends_at, is_mandatory, pin_required, validation, status, details, created_by_network_id, created_by_store_id, publish_at, publish_at_locked, campaign_id, is_featured), publications(channel, status, published_at, scheduled_at, metrics)").eq("store_id", st.id).order("created_at", { ascending: false }),
     // Codes révélés par les clients (drive to store), lisibles par le magasin seulement.
     sb.from("code_reveals").select("store_promotion_id, revealed_at, confidence, used_at, validated_by").eq("store_id", st.id).order("revealed_at", { ascending: false }).range(0, 9999),
     sb.rpc("support_mine"),
@@ -676,6 +694,8 @@ async function loadData() {
     sb.rpc("my_store_is_demo", { p_store_id: st.id }),
     // Code vendeur : le code, le réglage de la centrale et celui du magasin (MOD-074).
     sb.rpc("store_pin_settings", { p_store_id: st.id }),
+    // Campagnes proposées par la centrale (MOD-083), et si ce magasin a accepté leur planning.
+    sb.from("campaigns").select("id, name, starts_on, ends_on, status, campaign_acceptances(store_id, accepted_at)").eq("status", "proposed").order("starts_on").range(0, 99),
   ]);
   const e = net.error || acc.error || rows.error; if (e) throw e;
   // Un code affiché loin du magasin ou hors des heures d'ouverture, et non confirmé, ne compte pas comme utilisé.
@@ -706,6 +726,7 @@ async function loadData() {
   S.fb = chState(fb); S.ig = chState(ig); S.gb = chState(gb);
   const all = rows.data.filter(r => r.promotions).map(r => mapRow(r, acc.data));
   S.promos = all.filter(p => !p.hidden); S.trash = all.filter(p => p.hidden); // corbeille : onglet « Supprimées »
+  S.camps = ((!cp.error && cp.data) || []).map(c => ({ ...c, accepted: (c.campaign_acceptances || []).some(a => a.store_id === st.id) }));
 }
 
 // Recharge puis réaffiche, sans casser une feuille ouverte.
@@ -884,7 +905,7 @@ function pricing(p) {
   return { price: null, old: null, badge: "" };
 }
 const live = (p) => p.status === "published" && Date.now() <= new Date(p.end).getTime() + DAY;
-const pendingNet = () => S.promos.filter(p => p.src === "net" && p.status === "received" && !p.mandatory);
+const pendingNet = () => S.promos.filter(p => p.src === "net" && p.status === "received" && !p.mandatory && !campWait(p));
 const mandatoryDue = () => S.promos.filter(p => p.src === "net" && p.mandatory && !["published", "scheduled"].includes(p.status));
 const pubCount = () => S.promos.reduce((t, p) => t + Object.values(p.ch || {}).filter(v => v === "ok").length, 0);
 const failCount = () => S.promos.reduce((t, p) => t + Object.values(p.ch || {}).filter(v => v === "ko").length, 0);
@@ -908,11 +929,12 @@ const imgOr = (src, cls = "") => src ? `<img onerror="this.style.visibility='hid
 // Le logo du magasin bascule vers la vue côté clients (et inversement).
 function viewHome() {
   const pend = pendingNet(), due = mandatoryDue();
-  const toPub = S.promos.filter(p => p.status === "active" && !p.mandatory && !p.suspended && !isOver(p));
+  const toPub = S.promos.filter(p => p.status === "active" && !p.mandatory && !p.suspended && !isOver(p) && !campWait(p));
   const live = S.promos.filter(p => catOf(p) === "live").sort((a, b) => a.end - b.end);
   const t = totals(), sum = (i) => t.fb[i] + t.ig[i];
   const row = (go, ic, color, title, sub, bg) => `<button class="todo-row" ${go}><span class="ic" style="background:${bg || (color === "#2D2D2D" ? "var(--surf)" : "var(--pink)")};color:${color}">${ic}</span><span class="sp"><b>${title}</b>${sub ? `<span>${sub}</span>` : ""}</span><span class="chev">${I.chev}</span></button>`;
   const rows = [
+    ...campOpen().map(c => row(`data-camp="${c.id}"`, I.net, "#e5087e", `Campagne ${esc(c.name)} : planning à accepter`, `${campItems(c).length} promos du ${fmtShort(campDate(c.starts_on))} au ${fmtShort(campDate(c.ends_on))}`)),
     pend.length && row('data-go="promos:todo"', I.net, "#e5087e", `${pend.length} promo${pend.length > 1 ? "s" : ""} de la centrale à valider`, pend.map(p => esc(p.title)).join(" · ")),
     ...due.map(p => row('data-go="promos:todo"', I.clock, "#2D2D2D", `${esc(p.title)} : à publier avant le ${fmtLong(p.deadline)}`, "Promo obligatoire de la centrale")),
     toPub.length && row('data-go="promos:todo"', I.send, "#951b81", `${toPub.length} promo${toPub.length > 1 ? "s" : ""} activée${toPub.length > 1 ? "s" : ""} à publier`, toPub.map(p => esc(p.title)).join(" · ")),
@@ -945,7 +967,7 @@ function catOf(p) {
 function viewPromos() {
   const all = [...S.promos, ...(S.trash || [])];
   const by = Object.fromEntries(CATS.map(c => [c.k, []]));
-  all.forEach(p => by[catOf(p)].push(p));
+  all.forEach(p => { if (!campWait(p)) by[catOf(p)].push(p); });
   by.todo.sort((a, b) => (b.mandatory - a.mandatory) || (a.deadline - b.deadline));
   by.live.sort((a, b) => a.end - b.end); by.soon.sort((a, b) => a.start - b.start);
   by.susp.sort((a, b) => a.end - b.end); by.del.sort((a, b) => b.end - a.end);
@@ -956,6 +978,7 @@ function viewPromos() {
     <h1 class="title">Promos</h1>
     ${pvSeg()}
     <div class="cats" id="cats" role="tablist" aria-label="Filtrer les promos">${CATS.map((c, k) => `<button role="tab" aria-selected="${k === i}" class="${k === i ? "on" : ""}" data-cat="${c.k}">${c.l}${by[c.k].length ? `<em>${by[c.k].length}</em>` : ""}</button>`).join("")}</div>
+    ${campOpen().map(campCard).join("")}
     ${pend.length && UI.cat !== "todo" ? `<div class="net-card"><span class="ic">${I.net}</span><span class="sp"><b>${pend.length > 1 ? `${pend.length} promos de la centrale` : esc(pend[0].title)}</b><span>${pend.length > 1 ? "À accepter ou refuser" : "Nouvelle promo de votre centrale"}</span></span><button data-cat="todo">Voir</button></div>` : ""}
     <div class="pager" id="pager">${CATS.map(c => `<section class="pg" data-pg="${c.k}" aria-label="${c.l}">${by[c.k].map(cardRow).join("") || `<div class="empty">Aucune promo ${c.l.toLowerCase()}.</div>`}</section>`).join("")}</div>
   </div>`;
@@ -988,13 +1011,14 @@ function viewPromoCal() {
   const week = Array.from({ length: 7 }, (_, i) => { const x = new Date(w0); x.setDate(x.getDate() + i); return x; });
   const ev = calEvents().filter(e => e.t >= w0.getTime() && e.t < w1.getTime());
   const has = new Set(ev.map(e => dayKey(e.t)));
-  const todo = S.promos.filter(p => catOf(p) === "todo" && p.src === "net" && p.status !== "draft").sort((a, b) => a.deadline - b.deadline);
+  const todo = S.promos.filter(p => catOf(p) === "todo" && p.src === "net" && p.status !== "draft" && !campWait(p)).sort((a, b) => a.deadline - b.deadline);
   const lock = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#2D2D2D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
   const nets = (p) => p.schedCh?.length ? p.schedCh.map(c => ({ facebook: "Facebook", instagram: "Instagram", google_business: "Google" }[c] || c)).join(", ") : "";
   const label = week[0].toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
   return `<div class="screen">
     <h1 class="title">Promos</h1>
     ${pvSeg()}
+    ${campOpen().map(campCard).join("")}
     <div class="wk-h"><b>${esc(label)}</b><div class="nv"><button data-wk="-7" aria-label="Semaine précédente">‹</button><button data-wk="7" aria-label="Semaine suivante">›</button></div></div>
     <div class="wk">${week.map(x => `<button data-wd="${dayKey(x)}" class="${dayKey(x) === dayKey(today) ? "td" : ""} ${UI.calDay === dayKey(x) ? "on" : ""}" aria-label="${esc(x.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }))}${has.has(dayKey(x)) ? ", événements prévus" : ""}"><small>${"DLMMJVS"[x.getDay()]}</small><b>${x.getDate()}</b><i class="${has.has(dayKey(x)) ? "on" : ""}"></i></button>`).join("")}</div>
     ${todo.length ? `<div class="cal-sec">Réseau · à valider</div>${todo.map(p => `<div class="vl">
@@ -1335,7 +1359,7 @@ function render(keepScroll) {
   if (UI.tab === "promos" && UI.pv !== "cal") bindPager();
   if (UI.tab === "settings" && $("#qr-th")) qrSvg(vitrineUrl()).then(svg => { const t = $("#qr-th"); if (t) t.innerHTML = svg; }).catch(() => {});
   $$("#nav [data-tab]").forEach(b => { b.classList.toggle("on", b.dataset.tab === UI.tab); b.toggleAttribute("aria-current", b.dataset.tab === UI.tab); });
-  const n = pendingNet().length;
+  const n = pendingNet().length + campOpen().length;
   $("#nav-bd").textContent = n; $("#nav-bd").classList.toggle("hidden", !n);
   $("#fab").classList.remove("hidden"); // le « + » fait partie du dock, sur tous les onglets
   window.scrollTo(0, keepScroll ? y : 0);
@@ -1345,7 +1369,7 @@ $$("#nav [data-tab]").forEach(b => b.onclick = () => go(b.dataset.tab));
 $("#fab").onclick = () => sheetChoose();
 
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-act],[data-chan-t],[data-stat],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-cat],[data-card],[data-pinscope],[data-pv],[data-wk],[data-wd]");
+  const t = e.target.closest("[data-go],[data-act],[data-chan-t],[data-stat],[data-activate],[data-decline],[data-pub],[data-sched],[data-toggle],[data-open],[data-edit],[data-retry],[data-cat],[data-card],[data-pinscope],[data-pv],[data-wk],[data-wd],[data-camp]");
   if (!t || t.closest("#layer")) return;
   const ds = t.dataset;
   if (ds.go) { const [a, b] = ds.go.split(":"); go(a, b); }
@@ -1362,6 +1386,7 @@ document.addEventListener("click", (e) => {
   else if (ds.act === "clients") clients(ds.id);
   else if (ds.cat) { UI.cat = ds.cat; const pg = $("#pager"), k = CATS.findIndex(c => c.k === ds.cat); pg && pg.scrollTo({ left: k * pg.clientWidth, behavior: "smooth" }); $$("#cats button").forEach(b => b.classList.toggle("on", b.dataset.cat === ds.cat)); }
   else if (ds.card) openPromo(find(ds.card));
+  else if (ds.camp) sheetCampaign(campById(ds.camp));
   else if (ds.stat) statsPromo(find(ds.stat));
   else if (ds.act === "reconnect") reconnect();
   else if (ds.act === "connect-meta") connectAccount("meta");
@@ -1794,7 +1819,7 @@ function publish(p, retryOnly) {
 // Programmer la publication (MOD-082). Réseau réel : RPC schedule_publication,
 // le planificateur publie à l'heure dite. Démo : demo_publish datée, comme avant.
 // Date imposée par la centrale (promo obligatoire) : le magasin valide, l'heure ne se change pas.
-function sheetSchedule(p) {
+function sheetSchedule(p, back) {
   const NAME = { fb: "Facebook", ig: "Instagram", gb: "Google" }, DB = { fb: "facebook", ig: "instagram", gb: "google_business" };
   const avail = ["fb", "ig", "gb"].filter(c => (c === "fb" ? S.fb : c === "ig" ? S.ig : GBP_READY && !STORE.demo ? S.gb : "none") === "ok");
   if (!avail.length) return toast("Connectez d'abord Facebook ou Instagram dans l’onglet Magasin.");
@@ -1834,10 +1859,63 @@ function sheetSchedule(p) {
         ? await sb.rpc("demo_publish", { p_store_promotion_id: p.spId, p_channels: chans.filter(c => c !== "gb").map(c => DB[c]), p_at: at.toISOString() })
         : await sb.rpc("schedule_publication", { p_store_promotion_id: p.spId, p_channels: chans.map(c => DB[c]), p_at: at.toISOString() });
       if (error) { $("#s-go").disabled = false; return toast(errText(error)); }
-      await loadData(); closeLayer(); render(true); toast(`Programmée le ${fmtDay(at)} à ${hhmm(at).replace(":", "h")}.`);
+      await loadData(); render(true); back ? back() : closeLayer(); toast(`Programmée le ${fmtDay(at)} à ${hhmm(at).replace(":", "h")}.`);
     };
+    if (back) $$("#layer [data-close]").forEach(b => b.onclick = back);
   };
   draw();
+}
+/* ---------- Campagnes (MOD-083) ---------- */
+// La centrale propose un planning pour tout un temps fort (ex. Black Friday,
+// 80 promos sur 15 jours). Le magasin l'accepte d'un geste, ou décale une promo
+// avec la flèche. Tant qu'il n'a pas accepté, les promos de la campagne restent
+// regroupées dans une seule carte au lieu d'encombrer « À traiter ».
+const campById = (id) => (S.camps || []).find(c => c.id === id);
+const campItems = (c) => S.promos.filter(p => p.camp === c.id && !p.hidden && p.status !== "declined");
+const campOpen = () => (S.camps || []).filter(c => !c.accepted && campItems(c).length && Date.now() < new Date(c.ends_on + "T23:59:59").getTime());
+const campWait = (p) => { const c = p.camp && campById(p.camp); return !!(c && !c.accepted && p.status !== "published" && p.status !== "scheduled"); };
+const campWhen = (p) => p.status === "scheduled" && p.schedFull ? p.schedFull : p.pubAtNet ? p.pubAtNet.getTime() : null;
+const hLbl = (t) => hhmm(t).replace(/^0/, "").replace(":00", "h").replace(":", "h");
+const campDate = (s) => { const [y, m, dd] = s.split("-").map(Number); return new Date(y, m - 1, dd); };
+const campCard = (c) => { const n = campItems(c).length; return `<div class="net-card"><span class="ic">${I.net}</span><span class="sp"><b>${esc(c.name)} · ${n} promo${n > 1 ? "s" : ""}</b><span>Planning proposé par votre centrale</span></span><button data-camp="${c.id}">Voir</button></div>`; };
+
+function sheetCampaign(c) {
+  if (!c) return;
+  const items = campItems(c).filter(p => !isOver(p)), connected = S.fb === "ok" || S.ig === "ok";
+  const days = {}; items.forEach(p => { const t = campWhen(p); (days[t ? dayKey(t) : "zz"] ||= []).push(p); });
+  const keys = Object.keys(days).sort();
+  const slots = [...new Set(items.filter(p => p.pubAtNet).map(p => hhmm(p.pubAtNet)))].sort().slice(0, 4).map(h => hLbl(new Date("2026-01-01T" + h)));
+  const nDays = keys.filter(k => k !== "zz").length;
+  const moved = items.filter(p => p.status === "scheduled" && p.pubAtNet && Math.abs(p.schedFull - p.pubAtNet.getTime()) >= 60e3).length;
+  const label = (k) => k === "zz" ? "Sans date proposée" : cap(campDate(k).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" }));
+  const row = (p) => { const t = campWhen(p), mv = p.status === "scheduled" && p.pubAtNet && Math.abs(p.schedFull - p.pubAtNet.getTime()) >= 60e3, past = !p.schedFull && t && t < Date.now();
+    return `<div class="cpr${mv ? " mv" : ""}"><span class="tm">${t ? hLbl(t) : "—"}</span><span class="tx">${p.star ? '<i class="sr">★ </i>' : ""}${esc(p.title)}</span>${mv ? '<em>décalée</em>' : past ? '<em class="ko">date passée</em>' : p.status === "scheduled" && c.accepted ? '<em class="ok">programmée</em>' : ""}
+      <button class="cps" data-cshift="${p.id}" aria-label="${esc(`Changer la date de ${p.title}`)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button></div>`; };
+  sheet(`<div class="grab"></div>
+    <div class="cph"><span>Proposée par ${esc(STORE.net)}</span><b>${esc(c.name)}</b><small>du ${fmtDay(campDate(c.starts_on))} au ${fmtDay(campDate(c.ends_on))}</small>
+      <div class="cpp"><i>${items.length} promo${items.length > 1 ? "s" : ""}</i>${nDays ? `<i>${nDays} jour${nDays > 1 ? "s" : ""}</i>` : ""}${slots.length ? `<i>${slots.join(" · ")}</i>` : ""}</div></div>
+    <p class="small" style="font-size:13.5px;margin:12px 2px 0">${c.accepted ? "Planning accepté : vos publications partiront aux dates ci-dessous. Décalez une promo avec la flèche tant qu'elle n'est pas partie." : "Votre centrale propose ce planning. Acceptez-le d'un geste, ou décalez une promo avec la flèche. Rien ne part sans votre accord."}</p>
+    ${keys.map(k => `<div class="cpd"><b>${label(k)}</b><span>${days[k].length} publication${days[k].length > 1 ? "s" : ""}</span></div><div class="cpbox">${days[k].sort((a, b) => (campWhen(a) || 0) - (campWhen(b) || 0)).map(row).join("")}</div>`).join("") || `<div class="empty">Aucune promo à venir dans cette campagne.</div>`}
+    <div class="cpf">${c.accepted
+      ? `<div class="cpok"><span>✓</span><div><b>Planning accepté</b><small>${items.filter(p => p.status === "scheduled").length} publications programmées${moved ? `, dont ${moved} décalée${moved > 1 ? "s" : ""}` : ""}.</small></div><button id="cp-undo">Annuler</button></div>`
+      : connected ? `<button class="big-btn" id="cp-ok" style="margin-top:0">Accepter le planning</button><p class="small" style="text-align:center">${moved ? `${moved} promo${moved > 1 ? "s" : ""} décalée${moved > 1 ? "s" : ""} : elle${moved > 1 ? "s gardent leur" : " garde sa"} date. Votre centrale le verra.` : "Programme d'un geste chaque promo à la date proposée."}</p>`
+      : `<button class="big-btn" id="cp-conn" style="margin-top:0">Connecter Facebook ou Instagram</button><p class="small" style="text-align:center">Il faut au moins un réseau pour accepter le planning.</p>`}</div>`);
+  const ly = $("#layer");
+  $$("[data-cshift]", ly).forEach(b => b.onclick = () => sheetSchedule(find(b.dataset.cshift), () => sheetCampaign(campById(c.id))));
+  $("#cp-conn") && ($("#cp-conn").onclick = () => { closeLayer(); go("settings"); });
+  $("#cp-ok") && ($("#cp-ok").onclick = async () => {
+    const b = $("#cp-ok"); b.disabled = true; b.textContent = "Programmation…";
+    const { data, error } = await sb.rpc("campaign_accept", { p_campaign_id: c.id, p_store_id: STORE.id });
+    if (error) { b.disabled = false; b.textContent = "Accepter le planning"; return toast(errText(error)); }
+    await loadData(); render(true); sheetCampaign(campById(c.id));
+    toast(`${data.scheduled + data.kept} publication${data.scheduled + data.kept > 1 ? "s" : ""} programmée${data.scheduled + data.kept > 1 ? "s" : ""}.${data.skipped ? ` ${data.skipped} à faire à la main (date passée ou promo indisponible).` : ""}`);
+  });
+  $("#cp-undo") && ($("#cp-undo").onclick = async () => {
+    if (!confirm(`Annuler le planning de « ${c.name} » ? Les publications pas encore parties sont déprogrammées.`)) return;
+    const { error } = await sb.rpc("campaign_withdraw", { p_campaign_id: c.id, p_store_id: STORE.id });
+    if (error) return toast(errText(error));
+    await loadData(); render(true); sheetCampaign(campById(c.id)); toast("Planning annulé.");
+  });
 }
 function sheetChoose() {
   sheet(`<div class="grab"></div><h2>Que voulez-vous publier ?</h2>
