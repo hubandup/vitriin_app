@@ -131,6 +131,40 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .link{font-size:12px;color:var(--p);font-weight:700;background:none;border:none;padding:0}
 .empty{font-size:13px;color:var(--muted);padding:14px 0;line-height:1.5}
 
+/* Calendrier (MOD-082) */
+.cal{min-width:920px}
+.cal-g{display:grid;grid-template-columns:230px repeat(28,minmax(0,1fr));align-items:center}
+.cal-h{border-bottom:1px solid var(--line)}
+.cal-m{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:12px 6px 0}
+.cal-d{text-align:center;padding:6px 0 9px;font-size:11px;color:var(--muted);font-weight:600}
+.cal-d b{display:block;font-size:13px;color:var(--ink);margin-top:2px}
+.cal-d.we{background:var(--hover)}
+.cal-d.now,.cal-d.now b{color:var(--p)}
+.cal-d.now{background:var(--t-pink)}
+.cal-body{position:relative}
+.cal-today{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--p);pointer-events:none;z-index:2}
+.cal-r{min-height:62px;border-bottom:1px solid var(--line)}
+.cal-r:last-child{border-bottom:none}
+.cal-n{grid-column:1/2;padding:10px 14px 10px 22px;min-width:0}
+.cal-n b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-n small{font-size:11.5px;color:var(--muted)}
+.cal-n .warn{color:var(--err);font-weight:700}
+.cal-bar{grid-row:1;height:36px;margin:0 2px;border:none;border-radius:10px;color:#fff;display:flex;align-items:center;gap:8px;padding:0 8px 0 11px;min-width:0;text-align:left;font-weight:600;font-size:12.5px;position:relative;z-index:1;cursor:pointer}
+.cal-bar span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-bar em{font-style:normal;flex:none;font-size:11.5px;font-weight:700;background:rgba(255,255,255,.24);padding:2px 8px;border-radius:20px}
+.cal-bar.draft{background:var(--card)!important;color:var(--ink);border:1.5px dashed var(--dash)}
+.cal-bar.draft em{background:var(--chip)}
+.cal-bar.cut-l{border-top-left-radius:0;border-bottom-left-radius:0}
+.cal-bar.cut-r{border-top-right-radius:0;border-bottom-right-radius:0}
+.cal-bar.sel{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+.cal-pin{grid-row:1;justify-self:center;align-self:start;margin-top:3px;z-index:3;width:18px;height:18px;border-radius:50%;background:var(--card);color:var(--ink);border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;pointer-events:none}
+.cal-legend{display:flex;flex-wrap:wrap;gap:14px;padding:14px 22px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.cal-legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+.cal-alert{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--t-pink);border-radius:16px;padding:14px 18px;margin-bottom:12px}
+.cal-alert div{flex:1 1 300px;font-size:14px;line-height:1.45}
+.cal-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cal-nav .rg{font-weight:700;font-size:14.5px;padding:0 6px}
+
 /* Tables */
 .tcard{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .tscroll{overflow-x:auto}
@@ -416,6 +450,7 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
     <nav class="nav" id="nav">
       <button data-v="overview"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="lbl">Tableau de bord</span></button>
       <button data-v="promos"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H5a2 2 0 0 0-2 2v4.6a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.8Z"/><circle cx="7.5" cy="7.5" r="1.4" fill="currentColor"/></svg><span class="lbl">Promotions</span></button>
+      <button data-v="calendar"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span class="lbl">Calendrier</span></button>
       <button data-v="stores"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4.6 4.5h14.8L21 9"/><path d="M3.4 9h17.2v1.6a2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0 2.6 2.6 0 0 1-5.2 0V9Z"/><path d="M5 11.4V20h14v-8.6"/></svg><span class="lbl">Magasins</span></button>
       <button data-v="audience"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6"/><path d="M17.5 13.5a5.5 5.5 0 0 1 3 5.5"/></svg><span class="lbl">Audience</span></button>
     </nav>
@@ -481,6 +516,7 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
             <div><label class="fl" for="f-start">Du</label><input class="in" id="f-start" type="date"></div>
             <div><label class="fl" for="f-end">Au</label><input class="in" id="f-end" type="date"></div>
           </div>
+          <div id="f-pub"></div>
 
           <div id="f-codes">
           <div id="f-code-w"><label class="fl" for="f-code">Code de réduction en caisse <small>· facultatif, fourni par la centrale</small></label>
@@ -491,6 +527,7 @@ textarea.in{min-height:84px;resize:vertical;line-height:1.45}
 
           <label class="fl">Règle</label>
           <label class="sw"><input type="checkbox" id="f-mand"><span class="k"></span><span><b>Promo obligatoire<i class="info" data-tip="Vos magasins ne peuvent pas la refuser. Ils la publient eux-mêmes, depuis leur espace.">i</i></b></span></label>
+          <div id="f-lock-w" class="hidden"></div>
           <label class="sw" id="f-pin-w"><input type="checkbox" id="f-pin"><span class="k"></span><span><b>Code vendeur en caisse<i class="info" data-tip="Pour cette campagne, le vendeur tape le code de son magasin sur le téléphone du client pour valider la promo.">i</i></b></span></label>
 
           <label class="fl">Magasins</label>
@@ -612,7 +649,7 @@ const SHORT_REGION = { "Provence-Alpes-Côte d'Azur": "PACA", "Auvergne-Rhône-A
 /* ---------- État ---------- */
 // dw : panneau latéral ouvert ({ k: "promo" | "store", id }). E : brouillon d'édition du panneau.
 const S = { user: null, profile: null, role: "member", net: null, stores: [], accounts: [], promos: [], acts: [], members: null,
-  view: "overview", zone: "all", filter: "all", q: "", dw: null, dwStores: false, topAll: false, stab: "prefs" };
+  view: "overview", zone: "all", filter: "all", calFrom: null, q: "", dw: null, dwStores: false, topAll: false, stab: "prefs" };
 let E = null;
 const isAdmin = () => S.role === "owner" || S.role === "admin";
 const NS = () => (S.net && S.net.settings) || {};
@@ -717,6 +754,7 @@ function derive() {
 const TITLES = {
   overview: ["Tableau de bord", "Vue d'ensemble du réseau · 30 derniers jours"],
   promos: ["Promotions", "Importer, diffuser et piloter tes campagnes"],
+  calendar: ["Calendrier", "Lancements, publications et activation des magasins, sur 4 semaines"],
   stores: ["Magasins", ""],
   audience: ["Audience", "Qui sont les clients de ton réseau"],
   settings: ["Paramètres", "Préférences, équipe, identité de la centrale et messages aux magasins"],
@@ -742,7 +780,7 @@ function render() {
   renderMe();
   show("bell-dot", D.stores.some(s => s.conn === "none" || s.conn === "broken"));
   const y = $("content").scrollTop;
-  $("content").innerHTML = { overview: viewOverview, promos: viewPromos, stores: viewStores, audience: viewAudience, settings: viewSettings }[S.view](D);
+  $("content").innerHTML = { overview: viewOverview, promos: viewPromos, calendar: viewCalendar, stores: viewStores, audience: viewAudience, settings: viewSettings }[S.view](D);
   $("content").scrollTop = y;
   bindView(D);
   renderDrawer(D);
@@ -901,6 +939,109 @@ function viewPromos(D) {
   </div>`;
 }
 
+/* ---------- Date de publication (MOD-082) ---------- */
+// Une publication programmée : statut scheduled (planificateur), ou pending daté
+// dans le futur (réseaux de démonstration, demo_publish).
+const isScheduled = (x) => x.status === "scheduled" || (x.status === "pending" && !!x.published_at && new Date(x.published_at) > Date.now());
+const schedAt = (x) => x.scheduled_at || x.published_at;
+const hhmm = (d) => new Date(d).toTimeString().slice(0, 5);
+const dtime = (d) => `${dshort(d)} ${hhmm(d).replace(":", "h")}`;
+function pubFields(px, v) {
+  return `<label class="fl" for="${px}-pubd">Publication sur les réseaux des magasins <small>· facultatif</small></label>
+  <div class="two"><div><input class="in" id="${px}-pubd" ${px === "e" ? 'data-e="pubDate"' : ""} type="date" value="${esc(v.pubDate || "")}" aria-label="Date de publication"></div>
+  <div><input class="in" id="${px}-pubt" ${px === "e" ? 'data-e="pubTime"' : ""} type="time" value="${esc(v.pubTime || "09:00")}" aria-label="Heure de publication"></div></div>`;
+}
+function lockSwitch(px, on) {
+  return `<label class="sw"><input type="checkbox" id="${px}-lock" ${on ? "checked" : ""}><span class="k"></span><span><b>Imposer la date de publication<i class="info" data-tip="Chaque magasin valide la publication, sans pouvoir changer la date ni l'heure. Il publie toujours sur ses propres comptes.">i</i></b>Les magasins valident, Vitriin publie à l'heure dite.</span></label>`;
+}
+
+/* ---------- Calendrier (MOD-082) ---------- */
+// Une barre par campagne, de son début à sa fin, sur 4 semaines. Le chiffre de
+// la barre : magasins prêts sur magasins ciblés. Prêt = publication validée
+// (programmée) ou faite pour une promo obligatoire, activée sinon.
+const CAL_DAYS = 28;
+const TYPE_COLOR = { percent: "var(--p)", amount: "var(--c-amber)", new_price: "var(--c-indigo)", x_plus_y: "var(--teal)", cashback: "var(--c-purple)", free_with_condition: "var(--v)" };
+const midnight = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+const monday = (d) => { const x = midnight(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+function calReady(p) {
+  const live = p.acts.filter(a => !a.hidden && !a.suspended);
+  const pub = live.filter(a => (a.publications || []).some(x => x.status === "published"));
+  const sch = live.filter(a => !pub.includes(a) && (a.publications || []).some(isScheduled));
+  const ok = p.is_mandatory ? pub.length + sch.length : live.filter(a => a.status === "active").length;
+  return { ok, sch: sch.length, pub: pub.length, target: live.length };
+}
+function calAlerts(D) {
+  const now = Date.now(), out = [];
+  D.promos.forEach(p => {
+    if (p.st === "draft" || p.st === "done") return;
+    const r = calReady(p); if (!r.target || r.ok >= r.target) return;
+    const late = r.target - r.ok, start = new Date(p.starts_at).getTime();
+    const deadline = p.publish_at_locked && p.publish_at ? new Date(p.publish_at).getTime() : start;
+    const days = Math.ceil((deadline - now) / DAY);
+    if (days > (p.is_mandatory ? 14 : 3) || r.ok / r.target >= 0.9) return;
+    const when = days <= 0 ? (p.st === "active" ? "est en cours" : "démarre aujourd'hui") : days === 1 ? "démarre demain" : `démarre dans ${days} jours`;
+    out.push({ p, days, html: `<b>${esc(p.title)}</b> ${p.publish_at_locked && days > 0 ? `est imposée dans ${days} jour${days > 1 ? "s" : ""}` : when} : <b>${nf.format(late)} magasin${late > 1 ? "s" : ""}</b> (${pct(late, r.target)} %) ${p.is_mandatory ? "n'ont pas validé la publication" : "ne l'ont pas encore activée"}.` });
+  });
+  return out.sort((a, b) => a.days - b.days).slice(0, 2);
+}
+function viewCalendar(D) {
+  const from = S.calFrom || monday(new Date());
+  const to = new Date(from); to.setDate(to.getDate() + CAL_DAYS);
+  const idx = (d) => Math.round((midnight(d) - from) / DAY);
+  const ti = idx(new Date());
+  const days = Array.from({ length: CAL_DAYS }, (_, i) => { const d = new Date(from); d.setDate(d.getDate() + i); return d; });
+  const firstOf = days.findIndex((d, i) => i > 0 && d.getDate() === 1);
+  const monthLbl = (d) => d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  const rows = D.promos.filter(p => new Date(p.starts_at) < to && new Date(p.ends_at) > from && p.status !== "archived")
+    .sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+  const lock = svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', 13, 2.2);
+  const cal = svg('<rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10h16"/>', 11, 2.4);
+  const alerts = calAlerts(D);
+  const legend = TYPES.map(t => `<span><i style="background:${TYPE_COLOR[t.k] || "var(--forest)"}"></i>${esc(t.label)}</span>`).join("")
+    + `<span>${lock} Date imposée</span><span><i style="border:1.5px dashed var(--dash);background:none"></i>Brouillon</span>`;
+  return `
+  ${tip("cal", "<b>Lecture :</b> une barre par campagne, du début à la fin. Le chiffre indique les magasins prêts (publication validée pour une promo obligatoire, activée sinon). Cliquez pour voir le suivi magasin par magasin.")}
+  ${alerts.map(a => `<div class="cal-alert"><span class="alert-ic" style="background:var(--card)">${svg(ICON.warn, 20)}</span><div>${a.html}</div><button class="btn-p" data-promo="${a.p.id}">Voir les magasins</button></div>`).join("")}
+  <div class="tcard">
+    <div class="tbar">
+      <div class="cal-nav">
+        <button class="btn-s" data-cal="-7" aria-label="Semaine précédente">‹</button>
+        <span class="rg">${dshort(from)} → ${dshort(new Date(to.getTime() - DAY))} ${to.getFullYear()}</span>
+        <button class="btn-s" data-cal="7" aria-label="Semaine suivante">›</button>
+        <button class="btn-s" data-cal="0">Aujourd'hui</button>
+      </div>
+      <button class="btn-p" style="font-size:13.5px;padding:10px 16px" data-new>${svg('<path d="M12 5v14M5 12h14"/>', 17, 2.4)}Nouvelle campagne</button>
+    </div>
+    <div class="tscroll"><div class="cal">
+      <div class="cal-g cal-h">
+        <div class="cal-m" style="grid-column:2/${firstOf > 0 ? 2 + firstOf : 30}">${esc(monthLbl(days[0]))}</div>
+        ${firstOf > 0 ? `<div class="cal-m" style="grid-column:${2 + firstOf}/30;border-left:1px solid var(--line)">${esc(monthLbl(days[firstOf]))}</div>` : ""}
+        <div class="cal-n" style="grid-row:2;font-size:12px;color:var(--muted);font-weight:600">Campagne</div>
+        ${days.map((d, i) => `<div class="cal-d${i === ti ? " now" : ""}${d.getDay() % 6 === 0 ? " we" : ""}" style="grid-row:2;grid-column:${i + 2}">${"DLMMJVS"[d.getDay()]}<b>${d.getDate()}</b></div>`).join("")}
+      </div>
+      <div class="cal-body">
+        ${ti >= 0 && ti < CAL_DAYS ? `<div class="cal-today" style="left:calc(230px + (100% - 230px) * ${((ti + (Date.now() - midnight(new Date())) / DAY) / CAL_DAYS).toFixed(4)})"></div>` : ""}
+        ${rows.length ? rows.map(p => {
+          const s = Math.max(0, idx(p.starts_at)), e = Math.min(CAL_DAYS - 1, idx(p.ends_at));
+          const r = calReady(p), draft = p.status === "draft", sel = S.dw && S.dw.k === "promo" && S.dw.id === p.id;
+          const color = TYPE_COLOR[p.promo_type] || "var(--forest)";
+          const t = typeOf(p.promo_type);
+          const pi = p.publish_at ? idx(p.publish_at) : -1;
+          const risk = calAlerts({ promos: [p] }).length > 0;
+          return `<div class="cal-g cal-r">
+            <div class="cal-n"><b>${esc(p.title)}</b><small>${t ? esc(t.label) : "Post"}${p.is_mandatory ? " · Obligatoire" : ""}${risk ? ` · <span class="warn">À risque</span>` : ""}</small></div>
+            <button class="cal-bar${draft ? " draft" : ""}${idx(p.starts_at) < 0 ? " cut-l" : ""}${idx(p.ends_at) >= CAL_DAYS ? " cut-r" : ""}${sel ? " sel" : ""}" style="grid-column:${s + 2}/${e + 3};background:${color}" data-promo="${p.id}"
+              aria-label="${esc(`${p.title}, du ${dshort(p.starts_at)} au ${dshort(p.ends_at)}, ${draft ? "brouillon" : `${r.ok} magasins prêts sur ${r.target}`}`)}">
+              ${p.publish_at_locked ? lock : ""}<span>${dshort(p.starts_at)} → ${dshort(p.ends_at)}</span><em>${draft ? "non envoyée" : `${nf.format(r.ok)}/${nf.format(r.target)}`}</em></button>
+            ${pi >= 0 && pi < CAL_DAYS && !draft ? `<span class="cal-pin" style="grid-column:${pi + 2}" title="Publication ${p.publish_at_locked ? "imposée" : "proposée"} : ${esc(dtime(p.publish_at))}">${p.publish_at_locked ? lock : cal}</span>` : ""}
+          </div>`;
+        }).join("") : `<div class="empty" style="padding:22px">Aucune campagne sur ces 4 semaines.</div>`}
+      </div>
+      <div class="cal-legend">${legend}</div>
+    </div></div>
+  </div>`;
+}
+
 /* ---------- Formats de publication par réseau ---------- */
 // live : réseau branché dans Vitriin. need : ce que le format exige.
 const FORMATS = [
@@ -966,6 +1107,7 @@ function chState(pubs, ch, acc) {
   const p = (pubs || []).find(x => x.channel === ch);
   if (p && p.status === "published") return `<span class="ch ok">✓ Publiée</span>`;
   if (p && p.status === "failed") return `<span class="ch ko" title="${esc(p.error_message || "")}">Échec</span>`;
+  if (p && isScheduled(p)) return `<span class="ch no">Programmée · ${dtime(schedAt(p))}</span>`;
   if (p && p.status === "pending") return `<span class="ch no">En cours</span>`;
   return acc ? `<span class="ch no">—</span>` : `<span class="ch no">Non connecté</span>`;
 }
@@ -978,14 +1120,15 @@ function promoDraft(p) {
     media: det.media && det.media.length ? [...det.media] : p.media_url ? [p.media_url] : [],
     title: p.title || "", type: p.promo_type || "percent", mech: p.mechanic || "", desc: stripCode(p.description),
     start: isoDay(p.starts_at), end: isoDay(p.ends_at), code: p.discount_code || "", ean: p.ean_code || "",
-    mand: !!p.is_mandatory, pin: !!p.pin_required, formats: new Set(det.formats || []) };
+    mand: !!p.is_mandatory, pin: !!p.pin_required, formats: new Set(det.formats || []),
+    pubDate: p.publish_at ? isoDay(p.publish_at) : "", pubTime: p.publish_at ? hhmm(p.publish_at) : "09:00", lock: !!p.publish_at_locked };
 }
 function viewPromoDw(D, p) {
   if (!E || E.id !== p.id) E = promoDraft(p);
   E.formats = syncFormats(E.formats, E.media.length, E.kind);
   const [sl, sc] = ST_PILL[p.st];
   const rows = p.acts.map(a => ({ a, s: D.byId[a.store_id] })).filter(x => x.s).sort((x, y) => x.s.name.localeCompare(y.s.name, "fr"));
-  const stLabel = (a) => a.hidden ? ["Supprimée", "p-grey"] : a.suspended ? ["Suspendue", "p-indigo"] : (a.publications || []).some(x => x.status === "published") ? ["Publiée", "p-green"] : a.status === "active" ? ["Activée", "p-indigo"] : a.status === "declined" ? ["Refusée", "p-red"] : ["Reçue", "p-amber"];
+  const stLabel = (a) => a.hidden ? ["Supprimée", "p-grey"] : a.suspended ? ["Suspendue", "p-indigo"] : (a.publications || []).some(x => x.status === "published") ? ["Publiée", "p-green"] : (a.publications || []).some(isScheduled) ? ["Programmée", "p-purple"] : a.status === "active" ? ["Activée", "p-indigo"] : a.status === "declined" ? ["Refusée", "p-red"] : ["Reçue", "p-amber"];
   const others = D.stores.filter(s => !p.acts.some(a => a.store_id === s.id)).length;
   const active = p.activated + p.acts.filter(a => a.status !== "active" && (a.publications || []).some(x => x.status === "published")).length;
   const showCode = feat("discount_code") || E.code, showEan = feat("ean_code") || E.ean;
@@ -1018,8 +1161,10 @@ function viewPromoDw(D, p) {
   </div>
   ${E.kind === "promo" && showCode ? `<label class="fl" for="e-code">Code de réduction en caisse</label><input class="in" id="e-code" data-e="code" maxlength="24" value="${esc(E.code)}" style="text-transform:uppercase;letter-spacing:.06em">` : ""}
   ${E.kind === "promo" && showEan ? `<label class="fl" for="e-ean">Code EAN en caisse</label><input class="in" id="e-ean" data-e="ean" maxlength="13" inputmode="numeric" value="${esc(E.ean)}">` : ""}
+  ${pubFields("e", E)}
   <label class="fl">Règle</label>
   <label class="sw"><input type="checkbox" id="e-mand" ${E.mand ? "checked" : ""}><span class="k"></span><span><b>Promo obligatoire<i class="info" data-tip="Vos magasins ne peuvent pas la refuser. Ils la publient eux-mêmes, depuis leur espace.">i</i></b></span></label>
+  ${E.mand ? lockSwitch("e", E.lock) : ""}
   ${pinMode() === "optional" ? `<label class="sw"><input type="checkbox" id="e-pin" ${E.pin ? "checked" : ""}><span class="k"></span><span><b>Code vendeur en caisse<i class="info" data-tip="Pour cette campagne, le vendeur tape le code de son magasin sur le téléphone du client pour valider la promo.">i</i></b></span></label>` : ""}
   <label class="fl">Formats de publication</label>
   <div id="e-formats">${formatsHtml(E.formats, E.media.length, E.kind, "data-ef")}</div>
@@ -1059,6 +1204,16 @@ function promoRow(v) {
   const start = new Date(v.start + "T00:00:00"), end = new Date(v.end + "T23:59:59");
   if (isNaN(start) || isNaN(end) || end <= start) throw new Error("Vérifiez les dates : la fin doit suivre le début.");
   if (!v.formats.size) throw new Error("Choisissez au moins un format de publication.");
+  // Date de publication proposée (ou imposée, pour une promo obligatoire) aux magasins.
+  let publishAt = null;
+  if (v.pubDate) {
+    publishAt = new Date(`${v.pubDate}T${v.pubTime || "09:00"}:00`);
+    if (isNaN(publishAt)) throw new Error("Vérifiez la date de publication.");
+    if (publishAt >= end) throw new Error("La publication doit avoir lieu avant la fin de la promo.");
+  }
+  const lock = !!(v.mand && v.lock && publishAt);
+  if (v.lock && v.mand && !publishAt) throw new Error("Choisissez la date de publication à imposer.");
+  if (lock && v.isNew && publishAt <= new Date()) throw new Error("La date de publication imposée doit être à venir.");
   return {
     title, mechanic: mech || null,
     // Le code part dans le texte du post : c'est le client final qui doit le lire.
@@ -1066,6 +1221,7 @@ function promoRow(v) {
     promo_type: v.kind === "promo" ? v.type : null, discount_code: code || null, ean_code: ean || null,
     media_url: v.media[0], details: { kind: v.kind, media: v.media, formats: [...v.formats] },
     starts_at: start.toISOString(), ends_at: end.toISOString(), is_mandatory: v.mand, pin_required: !!v.pin,
+    publish_at: publishAt ? publishAt.toISOString() : null, publish_at_locked: lock,
   };
 }
 function bindPromoDw(D) {
@@ -1075,7 +1231,8 @@ function bindPromoDw(D) {
   b.querySelectorAll("#e-types button").forEach(x => x.onclick = () => { E.type = x.dataset.type; markDirty(); render(); });
   b.querySelectorAll("[data-rm]").forEach(x => x.onclick = () => { E.media.splice(+x.dataset.rm, 1); markDirty(); render(); });
   b.querySelectorAll("[data-ef]").forEach(x => x.onchange = () => { x.checked ? E.formats.add(x.dataset.ef) : E.formats.delete(x.dataset.ef); markDirty(); $("dw-save").disabled = false; });
-  $("e-mand").onchange = () => { E.mand = $("e-mand").checked; markDirty(); };
+  $("e-mand").onchange = () => { E.mand = $("e-mand").checked; if (!E.mand) E.lock = false; markDirty(); render(); };
+  $("e-lock") && ($("e-lock").onchange = () => { E.lock = $("e-lock").checked; markDirty(); });
   $("e-pin") && ($("e-pin").onchange = () => { E.pin = $("e-pin").checked; markDirty(); });
   $("e-add").onclick = () => $("e-file").click();
   $("e-file").onchange = async () => {
@@ -1492,6 +1649,7 @@ function bindView(D) {
   c.querySelectorAll("[data-new]").forEach(b => b.onclick = () => openPromo());
   c.querySelectorAll("[data-soon]").forEach(b => b.onclick = () => toast(b.dataset.soon));
   c.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { S.filter = b.dataset.filter; render(); });
+  c.querySelectorAll("[data-cal]").forEach(b => b.onclick = () => { const n = +b.dataset.cal, f = S.calFrom || monday(new Date()); S.calFrom = n ? new Date(f.getFullYear(), f.getMonth(), f.getDate() + n) : null; render(); });
   c.querySelectorAll("[data-zone]").forEach(b => b.onclick = () => { S.zone = b.dataset.zone; render(); });
   c.querySelectorAll("[data-promo]").forEach(r => r.onclick = () => openDw("promo", r.dataset.promo));
   c.querySelectorAll("[data-store]").forEach(r => r.onclick = () => openDw("store", r.dataset.store));
@@ -1503,6 +1661,7 @@ function bindView(D) {
   if (S.view === "settings") bindSettings();
 }
 $("new-promo").onclick = () => openPromo();
+$("f-mand").addEventListener("change", () => { show("f-lock-w", $("f-mand").checked); if (!$("f-mand").checked && $("f-lock")) $("f-lock").checked = false; });
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => { show("m-promo", false); show("m-invite", false); show("m-pimp", false); });
 
 /* ---------- Support Vitriin ---------- */
@@ -1861,6 +2020,7 @@ function openPromo(resendId = null) {
     F.kind = "promo"; F.type = "percent"; F.media = []; F.formats = new Set(); F.pv = null; F.target = "all";
     ["f-title", "f-mech", "f-desc", "f-code", "f-ean"].forEach(id => $(id).value = "");
     $("f-mand").checked = false; $("f-pin").checked = false; show("f-pin-w", pinMode() === "optional");
+    $("f-pub").innerHTML = pubFields("f", { pubDate: "", pubTime: "09:00" }); $("f-lock-w").innerHTML = lockSwitch("f", false); show("f-lock-w", false);
     const t = new Date(); $("f-start").value = iso(t); $("f-end").value = iso(new Date(t.getTime() + 14 * DAY));
     syncTypes(); syncMedia();
   } else F.target = "pick";
@@ -1901,7 +2061,8 @@ $("f-send").onclick = async () => {
     if (!promoId) {
       const row = promoRow({ kind: F.kind, media: F.media, title: $("f-title").value, type: F.type, mech: $("f-mech").value,
         desc: $("f-desc").value, start: $("f-start").value, end: $("f-end").value,
-        code: feat("discount_code") ? $("f-code").value : "", ean: feat("ean_code") ? $("f-ean").value : "", mand: $("f-mand").checked, pin: pinMode() === "optional" && $("f-pin").checked, formats: F.formats });
+        code: feat("discount_code") ? $("f-code").value : "", ean: feat("ean_code") ? $("f-ean").value : "", mand: $("f-mand").checked, pin: pinMode() === "optional" && $("f-pin").checked, formats: F.formats,
+        pubDate: $("f-pubd").value, pubTime: $("f-pubt").value, lock: !!$("f-lock")?.checked, isNew: true });
       const { data, error } = await sb.from("promotions").insert({ ...row, created_by_network_id: S.net.id, status: "draft" }).select("id").single();
       if (error) throw error;
       promoId = data.id;
@@ -1923,8 +2084,8 @@ async function load() {
   const [st, ac, pr, sp, vs] = await Promise.all([
     sb.from("stores").select("id, name, address, city, postal_code, auto_accept, logo_url, created_at, invited_at").eq("network_id", id).order("name").range(0, 4999),
     sb.from("social_accounts").select("store_id, channel, status, display_name, stores!inner(network_id)").eq("stores.network_id", id).range(0, 9999),
-    sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, pin_required, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
-    sb.from("store_promotions").select("id, promotion_id, store_id, status, hidden, suspended, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),
+    sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, pin_required, publish_at, publish_at_locked, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
+    sb.from("store_promotions").select("id, promotion_id, store_id, status, hidden, suspended, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, scheduled_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),
     // App Vitriin : « J'aime » et codes affichés par les clients, par magasin et par campagne.
     sb.rpc("network_vitrine_stats", { p_network_id: id }),
   ]);
