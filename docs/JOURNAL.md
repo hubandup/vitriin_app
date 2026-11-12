@@ -55,6 +55,10 @@ Repères :
   réseaux, date proposée par la centrale pré-remplie, date imposée verrouillée : bouton « Valider la
   publication ») ; « Publier » bloqué avant une date imposée ; fiche promo : « Changer la date » et « Déprogrammer ».
   Réseaux de démonstration inchangés (`demo_publish` daté).
+- **Date de publication par défaut (demande Charles)** : le premier jour de la promo. Centrale : champ pré-rempli
+  avec le début, qui le suit tant qu'on ne l'a pas changé ; import Excel : premier jour à 9h. Magasin : la
+  programmation propose la date déjà programmée, sinon celle de la centrale, sinon le premier jour (aujourd'hui
+  si la promo a commencé, à 9h ou à l'heure pleine suivante).
 - **Mise en route** : appliquer les deux migrations, déployer `meta-publish` et `publish-scheduled`.
   Après validation Meta : `supabase secrets set SCHEDULER_ENABLED=true`.
 - **Retour arrière** : `git revert` du commit ; redéployer `meta-publish` ; migration inverse décrite en tête de

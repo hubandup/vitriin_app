@@ -947,7 +947,7 @@ const schedAt = (x) => x.scheduled_at || x.published_at;
 const hhmm = (d) => new Date(d).toTimeString().slice(0, 5);
 const dtime = (d) => `${dshort(d)} ${hhmm(d).replace(":", "h")}`;
 function pubFields(px, v) {
-  return `<label class="fl" for="${px}-pubd">Publication sur les réseaux des magasins <small>· facultatif</small></label>
+  return `<label class="fl" for="${px}-pubd">Publication sur les réseaux des magasins <small>· par défaut le premier jour</small></label>
   <div class="two"><div><input class="in" id="${px}-pubd" ${px === "e" ? 'data-e="pubDate"' : ""} type="date" value="${esc(v.pubDate || "")}" aria-label="Date de publication"></div>
   <div><input class="in" id="${px}-pubt" ${px === "e" ? 'data-e="pubTime"' : ""} type="time" value="${esc(v.pubTime || "09:00")}" aria-label="Heure de publication"></div></div>`;
 }
@@ -1206,8 +1206,9 @@ function promoRow(v) {
   if (!v.formats.size) throw new Error("Choisissez au moins un format de publication.");
   // Date de publication proposée (ou imposée, pour une promo obligatoire) aux magasins.
   let publishAt = null;
-  if (v.pubDate) {
-    publishAt = new Date(`${v.pubDate}T${v.pubTime || "09:00"}:00`);
+  const pubDate = v.pubDate === undefined ? v.start : v.pubDate; // non renseignée (import) : premier jour de la promo
+  if (pubDate) {
+    publishAt = new Date(`${pubDate}T${v.pubTime || "09:00"}:00`);
     if (isNaN(publishAt)) throw new Error("Vérifiez la date de publication.");
     if (publishAt >= end) throw new Error("La publication doit avoir lieu avant la fin de la promo.");
   }
@@ -1226,7 +1227,11 @@ function promoRow(v) {
 }
 function bindPromoDw(D) {
   const b = $("dw-b"), p = D.promoById[E.id];
-  b.querySelectorAll("[data-e]").forEach(i => i.oninput = () => { E[i.dataset.e] = i.value; markDirty(); });
+  b.querySelectorAll("[data-e]").forEach(i => i.oninput = () => {
+    // Date de publication : par défaut le premier jour de la promo, et elle suit le début tant qu'on ne l'a pas changée.
+    if (i.dataset.e === "start" && (!E.pubDate || E.pubDate === E.start)) { E.pubDate = i.value; const pd = $("e-pubd"); if (pd) pd.value = i.value; }
+    E[i.dataset.e] = i.value; markDirty();
+  });
   b.querySelectorAll("#e-kind button").forEach(x => x.onclick = () => { E.kind = x.dataset.k; markDirty(); render(); });
   b.querySelectorAll("#e-types button").forEach(x => x.onclick = () => { E.type = x.dataset.type; markDirty(); render(); });
   b.querySelectorAll("[data-rm]").forEach(x => x.onclick = () => { E.media.splice(+x.dataset.rm, 1); markDirty(); render(); });
@@ -1661,6 +1666,8 @@ function bindView(D) {
   if (S.view === "settings") bindSettings();
 }
 $("new-promo").onclick = () => openPromo();
+{ let prevStart = ""; $("f-start").addEventListener("focus", () => { prevStart = $("f-start").value; });
+  $("f-start").addEventListener("change", () => { const pd = $("f-pubd"); if (pd && (!pd.value || pd.value === prevStart)) pd.value = $("f-start").value; prevStart = $("f-start").value; }); }
 $("f-mand").addEventListener("change", () => { show("f-lock-w", $("f-mand").checked); if (!$("f-mand").checked && $("f-lock")) $("f-lock").checked = false; });
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => { show("m-promo", false); show("m-invite", false); show("m-pimp", false); });
 
@@ -2020,8 +2027,8 @@ function openPromo(resendId = null) {
     F.kind = "promo"; F.type = "percent"; F.media = []; F.formats = new Set(); F.pv = null; F.target = "all";
     ["f-title", "f-mech", "f-desc", "f-code", "f-ean"].forEach(id => $(id).value = "");
     $("f-mand").checked = false; $("f-pin").checked = false; show("f-pin-w", pinMode() === "optional");
-    $("f-pub").innerHTML = pubFields("f", { pubDate: "", pubTime: "09:00" }); $("f-lock-w").innerHTML = lockSwitch("f", false); show("f-lock-w", false);
-    const t = new Date(); $("f-start").value = iso(t); $("f-end").value = iso(new Date(t.getTime() + 14 * DAY));
+    { const t = new Date(); $("f-start").value = iso(t); $("f-end").value = iso(new Date(t.getTime() + 14 * DAY)); }
+    $("f-pub").innerHTML = pubFields("f", { pubDate: $("f-start").value, pubTime: "09:00" }); $("f-lock-w").innerHTML = lockSwitch("f", false); show("f-lock-w", false);
     syncTypes(); syncMedia();
   } else F.target = "pick";
   $("f-note").textContent = isResend ? "" : "Vitriin ne publie jamais à la place d'un magasin : chacun valide et publie depuis son espace.";

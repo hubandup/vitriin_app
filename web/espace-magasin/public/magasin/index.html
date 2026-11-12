@@ -1805,11 +1805,12 @@ function sheetSchedule(p) {
   const nDays = Math.max(1, Math.min(21, Math.ceil((new Date(p.end).getTime() - today.getTime()) / DAY)));
   const days = []; for (let k = 0; k < nDays; k++) days.push(d(k));
   const prop = p.schedFull ? new Date(p.schedFull) : p.pubAtNet && p.pubAtNet > Date.now() ? p.pubAtNet : null;
-  // Par défaut : la date déjà programmée, sinon celle proposée par la centrale, sinon le début de la promo (ou demain).
-  const startIdx = Math.round((new Date(p.start).setHours(0, 0, 0, 0) - today.getTime()) / DAY);
+  // Par défaut : la date déjà programmée, sinon celle proposée par la centrale, sinon le premier jour de la
+  // promo (aujourd'hui si elle a déjà commencé), à 9h, ou à l'heure pleine suivante si 9h est passé.
   const dayOf = (t) => Math.max(0, Math.min(nDays - 1, Math.round((new Date(t).setHours(0, 0, 0, 0) - today.getTime()) / DAY)));
-  let sel = prop ? dayOf(prop) : startIdx > 0 ? dayOf(p.start) : Math.min(1, nDays - 1);
+  let sel = prop ? dayOf(prop) : dayOf(p.start);
   let time = prop ? hhmm(prop) : "09:00";
+  if (!prop && sel === 0 && new Date().getHours() >= 9) time = `${String(Math.min(23, new Date().getHours() + 1)).padStart(2, "0")}:00`;
   const atOf = () => { if (locked) return new Date(p.pubAtNet); const [hh, mm] = (time || "09:00").split(":").map(Number); const at = new Date(days[sel]); at.setHours(hh, mm, 0, 0); return at; };
   const draw = () => {
     const at = atOf(), list = chans.map(c => NAME[c]);
