@@ -59,7 +59,10 @@ Repères :
   avec le début, qui le suit tant qu'on ne l'a pas changé ; import Excel : premier jour à 9h. Magasin : la
   programmation propose la date déjà programmée, sinon celle de la centrale, sinon le premier jour (aujourd'hui
   si la promo a commencé, à 9h ou à l'heure pleine suivante).
-- **Mise en route** : appliquer les deux migrations, déployer `meta-publish` et `publish-scheduled`.
+- **Mis en production le 12/11** : migrations appliquées (le job pg_cron dans une migration séparée,
+  `publication_scheduler_cron`, après le déploiement de la fonction) ; `meta-publish` v9 et `publish-scheduled` v1
+  déployées (bundles esbuild du code de ce commit, contenu vérifié après déploiement) ; le job tourne chaque
+  minute et répond `enabled: false`. Interfaces : en ligne à la fusion de la PR #1.
   Après validation Meta : `supabase secrets set SCHEDULER_ENABLED=true`.
 - **Retour arrière** : `git revert` du commit ; redéployer `meta-publish` ; migration inverse décrite en tête de
   `20261112170100_publication_scheduler.sql` (unschedule du job, suppression des lignes `scheduled`, des
