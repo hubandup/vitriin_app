@@ -10,8 +10,10 @@ format accepté par Instagram).
 
 ## Espace Centrale (app.vitriin.co/centrale)
 
-`public/centrale/index.html` : le back-office de la centrale, calé sur la
-maquette Claude Design « Vitriin Centrale ». Tableau de bord, promotions
+`public/centrale/index.html` : le back-office de la centrale. Design refondu
+le 12 nov. 2026 (MOD-084) : menu en haut, tuiles sans bordure, un seul accent
+magenta ; le Manager (`public/manager/index.html`) suit la même grammaire.
+Tableau de bord, promotions
 (création, envoi aux magasins, suivi magasin par magasin), magasins (état des
 connexions, invitation par lien `/?rejoindre=CODE`), audience (à venir).
 

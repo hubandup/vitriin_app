@@ -20,6 +20,51 @@ Repères :
 
 ## 2026-11-12
 
+### MOD-084 · Nouveau design de la Centrale et du Manager
+- **Demande (Charles)** : design jugé daté face aux SaaS récents. Direction validée le 12/11 sur maquette
+  (canevas Claude « Vitriin Centrale, tableau de bord avant / après »), puis : « déploie cette version en prod,
+  adapte ce design à tous les écrans, fais de même sur le Manager ».
+- **Principe** : fond blanc, tuiles `#F6F5F3` sans bordure, grands rayons, typographie plus contrastée (titres de
+  page 40 px, chiffres de 44 à 84 px), un seul accent : le magenta pour l'action et le point à regarder, les
+  chiffres en encre, le vert réservé aux hausses. Fin des pastilles d'icônes colorées et des avatars pastel.
+  Bouton principal en encre, « + » en dégradé.
+- **Centrale** (`public/centrale/index.html`) :
+  - Menu en haut, en pastilles, à la place de la barre latérale repliable (retirée, avec la préférence `c-fold`).
+    Paramètres, Support, Import des promos et déconnexion passent dans le menu du compte (avatar, pastille
+    magenta si une réponse du support attend). Sous 1440 px le menu passe sur une 2e ligne et défile : le
+    bandeau mobile `mnav` est retiré.
+  - Tableau de bord : bloc principal « Publications des magasins » (4 dernières semaines, barres cliquables),
+    tuile sombre « À relancer » (magasins sans réseau, taux de connexion, repère de l'objectif 90 %), trois
+    chiffres secondaires, cartes des campagnes actives (visuel en grand, relais par les magasins), connexion
+    par région, classement. Le titre de la page est le nom du réseau.
+  - Promotions : import Excel en tuile principale, quatre chiffres, tableau avec vignettes. Magasins : quatre
+    chiffres, tuile des magasins à relancer, réseaux en monochrome (FB, IG). Calendrier : une couleur par type
+    conservée (légende), teintes assombries pour le contraste du texte. Paramètres, panneaux, fenêtres,
+    support et connexion suivent la même grammaire.
+  - Thème sombre conservé (même réglage dans Préférences) ; la tuile sombre s'y inverse en clair.
+  - Textes : les derniers tutoiements passent au vouvoiement (règle `vitriin-brand.mdc`) ; recherche
+    « Magasin ou ville » ; l'icône 🎁 du type « Gratuit sous condition » devient « 0 € ».
+  - Retirés : `AV_PAL`, `TYPE_PILL`, `kpi()`, les classes `p-indigo` / `p-purple` (remplacées par `p-line` /
+    `p-amber`), les teintes `--t-*` / `--c-*`.
+- **Manager** (`public/manager/index.html`) : même en-tête (sept entrées en trois groupes, « Inclure les démos »
+  et compte à droite), accueil avec le bloc « Publications des magasins » et la tuile « À traiter » (échéances,
+  bouton vers la liste), chiffres et tableaux sans cadre, pastilles et boutons communs à la Centrale.
+  `trend()`, `svg()` et les icônes du menu sont retirés. Correction d'une balise `</p</p>` dans la fiche client.
+- **Logo** : `public/logo-vitriin.png` (logotype officiel), posé sans cadre dans l'en-tête et sur la connexion.
+- **Inchangé** : aucune requête, aucune fonction serveur, aucune migration. Espace magasin, vitrine `/v` et
+  page `/` (parcours présenté à Meta) non touchés.
+- **Contrôles avant mise en ligne** : 42 écrans Centrale et 32 écrans Manager rendus dans Chrome avec des
+  données fictives (ordinateur 1440, 1280 et 1024 px, téléphone 390 px, thème sombre, réseau vide, données
+  incomplètes) : aucune erreur JavaScript, aucun débordement horizontal. Une cinquantaine de gestes rejoués
+  (menus, filtres, recherche, panneaux, fenêtres, thème, déconnexion) sans écriture en base. Sept portes :
+  pas de nouvelle clé, pas de changement de requête ni de droits, textes insérés échappés.
+- **Non contrôlé** : le rendu avec les données réelles (pas de compte de production dans la session).
+- **Mise en production** : à la fusion de la PR sur `main` (déploiement Vercel automatique).
+- **À savoir** : le numéro MOD-083 est pris par la PR #2 (Campagnes), pas encore fusionnée. Écrite sur l'ancien
+  design, elle entre en conflit avec ce changement dans `centrale/index.html` et dans ce journal : ses écrans
+  sont à reprendre avec la nouvelle grammaire (`.card`, `.kpis` / `.kp`, `.chip`, `.btn-p` / `.btn-s`, `.sec`).
+- **Retour arrière** : `git revert` du commit MOD-084, puis redéploiement Vercel.
+
 ### MOD-082 · Planificateur de publications et calendrier (Centrale + magasin)
 - **Décisions (Charles)** : calendrier ET vraie programmation dès le MVP ; une centrale peut imposer la date et
   l'heure de publication d'une promo obligatoire, le magasin valide quand même (il publie sur SES comptes :
