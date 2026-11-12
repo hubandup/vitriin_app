@@ -18,6 +18,58 @@ Repères :
 
 ---
 
+## 2026-11-12
+
+### MOD-082 · Planificateur de publications et calendrier (Centrale + magasin)
+- **Décisions (Charles)** : calendrier ET vraie programmation dès le MVP ; une centrale peut imposer la date et
+  l'heure de publication d'une promo obligatoire, le magasin valide quand même (il publie sur SES comptes :
+  règle Meta Centrale → Magasin → post) ; développé tout de suite, publication automatique coupée jusqu'à
+  la validation de l'App Review.
+- **Base** (`20261112170000_publication_scheduled_status`, `20261112170100_publication_scheduler`) :
+  - `publications` : statut `scheduled`, `scheduled_at`, `claimed_at` (début d'une publication en cours) ;
+    une publication programmée est une ligne de `publications`, même contrainte « un post par canal ».
+  - `promotions` : `publish_at` (date proposée par la centrale), `publish_at_locked` (imposée : promo
+    obligatoire d'une centrale seulement, contrainte en base) ; droits colonne accordés à `authenticated`.
+  - RPC `schedule_publication(sp, canaux, date)` : membre du magasin, refuse démo / suspendue / refusée /
+    date passée / après la fin / canal non connecté ; active une promo en attente ; date imposée = `publish_at`
+    quoi qu'envoie le client. `unschedule_publication(sp)` : toujours possible, même une date imposée.
+  - Trigger `promotions_sync_imposed_publish_at` : la centrale déplace une date imposée, les programmations suivent.
+  - Plomberie : secret Vault `scheduler_cron_secret`, RPC `scheduler_check_secret` et `publications_release_stuck`
+    (service uniquement), job pg_cron `vitriin-publish-scheduled` chaque minute (pg_net).
+  - Testé sur une base locale : refus non-membre, date passée, après la fin, canal non connecté, démo ;
+    date imposée retenue ; retrait d'un canal ; déplacement de la date imposée ; droits.
+- **Fonctions** : le cœur de `meta-publish` passe dans `_shared/publish.ts` (aucun changement de comportement,
+  sauf : une ligne `scheduled` est reprise comme une ligne `failed`, `claimed_at` daté, et rien ne part avant une
+  date imposée). Nouvelle fonction `publish-scheduled` (sans JWT, en-tête `x-scheduler-secret`) : reprend les
+  publications dues, 8 activations par passage, passe en échec une promo terminée ou refusée entre-temps.
+  **Interrupteur** : ne publie rien tant que le secret `SCHEDULER_ENABLED` ne vaut pas `true`.
+  Ce déploiement de `meta-publish` emporte aussi MOD-037 (lien vitrine sur Facebook) et MOD-068 (Google, inactif
+  sans secrets), commités mais jamais déployés.
+- **Centrale** : onglet « Calendrier » : une barre par campagne sur 4 semaines (couleur du type, magasins prêts /
+  ciblés, cadenas si date imposée, pointillés pour un brouillon), trait du jour, alertes « démarre dans N jours :
+  X magasins ne l'ont pas activée / validée », clic = panneau de suivi magasin par magasin (statut « Programmée »
+  avec date et heure). Création et modification d'une promo : date et heure de publication, interrupteur
+  « Imposer la date de publication » pour une promo obligatoire.
+- **Magasin** : bascule Liste / Calendrier dans Promos (semaine en bandeau, promos du réseau à valider, agenda :
+  programmées, publiées, débuts, derniers jours). « Programmer » branché sur `schedule_publication` (choix des
+  réseaux, date proposée par la centrale pré-remplie, date imposée verrouillée : bouton « Valider la
+  publication ») ; « Publier » bloqué avant une date imposée ; fiche promo : « Changer la date » et « Déprogrammer ».
+  Réseaux de démonstration inchangés (`demo_publish` daté).
+- **Date de publication par défaut (demande Charles)** : le premier jour de la promo. Centrale : champ pré-rempli
+  avec le début, qui le suit tant qu'on ne l'a pas changé ; import Excel : premier jour à 9h. Magasin : la
+  programmation propose la date déjà programmée, sinon celle de la centrale, sinon le premier jour (aujourd'hui
+  si la promo a commencé, à 9h ou à l'heure pleine suivante).
+- **Mis en production le 12/11** : migrations appliquées (le job pg_cron dans une migration séparée,
+  `publication_scheduler_cron`, après le déploiement de la fonction) ; `meta-publish` v9 et `publish-scheduled` v1
+  déployées (bundles esbuild du code de ce commit, contenu vérifié après déploiement) ; le job tourne chaque
+  minute et répond `enabled: false`. Interfaces : en ligne à la fusion de la PR #1.
+  Après validation Meta : `supabase secrets set SCHEDULER_ENABLED=true`.
+- **Retour arrière** : `git revert` du commit ; redéployer `meta-publish` ; migration inverse décrite en tête de
+  `20261112170100_publication_scheduler.sql` (unschedule du job, suppression des lignes `scheduled`, des
+  fonctions, du trigger et des colonnes).
+
+---
+
 ## 2026-11-08
 
 ### BUG-014 · Aperçu flouté d'un code-barres sur une promo validée par QR

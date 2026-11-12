@@ -296,3 +296,21 @@ suppression automatique.
 est posé et que le texte ne le contient pas déjà. Modification commitée,
 **pas encore déployée** : l'Espace Centrale écrit déjà le code dans le texte,
 rien ne presse. Elle partira au prochain `supabase functions deploy meta-publish`.
+
+---
+
+## Planificateur (MOD-082)
+
+`publish-scheduled` publie les publications programmées (statut `scheduled`) à l'heure dite.
+Appelée chaque minute par pg_cron (job `vitriin-publish-scheduled`, migration
+`20261112170100_publication_scheduler.sql`), sans JWT : l'en-tête `x-scheduler-secret` est
+comparé en base au secret Vault `scheduler_cron_secret`.
+
+| Secret | Valeur |
+|---|---|
+| `SCHEDULER_ENABLED` | `true` pour publier. Absent ou autre valeur : la fonction compte les publications dues et ne publie rien. À poser après la validation de l'App Review Meta. |
+
+```bash
+supabase functions deploy meta-publish publish-scheduled
+supabase secrets set SCHEDULER_ENABLED=true   # le jour J
+```

@@ -431,3 +431,10 @@ verify_jwt = false
 [functions.google-pick]
 # JWT du commerçant : choix de la fiche quand le compte Google en gère plusieurs.
 verify_jwt = true
+
+
+[functions.publish-scheduled]
+# PUBLIQUE au sens du JWT : c'est pg_cron qui appelle, chaque minute. Protégée
+# par l'en-tête x-scheduler-secret, vérifié en base contre le secret Vault
+# scheduler_cron_secret. Ne publie rien tant que SCHEDULER_ENABLED != "true".
+verify_jwt = false
