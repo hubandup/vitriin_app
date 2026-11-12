@@ -20,6 +20,50 @@ Repères :
 
 ## 2026-11-12
 
+### MOD-083 · Campagnes : étaler un temps fort sur sa période (Centrale + magasin)
+- **Décisions (Charles)** : une campagne regroupe les promos d'un temps fort (ex. Black Friday, 80 promos sur
+  15 jours) et étale leurs publications ; la centrale PROPOSE le planning, elle n'impose rien ; le magasin
+  l'accepte d'un geste ou décale une promo ; la centrale voit qui a suivi ou ajusté. Interface simple : le
+  maximum de réglages est fixé une fois dans Paramètres › Diffusion, la campagne se crée en trois gestes.
+- **Base** (`20261112190000_campaigns`) :
+  - Table `campaigns` (réseau, nom, dates, statut `draft` / `proposed`, `spread_at`, `proposed_at`) ; RLS : la
+    centrale lit et écrit les siennes ; les magasins du réseau ne voient une campagne qu'une fois proposée ;
+    le statut ne bouge que par les RPC (droits colonne).
+  - `promotions.campaign_id` et `promotions.is_featured` (promo phare) ; trigger `promotions_campaign_guard` :
+    une promo ne rejoint qu'une campagne de la centrale qui l'a créée.
+  - Table `campaign_acceptances` (magasin, date) écrite seulement par les RPC.
+  - RPC `campaign_spread` : calcule `publish_at` pour chaque promo selon `networks.settings.diffusion`
+    (max par jour, créneaux, jours exclus, ordre de passage), une promo par jour à tour de rôle, phares d'abord,
+    chaque promo dans sa période, heure de Paris, à partir de demain ; une date imposée n'est pas touchée.
+  - RPC `campaign_propose` : envoie chaque promo à tous les magasins (`send_promotion`), rejouable.
+  - RPC `campaign_accept` (magasin) : programme chaque promo à la date proposée sur Facebook / Instagram
+    connectés (`schedule_publication`, `demo_publish` en démo) ; une promo déjà programmée garde sa date.
+    `campaign_withdraw` : déprogramme ce qui n'est pas parti. `campaign_tracking` (centrale) : accepté /
+    ajusté / sans réponse, magasin par magasin.
+  - Trigger `promotions_sync_imposed_publish_at` remplacé : en plus de la date imposée, la centrale qui
+    déplace une promo de campagne entraîne les magasins qui ont accepté, sauf les promos qu'ils ont décalées.
+  - Testé sur une base locale : 80 promos sur 13 jours (7, 7 puis 6 par jour, dimanches exclus, phares à 9h
+    les 8 premiers jours) ; acceptation (79 programmées, 1 décalée gardée) ; magasin d'un autre réseau refusé ;
+    garde réseau ; déplacement suivi sauf ajustement ; suivi ; retrait.
+- **Centrale** (`centrale/index.html`) :
+  - Menu « Campagnes » : liste, création (nom + dates), promos (choisir parmi les promos de la période avec
+    ★ phare, ou importer un Excel dans la campagne, colonne « Phare »), « Répartir », « Proposer aux N
+    magasins », calendrier semaine par semaine (clic sur une promo puis sur un jour pour la déplacer, jour
+    au-delà du maximum signalé), suivi des magasins avec relance à copier (modèle « Relance d'une campagne »).
+  - Paramètres › nouvel onglet « Diffusion » : rythme des campagnes (publications par jour, créneaux, jours,
+    ordre de passage) et la carte « Réception des promos » déplacée depuis Préférences.
+  - Calendrier : les promos d'une campagne tiennent sur une seule barre, qui ouvre la campagne.
+  - Vocabulaire : une promo seule s'appelle désormais « promo » (bouton « Nouvelle promo », colonnes, modèle
+    d'annonce) ; « campagne » est réservé aux temps forts.
+- **Magasin** (`magasin/index.html`) : tant que le planning n'est pas accepté, les promos de la campagne sont
+  regroupées dans une carte (Accueil, Promos, Calendrier) ; la feuille de campagne liste les publications jour
+  par jour, « Accepter le planning » d'un geste, flèche pour décaler une promo (feuille de programmation,
+  retour à la campagne), « Annuler » après acceptation.
+- **Reste à faire** : l'email « Nouvelle campagne » (`campaign-notify`) part encore promo par promo et n'est pas
+  envoyé pour les promos d'une campagne ; un email unique par campagne est à prévoir.
+- **Retour arrière** : `git revert` du commit, puis migration inverse décrite en tête de
+  `20261112190000_campaigns.sql` (tables, colonnes, fonctions, trigger rétabli dans sa version MOD-082).
+
 ### MOD-082 · Planificateur de publications et calendrier (Centrale + magasin)
 - **Décisions (Charles)** : calendrier ET vraie programmation dès le MVP ; une centrale peut imposer la date et
   l'heure de publication d'une promo obligatoire, le magasin valide quand même (il publie sur SES comptes :
