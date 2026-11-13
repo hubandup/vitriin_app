@@ -18,6 +18,67 @@ Repères :
 
 ---
 
+## 2026-11-13
+
+### MOD-084 · Nouveau design de la Centrale et du Manager
+- **Demande (Charles)** : design jugé daté face aux SaaS récents. Direction validée le 12/11 sur maquette
+  (canevas Claude « Vitriin Centrale, tableau de bord avant / après »), puis : « déploie cette version en prod,
+  adapte ce design à tous les écrans, fais de même sur le Manager ».
+- **Principe** : fond blanc, tuiles `#F6F5F3` sans bordure, grands rayons, typographie plus contrastée (titres de
+  page 40 px, chiffres de 44 à 84 px), un seul accent : le magenta pour l'action et le point à regarder, les
+  chiffres en encre, le vert réservé aux hausses. Fin des pastilles d'icônes colorées et des avatars pastel.
+  Bouton principal en encre, « + » en dégradé.
+- **Centrale** (`public/centrale/index.html`) :
+  - Menu en haut, en pastilles, à la place de la barre latérale repliable (retirée, avec la préférence `c-fold`).
+    Paramètres, Support, Import des promos et déconnexion passent dans le menu du compte (avatar, pastille
+    magenta si une réponse du support attend). Sous 1440 px le menu passe sur une 2e ligne et défile : le
+    bandeau mobile `mnav` est retiré. La recherche de magasins est une pastille qui s'ouvre au clic (les six
+    entrées du menu tiennent ainsi sur une ligne) ; elle s'efface en quittant Magasins, dont le sous-titre la
+    rappelle.
+  - Tableau de bord : bloc principal « Publications des magasins » (4 dernières semaines, barres cliquables),
+    tuile sombre « À relancer » (magasins sans réseau, taux de connexion, repère de l'objectif 90 %), trois
+    chiffres secondaires, cartes des promos actives (visuel en grand, relais par les magasins), connexion
+    par région, classement. Le titre de la page est le nom du réseau.
+  - Promotions : import Excel en tuile principale, quatre chiffres, tableau avec vignettes. Magasins : quatre
+    chiffres, tuile des magasins à relancer, réseaux en monochrome (FB, IG). Calendrier : une couleur par type
+    conservée (légende), teintes assombries pour le contraste du texte. Paramètres, panneaux, fenêtres,
+    support et connexion suivent la même grammaire.
+  - Campagnes (MOD-083, fusionné entre-temps) reprises dans cette grammaire, sans toucher à leurs requêtes :
+    liste sans cadre ; campagne ouverte avec son nom en titre de page et trois tuiles d'étapes, la tuile
+    sombre portant l'étape à faire (les promos tant qu'il n'y en a pas, puis « Répartir » et « Proposer ») ;
+    suivi des magasins dans une tuile (barre en encre, « a / ont accepté » accordé) ; planning en grille
+    légère, jour au-delà du maximum en pastille rouge, promo sélectionnée en encre avec un bandeau rose qui
+    reste visible au défilement ; fenêtre de choix des promos ; Paramètres › Diffusion (compteur, créneaux,
+    jours). Sur téléphone le planning défile horizontalement. Le jour cible d'un déplacement prend la classe
+    `tgt` : `drop` appartenait déjà à la zone de dépôt des visuels et lui imposait son cadre. Calendrier : la
+    barre d'une campagne garde le dégradé, et entre dans la légende.
+  - Vocabulaire de MOD-083 appliqué partout : « promo » pour une promo seule (cartes du tableau de bord,
+    renommées `pcards` / `promoCard`), « campagne » pour un temps fort.
+  - Thème sombre conservé (même réglage dans Préférences) ; la tuile sombre s'y inverse en clair.
+  - Textes : les derniers tutoiements passent au vouvoiement (règle `vitriin-brand.mdc`) ; recherche
+    « Magasin ou ville » ; l'icône 🎁 du type « Gratuit sous condition » devient « 0 € ».
+  - Retirés : `AV_PAL`, `TYPE_PILL`, `kpi()`, les classes `p-indigo` / `p-purple` (remplacées par `p-line` /
+    `p-amber`), les teintes `--t-*` / `--c-*`.
+- **Manager** (`public/manager/index.html`) : même en-tête (sept entrées en trois groupes, « Inclure les démos »
+  et compte à droite), accueil avec le bloc « Publications des magasins » et la tuile « À traiter » (échéances,
+  bouton vers la liste), chiffres et tableaux sans cadre, pastilles et boutons communs à la Centrale.
+  `trend()`, `svg()` et les icônes du menu sont retirés. Correction d'une balise `</p</p>` dans la fiche client.
+- **Logo** : `public/logo-vitriin.png` (logotype officiel), posé sans cadre dans l'en-tête et sur la connexion.
+- **Inchangé** : aucune requête, aucune fonction serveur, aucune migration. Espace magasin, vitrine `/v` et
+  page `/` (parcours présenté à Meta) non touchés.
+- **Contrôles avant mise en ligne** : 73 écrans Centrale (dont 28 pour Campagnes et Diffusion) et 32 écrans
+  Manager rendus dans Chrome avec des données fictives (ordinateur 1920, 1536, 1440, 1280 et 1024 px,
+  téléphone 390 px, thème sombre, réseau vide, données incomplètes) : aucune erreur JavaScript, aucun
+  débordement horizontal. 84 gestes rejoués sur un faux client : le parcours de lecture ne fait aucune
+  écriture ; le parcours d'écriture (répartir, proposer, déplacer une promo, promo phare, renommer, créer une
+  campagne, deux réglages de Diffusion) fait exactement les 8 appels attendus. Sept portes : pas de nouvelle
+  clé ; les 60 appels à la base et aux fonctions sont identiques, un par un, à ceux de `main` ; aucune
+  adresse externe ajoutée ; textes insérés échappés ; espace magasin, vitrine et migrations non touchés.
+- **Non contrôlé** : le rendu avec les données réelles (pas de compte de production dans la session).
+- **Mise en production** : à la fusion de la PR #3 sur `main` (déploiement Vercel automatique). La branche
+  contient `main` (MOD-083) et sa migration, appliquée en base le 13/11 (voir MOD-083).
+- **Retour arrière** : `git revert` du commit MOD-084, puis redéploiement Vercel.
+
 ## 2026-11-12
 
 ### MOD-083 · Campagnes : étaler un temps fort sur sa période (Centrale + magasin)
@@ -59,6 +120,13 @@ Repères :
   regroupées dans une carte (Accueil, Promos, Calendrier) ; la feuille de campagne liste les publications jour
   par jour, « Accepter le planning » d'un geste, flèche pour décaler une promo (feuille de programmation,
   retour à la campagne), « Annuler » après acceptation.
+- **Mis en production** : code en ligne le 12/11 à 23 h 50 UTC (fusion de la PR #2) ; migration appliquée le
+  13/11 à 00 h 44 UTC sous le nom `campaigns` (version `20261113004420`). Entre les deux, 54 minutes pendant
+  lesquelles la Centrale et l'espace magasin en ligne ne pouvaient pas charger leurs données (colonnes
+  `campaign_id` / `is_featured` et table `campaigns` absentes) ; aucune requête en échec dans les journaux
+  Supabase sur la période. Contrôles après application : les 8 fonctions ont la même empreinte que le fichier
+  du dépôt, RLS actif sur les deux tables, aucun droit pour `anon`, le statut d'une campagne non modifiable
+  hors RPC, cache PostgREST rechargé. À retenir : appliquer la migration avant de fusionner le code qui en dépend.
 - **Reste à faire** : l'email « Nouvelle campagne » (`campaign-notify`) part encore promo par promo et n'est pas
   envoyé pour les promos d'une campagne ; un email unique par campagne est à prévoir.
 - **Retour arrière** : `git revert` du commit, puis migration inverse décrite en tête de
