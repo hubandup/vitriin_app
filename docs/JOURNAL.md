@@ -72,8 +72,11 @@ Repères :
   client) ; RLS, propriété des données, admin, inscription et webhooks non touchés.
 - **Non contrôlé** : le rendu avec les données réelles et sur un vrai téléphone (pas de compte de production
   dans la session) ; la police Racing Sans One, non chargée par le banc de test.
-- **Mise en production** : à la fusion de la PR sur `main` (déploiement Vercel automatique).
-- **Retour arrière** : `git revert` du commit MOD-085, puis redéploiement Vercel.
+- **Mise en production** : PR #4 fusionnée sur `main` le 13/11 à 08 h 12 UTC (commit de fusion `0052af1`),
+  déploiement Vercel `dpl_5zg8k8BHPL4sPeHKQPTUzpN35Haq` en ligne sur app.vitriin.co. Pages `/magasin` et
+  `/v` servies vérifiées identiques au code fusionné.
+- **Retour arrière** : `git revert -m 1 0052af1`, ou dans Vercel « Instant Rollback » vers
+  `dpl_FTCfSC7Ngg7uqUF3gX4C9UdCteAT` (MOD-084).
 
 ### BUG-015 · « undefined » affiché sur l'accueil du magasin pour une promo obligatoire
 - **Symptôme** : dans « À faire », la ligne « … : à publier avant le … » affichait le mot « undefined » à la
