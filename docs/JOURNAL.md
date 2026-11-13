@@ -20,6 +20,30 @@ Repères :
 
 ## 2026-11-13
 
+### MOD-086 · Création d'une promo : zone noire pour le visuel, « Code promo web » en dernier
+- **Demande (Charles)**, après la mise en ligne de MOD-085 :
+  - Étape 3 « Validation » : inverser « Sans validation » et « Code promo web ». « Sans validation » rejoint
+    la grille, « Code promo web » prend la ligne pleine largeur du bas (ordre de `VALIDATIONS`).
+  - Étape 1 « Visuel » : la page paraissait vide. Retour de la zone noire carrée des premières maquettes, avec
+    trois choix ronds :
+    - si la centrale a partagé des visuels : « Photo / vidéo », « Mes photos », « Photothèque » ;
+    - sinon (magasin indépendant, ou centrale sans visuel) : « Prendre une photo », « Prendre une vidéo »,
+      « Mes photos ».
+- **Vidéo** : pas encore gérée (prévue en V1.1 avec TikTok). Choix de Charles : boutons visibles et marqués
+  « bientôt ». « Prendre une vidéo » est désactivé, « Photo / vidéo » ouvre l'appareil photo. Corrige au
+  passage un défaut de prod : l'ancien bouton « Vidéo » ouvrait en fait la galerie de photos.
+- Étape 3 : le picto de « Sans validation » devient une petite croix (c'était une coche, qu'on confondait
+  avec le choix sélectionné).
+- « Médiathèque de la centrale » devient « Photothèque » (zone, feuille de choix, fiche promo). La liste
+  des visuels n'est plus calculée qu'à un endroit (`libItems()`), pour la zone et pour la feuille.
+- Après le choix, l'aperçu du visuel prend la même forme carrée que la zone.
+- **Inchangé** : envoi des images, requêtes, fonctions serveur, autres écrans.
+- **Contrôles** : 45 écrans de l'espace magasin rendus (dont la zone avec et sans photothèque, la feuille
+  Photothèque et le parcours « Nouveau post »), sans erreur JavaScript ni débordement ; 430 appels à la base
+  identiques à ceux de `main`. Sept portes : rien de touché côté clés, RLS, données, admin, inscription,
+  webhooks.
+- **Retour arrière** : `git revert` du commit MOD-086.
+
 ### MOD-085 · Charte de la Centrale appliquée à l'espace magasin et à l'app client, nouveau menu du bas
 - **Demande (Charles)** : les maquettes d'écrans d'app proposées le 13/11 simplifiaient trop (itinéraire absent
   du fil, coupon sans sa feuille). Consigne : « revenir aux écrans actuellement en prod, mais appliquer
