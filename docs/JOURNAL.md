@@ -20,6 +20,16 @@ Repères :
 
 ## 2026-11-13
 
+### MOD-087 · Captures des apps pour vitriin.fr, servies par app.vitriin.co/site/
+- **Pourquoi** : la refonte de vitriin.fr (présentation commerciale v3 et nouveau design) montre les vrais écrans
+  des apps. Le site Lovable ne peut pas recevoir de fichiers depuis la session : les images sont donc servies par
+  l'app, dans `web/espace-magasin/public/site/` (17 fichiers WebP, 1,1 Mo au total).
+- **Contenu** : 4 écrans de la Centrale (tableau de bord, promotions, magasins, campagne), 6 de l'espace magasin,
+  6 de l'app client, et le visuel de la promo de démonstration (Hoodie Club). Générés depuis le code des apps
+  avec des données fictives (banc de test Playwright, résolution ×2).
+- **Inchangé** : aucune page, aucun code, aucune requête. Fichiers statiques seulement.
+- **Retour arrière** : `git revert` du commit MOD-087 (le site afficherait alors des images manquantes).
+
 ### MOD-086 · Création d'une promo : zone noire pour le visuel, « Code promo web » en dernier
 - **Demande (Charles)**, après la mise en ligne de MOD-085 :
   - Étape 3 « Validation » : inverser « Sans validation » et « Code promo web ». « Sans validation » rejoint
