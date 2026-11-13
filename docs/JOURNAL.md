@@ -20,6 +20,69 @@ Repères :
 
 ## 2026-11-13
 
+### MOD-085 · Charte de la Centrale appliquée à l'espace magasin et à l'app client, nouveau menu du bas
+- **Demande (Charles)** : les maquettes d'écrans d'app proposées le 13/11 simplifiaient trop (itinéraire absent
+  du fil, coupon sans sa feuille). Consigne : « revenir aux écrans actuellement en prod, mais appliquer
+  uniquement la charte graphique (les contrastes, les ombres, les typos, les espaces, les boutons, les
+  couleurs), pas de modification de l'UX ni des fonctionnalités », et garder le menu principal du bas proposé.
+- **Principe** : la grammaire de MOD-084 posée sur les écrans de MOD-077 / MOD-081, règle par règle, en
+  remplaçant les anciennes valeurs (rien n'est empilé). Aucun écran ajouté, retiré ou réorganisé.
+- **Espace magasin** (`public/magasin/index.html`) :
+  - Typographie : titres de page 34 px en graisse 500, grands chiffres en 500 (28 à 30 px), le reste en 600 au
+    lieu de 700 / 800. Les libellés écrits en capitales passent en casse de phrase (« Comptes connectés »,
+    « Photo de couverture »…), les titres de rubrique de l'onglet Magasin à 20 px.
+  - Boutons : bouton principal en pastille encre (il était en dégradé), bouton secondaire en pastille grise
+    sans bordure, tous en rayon complet. Le dégradé reste au « + », à l'icône « Valider la promo d'un client »
+    et à la pastille Vitriin de la diffusion. Le rouge reste aux gestes qui retirent (supprimer, déprogrammer,
+    se déconnecter).
+  - Tuiles : les cadres blancs à bordure deviennent des tuiles `#F6F5F3` sans bordure (lignes « À faire »,
+    listes de l'onglet Magasin, fiche promo, calendrier, aperçu du post). Un choix sélectionné se lit par un
+    contour encre (type de promo, validation, « Une promo / Un post »), un onglet ou un jour sélectionné par un
+    fond encre. Champs : bordure plus marquée (`#D8D4CE`), encre au focus.
+  - Couleurs : chiffres des statistiques en encre (le rouge reste aux échecs), icônes en encre sur pastille
+    blanche, bandeau de campagne en encre au lieu du dégradé, interrupteurs magenta comme à la Centrale. Les
+    badges d'offre gardent le magenta et Racing Sans One.
+  - Contrastes relevés : vert `#08705A`, rouge `#B3261E`, gris de texte `#6F6A63` à la place de `#a8a29b`,
+    catégories « En cours » et « Supprimées » de la page Promos : tous les textes passent 4,5:1.
+  - Ombres retirées (onglets, pastilles réseaux, avatar, halo du « + ») ; elles restent sur le menu du bas,
+    les feuilles et le message court.
+- **App client** (`public/v/index.html`) : mêmes règles. « J'en profite » garde son dégradé rose vers violet
+  (essayé en aplat magenta, Charles a préféré le dégradé d'origine), en pastille et sans halo : c'est le seul
+  bouton en couleur de l'app ; « Suivre », « Recevoir mon code », « C'est parti » passent en encre ;
+  filtres, centres d'intérêt et onglets « suivis / Suggestions » en pastilles grises, encre quand ils sont
+  actifs ; coupon, fiche commerce et cartes de commerce en tuiles sans bordure ; pastille neutre pour un
+  commerce sans logo ; écran de connexion sur fond blanc. Le fil plein écran (aimer, garder, « Y aller »,
+  partager), le coupon en feuille avec son code flouté, le QR, le code vendeur, l'itinéraire et la carte de la
+  fiche commerce sont inchangés.
+- **Menu du bas** (les deux apps) : pastille blanche flottante de 72 px ; l'onglet actif est une pastille encre
+  avec icône et libellé, les autres onglets une icône seule (leur libellé reste dans la page pour les lecteurs
+  d'écran) ; côté magasin le « + » en dégradé reste au centre. En CSS seulement, le balisage et les gestes ne
+  changent pas. Réglé pour 320, 360, 375, 390 et 430 px de large (sous 340 px, l'onglet actif du magasin
+  retombe sur l'icône seule).
+- **Hors feuilles de style**, les gabarits ne changent que pour des couleurs écrites en dur, la casse des
+  libellés, quelques graisses et l'icône de BUG-015 (111 fragments côté magasin, 26 côté client, relus un à un).
+- **Inchangé** : aucun parcours, aucune requête, aucune fonction serveur, aucune migration. Centrale, Manager,
+  page `/` et app mobile Expo non touchés. L'affiche QR générée (image) garde son dessin.
+- **Contrôles avant mise en ligne** : 41 écrans de l'espace magasin et 35 de l'app client rendus dans Chrome
+  avec des données fictives, avant puis après (onglets, fiches, feuilles, création pas à pas d'une promo et
+  d'un post, campagne, scanner, coupon dans ses cinq modes de validation, promo utilisée, visiteur non
+  connecté, bienvenue, aperçu commerçant, largeurs de 320 à 430 px et ordinateur) : aucune erreur JavaScript,
+  aucun débordement horizontal. Sept portes : pas de nouvelle clé ni d'adresse externe ; les appels à la base
+  et aux fonctions sont identiques un par un à ceux de `main` sur ces parcours (430 côté magasin, 123 côté
+  client) ; RLS, propriété des données, admin, inscription et webhooks non touchés.
+- **Non contrôlé** : le rendu avec les données réelles et sur un vrai téléphone (pas de compte de production
+  dans la session) ; la police Racing Sans One, non chargée par le banc de test.
+- **Mise en production** : à la fusion de la PR sur `main` (déploiement Vercel automatique).
+- **Retour arrière** : `git revert` du commit MOD-085, puis redéploiement Vercel.
+
+### BUG-015 · « undefined » affiché sur l'accueil du magasin pour une promo obligatoire
+- **Symptôme** : dans « À faire », la ligne « … : à publier avant le … » affichait le mot « undefined » à la
+  place de son icône.
+- **Cause** : la ligne appelle `I.clock`, une icône absente du jeu d'icônes de l'espace magasin depuis l'ajout
+  de cette ligne (commit `c89344f`, 1er novembre).
+- **Correction** : icône d'horloge ajoutée à `I` (`public/magasin/index.html`). Livrée avec MOD-085.
+- **Retour arrière** : `git revert` du commit MOD-085.
+
 ### MOD-084 · Nouveau design de la Centrale et du Manager
 - **Demande (Charles)** : design jugé daté face aux SaaS récents. Direction validée le 12/11 sur maquette
   (canevas Claude « Vitriin Centrale, tableau de bord avant / après »), puis : « déploie cette version en prod,
@@ -75,8 +138,9 @@ Repères :
   clé ; les 60 appels à la base et aux fonctions sont identiques, un par un, à ceux de `main` ; aucune
   adresse externe ajoutée ; textes insérés échappés ; espace magasin, vitrine et migrations non touchés.
 - **Non contrôlé** : le rendu avec les données réelles (pas de compte de production dans la session).
-- **Mise en production** : à la fusion de la PR #3 sur `main` (déploiement Vercel automatique). La branche
-  contient `main` (MOD-083) et sa migration, appliquée en base le 13/11 (voir MOD-083).
+- **Mise en production** : PR #3 fusionnée sur `main` le 13/11 à 00 h 47 UTC (commit de fusion `b63c5ad`),
+  déploiement Vercel automatique. La branche contenait `main` (MOD-083) et sa migration, appliquée en base
+  quelques minutes plus tôt (voir MOD-083).
 - **Retour arrière** : `git revert` du commit MOD-084, puis redéploiement Vercel.
 
 ## 2026-11-12
