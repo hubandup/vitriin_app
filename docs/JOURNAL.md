@@ -32,6 +32,8 @@ Repères :
 - **Vidéo** : pas encore gérée (prévue en V1.1 avec TikTok). Choix de Charles : boutons visibles et marqués
   « bientôt ». « Prendre une vidéo » est désactivé, « Photo / vidéo » ouvre l'appareil photo. Corrige au
   passage un défaut de prod : l'ancien bouton « Vidéo » ouvrait en fait la galerie de photos.
+- Étape 3 : le picto de « Sans validation » devient une petite croix (c'était une coche, qu'on confondait
+  avec le choix sélectionné).
 - « Médiathèque de la centrale » devient « Photothèque » (zone, feuille de choix, fiche promo). La liste
   des visuels n'est plus calculée qu'à un endroit (`libItems()`), pour la zone et pour la feuille.
 - Après le choix, l'aperçu du visuel prend la même forme carrée que la zone.

@@ -458,7 +458,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--sat);ba
 .vt button:disabled{opacity:.4}
 .vt button:last-child:nth-child(odd){grid-column:1/-1;min-height:0;flex-direction:row;align-items:center}
 .vt .vi{width:44px;height:44px;border-radius:50%;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center}
-.vt .vi svg{width:22px;height:22px}
+.vt .vi svg{width:22px;height:22px}.vt .vi svg.sm{width:16px;height:16px}
 .vt button.on .vi{background:var(--ink);color:#fff}
 .vt b{display:block;font-size:16px;font-weight:600;letter-spacing:-.01em}
 .vt span.s{display:block;font-size:13px;color:var(--muted);line-height:1.35}
@@ -580,7 +580,7 @@ const I = {
   scan: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="4" height="4" rx=".5"/><path d="M15 7h2M15 11h2M7 15h2M13 15h4v2"/></svg>',
   keypad: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M9.5 7h.01M12 7h.01M14.5 7h.01M9.5 10.5h.01M12 10.5h.01M14.5 10.5h.01M9.5 14h.01M12 14h.01M14.5 14h.01"/><path d="M11 18h2"/></svg>',
   barcode: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 5v14M7 5v14M10 5v14M14 5v14M17 5v14M21 5v14"/></svg>',
-  hand: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+  nocheck: '<svg class="sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>',
   info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
   torch: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6H6l2 5v9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-9z"/><path d="M6 6V3h12v3M12 13v3"/></svg>',
   user: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
@@ -1992,7 +1992,7 @@ function createForm(kind, draft) {
       case "Validation": return `<h2 class="wz-h">Comment valider la promo ?</h2>
         <p class="small wz-p">${STORE.pinMode === "required" ? "Votre centrale demande une validation par le vendeur." : STORE.pinMode === "off" ? "Votre centrale n'utilise pas la validation par le vendeur." : "Une validation par le vendeur vous dit exactement combien de promos ont servi."}</p>
         <div class="vt">${VALIDATIONS.map(([k, t, s]) => `<button class="${F.check === k ? "on" : ""}" data-check="${k}" aria-pressed="${F.check === k}" ${valAllowed(k) ? "" : "disabled"}>
-          <span class="vi">${{ qr: I.scan.replace('width="26" height="26"', 'width="22" height="22"'), pin: I.keypad, ean: I.barcode, web: I.globe, none: I.hand }[k]}</span>
+          <span class="vi">${{ qr: I.scan.replace('width="26" height="26"', 'width="22" height="22"'), pin: I.keypad, ean: I.barcode, web: I.globe, none: I.nocheck }[k]}</span>
           ${F.check === k ? `<span class="ok">${I.check}</span>` : k === "qr" && valAllowed("qr") ? '<span class="reco">Recommandé</span>' : ""}
           <span><b>${t}</b><span class="s">${s}</span></span></button>`).join("")}</div>
         <div class="infob">${I.info}<span>${esc(VALIDATIONS.find(v => v[0] === F.check)?.[3] || "")}${F.check === "pin" && STORE.pin ? ` Votre code : <b>${esc(STORE.pin)}</b>.` : ""}</span></div>
