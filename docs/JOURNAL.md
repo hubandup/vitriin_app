@@ -76,7 +76,7 @@ Repères :
   adresse externe ajoutée ; textes insérés échappés ; espace magasin, vitrine et migrations non touchés.
 - **Non contrôlé** : le rendu avec les données réelles (pas de compte de production dans la session).
 - **Mise en production** : à la fusion de la PR #3 sur `main` (déploiement Vercel automatique). La branche
-  contient `main` (MOD-083) : elle suppose, comme `main`, la migration `20261112190000_campaigns` appliquée.
+  contient `main` (MOD-083) et sa migration, appliquée en base le 13/11 (voir MOD-083).
 - **Retour arrière** : `git revert` du commit MOD-084, puis redéploiement Vercel.
 
 ## 2026-11-12
@@ -120,6 +120,13 @@ Repères :
   regroupées dans une carte (Accueil, Promos, Calendrier) ; la feuille de campagne liste les publications jour
   par jour, « Accepter le planning » d'un geste, flèche pour décaler une promo (feuille de programmation,
   retour à la campagne), « Annuler » après acceptation.
+- **Mis en production** : code en ligne le 12/11 à 23 h 50 UTC (fusion de la PR #2) ; migration appliquée le
+  13/11 à 00 h 44 UTC sous le nom `campaigns` (version `20261113004420`). Entre les deux, 54 minutes pendant
+  lesquelles la Centrale et l'espace magasin en ligne ne pouvaient pas charger leurs données (colonnes
+  `campaign_id` / `is_featured` et table `campaigns` absentes) ; aucune requête en échec dans les journaux
+  Supabase sur la période. Contrôles après application : les 8 fonctions ont la même empreinte que le fichier
+  du dépôt, RLS actif sur les deux tables, aucun droit pour `anon`, le statut d'une campagne non modifiable
+  hors RPC, cache PostgREST rechargé. À retenir : appliquer la migration avant de fusionner le code qui en dépend.
 - **Reste à faire** : l'email « Nouvelle campagne » (`campaign-notify`) part encore promo par promo et n'est pas
   envoyé pour les promos d'une campagne ; un email unique par campagne est à prévoir.
 - **Retour arrière** : `git revert` du commit, puis migration inverse décrite en tête de
