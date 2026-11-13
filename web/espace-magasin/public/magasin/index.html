@@ -399,10 +399,13 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--sat);ba
 .full .actions{flex:none;padding:10px 20px calc(var(--sab) + 14px);background:#fff}
 .req{color:var(--p)}
 .label{display:block;font-size:15px;font-weight:600;margin:20px 0 9px}
-.media{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.media button{background:var(--surf);border:none;border-radius:20px;padding:16px 4px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;font-weight:600;line-height:1.2;text-align:center}
-.media button.net{background:var(--pink)}
-.preview-img{position:relative;border-radius:24px;overflow:hidden;height:190px;background:var(--bg)}
+.media{aspect-ratio:1;max-height:440px;margin:4px auto 0;border-radius:28px;background:var(--ink);display:grid;grid-template-columns:repeat(3,1fr);align-content:center;gap:4px;padding:0 10px}
+.media button{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 2px;color:#fff;font-size:13.5px;font-weight:600;line-height:1.25;text-align:center}
+.media button>span{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;transition:background .15s}
+.media button:not(:disabled):active>span,.media button:not(:disabled):hover>span{background:rgba(255,255,255,.24)}
+.media button:disabled{opacity:.55;cursor:default}
+.media button em{font-style:normal;font-size:11px;font-weight:600;color:var(--ink);background:#fff;border-radius:999px;padding:2px 8px;margin-top:-4px}
+.preview-img{position:relative;border-radius:28px;overflow:hidden;aspect-ratio:1;max-height:440px;margin:4px auto 0;background:var(--bg)}
 .preview-img img{width:100%;height:100%;object-fit:cover}
 .ro-box{opacity:.55}
 .ro-line{font-size:14px;color:var(--muted);line-height:1.45;background:var(--bg);border-radius:16px;padding:12px 14px}
@@ -1686,7 +1689,7 @@ function openPromo(p) {
     const fixed = [pr.price != null ? `${eur(pr.price)}${pr.old ? ` au lieu de ${eur(pr.old)}` : ""}` : pr.badge, p.code && `Code ${p.code}`, p.ean && `EAN ${p.ean}`, p.src === "net" && `Du ${fmtShort(p.start)} au ${fmtShort(p.end)}`].filter(Boolean);
     layer.innerHTML = `<div class="full fiche" style="--cc:${st.c}">
       <div class="fhero">${F.img ? `<img src="${esc(F.img)}" alt="" onerror="this.style.visibility='hidden'">` : ""}
-        ${editable ? `<button class="photo" data-fx="photo" aria-label="Changer la photo"></button><span class="ph-hint">${I.cam}Changer la photo</span>${STORE.hasNet ? `<button class="lib" data-fx="lib">${I.net}Médiathèque</button>` : ""}` : ""}
+        ${editable ? `<button class="photo" data-fx="photo" aria-label="Changer la photo"></button><span class="ph-hint">${I.cam}Changer la photo</span>${STORE.hasNet ? `<button class="lib" data-fx="lib">${I.net}Photothèque</button>` : ""}` : ""}
         <button class="fx" data-fx="close" aria-label="Fermer">${I.x}</button>
         ${k === "live" && p.img && p.kind !== "post" ? `<button class="cl" data-fx="clients">${I.eye}Côté clients</button>` : ""}</div>
       <div class="scroll">
@@ -1938,8 +1941,8 @@ const VALIDATIONS = [
   ["qr", "QR code", "Le vendeur scanne le QR du client", "La plus fiable : chaque passage en caisse est compté automatiquement."],
   ["pin", "Code vendeur", "Tapé sur le téléphone du client", "Le vendeur tape le code du magasin sur le téléphone du client."],
   ["ean", "Code-barres", "Scanné par votre caisse", "Votre caisse scanne le code-barres. Vitriin ne voit pas le passage en caisse : le client confirme lui-même."],
-  ["web", "Code promo web", "À saisir sur votre site", "Pour la vente en ligne : le client copie le code et l'utilise sur votre site internet. Il confirme lui-même l'avoir utilisé."],
   ["none", "Sans validation", "Le client montre la promo", "Le client montre la promo en caisse et confirme lui-même l'avoir utilisée."],
+  ["web", "Code promo web", "À saisir sur votre site", "Pour la vente en ligne : le client copie le code et l'utilise sur votre site internet. Il confirme lui-même l'avoir utilisé."],
 ];
 const VAL_LABEL = { qr: "QR code scanné par le vendeur", pin: "Code vendeur sur le téléphone du client", ean: "Code-barres EAN scanné en caisse", web: "Code promo sur votre site internet", none: "Sans validation" };
 const webOk = (v) => /^[A-Z0-9][A-Z0-9_-]{2,23}$/.test(v);
@@ -1974,7 +1977,9 @@ function createForm(kind, draft) {
     switch (stepName()) {
       case "Visuel": return `<h2 class="wz-h">${F.kind === "post" ? "Votre photo ou vidéo" : "Le visuel de la promo"}</h2><p class="small wz-p">Une image nette du produit ou du magasin : c'est elle qu'on voit en premier sur les réseaux.</p>
         ${F.img ? `<div class="preview-img"><img onerror="this.style.visibility='hidden'" src="${esc(F.img)}" alt=""><button id="f-rm">Changer</button></div>` :
-        `<div class="media"><button data-src="cam"><span>${I.cam}</span>Photo</button><button data-src="file"><span>${I.vid}</span>Vidéo</button><button data-src="file"><span>${I.img}</span>Galerie</button>${STORE.hasNet ? `<button class="net" data-src="lib"><span style="color:var(--v)">${I.net}</span>Médiathèque de la centrale</button>` : ""}</div>`}`;
+        `<div class="media">${libItems().length
+          ? `<button data-src="cam"><span>${I.cam}</span>Photo / vidéo<em>vidéo bientôt</em></button><button data-src="file"><span>${I.img}</span>Mes photos</button><button data-src="lib"><span>${I.net}</span>Photothèque</button>`
+          : `<button data-src="cam"><span>${I.cam}</span>Prendre une photo</button><button disabled aria-disabled="true"><span>${I.vid}</span>Prendre une vidéo<em>bientôt</em></button><button data-src="file"><span>${I.img}</span>Mes photos</button>`}</div>`}`;
       case "Texte": return `<h2 class="wz-h">Le texte du post</h2><textarea class="in" id="f-text" rows="6" placeholder="Ex : Nouvelle collection trail en magasin, venez l'essayer !">${esc(F.text)}</textarea>`;
       case "Offre": return `<h2 class="wz-h">L'offre</h2>
         <span class="label">Titre <span class="req">*</span></span><input class="in" id="f-title" placeholder="Ex : Air Runner 95" value="${esc(F.title)}" maxlength="60">
@@ -2133,11 +2138,12 @@ function typeFields(F) {
   return "";
 }
 const iso = (t) => { const x = new Date(t); return new Date(x.getTime() - x.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+// Photothèque de la centrale : les visuels des promos qu'elle a envoyées, les plus récents d'abord, sans doublon.
+const libItems = () => STORE.hasNet ? [...new Set([...S.promos, ...(S.trash || [])].sort((x, y) => y.start - x.start).flatMap(p => p.netMedia || []).filter(u => /^https:\/\//.test(u)))].slice(0, 60) : [];
 function pickMedia(src, done) {
   if (src === "lib") {
-    // Les visuels des promos envoyées par la centrale, les plus récents d'abord, sans doublon.
-    const items = [...new Set([...S.promos, ...(S.trash || [])].sort((x, y) => y.start - x.start).flatMap(p => p.netMedia || []).filter(u => /^https:\/\//.test(u)))].slice(0, 60);
-    sheet(`<div class="grab"></div><h2>Médiathèque de la centrale</h2><p class="small" style="font-size:14px;margin-top:4px">Visuels partagés par ${esc(STORE.net)}, prêts à l'emploi.</p>
+    const items = libItems();
+    sheet(`<div class="grab"></div><h2>Photothèque de la centrale</h2><p class="small" style="font-size:14px;margin-top:4px">Visuels partagés par ${esc(STORE.net)}, prêts à l'emploi.</p>
       ${items.length ? "" : `<div class="empty" style="margin-top:14px">Votre centrale n'a pas encore partagé de visuel.</div>`}
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">${items.map((s, k) => `<button data-lib="${k}" style="aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--bg)"><img onerror="this.style.visibility='hidden'" src="${esc(s)}" alt="" style="width:100%;height:100%;object-fit:cover"></button>`).join("")}</div>
       <button class="txt-btn" data-close>Annuler</button>`, true);
