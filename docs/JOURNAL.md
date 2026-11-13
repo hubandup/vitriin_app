@@ -18,7 +18,7 @@ Repères :
 
 ---
 
-## 2026-11-12
+## 2026-11-13
 
 ### MOD-084 · Nouveau design de la Centrale et du Manager
 - **Demande (Charles)** : design jugé daté face aux SaaS récents. Direction validée le 12/11 sur maquette
@@ -32,15 +32,28 @@ Repères :
   - Menu en haut, en pastilles, à la place de la barre latérale repliable (retirée, avec la préférence `c-fold`).
     Paramètres, Support, Import des promos et déconnexion passent dans le menu du compte (avatar, pastille
     magenta si une réponse du support attend). Sous 1440 px le menu passe sur une 2e ligne et défile : le
-    bandeau mobile `mnav` est retiré.
+    bandeau mobile `mnav` est retiré. La recherche de magasins est une pastille qui s'ouvre au clic (les six
+    entrées du menu tiennent ainsi sur une ligne) ; elle s'efface en quittant Magasins, dont le sous-titre la
+    rappelle.
   - Tableau de bord : bloc principal « Publications des magasins » (4 dernières semaines, barres cliquables),
     tuile sombre « À relancer » (magasins sans réseau, taux de connexion, repère de l'objectif 90 %), trois
-    chiffres secondaires, cartes des campagnes actives (visuel en grand, relais par les magasins), connexion
+    chiffres secondaires, cartes des promos actives (visuel en grand, relais par les magasins), connexion
     par région, classement. Le titre de la page est le nom du réseau.
   - Promotions : import Excel en tuile principale, quatre chiffres, tableau avec vignettes. Magasins : quatre
     chiffres, tuile des magasins à relancer, réseaux en monochrome (FB, IG). Calendrier : une couleur par type
     conservée (légende), teintes assombries pour le contraste du texte. Paramètres, panneaux, fenêtres,
     support et connexion suivent la même grammaire.
+  - Campagnes (MOD-083, fusionné entre-temps) reprises dans cette grammaire, sans toucher à leurs requêtes :
+    liste sans cadre ; campagne ouverte avec son nom en titre de page et trois tuiles d'étapes, la tuile
+    sombre portant l'étape à faire (les promos tant qu'il n'y en a pas, puis « Répartir » et « Proposer ») ;
+    suivi des magasins dans une tuile (barre en encre, « a / ont accepté » accordé) ; planning en grille
+    légère, jour au-delà du maximum en pastille rouge, promo sélectionnée en encre avec un bandeau rose qui
+    reste visible au défilement ; fenêtre de choix des promos ; Paramètres › Diffusion (compteur, créneaux,
+    jours). Sur téléphone le planning défile horizontalement. Le jour cible d'un déplacement prend la classe
+    `tgt` : `drop` appartenait déjà à la zone de dépôt des visuels et lui imposait son cadre. Calendrier : la
+    barre d'une campagne garde le dégradé, et entre dans la légende.
+  - Vocabulaire de MOD-083 appliqué partout : « promo » pour une promo seule (cartes du tableau de bord,
+    renommées `pcards` / `promoCard`), « campagne » pour un temps fort.
   - Thème sombre conservé (même réglage dans Préférences) ; la tuile sombre s'y inverse en clair.
   - Textes : les derniers tutoiements passent au vouvoiement (règle `vitriin-brand.mdc`) ; recherche
     « Magasin ou ville » ; l'icône 🎁 du type « Gratuit sous condition » devient « 0 € ».
@@ -53,17 +66,64 @@ Repères :
 - **Logo** : `public/logo-vitriin.png` (logotype officiel), posé sans cadre dans l'en-tête et sur la connexion.
 - **Inchangé** : aucune requête, aucune fonction serveur, aucune migration. Espace magasin, vitrine `/v` et
   page `/` (parcours présenté à Meta) non touchés.
-- **Contrôles avant mise en ligne** : 42 écrans Centrale et 32 écrans Manager rendus dans Chrome avec des
-  données fictives (ordinateur 1440, 1280 et 1024 px, téléphone 390 px, thème sombre, réseau vide, données
-  incomplètes) : aucune erreur JavaScript, aucun débordement horizontal. Une cinquantaine de gestes rejoués
-  (menus, filtres, recherche, panneaux, fenêtres, thème, déconnexion) sans écriture en base. Sept portes :
-  pas de nouvelle clé, pas de changement de requête ni de droits, textes insérés échappés.
+- **Contrôles avant mise en ligne** : 73 écrans Centrale (dont 28 pour Campagnes et Diffusion) et 32 écrans
+  Manager rendus dans Chrome avec des données fictives (ordinateur 1920, 1536, 1440, 1280 et 1024 px,
+  téléphone 390 px, thème sombre, réseau vide, données incomplètes) : aucune erreur JavaScript, aucun
+  débordement horizontal. 84 gestes rejoués sur un faux client : le parcours de lecture ne fait aucune
+  écriture ; le parcours d'écriture (répartir, proposer, déplacer une promo, promo phare, renommer, créer une
+  campagne, deux réglages de Diffusion) fait exactement les 8 appels attendus. Sept portes : pas de nouvelle
+  clé ; les 60 appels à la base et aux fonctions sont identiques, un par un, à ceux de `main` ; aucune
+  adresse externe ajoutée ; textes insérés échappés ; espace magasin, vitrine et migrations non touchés.
 - **Non contrôlé** : le rendu avec les données réelles (pas de compte de production dans la session).
-- **Mise en production** : à la fusion de la PR sur `main` (déploiement Vercel automatique).
-- **À savoir** : le numéro MOD-083 est pris par la PR #2 (Campagnes), pas encore fusionnée. Écrite sur l'ancien
-  design, elle entre en conflit avec ce changement dans `centrale/index.html` et dans ce journal : ses écrans
-  sont à reprendre avec la nouvelle grammaire (`.card`, `.kpis` / `.kp`, `.chip`, `.btn-p` / `.btn-s`, `.sec`).
+- **Mise en production** : à la fusion de la PR #3 sur `main` (déploiement Vercel automatique). La branche
+  contient `main` (MOD-083) : elle suppose, comme `main`, la migration `20261112190000_campaigns` appliquée.
 - **Retour arrière** : `git revert` du commit MOD-084, puis redéploiement Vercel.
+
+## 2026-11-12
+
+### MOD-083 · Campagnes : étaler un temps fort sur sa période (Centrale + magasin)
+- **Décisions (Charles)** : une campagne regroupe les promos d'un temps fort (ex. Black Friday, 80 promos sur
+  15 jours) et étale leurs publications ; la centrale PROPOSE le planning, elle n'impose rien ; le magasin
+  l'accepte d'un geste ou décale une promo ; la centrale voit qui a suivi ou ajusté. Interface simple : le
+  maximum de réglages est fixé une fois dans Paramètres › Diffusion, la campagne se crée en trois gestes.
+- **Base** (`20261112190000_campaigns`) :
+  - Table `campaigns` (réseau, nom, dates, statut `draft` / `proposed`, `spread_at`, `proposed_at`) ; RLS : la
+    centrale lit et écrit les siennes ; les magasins du réseau ne voient une campagne qu'une fois proposée ;
+    le statut ne bouge que par les RPC (droits colonne).
+  - `promotions.campaign_id` et `promotions.is_featured` (promo phare) ; trigger `promotions_campaign_guard` :
+    une promo ne rejoint qu'une campagne de la centrale qui l'a créée.
+  - Table `campaign_acceptances` (magasin, date) écrite seulement par les RPC.
+  - RPC `campaign_spread` : calcule `publish_at` pour chaque promo selon `networks.settings.diffusion`
+    (max par jour, créneaux, jours exclus, ordre de passage), une promo par jour à tour de rôle, phares d'abord,
+    chaque promo dans sa période, heure de Paris, à partir de demain ; une date imposée n'est pas touchée.
+  - RPC `campaign_propose` : envoie chaque promo à tous les magasins (`send_promotion`), rejouable.
+  - RPC `campaign_accept` (magasin) : programme chaque promo à la date proposée sur Facebook / Instagram
+    connectés (`schedule_publication`, `demo_publish` en démo) ; une promo déjà programmée garde sa date.
+    `campaign_withdraw` : déprogramme ce qui n'est pas parti. `campaign_tracking` (centrale) : accepté /
+    ajusté / sans réponse, magasin par magasin.
+  - Trigger `promotions_sync_imposed_publish_at` remplacé : en plus de la date imposée, la centrale qui
+    déplace une promo de campagne entraîne les magasins qui ont accepté, sauf les promos qu'ils ont décalées.
+  - Testé sur une base locale : 80 promos sur 13 jours (7, 7 puis 6 par jour, dimanches exclus, phares à 9h
+    les 8 premiers jours) ; acceptation (79 programmées, 1 décalée gardée) ; magasin d'un autre réseau refusé ;
+    garde réseau ; déplacement suivi sauf ajustement ; suivi ; retrait.
+- **Centrale** (`centrale/index.html`) :
+  - Menu « Campagnes » : liste, création (nom + dates), promos (choisir parmi les promos de la période avec
+    ★ phare, ou importer un Excel dans la campagne, colonne « Phare »), « Répartir », « Proposer aux N
+    magasins », calendrier semaine par semaine (clic sur une promo puis sur un jour pour la déplacer, jour
+    au-delà du maximum signalé), suivi des magasins avec relance à copier (modèle « Relance d'une campagne »).
+  - Paramètres › nouvel onglet « Diffusion » : rythme des campagnes (publications par jour, créneaux, jours,
+    ordre de passage) et la carte « Réception des promos » déplacée depuis Préférences.
+  - Calendrier : les promos d'une campagne tiennent sur une seule barre, qui ouvre la campagne.
+  - Vocabulaire : une promo seule s'appelle désormais « promo » (bouton « Nouvelle promo », colonnes, modèle
+    d'annonce) ; « campagne » est réservé aux temps forts.
+- **Magasin** (`magasin/index.html`) : tant que le planning n'est pas accepté, les promos de la campagne sont
+  regroupées dans une carte (Accueil, Promos, Calendrier) ; la feuille de campagne liste les publications jour
+  par jour, « Accepter le planning » d'un geste, flèche pour décaler une promo (feuille de programmation,
+  retour à la campagne), « Annuler » après acceptation.
+- **Reste à faire** : l'email « Nouvelle campagne » (`campaign-notify`) part encore promo par promo et n'est pas
+  envoyé pour les promos d'une campagne ; un email unique par campagne est à prévoir.
+- **Retour arrière** : `git revert` du commit, puis migration inverse décrite en tête de
+  `20261112190000_campaigns.sql` (tables, colonnes, fonctions, trigger rétabli dans sa version MOD-082).
 
 ### MOD-082 · Planificateur de publications et calendrier (Centrale + magasin)
 - **Décisions (Charles)** : calendrier ET vraie programmation dès le MVP ; une centrale peut imposer la date et

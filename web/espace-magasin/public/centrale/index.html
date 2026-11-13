@@ -56,10 +56,13 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .nav button{height:44px;padding:0 16px;border:none;border-radius:999px;background:transparent;color:var(--ink);font-size:15px;font-weight:500;white-space:nowrap}
 .nav button.on{background:var(--ink);color:var(--page);font-weight:600}
 .acts{display:flex;align-items:center;gap:10px;flex:none;margin-left:auto}
-.search{display:flex;align-items:center;gap:8px;flex:none;width:180px;height:48px;padding:0 16px;border-radius:999px;background:var(--tile)}
-.search input{min-width:0;width:100%;border:none;background:none;outline:none;font-size:14px}
+.search-w{position:relative;flex:none;width:48px;height:48px}
+.search{position:absolute;top:0;right:0;z-index:6;display:flex;align-items:center;gap:9px;width:48px;height:48px;padding:0 15px;border-radius:999px;background:var(--tile);overflow:hidden;cursor:pointer;transition:width .18s}
+.search svg{flex:none}
+.search input{flex:1;min-width:0;border:none;background:none;outline:none;font-size:14px}
 .search input::placeholder{color:var(--muted);opacity:1}
-.search:focus-within{box-shadow:0 0 0 2px var(--ink)}
+.search:focus-within{width:260px;cursor:text;box-shadow:0 0 0 2px var(--ink)}
+.search:has(input:not(:placeholder-shown)):not(:focus-within){background:var(--ink);color:var(--page)}
 .ibtn{position:relative;width:48px;height:48px;border:none;border-radius:50%;background:var(--tile);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none}
 .ibtn i{position:absolute;top:11px;right:12px;width:9px;height:9px;border-radius:50%;background:var(--p);box-shadow:0 0 0 2px var(--tile)}
 .btn-p,.btn-s{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:0 20px;border-radius:999px;font-weight:600;font-size:15px;line-height:1.15;white-space:nowrap}
@@ -143,17 +146,17 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .kp .val{font-size:44px;font-weight:500;letter-spacing:-.035em;line-height:1}
 .kp .tr{font-size:14px;font-weight:600;color:var(--ok)}
 .kp .tr.mut{font-weight:500;color:var(--muted)}
-.camps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
-.camp{display:flex;flex-direction:column;gap:18px;min-width:0;padding:0;border:none;background:none;text-align:left;color:var(--ink)}
-.camp > span{display:block;min-width:0}
-.camp .vis{position:relative;aspect-ratio:4/3;border-radius:28px;background:var(--tile);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:14px;font-weight:500}
-.camp .vis img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.camp .vis .pill{position:absolute;top:16px;left:16px;display:flex;align-items:center;gap:7px;background:var(--surf);color:var(--ink)}
-.camp .vis .pill.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--dot)}
-.camp b.t{display:block;font-size:20px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.camp small{display:block;margin-top:6px;font-size:15px;color:var(--muted)}
-.camp .row{display:flex;align-items:baseline}
-.camp .track{display:block}
+.pcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
+.pcard{display:flex;flex-direction:column;gap:18px;min-width:0;padding:0;border:none;background:none;text-align:left;color:var(--ink)}
+.pcard > span{display:block;min-width:0}
+.pcard .vis{position:relative;aspect-ratio:4/3;border-radius:28px;background:var(--tile);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:14px;font-weight:500}
+.pcard .vis img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pcard .vis .pill{position:absolute;top:16px;left:16px;display:flex;align-items:center;gap:7px;background:var(--surf);color:var(--ink)}
+.pcard .vis .pill.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--dot)}
+.pcard b.t{display:block;font-size:20px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard small{display:block;margin-top:6px;font-size:15px;color:var(--muted)}
+.pcard .row{display:flex;align-items:baseline}
+.pcard .track{display:block}
 .relay{min-width:0}
 .relay .row{font-size:14px;color:var(--muted);align-items:baseline}
 .relay .row b{font-size:15px;font-weight:700;color:var(--ink)}
@@ -202,6 +205,97 @@ input,select,textarea{font-family:inherit;color:var(--ink)}
 .cal-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cal-nav .rg{font-weight:600;font-size:16px;padding:0 8px}
 .cal-nav .btn-s{min-width:44px;padding:0 14px}
+
+/* ---------- Campagnes (MOD-083) ---------- */
+.cp-back{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.cp-back .del{color:var(--err-ink)}
+.cp-k{display:flex;align-items:center;gap:8px;width:100%;font-size:14px;font-weight:600;color:var(--muted)}
+.cp-ok{margin-left:auto;width:24px;height:24px;border-radius:50%;background:var(--ok-t);color:var(--ok);display:flex;align-items:center;justify-content:center}
+.cp-new{max-width:640px}
+.cp-new h3{margin-top:10px}
+.cp-go{display:flex;justify-content:flex-end;margin-top:22px}
+.cp-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:24px}
+.cp-step{display:flex;flex-direction:column;align-items:flex-start;gap:16px;min-width:0;padding:28px 30px;border-radius:28px;background:var(--tile)}
+.cp-sb{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:12px;width:100%;min-width:0}
+.cp-sb .btn-s{border-color:transparent}
+.cp-sb .mut{line-height:1.45}
+.cp-step.on{background:var(--ink);color:var(--page)}
+.cp-step.on .cp-k,.cp-step.on .mut,.cp-step.on .cp-n small{color:inherit;opacity:.82}
+.cp-step.on .btn-p{background:var(--page);color:var(--ink)}
+.cp-step.on .btn-s{background:none;border-color:#8A8680;color:inherit}
+.cp-step.on .link{color:inherit}
+.cp-name{font-size:17px;font-weight:600}
+.cp-dates{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;width:100%}
+.cp-dates .in{min-width:0}
+.cp-n{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px}
+.cp-n b{font-size:44px;font-weight:500;letter-spacing:-.035em;line-height:1}
+.cp-n small{font-size:15px;color:var(--muted)}
+.cp-n .badge{align-self:center}
+.cp-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.cp-fact{font-size:20px;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+.cp-big{width:100%;min-height:52px;margin-top:auto}
+.cp-track{margin-top:24px;padding:26px 30px;border-radius:28px;background:var(--tile)}
+.cp-th{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;font-size:15px;color:var(--muted)}
+.cp-th h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.cp-th span b{color:var(--ink);font-weight:700}
+.cp-th .track{display:flex;flex:1 1 200px;max-width:420px;height:10px}
+.cp-th .track i{border-radius:0}
+.cp-th .btn-s{border-color:transparent}
+.cp-who{margin-top:18px;max-height:320px;overflow:auto}
+.cp-w{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 190px 130px;gap:6px 16px;align-items:center;padding:12px 0;border-top:1px solid var(--line2);font-size:15px}
+.cp-w b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-w .pill{justify-self:start}
+.cp-sel{position:sticky;top:8px;z-index:4;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin-top:24px;padding:14px 14px 14px 22px;border-radius:24px;background:var(--pink)}
+.cp-sel > div{flex:1 1 260px;min-width:0}
+.cp-sel b{display:block;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-sel span{font-size:14px;color:var(--ink2)}
+.cp-sel .btn-s{min-height:40px;padding:0 16px;font-size:14px;border-color:transparent}
+.cp-sel .x{background:var(--surf)}
+.cp-note{margin:24px 2px 0;line-height:1.45}
+.cp-tray{margin-top:24px;font-size:15px}
+.cp-tray > div{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.cp-tray .cp-chip{width:auto;max-width:240px}
+.cp-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-width:760px;margin-top:24px}
+.cp-wd{padding:0 10px 12px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line2)}
+.cp-day{display:flex;flex-direction:column;gap:4px;min-width:0;min-height:136px;padding:10px 8px 12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cp-day:nth-child(7n){border-right:none}
+.cp-day.out{opacity:.4}
+.cp-day.off{background:var(--tile)}
+.cp-day.off .cp-chip{background:var(--surf)}
+.cp-day.tgt{cursor:copy;box-shadow:inset 0 2px 0 var(--p)}
+.cp-day.tgt:hover,.cp-day.tgt:focus-visible{background:var(--pink);box-shadow:inset 0 0 0 2px var(--p);outline:none}
+.cp-dh{display:flex;align-items:center;gap:6px;padding:0 2px 4px}
+.cp-dh b{font-size:14px;font-weight:600}
+.cp-dh em{margin-left:auto;font-style:normal;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--ink2)}
+.cp-dh em.over{background:var(--err-t);color:var(--err-ink)}
+.cp-chip{display:flex;align-items:center;gap:6px;width:100%;min-width:0;min-height:28px;padding:4px 8px;border:none;border-radius:9px;background:var(--tile);color:var(--ink);font-size:13px;line-height:1.25;text-align:left}
+.cp-chip i{flex:none;min-width:26px;font-style:normal;font-weight:600;color:var(--muted)}
+.cp-chip span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cp-chip.star,.cp-day.off .cp-chip.star{background:var(--pink)}
+.cp-chip.on,.cp-day.off .cp-chip.on{background:var(--ink);color:var(--page)}
+.cp-chip.on i{color:inherit;opacity:.8}
+.cp-cal.moving .cp-chip:not(.on){opacity:.55}
+.cpk-top{display:flex;gap:8px}
+.cpk-top input{flex:1;min-width:0}
+.cpk-list{margin-top:14px;max-height:52vh;overflow:auto;border-radius:16px;background:var(--tile);padding:4px 14px}
+.cpk-r{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line2);cursor:pointer}
+.cpk-r:last-child{border-bottom:none}
+.cpk-r input{flex:none;width:18px;height:18px;accent-color:var(--p)}
+.cpk-t{flex:1;min-width:0}
+.cpk-t b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpk-t small{font-size:13px;color:var(--muted)}
+.cpk-s{flex:none;width:44px;height:44px;border:none;border-radius:50%;background:var(--surf);color:var(--muted);font-size:17px}
+.cpk-s.on{background:var(--pink);color:var(--acc)}
+.cpk-f{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:18px}
+/* Paramètres › Diffusion */
+.stepper{display:inline-flex;align-items:center;gap:6px;padding:5px;border-radius:999px;background:var(--surf)}
+.stepper button{width:44px;height:44px;border:none;border-radius:50%;background:var(--tile);color:var(--ink);font-size:20px;font-weight:600}
+.stepper b{min-width:44px;text-align:center;font-size:22px;font-weight:500}
+.dweek{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;max-width:400px}
+.dweek button{height:44px;border:none;border-radius:14px;background:var(--surf);color:var(--muted);font-weight:600;font-size:15px}
+.dweek button.on{background:var(--ink);color:var(--page)}
+.card .chip:not(.on){background:var(--surf)}
+.stepper button:disabled,.dweek button:disabled,.chip:disabled{opacity:.45;cursor:not-allowed}
 
 /* ---------- Tableaux ---------- */
 .tbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
@@ -429,22 +523,22 @@ label.ck input{accent-color:var(--p);width:18px;height:18px}
 .spin{display:flex;align-items:center;justify-content:center;height:100vh;color:var(--muted);font-size:15px}
 
 /* ---------- Écrans étroits ---------- */
-@media (min-width:1500px){.search{width:230px}}
-@media (max-width:1439px){.navw{order:3;flex-basis:100%;overflow-x:auto}.search{width:230px}}
+@media (max-width:1439px){.navw{order:3;flex-basis:100%;overflow-x:auto}.search-w{width:230px}.search,.search:focus-within{position:static;width:100%;transition:none}.search:has(input:not(:placeholder-shown)):not(:focus-within){background:var(--tile);color:inherit}}
 @media (max-width:980px){
-  .hdr{padding:14px 20px}.wrap{padding:8px 20px 56px}.search{display:none}
+  .hdr{padding:14px 20px}.wrap{padding:8px 20px 56px}.search-w{display:none}
   .form{grid-template-columns:1fr}.post{position:static}
-  .pg h1{font-size:32px}.big{font-size:64px}.camps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pg h1{font-size:32px}.big{font-size:64px}.pcards{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:640px){
   .hdr{padding:12px 16px}.wrap{padding:4px 16px 48px}.brand span{display:none}
   #new-promo{padding:0 7px 0 20px}#new-promo .t{display:none}
   .hero,.inv{padding:28px 24px}.card,.banner{padding:24px 22px}.src{padding:24px}
   .big{font-size:56px}.bars{height:240px}.kpis{grid-template-columns:1fr 1fr}.kp{padding:2px 12px 2px 18px}.kp .val{font-size:34px}.sec-h h2{font-size:24px}
-  .line .rn{flex-basis:128px}.camps{grid-template-columns:1fr}.two{grid-template-columns:1fr}.types{grid-template-columns:repeat(2,1fr)}
+  .line .rn{flex-basis:128px}.pcards{grid-template-columns:1fr}.two{grid-template-columns:1fr}.types{grid-template-columns:repeat(2,1fr)}
   .mh{padding:22px 20px 8px}.mb{padding:16px 20px 22px}.mf{padding:0 20px 22px}
   .drawer{width:100vw;min-width:0}.dw-h{padding:16px 20px 10px}.dw-b{padding:10px 20px 28px}.dw-f{padding:14px 20px}
   .menu{position:fixed;top:70px;right:12px;left:12px;width:auto}
+  .cp-step,.cp-track{padding:24px 22px}.cp-dates{grid-template-columns:minmax(0,1fr)}.cp-w{grid-template-columns:minmax(0,1fr) auto}.cp-w .mut,.cp-w > span:empty{display:none}
 }
 </style>
 </head>
@@ -489,12 +583,13 @@ label.ck input{accent-color:var(--p);width:18px;height:18px}
     <div class="navw"><nav class="nav" id="nav" aria-label="Navigation principale">
       <button data-v="overview"><span class="lbl">Tableau de bord</span></button>
       <button data-v="promos"><span class="lbl">Promotions</span></button>
+      <button data-v="campaigns"><span class="lbl">Campagnes</span></button>
       <button data-v="calendar"><span class="lbl">Calendrier</span></button>
       <button data-v="stores"><span class="lbl">Magasins</span></button>
       <button data-v="audience"><span class="lbl">Audience</span></button>
     </nav></div>
     <div class="acts">
-      <label class="search"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg><input id="q" type="text" placeholder="Magasin ou ville" aria-label="Rechercher un magasin"></label>
+      <div class="search-w"><label class="search" title="Rechercher un magasin"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg><input id="q" type="text" placeholder="Magasin ou ville" aria-label="Rechercher un magasin"></label></div>
       <button class="ibtn" id="bell" title="Magasins à activer" aria-label="Magasins à activer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><i id="bell-dot" class="hidden"></i></button>
       <button class="btn-p" id="new-promo" aria-label="Nouvelle promo"><span class="plus"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span><span class="t">Nouvelle promo</span></button>
       <div class="me">
@@ -571,7 +666,7 @@ label.ck input{accent-color:var(--p);width:18px;height:18px}
           <label class="fl">Règle</label>
           <label class="sw"><input type="checkbox" id="f-mand"><span class="k"></span><span><b>Promo obligatoire<i class="info" data-tip="Vos magasins ne peuvent pas la refuser. Ils la publient eux-mêmes, depuis leur espace.">i</i></b></span></label>
           <div id="f-lock-w" class="hidden"></div>
-          <label class="sw" id="f-pin-w"><input type="checkbox" id="f-pin"><span class="k"></span><span><b>Code vendeur en caisse<i class="info" data-tip="Pour cette campagne, le vendeur tape le code de son magasin sur le téléphone du client pour valider la promo.">i</i></b></span></label>
+          <label class="sw" id="f-pin-w"><input type="checkbox" id="f-pin"><span class="k"></span><span><b>Code vendeur en caisse<i class="info" data-tip="Pour cette promo, le vendeur tape le code de son magasin sur le téléphone du client pour valider la promo.">i</i></b></span></label>
 
           <label class="fl">Magasins</label>
           <div class="seg" id="f-target"><button data-t="all" class="on">Tout le réseau</button><button data-t="pick">Sélection</button></div>
@@ -623,13 +718,25 @@ label.ck input{accent-color:var(--p);width:18px;height:18px}
   </div>
 </div>
 
+<!-- ============ MODALE : PROMOS D'UNE CAMPAGNE (MOD-083) ============ -->
+<div class="ov hidden" id="m-camp">
+  <div class="modal sm">
+    <div class="mh"><div><h2 id="cpk-title">Promos de la campagne</h2><p id="cpk-sub"></p></div><button class="x" data-close aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="mb">
+      <div class="cpk-top"><input class="in" id="cpk-q" placeholder="Rechercher une promo" aria-label="Rechercher une promo"><button class="btn-s" id="cpk-all">Tout cocher</button></div>
+      <div id="cpk-list" class="cpk-list"></div>
+      <div class="cpk-f"><button class="btn-s" id="cpk-imp">Importer un fichier</button><button class="btn-p" id="cpk-go">Valider</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- ============ MODALE : IMPORTER DES PROMOS ============ -->
 <div class="ov hidden" id="m-pimp">
   <div class="modal sm">
     <div class="mh"><div><h2>Importer des promos</h2><p>Une ligne par promo. Les images : un lien https, ou le nom d'un fichier ajouté ci-dessous.</p></div><button class="x" data-close aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="mb">
       <div class="imp">
-        <div class="imp-hd"><div><b>1. Le fichier Excel ou CSV</b><span>Colonnes : Titre, Offre, Texte, Code en caisse, EAN, Début, Fin, Obligatoire (oui / non), Image.</span></div></div>
+        <div class="imp-hd"><div><b>1. Le fichier Excel ou CSV</b><span>Colonnes : Titre, Offre, Texte, Code en caisse, EAN, Début, Fin, Obligatoire (oui / non), Phare (oui / non, pour une campagne), Image.</span></div></div>
         <div class="copy"><button class="btn-p" id="pi-pick">Choisir le fichier</button><button class="btn-s" id="pi-tpl">Télécharger le modèle</button><input type="file" id="pi-file" accept=".xlsx,.xls,.csv" hidden></div>
         <p class="hint" id="pi-fname"></p>
       </div>
@@ -690,7 +797,7 @@ const SHORT_REGION = { "Provence-Alpes-Côte d'Azur": "PACA", "Auvergne-Rhône-A
 /* ---------- État ---------- */
 // dw : panneau latéral ouvert ({ k: "promo" | "store", id }). E : brouillon d'édition du panneau.
 const S = { user: null, profile: null, role: "member", net: null, stores: [], accounts: [], promos: [], acts: [], members: null,
-  view: "overview", wk: 7, zone: "all", filter: "all", calFrom: null, q: "", dw: null, dwStores: false, topAll: false, stab: "prefs" };
+  view: "overview", wk: 7, zone: "all", filter: "all", calFrom: null, q: "", dw: null, dwStores: false, topAll: false, stab: "prefs", camps: [], camp: null, campSel: null, campWho: false, track: null };
 let E = null;
 const isAdmin = () => S.role === "owner" || S.role === "admin";
 const NS = () => (S.net && S.net.settings) || {};
@@ -731,8 +838,10 @@ const TPL = {
     def: "Bonjour,\n\n{reseau} passe sur Vitriin pour diffuser ses promotions sur les pages Facebook et Instagram de chaque magasin.\n\n1. Ouvrez ce lien : {lien}\n2. Créez votre compte et votre magasin.\n3. Connectez votre Page Facebook et votre compte Instagram.\n\nCode réseau, si on vous le demande : {code}\n\nVous recevrez ensuite nos promos dans votre espace, prêtes à publier." },
   relance: { label: "Relance connexion réseaux", sub: "Pour un magasin qui n'a pas connecté Facebook ou Instagram.",
     def: "Bonjour {magasin},\n\nPour relayer les promos du réseau {reseau}, il reste une étape : connecter la Page Facebook et le compte Instagram du magasin. Ça prend deux minutes depuis votre espace : {lien}\n\nMerci !" },
-  promo: { label: "Annonce d'une promo", sub: "Pour prévenir les magasins qu'une campagne les attend.",
-    def: "Bonjour {magasin},\n\nNouvelle campagne du réseau {reseau} : « {promo} », du {debut} au {fin}.\nElle vous attend dans votre espace Vitriin, prête à publier : {lien}\n\nMerci de la relayer sur vos réseaux !" },
+  promo: { label: "Annonce d'une promo", sub: "Pour prévenir les magasins qu'une promo les attend.",
+    def: "Bonjour {magasin},\n\nNouvelle promo du réseau {reseau} : « {promo} », du {debut} au {fin}.\nElle vous attend dans votre espace Vitriin, prête à publier : {lien}\n\nMerci de la relayer sur vos réseaux !" },
+  campagne: { label: "Relance d'une campagne", sub: "Pour un magasin qui n'a pas encore accepté le planning d'une campagne.",
+    def: "Bonjour {magasin},\n\nLa campagne « {campagne} » du réseau {reseau} vous attend : {n} promos du {debut} au {fin}, déjà planifiées sur la période.\nUn seul geste pour tout programmer, « Accepter le planning » : {lien}\n\nMerci !" },
 };
 const tplText = (k) => (NS().email_templates || {})[k] || TPL[k].def;
 const fillTpl = (k, v) => tplText(k).replace(/\{(\w+)\}/g, (m, x) => v[x] ?? m);
@@ -791,14 +900,15 @@ function derive() {
 /* ---------- Navigation ---------- */
 const TITLES = {
   overview: ["Tableau de bord", "vue d'ensemble"],
-  promos: ["Promotions", "Importer, diffuser et piloter vos campagnes"],
+  promos: ["Promotions", "Importer, diffuser et piloter vos promos"],
+  campaigns: ["Campagnes", "Temps forts : des dizaines de promos étalées sur une période, en trois gestes"],
   calendar: ["Calendrier", "Lancements, publications et activation des magasins, sur 4 semaines"],
   stores: ["Magasins", ""],
   audience: ["Audience", "Qui sont les clients de votre réseau"],
   settings: ["Paramètres", "Préférences, équipe, identité de la centrale et messages aux magasins"],
 };
 const navBtns = () => document.querySelectorAll("#nav button, #nav2 button");
-function go(v) { if (!confirmLeave()) return; S.view = v; S.dw = null; E = null; render(); $("scroll").scrollTop = 0; }
+function go(v) { if (!confirmLeave()) return; if (v === "campaigns" && S.view !== "campaigns") { S.camp = null; S.campSel = null; } if (v !== "stores" && S.q) { S.q = ""; $("q").value = ""; } S.view = v; S.dw = null; E = null; render(); $("scroll").scrollTop = 0; }
 navBtns().forEach(b => b.onclick = () => go(b.dataset.v));
 $("bulk-go").onclick = () => openPimp();
 $("bell").onclick = () => go("stores");
@@ -814,8 +924,11 @@ function render() {
   const D = derive();
   const [t, sub] = TITLES[S.view];
   const ov = S.view === "overview", nb = D.stores.length;
-  $("pg-title").textContent = ov ? S.net.name : t;
-  $("pg-sub").textContent = ov ? `${nf.format(nb)} magasin${nb > 1 ? "s" : ""} · ${sub}` : S.view === "stores" ? `${nf.format(nb)} point${nb > 1 ? "s" : ""} de vente · segmentation par zone` : sub;
+  // Campagne ouverte : son nom en titre, sa période en sous-titre.
+  const cn = S.view === "campaigns" && S.camp === "new", cc = S.view === "campaigns" && S.camp && !cn ? campOf(S.camp) : null;
+  $("pg-title").textContent = ov ? S.net.name : cc ? cc.name : cn ? "Nouvelle campagne" : t;
+  $("pg-sub").textContent = ov ? `${nf.format(nb)} magasin${nb > 1 ? "s" : ""} · ${sub}` : cc ? `Campagne · ${dlong(dOf(cc.starts_on))} → ${dlong(dOf(cc.ends_on))}`
+    : cn ? "Trois gestes : un nom et des dates, des promos, puis « Répartir »." : S.view === "stores" ? `${nf.format(nb)} point${nb > 1 ? "s" : ""} de vente · ${S.q ? `recherche « ${S.q} »` : "segmentation par zone"}` : sub;
   document.querySelectorAll("#nav button, #nav2 button").forEach(b => b.classList.toggle("on", b.dataset.v === S.view));
   $("net-name").textContent = S.net.name;
   $("net-count").textContent = `${nf.format(D.stores.length)} magasin${D.stores.length > 1 ? "s" : ""}`;
@@ -823,7 +936,7 @@ function render() {
   renderMe();
   show("bell-dot", D.stores.some(s => s.conn === "none" || s.conn === "broken"));
   const y = $("scroll").scrollTop;
-  $("content").innerHTML = { overview: viewOverview, promos: viewPromos, calendar: viewCalendar, stores: viewStores, audience: viewAudience, settings: viewSettings }[S.view](D);
+  $("content").innerHTML = { overview: viewOverview, promos: viewPromos, campaigns: viewCampaigns, calendar: viewCalendar, stores: viewStores, audience: viewAudience, settings: viewSettings }[S.view](D);
   $("scroll").scrollTop = y;
   bindView(D);
   renderDrawer(D);
@@ -870,10 +983,10 @@ const kp = (lbl, val, note = "", mut = false) => `<div class="kp"><span class="l
 function topLine(s, i) {
   return `<div class="line click" data-store="${s.id}"><span class="rank">${i + 1}</span><div style="flex:1;min-width:0"><b class="nm">${esc(s.name)}</b><small>${esc([s.city, s.region && (SHORT_REGION[s.region] || s.region)].filter(Boolean).join(" · ") || "—")}</small></div><div class="r"><b class="nm">${compact(s.viewsAll)}</b><small>${s.pubCount} pub.</small></div></div>`;
 }
-// Carte d'une campagne : visuel en grand, statut, relais par les magasins.
-function campCard(p) {
+// Carte d'une promo : visuel en grand, statut, relais par les magasins.
+function promoCard(p) {
   const r = pct(p.relayed, p.target), [sl] = ST_PILL[p.st];
-  return `<button class="camp" data-promo="${p.id}">
+  return `<button class="pcard" data-promo="${p.id}">
     <span class="vis">${p.media_url ? `<img src="${esc(p.media_url)}" alt="" loading="lazy">` : `${svg(ICON.img, 30, 1.6)}<span>Pas encore de visuel</span>`}<span class="pill${p.st === "active" ? " live" : ""}">${sl}</span></span>
     <span><b class="t">${esc(p.title)}</b><small>${esc(p.regions === "—" ? "Aucun magasin ciblé" : p.regions)} · ${p.views ? compact(p.views) + " vues" : dshort(p.starts_at) + " → " + dshort(p.ends_at)}</small></span>
     <span class="relay"><span class="row"><span>${p.target ? `Publiée par ${nf.format(p.relayed)} magasin${p.relayed > 1 ? "s" : ""} sur ${nf.format(p.target)}` : "Pas encore envoyée aux magasins"}</span>${p.target ? `<b>${r} %</b>` : ""}</span><span class="track"><i class="${p.st === "active" ? "acc" : "mut"}" style="width:${r}%"></i></span></span>
@@ -932,8 +1045,8 @@ function viewOverview(D) {
     ${kp("Magasins du réseau", nf.format(n), newStores ? `+${newStores} sur 30 jours` : "")}
   </div>
   <section class="sec">
-    <div class="sec-h"><h2>${live.length ? "Campagnes actives" : "Dernières campagnes"}</h2><button class="btn-s" data-go="promos">Toutes les campagnes</button></div>
-    ${shown.length ? `<div class="camps">${shown.map(campCard).join("")}</div>` : `<div class="empty">Aucune campagne pour l'instant. Créez la première avec « Nouvelle promo ».</div>`}
+    <div class="sec-h"><h2>${live.length ? "Promos actives" : "Dernières promos"}</h2><button class="btn-s" data-go="promos">Toutes les promos</button></div>
+    ${shown.length ? `<div class="pcards">${shown.map(promoCard).join("")}</div>` : `<div class="empty">Aucune promo pour l'instant. Créez la première avec « Nouvelle promo ».</div>`}
   </section>
   <div class="g2 sec">
     <div class="card">
@@ -962,33 +1075,33 @@ function viewPromos(D) {
   const cols = "grid-template-columns:2.4fr 1.1fr 1.3fr 1.6fr .7fr .9fr";
   const chip = (k, l) => `<button class="chip ${S.filter === k ? "on" : ""}" data-filter="${k}" aria-pressed="${S.filter === k}">${l}<em>${counts[k]}</em></button>`;
   return `
-  ${tip("pr", "<b>Astuce :</b> cliquez sur une campagne pour modifier tous ses critères (visuel, offre, dates, codes…). Les magasins voient la version à jour.")}
+  ${tip("pr", "<b>Astuce :</b> cliquez sur une promo pour modifier tous ses critères (visuel, offre, dates, codes…). Les magasins voient la version à jour.")}
   <div class="srcs">
     <div class="src main"><div><div><b>Importer un fichier Excel</b><p>Une ligne par promo, avec ses images : tout part aux magasins en une fois.</p></div><button class="btn-p" data-pimp>${svg('<path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/>', 18, 2.2)}Choisir un fichier</button></div></div>
     <div class="src"><span class="ic">${svg(ICON.img, 24, 1.8)}</span><div><b>Importer des visuels</b><p>Diffusez une affiche à tout ou partie de votre réseau.</p></div><button class="btn-s" data-new>Téléverser</button></div>
     <div class="src"><span class="soon">Bientôt</span><span class="ic">${svg(ICON.db, 24, 1.8)}</span><div><b>Connecter mon PIM</b><p>Synchronisez votre catalogue produits en temps réel via l'API.</p></div><button class="btn-s" data-soon="La connexion PIM arrive bientôt.">Configurer</button></div>
   </div>
   <div class="kpis">
-    ${kp("Campagnes actives", nf.format(active.length))}
+    ${kp("Promos actives", nf.format(active.length))}
     ${kp("Vues générées", compact(views))}
     ${kp("Magasins relais", nf.format(relays))}
     ${kp("Taux de relais moyen", pct(relays, targets) + " %")}
   </div>
   <div class="sec">
-    <div class="tbar"><div class="chips" role="group" aria-label="Filtrer par statut">${chip("all", "Toutes")}${chip("active", "Actives")}${chip("planned", "Programmées")}${chip("done", "Terminées")}</div><button class="btn-p" data-new>${PLUS}Nouvelle campagne</button></div>
+    <div class="tbar"><div class="chips" role="group" aria-label="Filtrer par statut">${chip("all", "Toutes")}${chip("active", "Actives")}${chip("planned", "Programmées")}${chip("done", "Terminées")}</div><button class="btn-p" data-new>${PLUS}Nouvelle promo</button></div>
     <div class="tscroll">
-      <div class="thead" style="${cols}"><div>Campagne</div><div>Type</div><div>Régions</div><div>Relais magasins</div><div class="r">Vues</div><div class="r">Statut</div></div>
+      <div class="thead" style="${cols}"><div>Promo</div><div>Type</div><div>Régions</div><div>Relais magasins</div><div class="r">Vues</div><div class="r">Statut</div></div>
       ${list.length ? list.map(p => {
         const t = typeOf(p.promo_type), r = pct(p.relayed, p.target), [sl, sc] = ST_PILL[p.st];
         const sel = S.dw && S.dw.k === "promo" && S.dw.id === p.id;
         return `<div class="trow click${sel ? " sel" : ""}" style="${cols}" data-promo="${p.id}">
-          <div class="cell-name">${p.media_url ? `<img class="thumb" src="${esc(p.media_url)}" alt="" loading="lazy">` : `<span class="thumb ph">${svg(ICON.img, 20, 1.6)}</span>`}<div style="min-width:0"><b>${esc(p.title)}</b><small>${dshort(p.starts_at)} → ${dshort(p.ends_at)}${p.is_mandatory ? " · Obligatoire" : ""}</small></div></div>
+          <div class="cell-name">${p.media_url ? `<img class="thumb" src="${esc(p.media_url)}" alt="" loading="lazy">` : `<span class="thumb ph">${svg(ICON.img, 20, 1.6)}</span>`}<div style="min-width:0"><b>${esc(p.title)}</b><small>${dshort(p.starts_at)} → ${dshort(p.ends_at)}${p.is_mandatory ? " · Obligatoire" : ""}${p.campaign_id && campOf(p.campaign_id) ? ` · ${p.is_featured ? "★ " : ""}${esc(campOf(p.campaign_id).name)}` : ""}</small></div></div>
           <div><span class="badge">${esc(t ? t.label : p.promo_type || "Post")}</span></div>
           <div class="mut">${esc(p.regions)}</div>
           <div class="relay"><div class="row"><b>${p.target ? `${nf.format(p.relayed)} / ${nf.format(p.target)}` : "— / 0"}</b><span>${r} %</span></div><div class="track"><i class="${p.st === "active" ? "acc" : "mut"}" style="width:${r}%"></i></div></div>
           <div class="r num">${p.views ? compact(p.views) : "—"}</div>
           <div class="r"><span class="pill ${sc}">${sl}</span></div></div>`;
-      }).join("") : `<div class="empty">${D.promos.length ? "Aucune campagne dans ce filtre." : "Aucune campagne pour l'instant. Créez la première avec « Nouvelle campagne »."}</div>`}
+      }).join("") : `<div class="empty">${D.promos.length ? "Aucune promo dans ce filtre." : "Aucune promo pour l'instant. Créez la première avec « Nouvelle promo »."}</div>`}
     </div>
   </div>`;
 }
@@ -1010,7 +1123,7 @@ function lockSwitch(px, on) {
 }
 
 /* ---------- Calendrier (MOD-082) ---------- */
-// Une barre par campagne, de son début à sa fin, sur 4 semaines. Le chiffre de
+// Une barre par promo (ou par campagne MOD-083), de son début à sa fin, sur 4 semaines. Le chiffre de
 // la barre : magasins prêts sur magasins ciblés. Prêt = publication validée
 // (programmée) ou faite pour une promo obligatoire, activée sinon.
 const CAL_DAYS = 28;
@@ -1046,15 +1159,18 @@ function viewCalendar(D) {
   const days = Array.from({ length: CAL_DAYS }, (_, i) => { const d = new Date(from); d.setDate(d.getDate() + i); return d; });
   const firstOf = days.findIndex((d, i) => i > 0 && d.getDate() === 1);
   const monthLbl = (d) => d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
-  const rows = D.promos.filter(p => new Date(p.starts_at) < to && new Date(p.ends_at) > from && p.status !== "archived")
+  // Les promos d'une campagne (MOD-083) tiennent sur une seule barre : la campagne.
+  const rows = D.promos.filter(p => new Date(p.starts_at) < to && new Date(p.ends_at) > from && p.status !== "archived" && !(p.campaign_id && campOf(p.campaign_id)))
     .sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+  const camps = (S.camps || []).map(c => ({ c, ps: campPromos(D, c) }))
+    .filter(x => x.ps.length && dOf(x.c.starts_on) < to && dOf(x.c.ends_on).getTime() + DAY > from.getTime());
   const lock = svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', 13, 2.2);
   const cal = svg('<rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10h16"/>', 11, 2.4);
   const alerts = calAlerts(D);
   const legend = TYPES.map(t => `<span><i style="background:${TYPE_COLOR[t.k] || "var(--k-post)"}"></i>${esc(t.label)}</span>`).join("")
-    + `<span>${lock} Date imposée</span><span><i style="border:1.5px dashed var(--line2);background:none"></i>Brouillon</span>`;
+    + `<span>${svg(flagIco, 13, 2.2)} Campagne</span><span>${lock} Date imposée</span><span><i style="border:1.5px dashed var(--line2);background:none"></i>Brouillon</span>`;
   return `
-  ${tip("cal", "<b>Lecture :</b> une barre par campagne, du début à la fin. Le chiffre indique les magasins prêts (publication validée pour une promo obligatoire, activée sinon). Cliquez pour voir le suivi magasin par magasin.")}
+  ${tip("cal", "<b>Lecture :</b> une barre par promo, du début à la fin. Les promos d'une campagne tiennent sur une seule barre. Le chiffre indique les magasins prêts (publication validée pour une promo obligatoire, activée sinon). Cliquez pour voir le suivi magasin par magasin.")}
   ${alerts.map(a => `<div class="cal-alert"><span class="alert-ic">${svg(ICON.warn, 20)}</span><div>${a.html}</div><button class="btn-p" data-promo="${a.p.id}">Voir les magasins</button></div>`).join("")}
   <div>
     <div class="tbar">
@@ -1064,18 +1180,24 @@ function viewCalendar(D) {
         <button class="btn-s" data-cal="7" aria-label="Semaine suivante">›</button>
         <button class="btn-s" data-cal="0">Aujourd'hui</button>
       </div>
-      <button class="btn-p" data-new>${PLUS}Nouvelle campagne</button>
+      <button class="btn-p" data-new>${PLUS}Nouvelle promo</button>
     </div>
     <div class="tscroll"><div class="cal">
       <div class="cal-g cal-h">
         <div class="cal-m" style="grid-column:2/${firstOf > 0 ? 2 + firstOf : 30}">${esc(monthLbl(days[0]))}</div>
         ${firstOf > 0 ? `<div class="cal-m" style="grid-column:${2 + firstOf}/30;border-left:1px solid var(--line)">${esc(monthLbl(days[firstOf]))}</div>` : ""}
-        <div class="cal-n" style="grid-row:2;font-size:13px;color:var(--muted);font-weight:600">Campagne</div>
+        <div class="cal-n" style="grid-row:2;font-size:13px;color:var(--muted);font-weight:600">Promo</div>
         ${days.map((d, i) => `<div class="cal-d${i === ti ? " now" : ""}${d.getDay() % 6 === 0 ? " we" : ""}" style="grid-row:2;grid-column:${i + 2}">${"DLMMJVS"[d.getDay()]}<b>${d.getDate()}</b></div>`).join("")}
       </div>
       <div class="cal-body">
         ${ti >= 0 && ti < CAL_DAYS ? `<div class="cal-today" style="left:calc(230px + (100% - 230px) * ${((ti + (Date.now() - midnight(new Date())) / DAY) / CAL_DAYS).toFixed(4)})"></div>` : ""}
-        ${rows.length ? rows.map(p => {
+        ${camps.map(({ c, ps }) => { const a = idx(dOf(c.starts_on)), z = idx(dOf(c.ends_on)), draft = c.status !== "proposed";
+          return `<div class="cal-g cal-r">
+            <div class="cal-n"><b>${esc(c.name)}</b><small>Campagne · ${ps.length} promo${ps.length > 1 ? "s" : ""}${draft ? " · non proposée" : ""}</small></div>
+            <button class="cal-bar${draft ? " draft" : ""}${a < 0 ? " cut-l" : ""}${z >= CAL_DAYS ? " cut-r" : ""}" style="grid-column:${Math.max(0, a) + 2}/${Math.min(CAL_DAYS - 1, z) + 3};background:var(--grad)" data-camp-open="${c.id}"
+              aria-label="${esc(`Campagne ${c.name}, du ${dshort(dOf(c.starts_on))} au ${dshort(dOf(c.ends_on))}, ${ps.length} promos`)}">${svg(flagIco, 13, 2.2)}<span>${dshort(dOf(c.starts_on))} → ${dshort(dOf(c.ends_on))}</span><em>${ps.length} promos</em></button>
+          </div>`; }).join("")}
+        ${rows.length || camps.length ? rows.map(p => {
           const s = Math.max(0, idx(p.starts_at)), e = Math.min(CAL_DAYS - 1, idx(p.ends_at));
           const r = calReady(p), draft = p.status === "draft", sel = S.dw && S.dw.k === "promo" && S.dw.id === p.id;
           const color = TYPE_COLOR[p.promo_type] || "var(--k-post)";
@@ -1089,11 +1211,258 @@ function viewCalendar(D) {
               ${p.publish_at_locked ? lock : ""}<span>${dshort(p.starts_at)} → ${dshort(p.ends_at)}</span><em>${draft ? "non envoyée" : `${nf.format(r.ok)}/${nf.format(r.target)}`}</em></button>
             ${pi >= 0 && pi < CAL_DAYS && !draft ? `<span class="cal-pin" style="grid-column:${pi + 2}" title="Publication ${p.publish_at_locked ? "imposée" : "proposée"} : ${esc(dtime(p.publish_at))}">${p.publish_at_locked ? lock : cal}</span>` : ""}
           </div>`;
-        }).join("") : `<div class="empty" style="padding:22px">Aucune campagne sur ces 4 semaines.</div>`}
+        }).join("") : `<div class="empty" style="padding:22px">Aucune promo sur ces 4 semaines.</div>`}
       </div>
       <div class="cal-legend">${legend}</div>
     </div></div>
   </div>`;
+}
+
+/* ---------- Campagnes (MOD-083) ---------- */
+// Un temps fort (ex. Black Friday, 80 promos sur 15 jours) en trois gestes :
+// 1. nom et dates, 2. les promos, 3. « Répartir ». Le planning vient des
+// réglages Paramètres › Diffusion ; la centrale le propose, chaque magasin
+// l'accepte d'un geste ou décale une promo. Calculs et droits côté serveur.
+const DIFF_DEF = { max_per_day: 6, slots: ["09:00", "12:00", "18:00"], off_days: [7], order: "featured" };
+const diff = () => { const g = { ...DIFF_DEF, ...(NS().diffusion || {}) }; return { ...g, slots: [...g.slots].sort(), off_days: g.off_days.map(Number) }; };
+const ORDERS = [["featured", "Promos phares d'abord"], ["date", "Par date de début"], ["mix", "Mélangé"]];
+const dOf = (s) => { const [y, m, d] = String(s).slice(0, 10).split("-").map(Number); return new Date(y, m - 1, d); };
+const isoDow = (d) => ((d.getDay() + 6) % 7) + 1;
+const slotL = (x) => x.replace(/^0/, "").replace(":00", "h").replace(":", "h");
+const hh = (d) => slotL(hhmm(d));
+const campOf = (id) => (S.camps || []).find(c => c.id === id);
+const campPromos = (D, c) => D.promos.filter(p => p.campaign_id === c.id && p.status !== "archived");
+const dlong = (d) => new Date(d).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "");
+const flagIco = '<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>';
+const C = { name: "", start: "", end: "" }; // brouillon d'une nouvelle campagne
+
+function viewCampaigns(D) {
+  if (S.camp === "new") return viewCampNew();
+  const c = S.camp && campOf(S.camp);
+  if (c) return viewCamp(D, c);
+  const list = [...(S.camps || [])].sort((a, b) => b.starts_on.localeCompare(a.starts_on));
+  const cols = "grid-template-columns:2.4fr 1.6fr .8fr 1fr";
+  return `
+  ${tip("camp", "<b>Une campagne = un temps fort.</b> Regroupez ses promos (Black Friday, soldes, rentrée…), cliquez « Répartir » : Vitriin étale les publications sur la période selon vos réglages de Diffusion. Les magasins acceptent le planning d'un geste.")}
+  <div class="tbar"><div class="mut">Le rythme vient de <button class="link" data-stabgo="diffusion">Paramètres › Diffusion</button> : ${diff().max_per_day} publications par jour au plus, à ${diff().slots.map(slotL).join(", ")}.</div>
+    <button class="btn-p" data-camp-new>${PLUS}Nouvelle campagne</button></div>
+  ${list.length ? `<div class="tscroll">
+    <div class="thead" style="${cols}"><div>Campagne</div><div>Période</div><div class="r">Promos</div><div class="r">Statut</div></div>
+    ${list.map(c => {
+      const ps = campPromos(D, c), stars = ps.filter(p => p.is_featured).length, over = dOf(c.ends_on).getTime() + DAY < Date.now();
+      const [l, k] = over ? ["Terminée", "p-grey"] : c.status === "proposed" ? ["Proposée", "p-green"] : c.spread_at ? ["Répartie", "p-amber"] : ["Brouillon", "p-grey"];
+      return `<div class="trow click" style="${cols}" data-camp="${c.id}">
+        <div class="cell-name"><span class="av">${svg(flagIco, 18)}</span><div style="min-width:0"><b>${esc(c.name)}</b><small>${stars} phare${stars > 1 ? "s" : ""}</small></div></div>
+        <div class="mut">${dlong(dOf(c.starts_on))} → ${dlong(dOf(c.ends_on))}</div>
+        <div class="r num">${ps.length}</div>
+        <div class="r"><span class="pill ${k}">${l}</span></div></div>`;
+    }).join("")}
+  </div>` : `<div class="card center"><span class="ic">${svg(flagIco, 24, 1.8)}</span><h3>Aucune campagne pour l'instant</h3><p>Créez la première avec « Nouvelle campagne » : un nom, des dates, vos promos, puis « Répartir ».</p></div>`}`;
+}
+
+function viewCampNew() {
+  return `<div class="cp-back"><button class="link" data-camp-back>‹ Toutes les campagnes</button></div>
+  <div class="card cp-new">
+    <span class="cp-k">Étape 1 sur 3</span><h3>Nom et dates</h3><div class="sub">Le temps fort et sa période. Les promos s'ajoutent juste après.</div>
+    <label class="fl" for="cn-name">Nom</label><input class="in" id="cn-name" maxlength="80" placeholder="Ex. Black Friday" value="${esc(C.name)}">
+    <div class="two"><div><label class="fl" for="cn-start">Du</label><input class="in" type="date" id="cn-start" value="${esc(C.start)}"></div>
+      <div><label class="fl" for="cn-end">Au</label><input class="in" type="date" id="cn-end" value="${esc(C.end)}"></div></div>
+    <div class="err" id="cn-err" role="alert"></div>
+    <div class="cp-go"><button class="btn-p" id="cn-go">Créer la campagne</button></div>
+  </div>`;
+}
+
+function campDays(c) {
+  const a = monday(dOf(c.starts_on)), end = dOf(c.ends_on), out = [];
+  const b = new Date(end); b.setDate(b.getDate() + (7 - isoDow(end)));
+  for (let d = new Date(a); d <= b; d.setDate(d.getDate() + 1)) out.push(new Date(d));
+  return out;
+}
+
+function viewCamp(D, c) {
+  const g = diff(), ps = campPromos(D, c), stars = ps.filter(p => p.is_featured).length;
+  const drafts = ps.filter(p => p.status === "draft").length, live = ps.filter(p => new Date(p.ends_at) > Date.now());
+  const dated = live.filter(p => p.publish_at), proposed = c.status === "proposed", spread = !!c.spread_at && dated.length;
+  const nStores = S.stores.length, sel = S.campSel && ps.find(p => p.id === S.campSel);
+  const first = dOf(c.starts_on), last = dOf(c.ends_on), over = last.getTime() + DAY < Date.now();
+  const inRange = (d) => d >= first && d <= last;
+  const byDay = {}; dated.forEach(p => (byDay[isoDay(p.publish_at)] ||= []).push(p));
+  Object.values(byDay).forEach(l => l.sort((a, b) => new Date(a.publish_at) - new Date(b.publish_at)));
+  const outside = live.filter(p => !p.publish_at || !inRange(midnight(p.publish_at)));
+  const openDays = campDays(c).filter(d => inRange(d) && !g.off_days.includes(isoDow(d))).length;
+  const chip = (p) => `<button class="cp-chip${p.is_featured ? " star" : ""}${S.campSel === p.id ? " on" : ""}" data-cpp="${p.id}" title="${esc(p.title)}${p.publish_at ? " · " + esc(dtime(p.publish_at)) : ""}"><i>${p.publish_at ? hh(p.publish_at) : "—"}</i><span>${p.is_featured ? "★ " : ""}${esc(p.title)}</span></button>`;
+  const T = S.track && S.track.id === c.id ? S.track.data : null;
+  // L'étape à faire maintenant porte la tuile inversée : les promos tant qu'il n'y en a pas, puis « Répartir » et « Proposer ».
+  const step = (n, lbl, done, body, on) => `<li class="cp-step${on ? " on" : ""}"><span class="cp-k">${n} · ${lbl}${done ? `<i class="cp-ok" role="img" aria-label="Fait">${svg('<path d="m5 12.5 4.5 4.5L19 7.5"/>', 14, 2.6)}</i>` : ""}</span><div class="cp-sb">${body}</div></li>`;
+  const again = `<button class="link" data-camp-spread>Répartir à nouveau</button>`;
+  const btn3 = !ps.length ? `<div class="mut">Ajoutez d'abord des promos.</div><button class="btn-p cp-big" disabled>Répartir</button>`
+    : !spread ? `<div class="mut">${g.max_per_day} par jour au plus · ${g.slots.map(slotL).join(", ")} · ${openDays} jours de diffusion</div><button class="btn-p cp-big" data-camp-spread>Répartir</button>`
+    : !proposed ? `<b class="cp-fact">${dated.length} publications sur ${openDays} jours</b>${again}<button class="btn-p cp-big" data-camp-propose>Proposer aux ${nf.format(nStores)} magasins</button>`
+    : `<b class="cp-fact">Proposée aux ${nf.format(nStores)} magasins</b><div class="mut">le ${dlong(c.proposed_at)}. Chaque magasin accepte ou ajuste ; rien ne part sans son accord.</div>
+       ${drafts ? `<button class="btn-p" data-camp-propose>Envoyer les ${drafts} nouvelle${drafts > 1 ? "s" : ""} promo${drafts > 1 ? "s" : ""}</button>` : ""}${again}`;
+  const pend = T ? T.stores.filter(s => s.state === "pending") : [];
+  const hv = (n) => n > 1 ? "ont" : "a";
+  const bar = T ? (() => { const n = T.accepted + T.adjusted + T.pending || 1; return `<section class="cp-track" aria-label="Suivi des magasins">
+    <div class="cp-th"><h2>Suivi des magasins</h2>
+      <div class="track" aria-hidden="true"><i style="width:${T.accepted / n * 100}%"></i><i class="mut" style="width:${T.adjusted / n * 100}%"></i></div>
+      <span><b>${T.accepted}</b> ${hv(T.accepted)} accepté</span><span><b>${T.adjusted}</b> ${hv(T.adjusted)} ajusté</span><span><b>${T.pending}</b> sans réponse</span>
+      ${pend.length ? `<button class="btn-s" data-camp-relall>Copier la relance</button><button class="link" data-camp-who>${S.campWho ? "Masquer" : "Voir"} les magasins</button>` : ""}</div>
+    ${S.campWho ? `<div class="cp-who">${T.stores.map(s => `<div class="cp-w"><b>${esc(s.name)}</b><span class="mut">${esc(s.city || "")}</span><span class="pill ${{ accepted: "p-green", adjusted: "p-amber", pending: "p-grey" }[s.state]}">${{ accepted: "A accepté", adjusted: `A ajusté ${s.moved} promo${s.moved > 1 ? "s" : ""}`, pending: s.connected ? "Sans réponse" : "Réseaux non connectés" }[s.state]}</span>${s.state === "pending" ? `<button class="link" data-camp-rel="${s.id}">Copier la relance</button>` : "<span></span>"}</div>`).join("")}</div>` : ""}
+  </section>`; })() : "";
+  const days = campDays(c), cnt = (k) => (byDay[k] || []).length;
+  return `<div class="cp-back"><button class="link" data-camp-back>‹ Toutes les campagnes</button><button class="link del" data-camp-del>Supprimer la campagne</button></div>
+  <ol class="cp-steps">
+    ${step(1, "Nom et dates", true, `<input class="in cp-name" id="cp-name" maxlength="80" value="${esc(c.name)}" aria-label="Nom de la campagne">
+      <div class="cp-dates"><input class="in" type="date" id="cp-start" value="${c.starts_on}" aria-label="Début"><input class="in" type="date" id="cp-end" value="${c.ends_on}" aria-label="Fin"></div>`)}
+    ${step(2, "Promos", ps.length > 0, `<div class="cp-n"><b>${ps.length}</b><small>promo${ps.length > 1 ? "s" : ""}</small>${stars ? `<span class="badge">★ ${stars} phare${stars > 1 ? "s" : ""}</span>` : ""}</div>
+      <div class="cp-acts"><button class="${ps.length || over ? "btn-s" : "btn-p"}" data-camp-pick>Choisir des promos</button><button class="btn-s" data-camp-imp>Importer un fichier</button></div>`, !ps.length && !over)}
+    ${step(3, "Répartir", proposed, btn3, ps.length && !proposed && !over)}
+  </ol>
+  ${bar}
+  ${sel ? `<div class="cp-sel"><div><b>${sel.is_featured ? "★ " : ""}${esc(sel.title)}</b><span>${sel.publish_at ? esc(dtime(sel.publish_at)) : "Sans date"} · cliquez sur un jour pour la déplacer</span></div>
+    <button class="btn-s" data-cp-star>${sel.is_featured ? "Retirer des phares" : "★ Promo phare"}</button><button class="btn-s" data-promo="${sel.id}">Ouvrir la fiche</button><button class="btn-s" data-cp-rm>Retirer de la campagne</button><button class="x" data-cp-x aria-label="Désélectionner">${svg('<path d="M6 6l12 12M18 6 6 18"/>', 18, 2.2)}</button></div>`
+    : spread ? `<div class="mut cp-note">Cliquez sur une promo puis sur un jour pour la déplacer.${proposed ? " Les magasins qui ont accepté le planning suivent, sauf s'ils l'ont eux-mêmes décalée." : ""}</div>` : ""}
+  ${outside.length && spread ? `<div class="cp-tray"><b>Hors période ou sans date (${outside.length})</b><div>${outside.map(chip).join("")}</div></div>` : ""}
+  <div class="tscroll"><section class="cp-cal${sel ? " moving" : ""}" aria-label="Planning de la campagne">
+    ${["Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam.", "Dim."].map(w => `<div class="cp-wd">${w}</div>`).join("")}
+    ${days.map(d => { const k = isoDay(d), n = cnt(k), off = g.off_days.includes(isoDow(d)), inr = inRange(d);
+      const drop = sel && inr && !(sel.publish_at && isoDay(sel.publish_at) === k);
+      return `<div class="cp-day${inr ? "" : " out"}${off && inr ? " off" : ""}${drop ? " tgt" : ""}" ${drop ? `data-cpd="${k}" role="button" tabindex="0" aria-label="Déplacer ici, ${esc(dlong(d))}"` : ""}>
+        <div class="cp-dh"><b>${d.getDate()}${d.getDate() === 1 || d.getTime() === days[0].getTime() ? " " + d.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "") : ""}</b>${n ? `<em class="${n > g.max_per_day ? "over" : ""}">${n}${n > g.max_per_day ? " · trop" : ""}</em>` : ""}</div>
+        ${(byDay[k] || []).map(chip).join("")}</div>`; }).join("")}
+  </section></div>
+  ${!spread && ps.length ? `<p class="mut cp-note">${ps.length} promo${ps.length > 1 ? "s" : ""} prête${ps.length > 1 ? "s" : ""}. Un clic sur « Répartir » les étale sur la période.</p>` : ""}`;
+}
+
+async function loadTrack(c) {
+  if (!c || c.status !== "proposed") return;
+  const { data, error } = await sb.rpc("campaign_tracking", { p_campaign_id: c.id });
+  if (!error) S.track = { id: c.id, data };
+}
+async function openCamp(id) { S.camp = id; S.campSel = null; S.campWho = false; S.track = null; render(); $("scroll").scrollTop = 0; await loadTrack(campOf(id)); if (S.camp === id) render(); }
+const campRel = (c, s) => fillTpl("campagne", { magasin: s ? s.name : "", reseau: S.net.name, campagne: c.name, debut: dshort(dOf(c.starts_on)), fin: dshort(dOf(c.ends_on)), n: campPromos(derive(), c).length, lien: location.origin + "/magasin/" }).replace(/^Bonjour ,/, "Bonjour,");
+
+async function campUpdate(c, patch) {
+  const { error } = await sb.from("campaigns").update(patch).eq("id", c.id);
+  if (error) { toast(errText(error)); return false; }
+  Object.assign(c, patch); render(); return true;
+}
+async function movePromo(p, dayIso) {
+  const prev = p.publish_at ? new Date(p.publish_at) : null, slot = prev ? hhmm(prev) : diff().slots[0];
+  const at = dOf(dayIso); const [h, m] = slot.split(":").map(Number); at.setHours(h, m, 0, 0);
+  if (at.getTime() <= Date.now() + 60e3) return toast("Choisissez un jour à venir.");
+  if (midnight(at) < midnight(p.starts_at)) return toast(`« ${p.title} » ne commence que le ${dshort(p.starts_at)}.`);
+  if (at >= new Date(p.ends_at)) return toast(`« ${p.title} » se termine le ${dshort(p.ends_at)}.`);
+  const { error } = await sb.from("promotions").update({ publish_at: at.toISOString() }).eq("id", p.id);
+  if (error) return toast(errText(error));
+  const r = S.promos.find(x => x.id === p.id); if (r) r.publish_at = at.toISOString();
+  S.campSel = null; render(); toast(`Déplacée au ${dlong(at)} à ${hh(at)}.`);
+}
+
+function bindCampaigns(D) {
+  const c = $("content"), q = (s) => c.querySelector(s), cur = S.camp && S.camp !== "new" && campOf(S.camp);
+  c.querySelectorAll("[data-camp]").forEach(r => r.onclick = () => openCamp(r.dataset.camp));
+  c.querySelectorAll("[data-camp-new]").forEach(b => b.onclick = () => {
+    const t = new Date(), a = new Date(t.getTime() + 7 * DAY), z = new Date(a.getTime() + 14 * DAY);
+    Object.assign(C, { name: "", start: iso(a), end: iso(z) }); S.camp = "new"; render(); q("#cn-name")?.focus();
+  });
+  c.querySelectorAll("[data-camp-back]").forEach(b => b.onclick = () => { S.camp = null; S.campSel = null; render(); });
+  c.querySelectorAll("[data-stabgo]").forEach(b => b.onclick = (e) => { e.stopPropagation(); S.stab = b.dataset.stabgo; go("settings"); });
+  if (q("#cn-go")) q("#cn-go").onclick = async () => {
+    const name = q("#cn-name").value.trim(), start = q("#cn-start").value, end = q("#cn-end").value, err = q("#cn-err");
+    Object.assign(C, { name, start, end });
+    if (!name) return (err.textContent = "Donnez un nom à la campagne.");
+    if (!start || !end || end < start) return (err.textContent = "Vérifiez les dates : la fin doit suivre le début.");
+    if ((dOf(end) - dOf(start)) / DAY > 92) return (err.textContent = "Une campagne dure au plus trois mois.");
+    q("#cn-go").disabled = true;
+    const { data, error } = await sb.from("campaigns").insert({ network_id: S.net.id, name, starts_on: start, ends_on: end }).select("id, name, starts_on, ends_on, status, spread_at, proposed_at, created_at").single();
+    if (error) { q("#cn-go").disabled = false; return (err.textContent = errText(error)); }
+    S.camps = [data, ...(S.camps || [])]; openCamp(data.id); openCampPick(data);
+  };
+  if (!cur) return;
+  q("#cp-name").onchange = (e) => { const v = e.target.value.trim(); if (v && v !== cur.name) campUpdate(cur, { name: v }); };
+  ["#cp-start", "#cp-end"].forEach(id => q(id).onchange = () => {
+    const s = q("#cp-start").value, e = q("#cp-end").value;
+    if (!s || !e || e < s) return toast("La fin doit suivre le début.");
+    campUpdate(cur, { starts_on: s, ends_on: e }).then(ok => ok && cur.spread_at && toast("Période modifiée : cliquez « Répartir à nouveau » pour recaler le planning."));
+  });
+  c.querySelectorAll("[data-camp-pick]").forEach(b => b.onclick = () => openCampPick(cur));
+  c.querySelectorAll("[data-camp-imp]").forEach(b => b.onclick = () => openPimp(cur));
+  c.querySelectorAll("[data-camp-spread]").forEach(b => b.onclick = async () => {
+    if (cur.status === "proposed" && !confirm("Répartir à nouveau ? Les magasins qui ont accepté le planning suivront les nouvelles dates, sauf pour les promos qu'ils ont décalées.")) return;
+    b.disabled = true;
+    const { data, error } = await sb.rpc("campaign_spread", { p_campaign_id: cur.id });
+    if (error) { b.disabled = false; return toast(errText(error)); }
+    await load(); S.campSel = null; render();
+    toast(`${data.placed} publication${data.placed > 1 ? "s" : ""} réparties sur ${data.days} jours.${data.overflow ? ` ${data.overflow} dépassent le maximum par jour.` : ""}${data.unplaced ? ` ${data.unplaced} hors période.` : ""}`);
+  });
+  c.querySelectorAll("[data-camp-propose]").forEach(b => b.onclick = async () => {
+    const n = S.stores.length;
+    if (!n) return toast("Votre réseau n'a pas encore de magasin : invitez-les depuis la page Magasins.");
+    if (!confirm(`Proposer « ${cur.name} » à vos ${n} magasins ? Ils reçoivent les promos et le planning, et l'acceptent d'un geste.`)) return;
+    b.disabled = true;
+    const { error } = await sb.rpc("campaign_propose", { p_campaign_id: cur.id });
+    if (error) { b.disabled = false; return toast(errText(error)); }
+    await load(); await loadTrack(campOf(cur.id)); render(); toast(`Campagne proposée à ${n} magasin${n > 1 ? "s" : ""}.`);
+  });
+  c.querySelectorAll("[data-camp-del]").forEach(b => b.onclick = async () => {
+    if (!confirm(`Supprimer la campagne « ${cur.name} » ? Ses promos sont conservées${cur.status === "proposed" ? " et les programmations des magasins restent en place" : ""}.`)) return;
+    const { error } = await sb.from("campaigns").delete().eq("id", cur.id);
+    if (error) return toast(errText(error));
+    S.camps = S.camps.filter(x => x.id !== cur.id); S.promos.forEach(p => { if (p.campaign_id === cur.id) p.campaign_id = null; }); S.camp = null; render(); toast("Campagne supprimée.");
+  });
+  c.querySelectorAll("[data-cpp]").forEach(b => b.onclick = (e) => { e.stopPropagation(); S.campSel = S.campSel === b.dataset.cpp ? null : b.dataset.cpp; render(); });
+  c.querySelectorAll("[data-cpd]").forEach(d => { const mv = () => { const p = D.promoById[S.campSel]; if (p) movePromo(p, d.dataset.cpd); }; d.onclick = mv; d.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); mv(); } }; });
+  if (q("[data-cp-x]")) q("[data-cp-x]").onclick = () => { S.campSel = null; render(); };
+  if (q("[data-cp-star]")) q("[data-cp-star]").onclick = async () => {
+    const p = S.promos.find(x => x.id === S.campSel); if (!p) return;
+    const { error } = await sb.from("promotions").update({ is_featured: !p.is_featured }).eq("id", p.id);
+    if (error) return toast(errText(error)); p.is_featured = !p.is_featured; render();
+  };
+  if (q("[data-cp-rm]")) q("[data-cp-rm]").onclick = async () => {
+    const p = S.promos.find(x => x.id === S.campSel); if (!p) return;
+    const { error } = await sb.from("promotions").update({ campaign_id: null }).eq("id", p.id);
+    if (error) return toast(errText(error)); p.campaign_id = null; S.campSel = null; render(); toast(`« ${p.title} » retirée de la campagne.`);
+  };
+  c.querySelectorAll("[data-camp-who]").forEach(b => b.onclick = () => { S.campWho = !S.campWho; render(); });
+  c.querySelectorAll("[data-camp-relall]").forEach(b => b.onclick = () => copy(campRel(cur)));
+  c.querySelectorAll("[data-camp-rel]").forEach(b => b.onclick = () => copy(campRel(cur, S.stores.find(s => s.id === b.dataset.campRel))));
+}
+
+// Choisir les promos d'une campagne : promos de la centrale en cours ou à venir,
+// qui croisent la période et n'appartiennent pas à une autre campagne.
+function openCampPick(c) {
+  const D = derive(), a = dOf(c.starts_on), z = new Date(dOf(c.ends_on).getTime() + DAY);
+  const pool = D.promos.filter(p => p.status !== "archived" && new Date(p.ends_at) > Date.now() && (!p.campaign_id || p.campaign_id === c.id) && new Date(p.starts_at) < z && new Date(p.ends_at) > a)
+    .sort((x, y) => (y.campaign_id === c.id) - (x.campaign_id === c.id) || new Date(x.starts_at) - new Date(y.starts_at));
+  const P = { on: new Set(pool.filter(p => p.campaign_id === c.id).map(p => p.id)), star: new Set(pool.filter(p => p.is_featured).map(p => p.id)), q: "" };
+  const draw = () => {
+    const vis = pool.filter(p => !P.q || norm(p.title).includes(P.q));
+    $("cpk-list").innerHTML = vis.length ? vis.map(p => `<label class="cpk-r"><input type="checkbox" value="${p.id}" ${P.on.has(p.id) ? "checked" : ""}><span class="cpk-t"><b>${esc(p.title)}</b><small>${dshort(p.starts_at)} → ${dshort(p.ends_at)}${p.status === "draft" ? " · brouillon" : ""}</small></span><button type="button" class="cpk-s${P.star.has(p.id) ? " on" : ""}" data-star="${p.id}" aria-pressed="${P.star.has(p.id)}" title="Promo phare">★</button></label>`).join("")
+      : `<div class="empty">${pool.length ? "Aucune promo ne correspond." : "Aucune promo sur cette période. Importez un fichier, ou créez des promos depuis la page Promotions."}</div>`;
+    $("cpk-list").querySelectorAll("input").forEach(i => i.onchange = () => { i.checked ? P.on.add(i.value) : P.on.delete(i.value); sum(); });
+    $("cpk-list").querySelectorAll("[data-star]").forEach(b => b.onclick = (e) => { e.preventDefault(); const id = b.dataset.star; P.star.has(id) ? P.star.delete(id) : (P.star.add(id), P.on.add(id)); draw(); });
+    sum();
+  };
+  const sum = () => { const s = [...P.on].filter(id => P.star.has(id)).length; $("cpk-go").textContent = `Valider ${P.on.size} promo${P.on.size > 1 ? "s" : ""}${s ? ` dont ${s} phare${s > 1 ? "s" : ""}` : ""}`; };
+  $("cpk-title").textContent = `Promos de « ${c.name} »`;
+  $("cpk-sub").textContent = `Du ${dshort(a)} au ${dshort(dOf(c.ends_on))}. ★ = promo phare, elle part en premier.`;
+  $("cpk-q").value = ""; $("cpk-q").oninput = (e) => { P.q = norm(e.target.value); draw(); };
+  $("cpk-all").onclick = () => { const vis = pool.filter(p => !P.q || norm(p.title).includes(P.q)); const all = vis.every(p => P.on.has(p.id)); vis.forEach(p => all ? P.on.delete(p.id) : P.on.add(p.id)); draw(); };
+  $("cpk-imp").onclick = () => { show("m-camp", false); openPimp(c); };
+  $("cpk-go").onclick = async () => {
+    const was = new Set(pool.filter(p => p.campaign_id === c.id).map(p => p.id));
+    const add = [...P.on].filter(id => !was.has(id)), rm = [...was].filter(id => !P.on.has(id));
+    const starOn = [...P.on].filter(id => P.star.has(id) && !D.promoById[id].is_featured), starOff = pool.filter(p => p.is_featured && !P.star.has(p.id)).map(p => p.id);
+    $("cpk-go").disabled = true;
+    const ops = [add.length && sb.from("promotions").update({ campaign_id: c.id }).in("id", add), rm.length && sb.from("promotions").update({ campaign_id: null }).in("id", rm),
+      starOn.length && sb.from("promotions").update({ is_featured: true }).in("id", starOn), starOff.length && sb.from("promotions").update({ is_featured: false }).in("id", starOff)].filter(Boolean);
+    const res = await Promise.all(ops); $("cpk-go").disabled = false;
+    const e = res.find(r => r.error); if (e) return toast(errText(e.error));
+    show("m-camp", false); await load(); render();
+    toast(add.length || rm.length ? `${P.on.size} promo${P.on.size > 1 ? "s" : ""} dans la campagne.${c.spread_at ? " Cliquez « Répartir à nouveau » pour les placer." : ""}` : "Promos phares mises à jour.");
+  };
+  draw(); show("m-camp");
 }
 
 /* ---------- Formats de publication par réseau ---------- */
@@ -1219,7 +1588,7 @@ function viewPromoDw(D, p) {
   <label class="fl">Règle</label>
   <label class="sw"><input type="checkbox" id="e-mand" ${E.mand ? "checked" : ""}><span class="k"></span><span><b>Promo obligatoire<i class="info" data-tip="Vos magasins ne peuvent pas la refuser. Ils la publient eux-mêmes, depuis leur espace.">i</i></b></span></label>
   ${E.mand ? lockSwitch("e", E.lock) : ""}
-  ${pinMode() === "optional" ? `<label class="sw"><input type="checkbox" id="e-pin" ${E.pin ? "checked" : ""}><span class="k"></span><span><b>Code vendeur en caisse<i class="info" data-tip="Pour cette campagne, le vendeur tape le code de son magasin sur le téléphone du client pour valider la promo.">i</i></b></span></label>` : ""}
+  ${pinMode() === "optional" ? `<label class="sw"><input type="checkbox" id="e-pin" ${E.pin ? "checked" : ""}><span class="k"></span><span><b>Code vendeur en caisse<i class="info" data-tip="Pour cette promo, le vendeur tape le code de son magasin sur le téléphone du client pour valider la promo.">i</i></b></span></label>` : ""}
   <label class="fl">Formats de publication</label>
   <div id="e-formats">${formatsHtml(E.formats, E.media.length, E.kind, "data-ef")}</div>
   <div class="err hidden" id="e-err"></div>
@@ -1420,10 +1789,10 @@ function viewStores(D) {
     ${kp("Points de vente", nf.format(n), `${regs} région${regs > 1 ? "s" : ""}`, true)}
     ${kp("Connectés à un réseau ou plus", pct(connected.length, n) + " %", `${nf.format(connected.length)} magasin${connected.length > 1 ? "s" : ""}`, true)}
     ${kp("Sans aucun réseau", nf.format(off.length), off.length ? "à activer" : "", true)}
-    ${kp("Promos relayées", nf.format(relays), "toutes campagnes", true)}
+    ${kp("Promos relayées", nf.format(relays), "toutes promos", true)}
   </div>
   ${off.length ? `<div class="banner">
-    <div class="hd"><div><b>Magasins sans réseau social</b><span>Relancez-les pour qu'ils connectent Facebook ou Instagram et relaient vos campagnes.</span></div><span class="pill p-red">${off.length} à activer</span></div>
+    <div class="hd"><div><b>Magasins sans réseau social</b><span>Relancez-les pour qu'ils connectent Facebook ou Instagram et relaient vos promos.</span></div><span class="pill p-red">${off.length} à activer</span></div>
     <div class="bd">${off.slice(0, 6).map(s => `<div class="tag">${storeAv(s)}<div><b>${esc(s.name)}</b><small>${esc(s.city || (s.conn === "broken" ? "Compte à reconnecter" : "—"))}</small></div><button data-relance="${s.id}">Relancer</button></div>`).join("")}${off.length > 6 ? `<div class="tag more"><div><b>+ ${off.length - 6} autres</b><small>dans le tableau ci-dessous</small></div></div>` : ""}</div>
   </div>` : ""}
   <div class="sec">
@@ -1455,7 +1824,7 @@ function viewAudience() {
 }
 
 /* ---------- Paramètres ---------- */
-const STABS = [["prefs", "Préférences"], ["users", "Utilisateurs"], ["account", "Enseigne"], ["comms", "Communication"]];
+const STABS = [["prefs", "Préférences"], ["diffusion", "Diffusion"], ["users", "Utilisateurs"], ["account", "Enseigne"], ["comms", "Communication"]];
 const ROLE_L = { owner: "Propriétaire", admin: "Administrateur", member: "Éditeur" };
 // Code vendeur en caisse (MOD-074) : réglage du réseau, « au choix des magasins » par défaut.
 const PIN_MODES = [["required", "Obligatoire"], ["optional", "Au choix des magasins"], ["off", "Désactivé"]];
@@ -1464,7 +1833,7 @@ const swHtml = (id, on, title, sub, dis) => `<label class="sw ${dis ? "ro" : ""}
 function viewSettings() {
   const tabs = `<div class="stabs">${STABS.map(([k, l]) => `<button data-stab="${k}" class="${S.stab === k ? "on" : ""}">${l}</button>`).join("")}</div>`;
   const adminNote = isAdmin() ? "" : `<div class="hint" style="margin-bottom:14px">Vous êtes éditeur : les réglages de la centrale sont en lecture seule. Demandez à un administrateur pour les modifier.</div>`;
-  return tabs + ({ prefs: setPrefs, users: setUsers, account: setAccount, comms: setComms }[S.stab])(adminNote);
+  return tabs + ({ prefs: setPrefs, diffusion: setDiffusion, users: setUsers, account: setAccount, comms: setComms }[S.stab])(adminNote);
 }
 function setPrefs(note) {
   const t = ls.get("c-theme", "auto"), ad = !isAdmin(), custom = NS().custom_types || [];
@@ -1474,22 +1843,40 @@ function setPrefs(note) {
       ${swHtml("p-tips", tipsOn(), "Astuces et conseils", "Afficher des bulles d'aide dans les pages de la centrale.")}
       ${tipsHidden().length ? `<button class="link" style="margin-top:10px" id="p-tips-reset">Réafficher les ${tipsHidden().length} conseil${tipsHidden().length > 1 ? "s" : ""} masqué${tipsHidden().length > 1 ? "s" : ""}</button>` : ""}
     </div>
-    <div class="card"><h3>Diffusion</h3><div class="sub">Pour tout le réseau.</div>
-      ${swHtml("p-auto", feat("auto_accept"), "Accepter automatiquement les promotions", "Les promos du réseau sont activées dès réception. Chaque magasin peut désactiver cette option dans ses réglages.", ad)}
-      ${swHtml("p-sedit", feat("store_edit"), "Les magasins peuvent personnaliser les promos", "Titre, texte et visuel, sur leurs propres publications. L'offre, les dates et les codes restent ceux de la centrale.", ad)}
-      ${swHtml("p-sdel", feat("store_delete"), "Les magasins peuvent suspendre une promo", "En cours ou à venir, elle est retirée de leur vitrine jusqu'à ce qu'ils la reprennent. Jamais une promo obligatoire. Une promo terminée peut toujours être supprimée de leur app.", ad)}
-    </div>
     <div class="card"><h3>Codes en caisse</h3><div class="sub">Champs proposés dans les promos.</div>
       ${swHtml("p-code", feat("discount_code"), "Code de réduction en caisse", "Un code alphanumérique affiché dans le post (ex. BLACK25).", ad)}
       ${swHtml("p-ean", feat("ean_code"), "Code EAN en caisse", "Un code-barres EAN-8 ou EAN-13 à scanner en caisse.", ad)}
       <div style="margin-top:16px"><b>Code vendeur en caisse</b><div class="sub" style="margin-top:2px">Le vendeur tape le code de son magasin sur le téléphone du client pour valider la promo.</div>
         <div class="seg" id="p-pin" style="margin-top:10px">${PIN_MODES.map(([k, l]) => `<button data-pinm="${k}" class="${pinMode() === k ? "on" : ""}" ${ad ? "disabled" : ""}>${l}</button>`).join("")}</div>
-        <div class="sub" style="margin-top:8px">${{ required: "Demandé pour toutes les promos de tous les magasins.", optional: "Chaque magasin décide (désactivé par défaut). Vous pouvez aussi l'imposer sur une campagne.", off: "Pas de code vendeur : le client confirme lui-même qu'il a utilisé la promo." }[pinMode()]}</div></div>
+        <div class="sub" style="margin-top:8px">${{ required: "Demandé pour toutes les promos de tous les magasins.", optional: "Chaque magasin décide (désactivé par défaut). Vous pouvez aussi l'imposer sur une promo.", off: "Pas de code vendeur : le client confirme lui-même qu'il a utilisé la promo." }[pinMode()]}</div></div>
     </div>
     <div class="card"><h3>Types de promotion</h3><div class="sub">Les types standards, plus les vôtres.</div>
       <div class="chips" style="margin-top:12px">${TYPES.map(x => `<span class="badge">${esc(x.label)}</span>`).join("")}
       ${custom.map(x => `<span class="badge p-grey">${esc(x.label)}${ad ? "" : ` <button class="link" data-rmtype="${esc(x.k)}" aria-label="Supprimer" style="margin-left:4px">×</button>`}</span>`).join("")}</div>
       ${ad ? "" : `<div class="copy" style="margin-top:14px"><input class="in" id="p-newtype" maxlength="40" placeholder="Ex. Vente privée"><button class="btn-p" id="p-addtype">Ajouter</button></div>`}
+    </div>
+  </div>`;
+}
+// Diffusion (MOD-083) : le rythme des campagnes, réglé une fois, et la réception des promos.
+const SLOT_CHOICES = ["08:00", "09:00", "10:00", "11:00", "12:00", "14:00", "17:00", "18:00", "19:00", "20:00"];
+function setDiffusion(note) {
+  const ad = !isAdmin(), g = diff(), open = 7 - g.off_days.length, cap15 = Math.round(15 * open / 7) * g.max_per_day;
+  return `${note}<div class="sgrid">
+    <div class="card"><h3>Rythme des campagnes</h3><div class="sub">Réglé une fois, appliqué à chaque campagne : « Répartir » s'en sert pour étaler les publications.</div>
+      <div class="fl">Publications par jour, au plus, par magasin</div>
+      <div class="stepper"><button data-dmax="-1" aria-label="Une de moins" ${ad || g.max_per_day <= 1 ? "disabled" : ""}>−</button><b>${g.max_per_day}</b><button data-dmax="1" aria-label="Une de plus" ${ad || g.max_per_day >= 24 ? "disabled" : ""}>+</button></div>
+      <div class="fl">Créneaux horaires</div>
+      <div class="chips">${SLOT_CHOICES.map(h => `<button class="chip ${g.slots.includes(h) ? "on" : ""}" data-dslot="${h}" aria-pressed="${g.slots.includes(h)}" ${ad ? "disabled" : ""}>${slotL(h)}</button>`).join("")}</div>
+      <div class="fl">Jours de diffusion</div>
+      <div class="dweek">${["L", "M", "M", "J", "V", "S", "D"].map((l, i) => `<button data-dday="${i + 1}" class="${g.off_days.includes(i + 1) ? "" : "on"}" aria-pressed="${!g.off_days.includes(i + 1)}" aria-label="${["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][i]}" ${ad ? "disabled" : ""}>${l}</button>`).join("")}</div>
+      <div class="fl">Ordre de passage</div>
+      <div class="seg">${ORDERS.map(([k, l]) => `<button data-dord="${k}" class="${g.order === k ? "on" : ""}" ${ad ? "disabled" : ""}>${l}</button>`).join("")}</div>
+      <div class="hint">Sur une campagne de 15 jours : environ <b>${cap15} publications</b> possibles par magasin (${open} jour${open > 1 ? "s" : ""} sur 7 × ${g.max_per_day} par jour).</div>
+    </div>
+    <div class="card"><h3>Réception des promos</h3><div class="sub">Pour tout le réseau.</div>
+      ${swHtml("p-auto", feat("auto_accept"), "Accepter automatiquement les promotions", "Les promos du réseau sont activées dès réception. Chaque magasin peut désactiver cette option dans ses réglages.", ad)}
+      ${swHtml("p-sedit", feat("store_edit"), "Les magasins peuvent personnaliser les promos", "Titre, texte et visuel, sur leurs propres publications. L'offre, les dates et les codes restent ceux de la centrale.", ad)}
+      ${swHtml("p-sdel", feat("store_delete"), "Les magasins peuvent suspendre une promo", "En cours ou à venir, elle est retirée de leur vitrine jusqu'à ce qu'ils la reprennent. Jamais une promo obligatoire. Une promo terminée peut toujours être supprimée de leur app.", ad)}
     </div>
   </div>`;
 }
@@ -1548,7 +1935,7 @@ function setAccount(note) {
 }
 function setComms(note) {
   const ro = isAdmin() ? "" : "readonly";
-  return `${note}<div class="tip">${svg('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/>', 18)}<div>Vitriin n'envoie pas ces emails : copiez le message et envoyez-le depuis votre messagerie. Variables : <b>{magasin}</b> <b>{reseau}</b> <b>{lien}</b> <b>{code}</b> <b>{promo}</b> <b>{debut}</b> <b>{fin}</b>.</div></div>
+  return `${note}<div class="tip">${svg('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/>', 18)}<div>Vitriin n'envoie pas ces emails : copiez le message et envoyez-le depuis votre messagerie. Variables : <b>{magasin}</b> <b>{reseau}</b> <b>{lien}</b> <b>{code}</b> <b>{promo}</b> <b>{campagne}</b> <b>{n}</b> <b>{debut}</b> <b>{fin}</b>.</div></div>
   <div class="sgrid">${Object.entries(TPL).map(([k, t]) => `<div class="card"><h3>${t.label}</h3><div class="sub">${t.sub}</div>
     <textarea class="in" data-tpl="${k}" style="min-height:190px;margin-top:12px" maxlength="3000" ${ro}>${esc(tplText(k))}</textarea>
     <div class="row" style="margin-top:10px;justify-content:flex-end;gap:8px">${isAdmin() ? `<button class="link" data-tplreset="${k}">Rétablir le modèle</button>` : ""}<button class="btn-s" data-tplcopy="${k}">Copier</button></div></div>`).join("")}</div>
@@ -1582,15 +1969,24 @@ async function uploadSmall(file, folder) {
 function bindSettings() {
   const c = $("content"), q = (s) => c.querySelector(s);
   c.querySelectorAll("[data-stab]").forEach(b => b.onclick = () => { S.stab = b.dataset.stab; if (S.stab === "users" && S.members === null) loadMembers(); render(); });
+  if (S.stab === "diffusion" && isAdmin()) {
+    q("#p-auto").onchange = (e) => saveSettings({ auto_accept: e.target.checked }, e.target.checked ? "Les nouvelles promos seront acceptées automatiquement." : "Les magasins valideront chaque promo.");
+    q("#p-sedit").onchange = (e) => saveSettings({ store_edit: e.target.checked }, e.target.checked ? "Les magasins peuvent personnaliser vos promos." : "Vos promos ne sont plus modifiables par les magasins.");
+    q("#p-sdel").onchange = (e) => saveSettings({ store_delete: e.target.checked }, e.target.checked ? "Les magasins peuvent suspendre vos promos non obligatoires." : "Les magasins ne peuvent plus suspendre vos promos.");
+    const g = diff(), put = (patch, msg) => saveSettings({ diffusion: { ...g, ...patch } }, msg);
+    c.querySelectorAll("[data-dmax]").forEach(b => b.onclick = () => put({ max_per_day: Math.max(1, Math.min(24, g.max_per_day + Number(b.dataset.dmax))) }, "Rythme enregistré."));
+    c.querySelectorAll("[data-dslot]").forEach(b => b.onclick = () => { const h = b.dataset.dslot, on = g.slots.includes(h);
+      if (on && g.slots.length === 1) return toast("Gardez au moins un créneau."); put({ slots: on ? g.slots.filter(x => x !== h) : [...g.slots, h].sort() }, "Créneaux enregistrés."); });
+    c.querySelectorAll("[data-dday]").forEach(b => b.onclick = () => { const d = Number(b.dataset.dday), off = g.off_days.includes(d);
+      if (!off && g.off_days.length >= 6) return toast("Gardez au moins un jour de diffusion."); put({ off_days: off ? g.off_days.filter(x => x !== d) : [...g.off_days, d].sort() }, "Jours de diffusion enregistrés."); });
+    c.querySelectorAll("[data-dord]").forEach(b => b.onclick = () => b.dataset.dord !== g.order && put({ order: b.dataset.dord }, "Ordre de passage enregistré."));
+  }
   if (S.stab === "prefs") {
     c.querySelectorAll("[data-th]").forEach(b => b.onclick = () => { ls.set("c-theme", b.dataset.th); applyTheme(); render(); });
     q("#p-tips").onchange = (e) => { ls.set("c-tips", e.target.checked ? "1" : "0"); render(); };
     if (q("#p-tips-reset")) q("#p-tips-reset").onclick = () => { ls.set("c-tips-x", "[]"); render(); };
     if (!isAdmin()) return;
-    q("#p-auto").onchange = (e) => saveSettings({ auto_accept: e.target.checked }, e.target.checked ? "Les nouvelles promos seront acceptées automatiquement." : "Les magasins valideront chaque promo.");
     q("#p-code").onchange = (e) => saveSettings({ discount_code: e.target.checked });
-    q("#p-sedit").onchange = (e) => saveSettings({ store_edit: e.target.checked }, e.target.checked ? "Les magasins peuvent personnaliser vos promos." : "Vos promos ne sont plus modifiables par les magasins.");
-    q("#p-sdel").onchange = (e) => saveSettings({ store_delete: e.target.checked }, e.target.checked ? "Les magasins peuvent suspendre vos promos non obligatoires." : "Les magasins ne peuvent plus suspendre vos promos.");
     q("#p-ean").onchange = (e) => saveSettings({ ean_code: e.target.checked });
     c.querySelectorAll("[data-pinm]").forEach(b => b.onclick = () => b.dataset.pinm !== pinMode() && saveSettings({ pin_mode: b.dataset.pinm },
       { required: "Code vendeur demandé pour toutes les promos.", optional: "Chaque magasin choisit s'il demande le code vendeur.", off: "Code vendeur désactivé pour le réseau." }[b.dataset.pinm]));
@@ -1708,6 +2104,7 @@ function bindView(D) {
   c.querySelectorAll("[data-cal]").forEach(b => b.onclick = () => { const n = +b.dataset.cal, f = S.calFrom || monday(new Date()); S.calFrom = n ? new Date(f.getFullYear(), f.getMonth(), f.getDate() + n) : null; render(); });
   c.querySelectorAll("[data-zone]").forEach(b => b.onclick = () => { S.zone = b.dataset.zone; render(); });
   c.querySelectorAll("[data-promo]").forEach(r => r.onclick = () => openDw("promo", r.dataset.promo));
+  c.querySelectorAll("[data-camp-open]").forEach(b => b.onclick = () => { if (!confirmLeave()) return; S.view = "campaigns"; S.dw = null; E = null; openCamp(b.dataset.campOpen); });
   c.querySelectorAll("[data-store]").forEach(r => r.onclick = () => openDw("store", r.dataset.store));
   c.querySelectorAll("[data-invite]").forEach(b => b.onclick = openInvite);
   c.querySelectorAll("[data-pimp]").forEach(b => b.onclick = openPimp);
@@ -1716,12 +2113,13 @@ function bindView(D) {
   c.querySelectorAll("[data-topall]").forEach(b => b.onclick = () => { S.topAll = !S.topAll; render(); });
   c.querySelectorAll("[data-tipx]").forEach(b => b.onclick = () => { ls.set("c-tips-x", JSON.stringify([...tipsHidden(), b.dataset.tipx])); render(); });
   if (S.view === "settings") bindSettings();
+  if (S.view === "campaigns") bindCampaigns(D);
 }
 $("new-promo").onclick = () => openPromo();
 { let prevStart = ""; $("f-start").addEventListener("focus", () => { prevStart = $("f-start").value; });
   $("f-start").addEventListener("change", () => { const pd = $("f-pubd"); if (pd && (!pd.value || pd.value === prevStart)) pd.value = $("f-start").value; prevStart = $("f-start").value; }); }
 $("f-mand").addEventListener("change", () => { show("f-lock-w", $("f-mand").checked); if (!$("f-mand").checked && $("f-lock")) $("f-lock").checked = false; });
-document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => { show("m-promo", false); show("m-invite", false); show("m-pimp", false); });
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => { show("m-promo", false); show("m-invite", false); show("m-pimp", false); show("m-camp", false); });
 
 /* ---------- Support Vitriin ---------- */
 const TK_TOPICS = [["social", "Connexion des magasins à Facebook / Instagram"], ["publication", "Publication"], ["promo", "Créer ou envoyer une promo"], ["account", "Comptes et accès"], ["billing", "Facturation"], ["other", "Autre"]];
@@ -1911,15 +2309,19 @@ const PI_COLS = [
   ["start", "Début", /^(debut|date de debut|date debut|du|start)/],
   ["end", "Fin", /^(fin|date de fin|date fin|au|end)/],
   ["mand", "Obligatoire", /^(obligatoire|imposee?)/],
+  ["star", "Phare", /^(phare|promo phare|vedette|mise en avant)/],
   ["image", "Image", /^(image|visuel|photo|fichier|url)/],
 ];
-const PI = { rows: null, files: new Map() };
-function openPimp() { PI.rows = null; PI.files = new Map(); ["pi-fname", "pi-iname"].forEach(i => $(i).textContent = ""); $("pi-body").innerHTML = ""; show("m-promo", false); show("m-pimp"); }
+const PI = { rows: null, files: new Map(), camp: null };
+// c : campagne de destination (MOD-083). Les promos importées la rejoignent, en brouillon :
+// elles partent aux magasins avec la campagne.
+function openPimp(c) { PI.rows = null; PI.files = new Map(); PI.camp = c && c.id ? c : null;
+  document.querySelector("#m-pimp .mh h2").textContent = PI.camp ? `Importer des promos dans « ${PI.camp.name} »` : "Importer des promos"; ["pi-fname", "pi-iname"].forEach(i => $(i).textContent = ""); $("pi-body").innerHTML = ""; show("m-promo", false); show("m-pimp"); }
 $("pi-pick").onclick = () => $("pi-file").click();
 $("pi-imgs-pick").onclick = () => $("pi-imgs").click();
 $("pi-tpl").onclick = () => {
   const t = new Date(), d = (n) => new Date(t.getTime() + n * DAY).toLocaleDateString("fr-FR");
-  const csv = "\ufeffTitre;Offre;Texte;Code en caisse;EAN;Début;Fin;Obligatoire;Image\n" + `Semaine du jardin;-20 %;Toute la gamme jardin à -20 % en magasin.;JARDIN20;;${d(1)};${d(15)};non;affiche-jardin.jpg\n`;
+  const csv = "\ufeffTitre;Offre;Texte;Code en caisse;EAN;Début;Fin;Obligatoire;Phare;Image\n" + `Semaine du jardin;-20 %;Toute la gamme jardin à -20 % en magasin.;JARDIN20;;${d(1)};${d(15)};non;non;affiche-jardin.jpg\n`;
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = "modele-promos-vitriin.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 };
 $("pi-imgs").onchange = (ev) => {
@@ -1960,7 +2362,7 @@ $("pi-file").onchange = async (ev) => {
     PI_COLS.forEach(([k, , re]) => { const i = head.findIndex((h, j) => re.test(h) && !Object.values(map).includes(j)); if (i >= 0) map[k] = i; });
     const rows = grid.slice(hi + 1).map(r => {
       const o = {}; Object.entries(map).forEach(([k, i]) => o[k] = r[i] instanceof Date ? r[i] : String(r[i] ?? "").trim());
-      o.start = piDate(o.start); o.end = piDate(o.end); o.mand = /^(oui|o|yes|x|1|vrai)$/i.test(o.mand || ""); o.ean = String(o.ean || "").replace(/\D/g, "");
+      o.start = piDate(o.start); o.end = piDate(o.end); o.mand = /^(oui|o|yes|x|1|vrai)$/i.test(o.mand || ""); o.star = /^(oui|o|yes|x|1|vrai|★)$/i.test(o.star || ""); o.ean = String(o.ean || "").replace(/\D/g, "");
       return o;
     }).filter(o => o.title || o.mech);
     if (!rows.length) throw new Error("Aucune promo dans ce fichier.");
@@ -1972,12 +2374,12 @@ function piPreview() {
   const rows = PI.rows, bad = rows.map(piCheck), ok = bad.filter(x => !x).length, n = S.stores.length;
   $("pi-body").innerHTML = `<div class="res"><b>${rows.length} promo${rows.length > 1 ? "s" : ""}</b> dans le fichier, ${ok} prête${ok > 1 ? "s" : ""}.</div>
     <div class="imp" style="margin-top:10px;padding:8px 12px"><div class="tw"><table><tr><th>Titre</th><th>Offre</th><th>Du</th><th>Au</th><th>Image</th><th></th></tr>${rows.map((r, i) => `<tr><td style="max-width:110px">${esc(r.title)}</td><td style="max-width:80px">${esc(r.mech)}</td><td>${r.start ? dshort(r.start) : "—"}</td><td>${r.end ? dshort(r.end) : "—"}</td><td style="max-width:90px">${esc(r.image || "—")}</td><td style="color:${bad[i] ? "var(--err)" : "var(--ok)"};font-weight:700;white-space:normal;max-width:none;min-width:90px">${bad[i] ? esc(bad[i]) : "OK"}</td></tr>`).join("")}</table></div></div>
-    <label class="ck"><input type="checkbox" id="pi-send" checked> Envoyer tout de suite à mes ${n} magasin${n > 1 ? "s" : ""} (sinon, enregistrées en brouillon)</label>
+    ${PI.camp ? `<p class="hint">Elles rejoignent la campagne « ${esc(PI.camp.name)} » en brouillon. Elles partiront aux magasins avec la campagne.</p>` : `<label class="ck"><input type="checkbox" id="pi-send" checked> Envoyer tout de suite à mes ${n} magasin${n > 1 ? "s" : ""} (sinon, enregistrées en brouillon)</label>`}
     <div class="copy" style="justify-content:flex-end"><button class="btn-p" id="pi-go" ${ok ? "" : "disabled"}>Importer ${ok} promo${ok > 1 ? "s" : ""}</button></div>`;
   $("pi-go").onclick = piRun;
 }
 async function piRun() {
-  const btn = $("pi-go"), send = $("pi-send").checked; btn.disabled = true;
+  const btn = $("pi-go"), camp = PI.camp, send = !camp && $("pi-send").checked; btn.disabled = true;
   const todo = PI.rows.filter(r => !piCheck(r)), done = [], fails = [];
   for (const [i, r] of todo.entries()) {
     btn.textContent = `Import ${i + 1} / ${todo.length}…`;
@@ -1985,15 +2387,17 @@ async function piRun() {
       const img = piImage(r), media = img.url ? [img.url] : await uploadPromoImages([img.file]);
       const row = promoRow({ kind: "promo", media, title: r.title, type: piType(r.mech), mech: r.mech, desc: r.desc || "", start: r.start, end: r.end,
         code: feat("discount_code") ? r.code || "" : "", ean: feat("ean_code") ? r.ean : "", mand: r.mand, formats: syncFormats(new Set(), 1, "promo") });
-      const { data, error } = await sb.from("promotions").insert({ ...row, created_by_network_id: S.net.id, status: "draft" }).select("id").single();
+      const { data, error } = await sb.from("promotions").insert({ ...row, created_by_network_id: S.net.id, status: "draft", ...(camp ? { campaign_id: camp.id, is_featured: !!r.star } : {}) }).select("id").single();
       if (error) throw error;
       if (send) { const { error: e2 } = await sb.rpc("send_promotion", { p_promotion_id: data.id, p_store_ids: null }); if (e2) throw e2; notifyCampaign(data.id); }
       done.push(r.title);
     } catch (e) { fails.push(`${r.title} (${errText(e)})`); }
   }
   const skipped = PI.rows.length - todo.length;
-  $("pi-body").innerHTML = `<div class="res"><b>Import terminé.</b><ul><li>${done.length} promo${done.length > 1 ? "s" : ""} ${send ? "envoyée" + (done.length > 1 ? "s" : "") + " aux magasins" : "enregistrée" + (done.length > 1 ? "s" : "") + " en brouillon"}</li>${skipped ? `<li>${skipped} ligne${skipped > 1 ? "s" : ""} incomplète${skipped > 1 ? "s" : ""}, non importée${skipped > 1 ? "s" : ""}</li>` : ""}${fails.length ? `<li style="color:var(--err)">${fails.length} en erreur : ${fails.slice(0, 5).map(esc).join(", ")}</li>` : ""}</ul></div>`;
-  PI.rows = null; await load(); S.view = "promos"; render();
+  $("pi-body").innerHTML = `<div class="res"><b>Import terminé.</b><ul><li>${done.length} promo${done.length > 1 ? "s" : ""} ${camp ? "ajoutée" + (done.length > 1 ? "s" : "") + " à la campagne" : send ? "envoyée" + (done.length > 1 ? "s" : "") + " aux magasins" : "enregistrée" + (done.length > 1 ? "s" : "") + " en brouillon"}</li>${skipped ? `<li>${skipped} ligne${skipped > 1 ? "s" : ""} incomplète${skipped > 1 ? "s" : ""}, non importée${skipped > 1 ? "s" : ""}</li>` : ""}${fails.length ? `<li style="color:var(--err)">${fails.length} en erreur : ${fails.slice(0, 5).map(esc).join(", ")}</li>` : ""}</ul></div>`;
+  PI.rows = null; await load();
+  if (camp) { S.view = "campaigns"; S.camp = camp.id; } else S.view = "promos";
+  render();
 }
 
 /* ---------- Nouvelle promo ---------- */
@@ -2140,16 +2544,19 @@ $("f-send").onclick = async () => {
 /* ---------- Chargement ---------- */
 async function load() {
   const id = S.net.id;
-  const [st, ac, pr, sp, vs] = await Promise.all([
+  const [st, ac, pr, sp, vs, cp] = await Promise.all([
     sb.from("stores").select("id, name, address, city, postal_code, auto_accept, logo_url, created_at, invited_at").eq("network_id", id).order("name").range(0, 4999),
     sb.from("social_accounts").select("store_id, channel, status, display_name, stores!inner(network_id)").eq("stores.network_id", id).range(0, 9999),
-    sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, pin_required, publish_at, publish_at_locked, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
+    sb.from("promotions").select("id, title, description, mechanic, promo_type, discount_code, ean_code, media_url, details, starts_at, ends_at, is_mandatory, pin_required, publish_at, publish_at_locked, campaign_id, is_featured, status, created_at").eq("created_by_network_id", id).order("created_at", { ascending: false }).range(0, 999),
     sb.from("store_promotions").select("id, promotion_id, store_id, status, hidden, suspended, created_at, promotions!inner(created_by_network_id), publications(channel, status, published_at, scheduled_at, metrics, error_message)").eq("promotions.created_by_network_id", id).range(0, 49999),
-    // App Vitriin : « J'aime » et codes affichés par les clients, par magasin et par campagne.
+    // App Vitriin : « J'aime » et codes affichés par les clients, par magasin et par promo.
     sb.rpc("network_vitrine_stats", { p_network_id: id }),
+    // Campagnes (MOD-083).
+    sb.from("campaigns").select("id, name, starts_on, ends_on, status, spread_at, proposed_at, created_at").eq("network_id", id).order("starts_on", { ascending: false }).range(0, 499),
   ]);
-  const e = st.error || ac.error || pr.error || sp.error; if (e) throw e;
-  S.stores = st.data; S.accounts = ac.data; S.promos = pr.data; S.acts = sp.data;
+  const e = st.error || ac.error || pr.error || sp.error || cp.error; if (e) throw e;
+  S.stores = st.data; S.accounts = ac.data; S.promos = pr.data; S.acts = sp.data; S.camps = cp.data;
+  if (S.view === "campaigns" && S.camp && S.camp !== "new") await loadTrack(campOf(S.camp));
   S.vstats = (!vs.error && vs.data) || [];
 }
 
@@ -2227,7 +2634,7 @@ async function boot() {
   const tk = qs.get("support");
   if (tk && /^[0-9a-f-]{36}$/i.test(tk)) { history.replaceState(null, "", location.pathname); helpThread(tk); }
 }
-// Email « Nouvelle campagne » aux gérants (Brevo), envoyé côté serveur ; un échec n'empêche pas l'envoi aux magasins.
+// Email « Nouvelle promo » aux gérants (Brevo), envoyé côté serveur ; un échec n'empêche pas l'envoi aux magasins.
 const notifyCampaign = (id) => sb.functions.invoke("campaign-notify", { body: { promotion_id: id } }).catch(() => {});
 // Email du support (Brevo), envoyé côté serveur ; un échec n'empêche pas le message d'être enregistré.
 const notifySupport = (id) => sb.functions.invoke("support-notify", { body: { ticket_id: id } }).catch(() => {});
@@ -2237,7 +2644,7 @@ boot();
 // remonte sans recharger la page. Pas de rafraîchissement pendant une saisie.
 async function liveRefresh() {
   if (!S.net || document.visibilityState !== "visible") return;
-  if (!$("m-promo").classList.contains("hidden") || !$("m-invite").classList.contains("hidden")) return;
+  if (!$("m-promo").classList.contains("hidden") || !$("m-invite").classList.contains("hidden") || !$("m-camp").classList.contains("hidden") || !$("m-pimp").classList.contains("hidden")) return;
   if (document.activeElement && ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
   if ((E && E.dirty) || S.view === "settings") return;
   const y = $("scroll").scrollTop;
