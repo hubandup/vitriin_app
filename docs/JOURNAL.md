@@ -46,8 +46,9 @@ Repères :
     catégories « En cours » et « Supprimées » de la page Promos : tous les textes passent 4,5:1.
   - Ombres retirées (onglets, pastilles réseaux, avatar, halo du « + ») ; elles restent sur le menu du bas,
     les feuilles et le message court.
-- **App client** (`public/v/index.html`) : mêmes règles. « J'en profite » reste le seul bouton magenta, en
-  aplat (plus de dégradé ni de halo) ; « Suivre », « Recevoir mon code », « C'est parti » passent en encre ;
+- **App client** (`public/v/index.html`) : mêmes règles. « J'en profite » garde son dégradé rose vers violet
+  (essayé en aplat magenta, Charles a préféré le dégradé d'origine), en pastille et sans halo : c'est le seul
+  bouton en couleur de l'app ; « Suivre », « Recevoir mon code », « C'est parti » passent en encre ;
   filtres, centres d'intérêt et onglets « suivis / Suggestions » en pastilles grises, encre quand ils sont
   actifs ; coupon, fiche commerce et cartes de commerce en tuiles sans bordure ; pastille neutre pour un
   commerce sans logo ; écran de connexion sur fond blanc. Le fil plein écran (aimer, garder, « Y aller »,

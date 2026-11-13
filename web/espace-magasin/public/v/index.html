@@ -17,7 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Racing+Sans+One&display=swap" rel="stylesheet">
 <style>
 /* Vitriin · app particulier. Écrans de MOD-077, charte de la Centrale (MOD-085) : blanc, tuiles #F6F5F3 sans bordure,
-   titres en graisse 500, boutons en pastille encre, magenta réservé à l'accent (« J'en profite »), menu du bas en pastille. */
+   titres en graisse 500, boutons en pastille encre, dégradé réservé à « J'en profite », menu du bas en pastille. */
 :root{
   --p:#e5087e; --v:#951b81; --grad:linear-gradient(100deg,#e5087e 0%,#951b81 100%);
   --ink:#2D2D2D; --ink2:#55514C; --muted:#6F6A63; --faint:#6F6A63; --line:#ECE8E2; --line2:#D8D4CE; --chip:#EBE8E3; --surf:#F6F5F3; --pink:#FBE6F1;
@@ -142,7 +142,7 @@ nav.tabs a.on{background:var(--ink);color:#fff;font-size:14px;padding:0 18px}nav
 .rinfo p{color:rgba(255,255,255,.78);font-size:13.5px;line-height:1.4;margin:6px 0 0}
 .rinfo .prc strong{font-size:32px;letter-spacing:-.02em}.rinfo .prc s{color:rgba(255,255,255,.4);font-size:17px}
 .rinfo .bdg{font-size:14px;border-radius:9px}
-.rcta{position:relative;margin-top:16px;width:calc(100% + 60px);background:var(--p);color:#fff;font-weight:600;font-size:16.5px;min-height:56px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:9px}
+.rcta{position:relative;margin-top:16px;width:calc(100% + 60px);background:var(--grad);color:#fff;font-weight:600;font-size:16.5px;min-height:56px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:9px}
 .next{display:flex;flex-direction:column;align-items:center;margin-top:12px;color:rgba(255,255,255,.45);font-size:11px;font-weight:600;width:calc(100% + 60px)}
 /* Coupon */
 .ov{position:fixed;inset:0;z-index:60;background:rgba(20,16,12,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;animation:fade .18s}
