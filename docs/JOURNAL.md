@@ -20,6 +20,39 @@ Repères :
 
 ## 2026-11-13
 
+### MOD-088 · Refonte complète de vitriin.fr (présentation commerciale v3 et nouveau design)
+- **Demande (Charles)** : « Revoir le site complètement avec l'ensemble des derniers éléments construits
+  ensemble : présentation commerciale ET nouveau design. »
+- **Où** : projet Lovable « Vitriin » (c4816cab…), commits `6c1f160` (partie 1 : styles, cadres, en-tête,
+  tarifs, formulaire, posts sociaux) et `a9ef2b3` (partie 2 : page d'accueil, sections commerciales,
+  llms.txt, police). Code écrit et testé hors Lovable (banc Vite + Playwright, bureau et mobile, sans erreur
+  JS ni débordement), puis appliqué tel quel ; empreintes SHA-256 contrôlées fichier par fichier.
+- **Contenu** : page unique structurée comme la présentation (01 constat → 12 prochaine étape) : promesse,
+  circuit centrale → magasin → client, 5 modes de validation, comparatif, trois espaces avec les vraies
+  captures (MOD-087), mesure et fiabilité par mode, planning 4 semaines, onboarding inclus, tarifs et
+  rentabilité, campagne pilote, « bientôt », FAQ mise à jour (10 questions), contact.
+- **Design** : DM Sans seule (Instrument Sans retirée), fond blanc, tuiles #F6F5F3 sans bordure, tuile encre
+  pour l'essentiel, boutons pastille encre, dégradé réservé à « Demander une démo ».
+- **Supprimé** : `timeline.tsx`, `Screenshot.tsx` et 9 pointeurs d'anciennes captures, devenus inutilisés.
+- **Inchangé** : règles d'offre et calculs de prix (`offer-rules.ts`, `pricing-calculator.ts`, leurs tests),
+  pages légales, script de mesure d'audience, liste d'attente (RPC `join_waitlist`).
+- **Sécurité (7 portes)** : aucune clé ajoutée ; le site garde la seule clé publique anon déjà présente,
+  aucune nouvelle table, RPC ou webhook.
+- **À vérifier** : les coches du comparatif (section 05) sont déduites, la présentation ne les rendait pas
+  lisibles ; l'image de partage `og-accueil.jpg` montre encore l'ancien design.
+- **Dépend de** : MOD-087 en ligne, sinon les captures ne s'affichent pas.
+- **Retour arrière** : restaurer dans Lovable la version précédant `6c1f160` (historique des versions).
+
+### MOD-087 · Captures des apps pour vitriin.fr, servies par app.vitriin.co/site/
+- **Pourquoi** : la refonte de vitriin.fr (présentation commerciale v3 et nouveau design) montre les vrais écrans
+  des apps. Le site Lovable ne peut pas recevoir de fichiers depuis la session : les images sont donc servies par
+  l'app, dans `web/espace-magasin/public/site/` (17 fichiers WebP, 1,1 Mo au total).
+- **Contenu** : 4 écrans de la Centrale (tableau de bord, promotions, magasins, campagne), 6 de l'espace magasin,
+  6 de l'app client, et le visuel de la promo de démonstration (Hoodie Club). Générés depuis le code des apps
+  avec des données fictives (banc de test Playwright, résolution ×2).
+- **Inchangé** : aucune page, aucun code, aucune requête. Fichiers statiques seulement.
+- **Retour arrière** : `git revert` du commit MOD-087 (le site afficherait alors des images manquantes).
+
 ### MOD-086 · Création d'une promo : zone noire pour le visuel, « Code promo web » en dernier
 - **Demande (Charles)**, après la mise en ligne de MOD-085 :
   - Étape 3 « Validation » : inverser « Sans validation » et « Code promo web ». « Sans validation » rejoint
